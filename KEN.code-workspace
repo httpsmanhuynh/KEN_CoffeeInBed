@@ -1,0 +1,18 @@
+{
+  "folders": [
+    {
+      "path": ".",
+    },
+  ],
+  "settings": {
+    "mcp": {
+      "servers": {
+        "my-mcp-server-41d2fe38": {
+          "url": "https://mcp.figma.com/mcp",
+          "type": "http",
+        },
+      },
+      "inputs": [],
+    },
+  },
+}
