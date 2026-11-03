@@ -3,7 +3,7 @@ const { POINT_UNIT_VND } = require('../config/constants');
 
 // BR-H04: 4 hạng, sắp xếp tăng dần theo ngưỡng. Nguồn: Report 4.2.4
 const TIERS = Object.freeze([
-  { code: 'NONE', minPoints: 0, percent: 0 },
+  { code: 'BASIC', minPoints: 0, percent: 0 },
   { code: 'SILVER', minPoints: 1000, percent: 5 },
   { code: 'GOLD', minPoints: 5000, percent: 10 },
   { code: 'DIAMOND', minPoints: 10000, percent: 15 },
@@ -24,7 +24,8 @@ function tierForPoints(points) {
 
 // BR-H03: 10.000đ thực trả = 1 Điểm + 1 Coin
 function earnFromAmount(finalAmount) {
-  if (!Number.isInteger(finalAmount) || finalAmount < 0) throw new RangeError('finalAmount must be non-negative integer');
+  if (!Number.isInteger(finalAmount) || finalAmount < 0)
+    throw new RangeError('finalAmount must be non-negative integer');
   const n = Math.floor(finalAmount / POINT_UNIT_VND);
   return { points: n, coins: n };
 }
@@ -38,7 +39,7 @@ function applyEarn(account, finalAmount) {
   return { tier, tierPoints, coins: account.coins + coins, earned: { points, coins } };
 }
 
-// Qua năm: hạ đúng 1 bậc, tierPoints = ngưỡng hạng mới; NONE giữ nguyên điểm; Coins về 0 (BR-H03, H04, H05)
+// Qua năm: hạ đúng 1 bậc, tierPoints = ngưỡng hạng mới; BASIC giữ nguyên điểm; Coins về 0 (BR-H03, H04, H05)
 function yearRollover(account) {
   const i = tierIndex(account.tier);
   const next = i === 0 ? TIERS[0] : TIERS[i - 1];
@@ -57,4 +58,12 @@ function redeemCoins(account, cost) {
   return { ok: true, coins: account.coins - cost };
 }
 
-module.exports = { TIERS, tierByCode, tierForPoints, earnFromAmount, applyEarn, yearRollover, redeemCoins };
+module.exports = {
+  TIERS,
+  tierByCode,
+  tierForPoints,
+  earnFromAmount,
+  applyEarn,
+  yearRollover,
+  redeemCoins,
+};

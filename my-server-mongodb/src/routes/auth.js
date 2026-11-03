@@ -5,46 +5,44 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const { ObjectId } = require('mongodb');
-const { requireAuth, startSession, destroySession } = require('../middleware/auth');
+const { requireAuth, startSession, destroySession, pwdStamp } = require('../middleware/auth');
 const { rateLimit } = require('../middleware/rateLimit');
 const { issueOtp, verifyOtp } = require('../services/otp');
+const {
+  PHONE_RE,
+  EMAIL_RE,
+  wrap,
+  fail,
+  str,
+  isDup,
+  validNewPassword,
+  otpError,
+  publicUser,
+  tierOf,
+} = require('../utils/http');
 
 const router = express.Router();
-const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 30 });
-router.use(limiter);
-
-const PHONE_RE = /^0\d{9}$/;
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const DUMMY_HASH = bcrypt.hashSync('dummy-password', 10); // giữ thời gian phản hồi đều khi user không tồn tại
-
-const wrap = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
-const fail = (res, status, code, message) => res.status(status).json({ code, message });
-const str = (v) => (typeof v === 'string' ? v.trim() : ''); // chặn object/$operator (NoSQL injection)
-const isDup = (e) => e && e.code === 11000;
-
-const publicUser = (u, tier) => ({
-  id: String(u._id),
-  fullName: u.full_name,
-  phone: u.phone,
-  email: u.email || null,
-  role: u.role,
-  twoFactorEnabled: !!u.two_factor_enabled,
-  membershipTier: tier ? tier.code : 'BASIC',
-  tierPoints: u.tier_points,
-  coinsBalance: u.coin_balance,
+// Gắn từng route (không router.use): router này mount ở cả /api và /api/auth nên router.use sẽ đếm đôi.
+const ipLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 30 });
+// Theo tài khoản/SĐT (không chỉ IP): chống dò mật khẩu phân tán và spam SMS OTP vào số người khác (BR-A08).
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  key: (req) => `login:${str(req.body && req.body.identifier).toLowerCase()}`,
 });
-const tierOf = (db, user) => db.collection('membership_tiers').findOne({ _id: user.tier_id });
+const phoneOtpLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 5,
+  key: (req) => `otp:${str(req.body && req.body.phone)}`,
+});
 
-const otpError = (res, status) =>
-  status === 'EXPIRED'
-    ? fail(res, 422, 'OTP_EXPIRED', 'Mã OTP đã hết hạn')
-    : status === 'TOO_MANY'
-      ? fail(res, 429, 'OTP_TOO_MANY_ATTEMPTS', 'Nhập sai quá số lần cho phép')
-      : fail(res, 422, 'OTP_INVALID', 'Mã OTP không đúng');
+const DUMMY_HASH = bcrypt.hashSync('dummy-password', 10); // giữ thời gian phản hồi đều khi user không tồn tại
 
 // BR-A03: đăng ký -> lưu tạm vào otp_codes.pending_data -> OTP REGISTER (chưa tạo user)
 router.post(
   '/register',
+  ipLimiter,
+  phoneOtpLimiter,
   wrap(async (req, res) => {
     const db = req.app.locals.db;
     const fullName = str(req.body.fullName),
@@ -58,7 +56,7 @@ router.post(
       !PHONE_RE.test(phone) ||
       Number.isNaN(dob.getTime()) ||
       dob > new Date() ||
-      password.length < 8 ||
+      !validNewPassword(password) ||
       (email && (!EMAIL_RE.test(email) || email.length > 100))
     )
       return fail(res, 422, 'VALIDATION_ERROR', 'Thông tin đăng ký không hợp lệ');
@@ -83,6 +81,7 @@ router.post(
 // Xác minh OTP đăng ký -> tạo user ACTIVE với hạng BASIC
 router.post(
   '/verify-otp',
+  ipLimiter,
   wrap(async (req, res) => {
     const db = req.app.locals.db;
     const phone = str(req.body.phone);
@@ -119,7 +118,9 @@ router.post(
       await db.collection('users').insertOne(doc);
     } catch (e) {
       if (isDup(e))
-        return fail(res, 409, 'PHONE_EXISTS', 'Số điện thoại hoặc email đã được đăng ký');
+        return e.keyPattern && e.keyPattern.email
+          ? fail(res, 409, 'EMAIL_EXISTS', 'Email đã được sử dụng')
+          : fail(res, 409, 'PHONE_EXISTS', 'Số điện thoại đã được đăng ký');
       throw e;
     }
     res.json({ message: 'Kích hoạt tài khoản thành công' });
@@ -129,6 +130,8 @@ router.post(
 // BR-A05, BR-A08: mật khẩu -> (2FA: OTP) -> startSession
 router.post(
   '/login',
+  ipLimiter,
+  loginLimiter,
   wrap(async (req, res) => {
     const db = req.app.locals.db;
     const identifier = str(req.body.identifier),
@@ -140,7 +143,7 @@ router.post(
       : null;
     const ok = await bcrypt.compare(password, user ? user.password_hash : DUMMY_HASH);
     if (!user || !ok) return fail(res, 401, 'INVALID_CREDENTIALS', 'Sai thông tin đăng nhập');
-    if (user.status === 'LOCKED') return fail(res, 403, 'ACCOUNT_LOCKED', 'Tài khoản đã bị khóa');
+    if (user.status !== 'ACTIVE') return fail(res, 403, 'ACCOUNT_LOCKED', 'Tài khoản đã bị khóa');
 
     if (user.two_factor_enabled) {
       req.session.pending2FA = { userId: String(user._id) }; // KHÔNG gán session.user ở bước này
@@ -154,12 +157,13 @@ router.post(
 
 router.post(
   '/login/2fa',
+  ipLimiter,
   wrap(async (req, res) => {
     const db = req.app.locals.db;
     const pending = req.session.pending2FA;
     if (!pending) return fail(res, 401, 'UNAUTHENTICATED', 'Chưa đăng nhập bước 1');
     const user = await db.collection('users').findOne({ _id: new ObjectId(pending.userId) });
-    if (!user || user.status === 'LOCKED')
+    if (!user || user.status !== 'ACTIVE')
       return fail(res, 403, 'ACCOUNT_LOCKED', 'Tài khoản đã bị khóa');
     const { status } = await verifyOtp(db, {
       phone: user.phone,
@@ -179,6 +183,8 @@ router.post(
 // BR-A07: OTP luôn gửi về SĐT đã đăng ký; luôn trả 200 để không lộ SĐT có tồn tại hay không
 router.post(
   '/forgot-password',
+  ipLimiter,
+  phoneOtpLimiter,
   wrap(async (req, res) => {
     const db = req.app.locals.db;
     const user = await db
@@ -192,14 +198,11 @@ router.post(
 
 router.post(
   '/reset-password',
+  ipLimiter,
   wrap(async (req, res) => {
     const db = req.app.locals.db;
     const { newPassword, confirmPassword } = req.body;
-    if (
-      typeof newPassword !== 'string' ||
-      newPassword.length < 8 ||
-      newPassword !== confirmPassword
-    )
+    if (!validNewPassword(newPassword) || newPassword !== confirmPassword)
       return fail(res, 422, 'VALIDATION_ERROR', 'Mật khẩu mới không hợp lệ hoặc không khớp');
     const user = await db
       .collection('users')
@@ -215,7 +218,13 @@ router.post(
       .collection('users')
       .updateOne(
         { _id: user._id },
-        { $set: { password_hash: await bcrypt.hash(newPassword, 10), updated_at: new Date() } },
+        {
+          $set: {
+            password_hash: await bcrypt.hash(newPassword, 10),
+            password_changed_at: new Date(),
+            updated_at: new Date(),
+          },
+        },
       );
     res.json({ message: 'Đã đặt lại mật khẩu' });
   }),
@@ -224,6 +233,7 @@ router.post(
 // Đăng xuất dùng POST (không đổi dữ liệu bằng GET - chống CSRF)
 router.post(
   '/logout',
+  ipLimiter,
   wrap(async (req, res) => {
     await destroySession(req, res);
     res.status(204).end();
@@ -233,11 +243,13 @@ router.post(
 // Kiểm tra lại khóa tài khoản từ DB (BR-A05) - session cũ không dùng được nếu Admin đã khóa
 router.get(
   ['/me', '/profile'],
+  ipLimiter,
   requireAuth,
   wrap(async (req, res) => {
     const db = req.app.locals.db;
     const user = await db.collection('users').findOne({ _id: new ObjectId(req.session.user.id) });
-    if (!user || user.status === 'LOCKED') {
+    // BR-A05: bị khóa hoặc đã đổi/reset mật khẩu sau khi session này được tạo => thu hồi session
+    if (!user || user.status !== 'ACTIVE' || pwdStamp(user) !== req.session.user.pwdAt) {
       await destroySession(req, res);
       return fail(res, 401, 'UNAUTHENTICATED', 'Vui lòng đăng nhập');
     }

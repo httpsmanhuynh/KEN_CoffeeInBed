@@ -49,9 +49,19 @@ async function startServer() {
     app.use('/api/loyalty', require('./src/routes/loyalty'));
     app.use('/api', authRouter);
     app.use('/api/auth', authRouter);
+    app.use('/api/profile', require('./src/routes/profile'));
 
+    // Lỗi chung: lỗi client (body-parser: JSON sai 400, quá lớn 413...) giữ đúng mã 4xx;
+    // lỗi server luôn trả 500 và không lộ stack.
+    // eslint-disable-next-line no-unused-vars
     app.use((err, req, res, next) => {
-      // eslint-disable-line no-unused-vars
+      const status = err.status || err.statusCode || 500;
+      if (status >= 400 && status < 500) {
+        return res.status(status).json({
+          code: status === 413 ? 'PAYLOAD_TOO_LARGE' : 'BAD_REQUEST',
+          message: 'Yêu cầu không hợp lệ',
+        });
+      }
       console.error(err);
       res.status(500).json({ code: 'INTERNAL_ERROR', message: 'Lỗi hệ thống' });
     });

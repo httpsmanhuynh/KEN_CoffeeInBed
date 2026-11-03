@@ -1,14 +1,23 @@
 'use strict';
-// Rate limit đơn giản trong RAM (dev/đồ án). Chạy nhiều instance thì dùng Redis/express-rate-limit.
-function rateLimit({ windowMs, max }) {
+// Rate limit trong RAM (dev/đồ án). Chạy nhiều instance thì dùng Redis/express-rate-limit.
+// key: hàm (req) => string; mặc định theo IP. Gắn vào TỪNG route (không router.use) để request
+// không khớp route nào không bị đếm, và route mount nhiều chỗ không bị đếm đôi.
+function rateLimit({ windowMs, max, key = (req) => req.ip }) {
   const hits = new Map();
-  setInterval(() => { const now = Date.now(); for (const [k, v] of hits) if (v.reset <= now) hits.delete(k); }, windowMs).unref();
+  setInterval(() => {
+    const now = Date.now();
+    for (const [k, v] of hits) if (v.reset <= now) hits.delete(k);
+  }, windowMs).unref();
   return (req, res, next) => {
     const now = Date.now();
-    const key = req.ip;
-    let h = hits.get(key);
-    if (!h || h.reset <= now) { h = { count: 0, reset: now + windowMs }; hits.set(key, h); }
-    if (++h.count > max) return res.status(429).json({ code: 'TOO_MANY_REQUESTS', message: 'Thử lại sau ít phút' });
+    const k = key(req);
+    let h = hits.get(k);
+    if (!h || h.reset <= now) {
+      h = { count: 0, reset: now + windowMs };
+      hits.set(k, h);
+    }
+    if (++h.count > max)
+      return res.status(429).json({ code: 'TOO_MANY_REQUESTS', message: 'Thử lại sau ít phút' });
     next();
   };
 }
