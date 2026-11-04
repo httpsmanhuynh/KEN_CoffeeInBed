@@ -10,15 +10,7 @@ const { requireAuth, startSession, destroySession, pwdStamp } = require('../midd
 const { rateLimit } = require('../middleware/rateLimit');
 const { issueOtp, verifyOtp } = require('../services/otp');
 const {
-  PHONE_RE,
-  EMAIL_RE,
-  wrap,
-  fail,
-  str,
-  isDup,
-  validNewPassword,
-  otpError,
-  publicUser,
+  PHONE_RE, EMAIL_RE, wrap, fail, str, isDup, validNewPassword, otpError, publicUser,
 } = require('../utils/http');
 
 const router = express.Router();
@@ -51,8 +43,7 @@ async function checkCurrentPassword(req, res) {
 }
 
 // OTP phải do chính user này yêu cầu (tránh dùng OTP của người khác gửi tới cùng số).
-const otpNotOwned = (otp, user) =>
-  !!(otp && otp.user_id && String(otp.user_id) !== String(user._id));
+const otpNotOwned = (otp, user) => !!(otp && otp.user_id && String(otp.user_id) !== String(user._id));
 
 // Gửi OTP: CHANGE_PASSWORD / TOGGLE_2FA -> SĐT đã đăng ký; CHANGE_PHONE -> số mới.
 router.post(
@@ -103,21 +94,14 @@ router.post(
       purpose: 'CHANGE_PASSWORD',
       code: str(req.body.code),
     });
-    if (status !== 'OK' || otpNotOwned(otp, user))
-      return otpError(res, status === 'OK' ? 'INVALID' : status);
+    if (status !== 'OK' || otpNotOwned(otp, user)) return otpError(res, status === 'OK' ? 'INVALID' : status);
 
     const changedAt = new Date();
     await db
       .collection('users')
       .updateOne(
         { _id: user._id },
-        {
-          $set: {
-            password_hash: await bcrypt.hash(newPassword, 10),
-            password_changed_at: changedAt,
-            updated_at: changedAt,
-          },
-        },
+        { $set: { password_hash: await bcrypt.hash(newPassword, 10), password_changed_at: changedAt, updated_at: changedAt } },
       );
     // đổi session ID + cập nhật mốc đổi mật khẩu: các session khác của user bị thu hồi ở loadUser (BR-A05)
     await startSession(req, { ...user, password_changed_at: changedAt });
@@ -145,15 +129,11 @@ router.post(
       purpose: 'TOGGLE_2FA',
       code: str(req.body.code),
     });
-    if (status !== 'OK' || otpNotOwned(otp, user))
-      return otpError(res, status === 'OK' ? 'INVALID' : status);
+    if (status !== 'OK' || otpNotOwned(otp, user)) return otpError(res, status === 'OK' ? 'INVALID' : status);
 
     await db
       .collection('users')
-      .updateOne(
-        { _id: user._id },
-        { $set: { two_factor_enabled: enabled, updated_at: new Date() } },
-      );
+      .updateOne({ _id: user._id }, { $set: { two_factor_enabled: enabled, updated_at: new Date() } });
     res.json({ twoFactorEnabled: enabled });
   }),
 );
@@ -176,8 +156,7 @@ router.post(
       purpose: 'CHANGE_PHONE',
       code: str(req.body.code),
     });
-    if (status !== 'OK' || otpNotOwned(otp, user))
-      return otpError(res, status === 'OK' ? 'INVALID' : status);
+    if (status !== 'OK' || otpNotOwned(otp, user)) return otpError(res, status === 'OK' ? 'INVALID' : status);
 
     try {
       await db

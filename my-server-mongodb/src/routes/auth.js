@@ -9,16 +9,7 @@ const { requireAuth, startSession, destroySession, pwdStamp } = require('../midd
 const { rateLimit } = require('../middleware/rateLimit');
 const { issueOtp, verifyOtp } = require('../services/otp');
 const {
-  PHONE_RE,
-  EMAIL_RE,
-  wrap,
-  fail,
-  str,
-  isDup,
-  validNewPassword,
-  otpError,
-  publicUser,
-  tierOf,
+  PHONE_RE, EMAIL_RE, wrap, fail, str, isDup, validNewPassword, otpError, publicUser, tierOf,
 } = require('../utils/http');
 
 const router = express.Router();
@@ -26,13 +17,11 @@ const router = express.Router();
 const ipLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 30 });
 // Theo tài khoản/SĐT (không chỉ IP): chống dò mật khẩu phân tán và spam SMS OTP vào số người khác (BR-A08).
 const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 10,
+  windowMs: 15 * 60 * 1000, max: 10,
   key: (req) => `login:${str(req.body && req.body.identifier).toLowerCase()}`,
 });
 const phoneOtpLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000,
-  max: 5,
+  windowMs: 10 * 60 * 1000, max: 5,
   key: (req) => `otp:${str(req.body && req.body.phone)}`,
 });
 
@@ -218,13 +207,7 @@ router.post(
       .collection('users')
       .updateOne(
         { _id: user._id },
-        {
-          $set: {
-            password_hash: await bcrypt.hash(newPassword, 10),
-            password_changed_at: new Date(),
-            updated_at: new Date(),
-          },
-        },
+        { $set: { password_hash: await bcrypt.hash(newPassword, 10), password_changed_at: new Date(), updated_at: new Date() } },
       );
     res.json({ message: 'Đã đặt lại mật khẩu' });
   }),

@@ -1,7 +1,7 @@
+﻿require('node:dns').setServers(['8.8.8.8', '1.1.1.1']);
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
@@ -14,9 +14,14 @@ const isProd = process.env.NODE_ENV === 'production';
 
 // 1. Middleware cơ bản
 app.use(morgan('combined'));
-app.use(cors({ origin: 'http://localhost:4200', credentials: true }));
-app.use(bodyParser.json({ limit: '1mb' })); // 50mb quá lớn nếu không upload ảnh qua JSON
-app.use(bodyParser.urlencoded({ limit: '1mb', extended: true }));
+if (isProd) app.set('trust proxy', 1); // sau reverse proxy HTTPS: cookie secure + req.ip (rate limit) mới đúng
+app.use(cors({ origin: process.env.CORS_ORIGIN || 'http://localhost:4200', credentials: true }));
+app.use(express.json({ limit: '1mb' })); // 50mb quá lớn nếu không upload ảnh qua JSON
+app.use(express.urlencoded({ limit: '1mb', extended: true }));
+app.use((req, res, next) => {
+  req.body ??= {};
+  next();
+}); // Express 5: req.body là undefined khi không có body
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -39,9 +44,9 @@ const client = new MongoClient(uri);
 async function startServer() {
   try {
     await client.connect();
-    console.log('Mongo host:', client.options.hosts.map((h) => h.host).join(','));
     app.locals.db = client.db('ken_space_booking'); // route dùng req.app.locals.db
     console.log('Đã kết nối thành công tới MongoDB!');
+    // await require('./src/config/indexes').ensureIndexes(app.locals.db); // BR-A02: unique phone/email (idempotent)
 
     // 4. Routes
     app.get('/', (req, res) => res.send('This Web server is processed for MongoDB (KEN Platform)'));
@@ -55,6 +60,7 @@ async function startServer() {
     // lỗi server luôn trả 500 và không lộ stack.
     // eslint-disable-next-line no-unused-vars
     app.use((err, req, res, next) => {
+      if (res.headersSent) return next(err);
       const status = err.status || err.statusCode || 500;
       if (status >= 400 && status < 500) {
         return res.status(status).json({

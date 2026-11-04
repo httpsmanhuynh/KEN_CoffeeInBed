@@ -32,14 +32,5 @@ const publicUser = (u, tier) => ({
 const tierOf = (db, user) => db.collection('membership_tiers').findOne({ _id: user.tier_id });
 
 module.exports = {
-  PHONE_RE,
-  EMAIL_RE,
-  wrap,
-  fail,
-  str,
-  isDup,
-  validNewPassword,
-  otpError,
-  publicUser,
-  tierOf,
+  PHONE_RE, EMAIL_RE, wrap, fail, str, isDup, validNewPassword, otpError, publicUser, tierOf,
 };
