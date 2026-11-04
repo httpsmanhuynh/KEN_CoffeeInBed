@@ -1,6 +1,7 @@
 # 📚 KEN Coffee In Bed — Docs Hub
 
-> **Mục đích**: Đây là bản đồ trung tâm cho toàn bộ tài liệu dự án. AI Agent (Claude, Cursor, Copilot…) và developer **BẮT BUỘC đọc file này trước** khi bắt tay vào bất kỳ task nào.
+> **Mục đích**: Đây là bản đồ trung tâm cho toàn bộ tài liệu dự án.  
+> AI Agent (Claude, Cursor, Copilot…) và developer **BẮT BUỘC đọc file này trước** khi bắt tay vào bất kỳ task nào.
 
 ---
 
@@ -8,59 +9,88 @@
 
 ```
 docs/
-├── README.md              ← BẠN ĐANG Ở ĐÂY — Mục lục & hướng dẫn
-├── workflow/              ← Quy trình từng feature/issue đã làm
-│   ├── README.md          ← Index các workflow
-│   └── loyalty.md         ← Ví dụ: Hệ thống Loyalty
-├── memory/                ← Bài học, gotcha, sai lầm đã gặp
-│   ├── README.md
-│   └── loyalty-lessons.md
-├── principle/             ← Quy tắc code & thiết kế bắt buộc
-│   ├── README.md
-│   └── backend-rules.md
-└── project/               ← Tech specs, kiến trúc, DB schema
-    ├── README.md
-    ├── architecture.md
-    └── loyalty-spec.md
+├── README.md                      ← BẠN ĐANG Ở ĐÂY — Mục lục & hướng dẫn
+│
+├── workflow/                      ← Quy trình từng feature/issue đã làm
+│   ├── README.md                  ← Index tất cả workflow
+│   ├── auth.md                    ← Đăng ký, login, 2FA, session, OTP
+│   └── loyalty.md                 ← Hạng thành viên, Điểm, Coins, rollover
+│
+├── memory/                        ← Bài học, gotcha, sai lầm đã gặp
+│   ├── README.md                  ← Index + top gotcha
+│   ├── auth-lessons.md            ← DUMMY_HASH, session fixation, pwdStamp, ...
+│   └── loyalty-lessons.md         ← ObjectId trong test, race condition, idempotent, ...
+│
+├── principle/                     ← Quy tắc code bắt buộc
+│   ├── README.md                  ← Index + top 10 rules
+│   └── backend-rules.md           ← 12 quy tắc backend Express/MongoDB
+│
+└── project/                       ← Tech specs, kiến trúc, DB schema
+    ├── README.md                  ← Index + tech stack nhanh
+    ├── architecture.md            ← Folder map, DB schema đầy đủ, API list
+    └── loyalty-spec.md            ← Spec chi tiết hệ thống Loyalty
 ```
 
 ---
 
 ## 🔑 Quy tắc cho AI Agent
 
-1. **Đọc `docs/README.md` (file này) trước tiên** — để biết tổng quan.
-2. **Trước khi code feature mới** → đọc `docs/workflow/README.md` để tìm workflow liên quan.
-3. **Trước khi commit** → đọc `docs/principle/README.md` để kiểm tra quy tắc.
-4. **Khi gặp bug lạ** → đọc `docs/memory/README.md` để xem đã có ai gặp chưa.
-5. **Khi cần hiểu kiến trúc** → đọc `docs/project/README.md`.
+| Thời điểm | Việc cần làm |
+|-----------|-------------|
+| **Bắt đầu task** | Đọc `docs/workflow/README.md` → tìm workflow liên quan |
+| **Chưa có workflow** | Tìm hiểu codebase → tạo `docs/workflow/<feature>.md` sau khi xong |
+| **Gặp bug lạ** | Đọc `docs/memory/README.md` → xem đã có ai gặp chưa |
+| **Trước khi code** | Đọc `docs/principle/backend-rules.md` → đảm bảo đúng pattern |
+| **Trước khi commit** | Chạy `git diff` → review lỗ hổng → cập nhật docs/ nếu cần |
+| **Sau khi commit** | Ghi bài học vào `docs/memory/`, spec vào `docs/project/` |
 
 ---
 
 ## 🗺️ Quick Navigation
 
-| Bạn muốn...                        | Đọc file                                   |
-|-------------------------------------|---------------------------------------------|
-| Hiểu kiến trúc tổng thể            | [project/architecture.md](project/architecture.md) |
-| Biết business rules (BR-xxx)        | [project/loyalty-spec.md](project/loyalty-spec.md) |
-| Xem quy trình đã làm feature nào   | [workflow/README.md](workflow/README.md)    |
-| Tìm gotcha / bài học kinh nghiệm   | [memory/README.md](memory/README.md)        |
-| Kiểm tra quy tắc code              | [principle/README.md](principle/README.md)  |
+| Bạn muốn... | Đọc file |
+|-------------|----------|
+| Hiểu kiến trúc tổng thể, folder map, DB schema | [project/architecture.md](project/architecture.md) |
+| Spec chi tiết hệ thống Loyalty | [project/loyalty-spec.md](project/loyalty-spec.md) |
+| Tìm files/functions liên quan đến Auth | [workflow/auth.md](workflow/auth.md) |
+| Tìm files/functions liên quan đến Loyalty | [workflow/loyalty.md](workflow/loyalty.md) |
+| Tránh lỗi đã gặp trong Loyalty | [memory/loyalty-lessons.md](memory/loyalty-lessons.md) |
+| Tránh lỗi đã gặp trong Auth | [memory/auth-lessons.md](memory/auth-lessons.md) |
+| Kiểm tra quy tắc code trước commit | [principle/backend-rules.md](principle/backend-rules.md) |
 
 ---
 
-## 🏗️ Cách bổ sung tài liệu
+## 📝 Prompt mẫu cho AI Agent
 
-### Khi hoàn thành 1 feature/issue:
+### Prompt 1 — Sau khi hoàn thành feature (tạo workflow)
+
 ```
-docs/workflow/<tên-feature>.md    ← Ghi lại flow đã tìm/làm
-docs/memory/<tên-feature>-lessons.md ← Ghi bài học rút ra
-docs/project/<tên-feature>-spec.md   ← Ghi tech spec nếu phức tạp
+Tổng hợp lại workflow vừa làm thành docs/workflow/<feature>.md:
+- Files / folders / functions / classes đã tạo hoặc sửa
+- Collections MongoDB và schema liên quan
+- Business rules (BR-xxx) đã implement, nằm ở đâu
+- Luồng xử lý chính (flow diagram text)
+- Search keywords khi cần debug lại
 ```
 
-### Khi phát hiện quy tắc mới:
-```
-docs/principle/<chủ-đề>.md       ← Thêm rule mới
-```
+### Prompt 2 — Trước khi commit (pre-commit review)
 
-### Khi commit:
-Chạy review diff → cập nhật `docs/memory/` và `docs/principle/` nếu có phát hiện mới.
+```
+Đọc kỹ git diff và thực hiện:
+
+1. PHÁT HIỆN LỖ HỔNG:
+   - Missing auth / authorization check?
+   - Input chưa validate / sanitize?
+   - Race condition, non-idempotent?
+   - Lộ thông tin nhạy cảm?
+
+2. CLEANUP:
+   - Dead code, import thừa, biến không dùng?
+   - Comment cũ sai lệch với code?
+
+3. CẬP NHẬT DOCS:
+   - docs/memory/<feature>-lessons.md  → bài học / gotcha mới
+   - docs/principle/backend-rules.md   → rule mới nếu có
+   - docs/project/<feature>-spec.md    → tech spec / DB schema
+   - docs/workflow/<feature>.md        → cập nhật nếu flow thay đổi
+```
