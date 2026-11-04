@@ -5,11 +5,20 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const { ObjectId } = require('mongodb');
-const { requireAuth, startSession, destroySession, pwdStamp } = require('../middleware/auth');
+const { requireAuth, startSession, destroySession } = require('../middleware/auth');
 const { rateLimit } = require('../middleware/rateLimit');
 const { issueOtp, verifyOtp } = require('../services/otp');
 const {
-  PHONE_RE, EMAIL_RE, wrap, fail, str, isDup, validNewPassword, otpError, publicUser, tierOf,
+  PHONE_RE,
+  EMAIL_RE,
+  wrap,
+  fail,
+  str,
+  isDup,
+  validNewPassword,
+  otpError,
+  publicUser,
+  tierOf,
 } = require('../utils/http');
 
 const router = express.Router();
@@ -17,12 +26,15 @@ const router = express.Router();
 const ipLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 30 });
 // Theo tài khoản/SĐT (không chỉ IP): chống dò mật khẩu phân tán và spam SMS OTP vào số người khác (BR-A08).
 const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, max: 10,
+  windowMs: 15 * 60 * 1000,
+  max: 10,
   key: (req) => `login:${str(req.body && req.body.identifier).toLowerCase()}`,
 });
+const otpKey = (phone) => `otp:${phone}`;
 const phoneOtpLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000, max: 5,
-  key: (req) => `otp:${str(req.body && req.body.phone)}`,
+  windowMs: 10 * 60 * 1000,
+  max: 5,
+  key: (req) => otpKey(str(req.body && req.body.phone)),
 });
 
 const DUMMY_HASH = bcrypt.hashSync('dummy-password', 10); // giữ thời gian phản hồi đều khi user không tồn tại
@@ -135,6 +147,9 @@ router.post(
     if (user.status !== 'ACTIVE') return fail(res, 403, 'ACCOUNT_LOCKED', 'Tài khoản đã bị khóa');
 
     if (user.two_factor_enabled) {
+      // SĐT chỉ biết sau khi tra DB nên gọi hit() trực tiếp; dùng chung key với phoneOtpLimiter (BR-A08).
+      if (!phoneOtpLimiter.hit(otpKey(user.phone)))
+        return fail(res, 429, 'TOO_MANY_REQUESTS', 'Thử lại sau ít phút');
       req.session.pending2FA = { userId: String(user._id) }; // KHÔNG gán session.user ở bước này
       await issueOtp(db, { userId: user._id, purpose: '2FA_LOGIN', phone: user.phone });
       return res.json({ requires2FA: true });
@@ -203,12 +218,16 @@ router.post(
       code: str(req.body.code),
     });
     if (status !== 'OK') return otpError(res, status);
-    await db
-      .collection('users')
-      .updateOne(
-        { _id: user._id },
-        { $set: { password_hash: await bcrypt.hash(newPassword, 10), password_changed_at: new Date(), updated_at: new Date() } },
-      );
+    await db.collection('users').updateOne(
+      { _id: user._id },
+      {
+        $set: {
+          password_hash: await bcrypt.hash(newPassword, 10),
+          password_changed_at: new Date(),
+          updated_at: new Date(),
+        },
+      },
+    );
     res.json({ message: 'Đã đặt lại mật khẩu' });
   }),
 );
@@ -230,12 +249,7 @@ router.get(
   requireAuth,
   wrap(async (req, res) => {
     const db = req.app.locals.db;
-    const user = await db.collection('users').findOne({ _id: new ObjectId(req.session.user.id) });
-    // BR-A05: bị khóa hoặc đã đổi/reset mật khẩu sau khi session này được tạo => thu hồi session
-    if (!user || user.status !== 'ACTIVE' || pwdStamp(user) !== req.session.user.pwdAt) {
-      await destroySession(req, res);
-      return fail(res, 401, 'UNAUTHENTICATED', 'Vui lòng đăng nhập');
-    }
+    const user = req.user; // requireAuth đã kiểm tra DB (BR-A05)
     res.json(publicUser(user, await tierOf(db, user)));
   }),
 );

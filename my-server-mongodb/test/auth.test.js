@@ -5,10 +5,42 @@ const { requireAuth, requireRole, startSession, destroySession } = require('../s
 
 const mkRes = () => { const r = { code: null, cleared: null, status(c) { r.code = c; return r; }, json() { return r; }, clearCookie(n) { r.cleared = n; } }; return r; };
 
-test('requireAuth/requireRole: 401 khi chưa đăng nhập, 403 sai vai trò', () => {
-  let r = mkRes(); requireAuth({ session: {} }, r, () => assert.fail()); assert.equal(r.code, 401);
-  r = mkRes(); requireRole('ADMIN')({ session: { user: { role: 'CUSTOMER' } } }, r, () => assert.fail()); assert.equal(r.code, 403);
-  let ok = false; requireRole('ADMIN')({ session: { user: { role: 'ADMIN' } } }, mkRes(), () => { ok = true; }); assert.ok(ok);
+const { ObjectId } = require('mongodb');
+const oid = new ObjectId();
+// req giả có DB: findOne trả về user cho trước (hoặc null)
+const mkReq = (user, sessionUser) => ({
+  session: sessionUser === undefined ? {} : { user: sessionUser, destroy: (cb) => cb() },
+  app: { locals: { db: { collection: () => ({ findOne: async () => user }) } } },
+});
+const run = (mw, req) =>
+  new Promise((resolve) => {
+    const r = mkRes();
+    r.json = () => { resolve({ r, passed: false }); return r; };
+    mw(req, r, () => resolve({ r, passed: true }));
+  });
+
+test('requireAuth/requireRole: 401 khi chưa đăng nhập, 403 sai vai trò', async () => {
+  let x = await run(requireAuth, mkReq(null)); assert.equal(x.r.code, 401); assert.equal(x.passed, false);
+  const sess = { id: String(oid), role: 'ADMIN', pwdAt: 0 };
+  x = await run(requireRole('ADMIN'), mkReq({ _id: oid, status: 'ACTIVE', role: 'CUSTOMER' }, sess));
+  assert.equal(x.r.code, 403);
+  const req = mkReq({ _id: oid, status: 'ACTIVE', role: 'ADMIN' }, sess);
+  x = await run(requireRole('ADMIN'), req); assert.equal(x.passed, true); assert.equal(req.user.role, 'ADMIN');
+});
+
+test('requireAuth: thu hồi session khi user bị khóa / không còn / đã đổi mật khẩu (BR-A05)', async () => {
+  const sess = () => ({ id: String(oid), role: 'CUSTOMER', pwdAt: 0 });
+  const cases = [
+    { status: 'LOCKED' },
+    null,
+    { status: 'ACTIVE', password_changed_at: new Date() },
+  ];
+  for (const u of cases) {
+    const x = await run(requireAuth, mkReq(u && { _id: oid, ...u }, sess()));
+    assert.equal(x.r.code, 401); assert.equal(x.r.cleared, 'connect.sid'); assert.equal(x.passed, false);
+  }
+  const ok = await run(requireAuth, mkReq({ _id: oid, status: 'ACTIVE' }, sess()));
+  assert.equal(ok.passed, true);
 });
 
 test('startSession: regenerate nhưng giữ pendingBooking; không gán user trước khi gọi', async () => {

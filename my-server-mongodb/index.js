@@ -5,6 +5,7 @@ const cors = require('cors');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
+const { MongoStore } = require('connect-mongo');
 const path = require('path');
 const { MongoClient } = require('mongodb');
 
@@ -25,26 +26,30 @@ app.use((req, res, next) => {
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 2. Session (Chương VIII). Secret lấy từ biến môi trường, không commit giá trị thật.
+// 2. MongoDB (Chương VII). URI lấy từ env; mặc định là Mongo local. Tạo trước để session store dùng chung kết nối.
+const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017';
+const client = new MongoClient(uri);
+const DB_NAME = 'ken_space_booking';
+
+// 3. Session (Chương VIII). Secret lấy từ biến môi trường, không commit giá trị thật.
 if (isProd && !process.env.SESSION_SECRET)
   throw new Error('SESSION_SECRET is required in production');
 app.use(
   session({
     secret: process.env.SESSION_SECRET || 'dev-only-secret',
+    // Lưu session trong MongoDB (collection sessions): restart server không mất đăng nhập; TTL tự dọn session hết hạn.
+    store: MongoStore.create({ client, dbName: DB_NAME, collectionName: 'sessions', ttl: 24 * 60 * 60 }),
     resave: false,
     saveUninitialized: false,
     cookie: { httpOnly: true, secure: isProd, sameSite: 'lax', maxAge: 24 * 60 * 60 * 1000 },
   }),
 );
 
-// 3. MongoDB (Chương VII). URI lấy từ env; mặc định là Mongo local.
-const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017';
-const client = new MongoClient(uri);
-
 async function startServer() {
   try {
     await client.connect();
-    app.locals.db = client.db('ken_space_booking'); // route dùng req.app.locals.db
+    app.locals.db = client.db(DB_NAME); // route dùng req.app.locals.db
+    console.log('Mongo host:', client.options.hosts.map((h) => h.host).join(','));
     console.log('Đã kết nối thành công tới MongoDB!');
     // await require('./src/config/indexes').ensureIndexes(app.locals.db); // BR-A02: unique phone/email (idempotent)
 

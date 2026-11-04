@@ -5,12 +5,19 @@
 // - Đổi email: chỉ cần mật khẩu hiện tại.
 const express = require('express');
 const bcrypt = require('bcryptjs');
-const { ObjectId } = require('mongodb');
-const { requireAuth, startSession, destroySession, pwdStamp } = require('../middleware/auth');
+const { requireAuth, startSession, destroySession } = require('../middleware/auth');
 const { rateLimit } = require('../middleware/rateLimit');
 const { issueOtp, verifyOtp } = require('../services/otp');
 const {
-  PHONE_RE, EMAIL_RE, wrap, fail, str, isDup, validNewPassword, otpError, publicUser,
+  PHONE_RE,
+  EMAIL_RE,
+  wrap,
+  fail,
+  str,
+  isDup,
+  validNewPassword,
+  otpError,
+  publicUser,
 } = require('../utils/http');
 
 const router = express.Router();
@@ -19,20 +26,7 @@ const byUser = (req) => `u:${req.session.user.id}`;
 const otpLimiter = rateLimit({ windowMs: 10 * 60 * 1000, max: 5, key: byUser });
 const sensitiveLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10, key: byUser });
 
-// Đọc lại user từ DB mỗi lần (BR-A05): bị khóa thì session cũ không dùng được.
-const loadUser = wrap(async (req, res, next) => {
-  const user = await req.app.locals.db
-    .collection('users')
-    .findOne({ _id: new ObjectId(req.session.user.id) });
-  // BR-A05: bị khóa hoặc đã đổi/reset mật khẩu sau khi session này được tạo => thu hồi session
-  if (!user || user.status !== 'ACTIVE' || pwdStamp(user) !== req.session.user.pwdAt) {
-    await destroySession(req, res);
-    return fail(res, 401, 'UNAUTHENTICATED', 'Vui lòng đăng nhập');
-  }
-  req.user = user;
-  next();
-});
-const guard = [requireAuth, loadUser];
+const guard = [requireAuth]; // requireAuth đã kiểm tra DB (status + pwdAt) và gán req.user (BR-A05)
 
 // Trả true nếu đúng; sai thì đã trả lỗi 422 (không dùng 401 để Angular không tự đăng xuất).
 async function checkCurrentPassword(req, res) {
@@ -43,7 +37,8 @@ async function checkCurrentPassword(req, res) {
 }
 
 // OTP phải do chính user này yêu cầu (tránh dùng OTP của người khác gửi tới cùng số).
-const otpNotOwned = (otp, user) => !!(otp && otp.user_id && String(otp.user_id) !== String(user._id));
+const otpNotOwned = (otp, user) =>
+  !!(otp && otp.user_id && String(otp.user_id) !== String(user._id));
 
 // Gửi OTP: CHANGE_PASSWORD / TOGGLE_2FA -> SĐT đã đăng ký; CHANGE_PHONE -> số mới.
 router.post(
@@ -94,16 +89,21 @@ router.post(
       purpose: 'CHANGE_PASSWORD',
       code: str(req.body.code),
     });
-    if (status !== 'OK' || otpNotOwned(otp, user)) return otpError(res, status === 'OK' ? 'INVALID' : status);
+    if (status !== 'OK' || otpNotOwned(otp, user))
+      return otpError(res, status === 'OK' ? 'INVALID' : status);
 
     const changedAt = new Date();
-    await db
-      .collection('users')
-      .updateOne(
-        { _id: user._id },
-        { $set: { password_hash: await bcrypt.hash(newPassword, 10), password_changed_at: changedAt, updated_at: changedAt } },
-      );
-    // đổi session ID + cập nhật mốc đổi mật khẩu: các session khác của user bị thu hồi ở loadUser (BR-A05)
+    await db.collection('users').updateOne(
+      { _id: user._id },
+      {
+        $set: {
+          password_hash: await bcrypt.hash(newPassword, 10),
+          password_changed_at: changedAt,
+          updated_at: changedAt,
+        },
+      },
+    );
+    // đổi session ID + cập nhật mốc đổi mật khẩu: các session khác của user bị thu hồi ở requireAuth (BR-A05)
     await startSession(req, { ...user, password_changed_at: changedAt });
     res.json({ message: 'Đã đổi mật khẩu' });
   }),
@@ -129,11 +129,15 @@ router.post(
       purpose: 'TOGGLE_2FA',
       code: str(req.body.code),
     });
-    if (status !== 'OK' || otpNotOwned(otp, user)) return otpError(res, status === 'OK' ? 'INVALID' : status);
+    if (status !== 'OK' || otpNotOwned(otp, user))
+      return otpError(res, status === 'OK' ? 'INVALID' : status);
 
     await db
       .collection('users')
-      .updateOne({ _id: user._id }, { $set: { two_factor_enabled: enabled, updated_at: new Date() } });
+      .updateOne(
+        { _id: user._id },
+        { $set: { two_factor_enabled: enabled, updated_at: new Date() } },
+      );
     res.json({ twoFactorEnabled: enabled });
   }),
 );
@@ -156,7 +160,8 @@ router.post(
       purpose: 'CHANGE_PHONE',
       code: str(req.body.code),
     });
-    if (status !== 'OK' || otpNotOwned(otp, user)) return otpError(res, status === 'OK' ? 'INVALID' : status);
+    if (status !== 'OK' || otpNotOwned(otp, user))
+      return otpError(res, status === 'OK' ? 'INVALID' : status);
 
     try {
       await db
