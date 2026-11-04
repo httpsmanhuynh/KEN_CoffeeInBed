@@ -24,10 +24,14 @@ function canTransition(booking, to, actor, now) {
 
   if (booking.status === S.PENDING_PAYMENT) {
     if (to === S.CONFIRMED && now >= booking.paymentExpiresAt) return { ok: false, reason: 'HOLD_EXPIRED' };       // BR-E03
+    // BR-D04/D05: quá hạn giữ chỗ thì bản chất là EXPIRED (do hệ thống), khách không hủy thành CANCELLED nữa
+    if (to === S.CANCELLED && now >= booking.paymentExpiresAt) return { ok: false, reason: 'HOLD_EXPIRED' };
     if (to === S.EXPIRED && now < booking.paymentExpiresAt) return { ok: false, reason: 'NOT_YET_EXPIRED' };       // BR-D04
   }
   if (booking.status === S.CONFIRMED) {
     if (to === S.CHECKED_IN && now < booking.startAt - min(C.CHECKIN_EARLY_MINUTES)) return { ok: false, reason: 'TOO_EARLY' };       // BR-F01
+    // BR-F01: cửa sổ check-in = [start-15', start+30']; quá 30' là NO_SHOW nên không check-in được nữa
+    if (to === S.CHECKED_IN && now > booking.startAt + min(C.NO_SHOW_AFTER_MINUTES)) return { ok: false, reason: 'TOO_LATE' };
     if (to === S.NO_SHOW && now <= booking.startAt + min(C.NO_SHOW_AFTER_MINUTES)) return { ok: false, reason: 'NOT_NO_SHOW_YET' }; // BR-F01
     if (to === S.CANCELLED && now > booking.startAt - min(C.CANCEL_CUTOFF_MINUTES)) return { ok: false, reason: 'PAST_CUTOFF' };     // BR-G01
   }
