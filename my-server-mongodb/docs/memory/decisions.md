@@ -13,9 +13,13 @@
 - **`loginLimiter` theo identifier:** kẻ xấu có thể cố ý spam SĐT/email của người khác để khóa đăng nhập của họ 15 phút. Chấp nhận cho phạm vi đồ án.
 - **Index:** `phone`, `email` đã unique trên Atlas nên dòng `ensureIndexes` trong `index.js` để comment; chạy `npm run setup` khi cần tạo lại.
 
-## Vòng đời booking (chốt theo Report.docx)
-- **BR-C04:** buffer chỉ áp cho không gian EXCLUSIVE; SHARED không có buffer.
+## Vòng đời booking & Đặt không gian 5 bước (chốt theo Report.docx & database/schemas)
+- **BR-C04:** buffer chỉ áp cho không gian EXCLUSIVE; SHARED không có buffer (`buffer_minutes = 0`).
 - **BR-F01:** cửa sổ check-in là [start − 15', start + 30']. Quá start + 30' chỉ còn `NO_SHOW` (Admin). Lý do từ chối: `TOO_EARLY` / `TOO_LATE`.
 - **BR-D04/D05:** khách chỉ hủy `PENDING_PAYMENT` khi `now < payment_expires_at`. Từ lúc hết hạn lý do là `HOLD_EXPIRED` và job hệ thống chuyển `EXPIRED` (cách xử lý giống BR-E03).
+- **Chống đặt trùng song song (NFR-02 & Mini-spec 4.1.3):** `createBooking` và `rescheduleBooking` chạy trong Multi-Document ACID Transaction (`session.withTransaction`), bước đầu tiên khóa bản ghi `spaces` bằng `$inc: { lock_version: 1 }` trước khi chạy `checkAvailability` và ghi `bookings`. Khi 2 người đặt cùng một khung giờ song song, MongoDB sinh `WriteConflict` (code 112), tự động retry transaction thứ 2 sau khi transaction thứ 1 commit và trả về `409 OVERLAP` / `CAPACITY_EXCEEDED`.
+- **Tuân thủ strict validator (`database/schemas/*.validator.json`):**
+  - `bookings`: lưu đủ snapshot `zone_id`, `zone_name`, `space_name`, `package_name`, `fixed_inclusions_snapshot` (`WATER` khi đủ `min_hours_required`, `EQUIPMENT`), đồng bộ `voucher_id`/`voucher_code` và trạng thái hoàn tiền (`refund_status`, `refund_amount`).
+  - `booking_inclusions` & `booking_addons`: chỉ lưu trường `variant` khi có chuỗi biến thể hợp lệ (không lưu `null` vì schema định nghĩa `bsonType: 'string'`).
 
 > BR-F01 (mốc trên) và việc hủy quá hạn được suy ra từ các câu liên quan trong báo cáo, báo cáo không viết thẳng. Đổi quy tắc thì sửa `src/domain/bookingStateMachine.js` và test tương ứng.

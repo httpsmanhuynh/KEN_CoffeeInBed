@@ -1,4 +1,4 @@
-﻿require('node:dns').setServers(['8.8.8.8', '1.1.1.1']);
+require('node:dns').setServers(['8.8.8.8', '1.1.1.1']);
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -57,9 +57,17 @@ async function startServer() {
     app.get('/', (req, res) => res.send('This Web server is processed for MongoDB (KEN Platform)'));
     const authRouter = require('./src/routes/auth');
     app.use('/api/loyalty', require('./src/routes/loyalty'));
+    app.use('/api', require('./src/routes/catalog'));
+    app.use('/api/bookings', require('./src/routes/bookings'));
     app.use('/api', authRouter);
     app.use('/api/auth', authRouter);
     app.use('/api/profile', require('./src/routes/profile'));
+
+    // 5. Cronjob thu hồi đơn PENDING_PAYMENT quá hạn 15 phút (UC-36, BR-E03)
+    const { expirePendingBookings } = require('./src/services/bookingService');
+    setInterval(() => {
+      expirePendingBookings(app.locals.db).catch((e) => console.error('Expire job error:', e));
+    }, 60 * 1000).unref();
 
     // Lỗi chung: lỗi client (body-parser: JSON sai 400, quá lớn 413...) giữ đúng mã 4xx;
     // lỗi server luôn trả 500 và không lộ stack.
