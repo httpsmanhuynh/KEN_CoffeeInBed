@@ -13,7 +13,8 @@ my-server-mongodb/
 │   ├── README.md                    # Tổng quan kiến trúc, API & 13 Module (file này)
 │   ├── workflow/
 │   │   ├── booking-5-steps.md       # Quy trình Đặt không gian 5 bước (BR-D01), Vận hành & Chống đặt trùng
-│   │   └── catalog-payment-loyalty.md # Quy trình Catalog CRUD, Voucher, Payment Idempotent & Loyalty
+│   │   ├── catalog-payment-loyalty.md # Quy trình Catalog CRUD, Voucher, Payment Idempotent & Loyalty
+│   │   └── review-management.md     # Quy trình Quản lý Đánh giá sau sử dụng (UC-16, BR-H01, FR-4.3)
 │   ├── memory/
 │   │   ├── decisions.md             # Các quyết định kiến trúc đã chốt (Auth, Booking, Concurrency, Validator)
 │   │   └── open-questions.md        # Các câu hỏi mở / hạng mục tiếp theo
@@ -23,27 +24,30 @@ my-server-mongodb/
 │       └── changes.md               # Lịch sử thay đổi cấu hình, env, scripts & files
 ├── src/
 │   ├── config/
-│   │   ├── constants.js             # Hằng số nghiệp vụ (HOLD=15p, BUFFER=15p, CUTOFF=120p, GRACE=30p...)
-│   │   └── indexes.js               # ensureIndexes() cho users, otp_codes, loyalty, payment, catalog
+│   │   ├── constants.js             # Hằng số nghiệp vụ (HOLD=15p, BUFFER=15p, CUTOFF=120p, REVIEW_RATING=1..5...)
+│   │   └── indexes.js               # ensureIndexes() cho users, otp_codes, loyalty, payment, catalog, reviews
 │   ├── domain/                      # Pure business logic (không phụ thuộc DB)
 │   │   ├── availability.js          # Kiểm tra chỗ trống EXCLUSIVE (kèm buffer 15p) & SHARED (theo capacity)
 │   │   ├── bookingStateMachine.js   # Vòng đời 7 trạng thái đơn & kiểm tra điều kiện chuyển trạng thái
 │   │   ├── loyalty.js               # Tính Điểm/Coins (10.000đ = 1 Điểm + 1 Coin), nâng hạng, rollover đầu năm
 │   │   ├── payment.js               # Kiểm tra điều kiện thanh toán (BR-E01/E02/E03)
-│   │   └── pricing.js               # Tính giá tự động: Package + Inclusion + Add-on - Voucher - Hạng (BR-B03)
+│   │   ├── pricing.js               # Tính giá tự động: Package + Inclusion + Add-on - Voucher - Hạng (BR-B03)
+│   │   └── review.js                # Kiểm tra dữ liệu đánh giá, điều kiện chính chủ & CHECKED_OUT, cờ nhắc đánh giá
 │   ├── middleware/
 │   │   ├── auth.js                  # requireAuth (đọc lại DB thu hồi session BR-A05), requireRole, startSession
 │   │   └── rateLimit.js             # Bộ giới hạn tần suất theo IP / SĐT / User ID (BR-A08)
 │   ├── services/
 │   │   ├── bookingService.js        # Dịch vụ Đặt chỗ 5 bước, Transaction + lock_version, Check-in/out, Cron
-│   │   └── otp.js                   # Phát hành & xác thực OTP băm bcrypt (chống race condition)
+│   │   ├── otp.js                   # Phát hành & xác thực OTP băm bcrypt (chống race condition)
+│   │   └── reviewService.js         # Dịch vụ Tạo/Xem đánh giá trong Transaction, chống trùng & gắn lời nhắc đánh giá
 │   ├── routes/
 │   │   ├── auth.js                  # Đăng ký, OTP, Đăng nhập, 2FA, Quên/Đổi MK, Đăng xuất (/api & /api/auth)
 │   │   ├── profile.js               # Xem/Sửa hồ sơ, Đổi MK, Đổi SĐT, Bật/Tắt 2FA (/api/profile)
 │   │   ├── catalog.js               # Khám phá chỗ trống (UC-04/05) & Admin CRUD Catalog (/api & /api/catalog)
-│   │   ├── bookings.js              # Quy trình Booking 5 bước & Vận hành đơn (/api/bookings)
+│   │   ├── bookings.js              # Quy trình Booking 5 bước, Vận hành đơn & Lịch sử kèm lời nhắc đánh giá (/api/bookings)
 │   │   ├── payments.js              # Giao dịch thanh toán Idempotent & lịch sử (/api/payments)
-│   │   └── loyalty.js               # Hạng thành viên, Cộng điểm, Đổi Coins/Voucher, Rollover (/api/loyalty)
+│   │   ├── loyalty.js               # Hạng thành viên, Cộng điểm, Đổi Coins/Voucher, Rollover (/api/loyalty)
+│   │   └── reviews.js               # Tạo & Xem đánh giá, kiểm tra điều kiện & lời nhắc đánh giá (/api/reviews)
 │   └── utils/
 │       └── http.js                  # Helper wrap, fail, str, publicUser, tierOf
 └── test/
@@ -53,7 +57,8 @@ my-server-mongodb/
     ├── logout.test.js               # Test lỗi hủy session
     ├── loyalty.test.js              # 26 test cases domain & tích hợp Loyalty (BR-H03..H06)
     ├── otp.test.js                  # 15 test cases dịch vụ OTP (100% coverage)
-    └── payment_catalog.test.js      # 15 test cases Payment domain, Idempotency & Catalog Admin RBAC
+    ├── payment_catalog.test.js      # 15 test cases Payment domain, Idempotency & Catalog Admin RBAC
+    └── review.test.js               # 3 bộ kịch bản Domain & Tích hợp Review Management (TC-REV-01..03)
 ```
 
 ---
@@ -71,7 +76,7 @@ my-server-mongodb/
 | **7** | **Payment Management** | ✅ **100%** | `src/services/bookingService.js`, `src/routes/bookings.js`, `src/domain/payment.js`, `src/routes/payments.js` |
 | **8** | **Voucher Management** | ✅ **100%** | `src/routes/catalog.js`, `src/routes/loyalty.js`, `src/services/bookingService.js` |
 | **9** | **Loyalty Management** | ✅ **100%** | `src/domain/loyalty.js`, `src/routes/loyalty.js`, `src/services/bookingService.js` |
-| **10** | **Review Management** | ⏳ **Chưa làm** | *(Dự kiến: `src/routes/reviews.js` theo `reviews.validator.json`)* |
+| **10** | **Review Management** | ✅ **100%** | `src/domain/review.js`, `src/services/reviewService.js`, `src/routes/reviews.js`, `src/routes/bookings.js` |
 | **11** | **Admin Management & Dashboard** | 🟡 **Một phần** | Đã có Admin xem/lọc danh sách Booking (`GET /api/bookings`); chưa có Khóa/Mở khóa User & Thống kê Dashboard |
 | **12** | **Recommendation & Forecast API** | ⏳ **Chưa làm** | *(Dự kiến: đọc `demand_forecasts`, `inventory_alerts`, `sales_history_daily`, `sales_transactions`)* |
 | **13** | **System Configuration** | ✅ **100%** | `index.js`, `src/config/constants.js`, `src/config/indexes.js`, `src/middleware/rateLimit.js`, `src/utils/http.js` |
@@ -121,9 +126,11 @@ my-server-mongodb/
 | `POST` | `/api/bookings/quote` | Auth | **Bước 3 & 4 (`UC-06`, `UC-07`):** Báo giá tạm tính tự động tại Backend (Package + Phụ phí Inclusion vượt 50k + Add-on − Voucher − % Hạng) |
 | `POST` | `/api/bookings` | Auth | **Bước 4 (`UC-08`):** Xác nhận Checkout → Khóa `spaces.lock_version` trong ACID Transaction, tạo đơn `PENDING_PAYMENT` giữ chỗ 15 phút (hoặc `CONFIRMED` ngay nếu `final_amount = 0`) |
 | `POST` | `/api/bookings/:id/pay` | Auth | **Bước 5 (`UC-09`, `UC-10`):** Mô phỏng thanh toán (`SUCCESS` / `FAILED`). Nếu thành công → chuyển `CONFIRMED`, ghi `payment_transactions` và gửi SMS xác nhận |
-| `GET` | `/api/bookings/me` | Auth | Danh sách lịch sử đặt chỗ của khách hàng đang đăng nhập |
+| `GET` | `/api/bookings/me` | Auth | Danh sách lịch sử đặt chỗ của khách hàng đang đăng nhập kèm cờ nhắc đánh giá (`review_reminder`, `can_review`, `has_review`, `review`) |
 | `GET` | `/api/bookings` | Admin | Danh sách toàn bộ đơn đặt chỗ (lọc theo `status`, `spaceId`, `userId`) |
-| `GET` | `/api/bookings/:id` | Auth / Admin | Chi tiết đơn đặt chỗ kèm `inclusions`, `addons`, `payments` |
+| `GET` | `/api/bookings/:id` | Auth / Admin | Chi tiết đơn đặt chỗ kèm `inclusions`, `addons`, `transactions`, `review` và cờ nhắc đánh giá |
+| `GET` | `/api/bookings/:id/review` | Auth | Kiểm tra điều kiện đánh giá & xem đánh giá của đơn đặt chỗ (`UC-16`) |
+| `POST` | `/api/bookings/:id/review` | Auth | Gửi đánh giá cho đơn đặt chỗ chính chủ đã `CHECKED_OUT` (`BR-H01`) |
 | `POST` | `/api/bookings/:id/cancel` | Auth | **Hủy đơn (`UC-11`, `UC-12`, `UC-14`):** Hủy đơn `PENDING_PAYMENT` (còn hạn) hoặc hủy đơn `CONFIRMED` trước Cut-off Time (120 phút), hoàn lượt Voucher và hoàn tiền |
 | `POST` | `/api/bookings/:id/reschedule` | Auth | **Đổi lịch (`UC-13`, `UC-15`):** Đổi giờ bắt đầu của đơn `CONFIRMED` trước Cut-off Time (cùng gói & thời lượng, kiểm tra chống trùng trong Transaction) |
 | `POST` | `/api/bookings/:id/check-in` | Admin | **Check-in (`UC-25`, `BR-F01`):** Chuyển `CONFIRMED → CHECKED_IN` trong cửa sổ `[start_at - 15p, start_at + 30p]` |
@@ -146,13 +153,23 @@ my-server-mongodb/
 | `GET` | `/api/loyalty/history` | Auth | Xem lịch sử biến động Điểm & Coins (`loyalty_transactions`) |
 | `POST` | `/api/loyalty/year-rollover` | Admin | Rollover đầu năm (`UC-37`, `BR-H04`, `BR-H05`): hạ 1 bậc hạng, đặt lại điểm tối thiểu của hạng mới và đưa Coins về 0 |
 
+### 3.5. Quản lý Đánh giá sau sử dụng (`/api/reviews`, `/api/spaces/:id/reviews`)
+| Method | Endpoint | Phân quyền | Mô tả |
+| :---: | :--- | :---: | :--- |
+| `POST` | `/api/reviews` | Auth | **Tạo đánh giá (`UC-16`, `BR-H01`, `FR-4.3`):** Kiểm tra đơn chính chủ đã `CHECKED_OUT` trong Transaction, chặn đánh giá trùng (tối đa 01 đánh giá/Booking), lưu `rating` (1..5) & `comment` ($\le 500$ ký tự) |
+| `GET` | `/api/reviews/booking/:bookingId` | Auth | Kiểm tra điều kiện đánh giá (`canReview`, `reviewReminder`) và xem đánh giá của 01 Booking (chế độ chỉ xem nếu đã đánh giá — `AF2`) |
+| `GET` | `/api/reviews/me` | Auth | Xem danh sách đánh giá khách hàng đã gửi kèm danh sách các đơn `CHECKED_OUT` đang chờ đánh giá (`pendingReminders`) |
+| `GET` | `/api/reviews/space/:spaceId` | Public | Xem danh sách đánh giá của Không gian (theo `_id` hoặc `space_code`) kèm `averageRating`, `totalReviews` và phân bố 1..5 sao |
+| `GET` | `/api/spaces/:id/reviews` | Public | Alias xem đánh giá theo Không gian trong nhóm Catalog |
+| `GET` | `/api/reviews` | Public | Danh sách đánh giá có bộ lọc (`spaceId`, `bookingId`, `userId`, `rating`) |
+
 ---
 
-## 4. Hướng dẫn chạy kiểm thử (91 Tests — 100% Coverage)
+## 4. Hướng dẫn chạy kiểm thử (94 Tests — 100% Pass)
 
 ```powershell
 cd d:\hk7\PTWKDNC\KEN\my-server-mongodb
-# Chạy toàn bộ 91 test cases
+# Chạy toàn bộ 94 test cases
 npm test
 
 # Chạy kèm báo cáo độ phủ dòng lệnh (Line / Branch / Function Coverage)

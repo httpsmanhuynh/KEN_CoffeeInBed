@@ -35,5 +35,9 @@ async function ensureIndexes(db) {
   await db.collection('addons').createIndex({ is_active: 1 });
   await db.collection('products').createIndex({ is_active: 1, category: 1 });
   await db.collection('recipes').createIndex({ item_id: 1 });
+
+  // Review indexes: chặn đánh giá trùng (tối đa 01 đánh giá / Booking — BR-H01)
+  await db.collection('reviews').createIndex({ booking_id: 1 }, { unique: true, name: 'uq_reviews_booking' });
+  await db.collection('reviews').createIndex({ user_id: 1, created_at: -1 });
 }
 module.exports = { ensureIndexes };

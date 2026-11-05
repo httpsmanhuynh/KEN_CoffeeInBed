@@ -4,7 +4,7 @@
 // Bước 2 (UC-05): Chọn Không gian (Space) & Gói dịch vụ (Package) + Book Now qua Auth Guard (POST /api/bookings/select-package)
 // Bước 3 (UC-06): Chọn món trong gói (Inclusion) & Dịch vụ mua thêm (Add-on) (POST /api/bookings/quote)
 // Bước 4 (UC-07, UC-08): Checkout — Áp dụng Voucher, Xem Booking Summary & Xác nhận giữ chỗ 15 phút (POST /api/bookings)
-// Bước 5 (UC-09, UC-10, UC-25, UC-26): Payment -> Confirmation -> Check-in -> Sử dụng -> Check-out.
+// Bước 5 (UC-09, UC-10, UC-25, UC-26): Payment -> Confirmation -> Check-in -> Sử dụng -> Check-out -> Review (UC-16).
 const express = require('express');
 const { ObjectId } = require('mongodb');
 const { requireAuth, requireRole } = require('../middleware/auth');
@@ -23,6 +23,12 @@ const {
   expirePendingBookings,
   reconcileRefund,
 } = require('../services/bookingService');
+const {
+  attachReviewsToBookings,
+  getBookingReviewStatus,
+  createReview,
+} = require('../services/reviewService');
+const { enrichBookingWithReview } = require('../domain/review');
 
 const router = express.Router();
 
@@ -154,7 +160,7 @@ router.post(
   }),
 );
 
-// GET /api/bookings/me — Lịch sử đặt chỗ của khách đang đăng nhập (UC-11)
+// GET /api/bookings/me — Lịch sử đặt chỗ của khách đang đăng nhập kèm lời nhắc đánh giá (UC-11, UC-16, FR-4.3, BR-H01)
 router.get(
   '/me',
   requireAuth,
@@ -169,7 +175,34 @@ router.get(
       .find(filter)
       .sort({ created_at: -1 })
       .toArray();
-    res.json(bookings);
+    const enriched = await attachReviewsToBookings(db, bookings);
+    res.json(enriched);
+  }),
+);
+
+// GET /api/bookings — Admin xem danh sách toàn bộ đơn đặt chỗ (UC-24)
+router.get(
+  '/',
+  requireRole('ADMIN'),
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    const filter = {};
+    if (typeof req.query.status === 'string' && req.query.status.trim()) {
+      filter.status = req.query.status.trim().toUpperCase();
+    }
+    if (req.query.spaceId && ObjectId.isValid(req.query.spaceId)) {
+      filter.space_id = new ObjectId(req.query.spaceId);
+    }
+    if (req.query.userId && ObjectId.isValid(req.query.userId)) {
+      filter.user_id = new ObjectId(req.query.userId);
+    }
+    const bookings = await db
+      .collection('bookings')
+      .find(filter)
+      .sort({ created_at: -1 })
+      .toArray();
+    const enriched = await attachReviewsToBookings(db, bookings);
+    res.json(enriched);
   }),
 );
 
@@ -184,7 +217,7 @@ router.post(
   }),
 );
 
-// GET /api/bookings/:id — Chi tiết đơn đặt chỗ kèm Inclusions, Add-ons, Giao dịch thanh toán
+// GET /api/bookings/:id — Chi tiết đơn đặt chỗ kèm Inclusions, Add-ons, Giao dịch thanh toán & Trạng thái đánh giá
 router.get(
   '/:id',
   requireAuth,
@@ -201,7 +234,7 @@ router.get(
       return fail(res, 403, 'FORBIDDEN', 'Bạn không có quyền xem đơn này');
     }
 
-    const [inclusions, addons, transactions] = await Promise.all([
+    const [inclusions, addons, transactions, review] = await Promise.all([
       db.collection('booking_inclusions').find({ booking_id: bOid }).toArray(),
       db.collection('booking_addons').find({ booking_id: bOid }).toArray(),
       db
@@ -209,9 +242,48 @@ router.get(
         .find({ booking_id: bOid })
         .sort({ created_at: 1 })
         .toArray(),
+      db.collection('reviews').findOne({ booking_id: bOid }),
     ]);
 
-    res.json({ ...booking, inclusions, addons, transactions });
+    res.json(enrichBookingWithReview({ ...booking, inclusions, addons, transactions }, review));
+  }),
+);
+
+// GET /api/bookings/:id/review — Kiểm tra điều kiện đánh giá & xem đánh giá của đơn đặt chỗ (UC-16)
+router.get(
+  '/:id/review',
+  requireAuth,
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    try {
+      const status = await getBookingReviewStatus(db, {
+        user: req.user,
+        bookingId: req.params.id,
+      });
+      res.json(status);
+    } catch (err) {
+      return handleErr(res, err);
+    }
+  }),
+);
+
+// POST /api/bookings/:id/review — Gửi đánh giá cho đơn đặt chỗ đã CHECKED_OUT (UC-16, BR-H01)
+router.post(
+  '/:id/review',
+  requireAuth,
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    try {
+      const review = await createReview(db, {
+        user: req.user,
+        bookingId: req.params.id,
+        rating: req.body.rating,
+        comment: req.body.comment,
+      });
+      res.status(201).json(review);
+    } catch (err) {
+      return handleErr(res, err);
+    }
   }),
 );
 

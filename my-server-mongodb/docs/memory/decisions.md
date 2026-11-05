@@ -22,3 +22,9 @@
   - `payment_transactions`: lưu `idempotencyKey` vào trường `gateway_ref` (có unique index), lưu `actorId` vào `performed_by` và kênh thanh toán vào `note`.
   - `loyalty_transactions`: dùng đúng 3 loại `type` (`EARN`, `REDEEM`, `YEAR_RESET`) kèm `points_delta`, `coins_delta`, `points_after`, `coins_after`.
   - `user_vouchers`: khi khách đổi Coins lấy Voucher (`POST /api/loyalty/redeem`), ghi nhận vào ví `user_vouchers` để đối chiếu khi áp dụng mã tại Checkout.
+
+## 4. Quản lý Đánh giá sau sử dụng (`Review Management` — Module 10, `UC-16`, `BR-H01`, `FR-4.3`)
+- **Kiểm tra điều kiện đơn chính chủ & `CHECKED_OUT` (`BR-D06`, `BR-H01`, `BR-F03`, `NFR-02`):** Chỉ chủ đơn (`booking.user_id == req.user._id`) mới được đánh giá và đơn bắt buộc ở trạng thái `CHECKED_OUT`. Cả hai điều kiện được kiểm tra lại bên trong Multi-Document ACID Transaction khi lưu.
+- **Chặn đánh giá trùng (`BR-H01`, `EX-5.6`):** Trong Transaction lưu đánh giá, hệ thống lấy khóa ghi trên bản ghi `bookings` và kết hợp với unique index `uq_reviews_booking` (`{ booking_id: 1 }`) để đảm bảo tối đa 01 đánh giá/Booking ngay cả khi gửi trùng đồng thời. Nếu đơn đã có đánh giá, trả `409 REVIEW_ALREADY_EXISTS` kèm bản ghi `review` đã gửi để hiển thị ở chế độ chỉ xem (`AF2`).
+- **Tuân thủ `reviews.validator.json`:** Chỉ lưu đúng 6 trường (`_id`, `booking_id`, `user_id`, `rating` nguyên từ `1..5`, `comment` tối đa `500` ký tự hoặc `null`, `created_at >= booking.checked_out_at`). Không lưu `space_id` dư thừa vào `reviews` (đạt 3NF Chương 6; khi xem đánh giá theo Space thì truy vết qua `bookings`).
+- **Lời nhắc đánh giá trong Lịch sử đặt chỗ (`GET /api/bookings/me`, `GET /api/bookings/:id`):** Dùng `attachReviewsToBookings` để gắn động các trường `has_review`, `can_review`, `review_reminder` (`true` khi `status === 'CHECKED_OUT' && !has_review`) và `review` vào JSON trả về mà không làm bẩn schema `bookings` trong DB.

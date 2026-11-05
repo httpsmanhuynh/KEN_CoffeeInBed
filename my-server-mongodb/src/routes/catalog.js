@@ -18,6 +18,7 @@ const {
   evaluateSpaceAvailability,
   searchAvailableSpaces,
 } = require('../services/bookingService');
+const { listSpaceReviews } = require('../services/reviewService');
 
 const router = express.Router();
 const adminLimit = rateLimit({ windowMs: 15 * 60 * 1000, max: 60 });
@@ -247,6 +248,20 @@ router.get(
       zone,
       packages: compatiblePackages,
     });
+  }),
+);
+
+// GET /api/spaces/:id/reviews — Xem danh sách đánh giá & điểm trung bình của không gian (UC-16)
+router.get(
+  '/spaces/:id/reviews',
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    try {
+      const result = await listSpaceReviews(db, { spaceId: req.params.id });
+      res.json(result);
+    } catch (err) {
+      return handleErr(res, err);
+    }
   }),
 );
 

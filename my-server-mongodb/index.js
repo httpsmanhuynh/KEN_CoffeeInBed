@@ -62,6 +62,7 @@ async function startServer() {
     app.use('/api/catalog', catalogRouter);
     app.use('/api', catalogRouter);
     app.use('/api/bookings', require('./src/routes/bookings'));
+    app.use('/api/reviews', require('./src/routes/reviews'));
     app.use('/api', authRouter);
     app.use('/api/auth', authRouter);
     app.use('/api/profile', require('./src/routes/profile'));
