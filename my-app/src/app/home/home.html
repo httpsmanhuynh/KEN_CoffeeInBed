@@ -1,0 +1,95 @@
+<header class="navbar">
+  <a class="brand" href="#">
+    <div class="brand-mark">
+      <img src="../images/Logo.png" alt="">
+    </div>
+    <div class="brand-copy">
+      <span class="brand-title">KÉN</span>
+      <span class="brand-sub">Lười một chút, chill một góc</span>
+    </div>
+  </a>
+
+  <nav>
+    <ul class="nav-menu">
+      <li><a href="#">Trang chủ</a></li>
+      <li><a href="#">Không gian</a></li>
+      <li><a href="#">Menu</a></li>
+      <li><a href="#">Hỗ trợ</a></li>
+      <li><a href="#">Chính sách</a></li>
+      <li><a href="#">Về chúng tôi</a></li>
+
+    </ul>
+  </nav>
+
+  <div class="nav-auth">
+    <a class="link-login" href="#">Đăng nhập</a>
+    <a class="btn-register" href="#">Đăng ký</a>
+  </div>
+</header>
+
+<!-- NƠI RENDER NỘI DUNG CÁC TRANG -->
+<router-outlet></router-outlet>
+
+<footer class="cafe-site-footer">
+  <div class="cafe-footer-main">
+    
+    <div class="cafe-footer-brand">
+      <img src="../images/Logo.png" alt="Logo KÉN">
+      <div class="cafe-footer-brand-text">
+        <strong>KÉN</strong>
+        <span>Lười một chút, chill một góc</span>
+      </div>
+    </div>
+
+    <div class="cafe-footer-column cafe-footer-about">
+      <h2>Về KÉN</h2>
+      <a href="#">Giới thiệu</a>
+      <a href="#">Blog</a>
+      <a href="#">Đánh giá</a>
+      <a href="#">Trung tâm hỗ trợ</a>
+      <a href="#">Đặt chỗ của tôi</a>
+    </div>
+
+    <div class="cafe-footer-column cafe-footer-policy">
+      <h2>Chính sách</h2>
+      <a href="#">Chính sách hoạt động</a>
+      <a href="#">Điều kiện & điều khoản</a>
+    </div>
+
+    <div class="cafe-footer-column cafe-footer-payment">
+      <h2>Đối tác thanh toán</h2>
+      <img src="../images/đối tác thanh toán.png" alt="Đối tác thanh toán" class="cafe-footer-payment-img">
+    </div>
+
+    <!-- Cột 2 hàng 2: Theo dõi chúng tôi -->
+    <div class="cafe-footer-column cafe-footer-social">
+      <h2>Theo dõi chúng tôi</h2>
+      <a href="#"><img src="../images/facebook.png" alt="Facebook" class="footer-icon">Facebook</a>
+      <a href="#"><img src="../images/instagram.png" alt="Instagram" class="footer-icon">Instagram</a>
+      <a href="#"><img src="../images/tiktok.png" alt="Tiktok" class="footer-icon">Tiktok</a>
+      <a href="#"><img src="../images/youtube.png" alt="Youtube" class="footer-icon">Youtube</a>
+      <a href="#"><img src="../images/telegram.png" alt="Telegram" class="footer-icon">Telegram</a>
+    </div>
+
+    <div class="cafe-footer-column cafe-footer-contact">
+      <h2>Liên hệ</h2>
+      <a href="tel:1900123456">
+        <img src="../images/telephone.png" alt="Hotline" class="footer-icon">
+        <span>Hotline: 1900 123 456</span>
+      </a>
+      <a href="mailto:helloken.vn">
+        <img src="../images/envelope.png" alt="Email" class="footer-icon">
+        <span>Email: helloken.vn</span>
+      </a>
+      <a href="#">
+        <img src="../images/geo-alt.png" alt="Địa chỉ" class="footer-icon">
+        <span>123 Nguyễn Văn Cừ, Phường Chợ Lớn, TPHCM</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="cafe-footer-bottom">
+    <span>Công ty TNHH KÉN Việt Nam - 123 Nguyễn Văn Cừ, Phường Chợ Lớn, TPHCM</span>
+    <strong>Copyright 2025 KÉN. All right reserved</strong>
+  </div>
+</footer>
