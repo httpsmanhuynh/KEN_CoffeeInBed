@@ -10,6 +10,8 @@
 |---------|------|------------|
 | Auth & User | [auth.md](auth.md) | Đăng ký, login, 2FA, đổi mật khẩu, đổi SĐT |
 | Loyalty / Điểm thành viên | [loyalty.md](loyalty.md) | Hạng, Điểm, Coins, rollover cuối năm |
+| Thanh toán | [payment.md](payment.md) | Giao dịch, idempotency, success/fail/cancel |
+| Danh mục & Admin CRUD | [catalog.md](catalog.md) | Spaces, zones, packages, pricing, addons, products, recipes |
 
 ---
 

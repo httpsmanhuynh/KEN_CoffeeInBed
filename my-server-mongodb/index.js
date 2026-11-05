@@ -1,4 +1,4 @@
-﻿require('node:dns').setServers(['8.8.8.8', '1.1.1.1']);
+require('node:dns').setServers(['8.8.8.8', '1.1.1.1']);
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -55,6 +55,8 @@ async function startServer() {
     app.use('/api', authRouter);
     app.use('/api/auth', authRouter);
     app.use('/api/profile', require('./src/routes/profile'));
+    app.use('/api/payments', require('./src/routes/payments'));
+    app.use('/api/catalog', require('./src/routes/catalog'));
 
     // Lỗi chung: lỗi client (body-parser: JSON sai 400, quá lớn 413...) giữ đúng mã 4xx;
     // lỗi server luôn trả 500 và không lộ stack.

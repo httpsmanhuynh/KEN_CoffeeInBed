@@ -10,6 +10,7 @@
 |---------|------|---------|
 | Loyalty | [loyalty-lessons.md](loyalty-lessons.md) | Idempotent earn, ObjectId trong test, race condition |
 | Auth | [auth-lessons.md](auth-lessons.md) | DUMMY_HASH timing, session regenerate, pwdStamp |
+| Payment & Catalog | [payment-catalog-lessons.md](payment-catalog-lessons.md) | Idempotency conflict, camelCase→snake_case, soft/hard delete, pick() |
 
 ---
 

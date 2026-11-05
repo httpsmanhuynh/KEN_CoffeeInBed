@@ -17,7 +17,7 @@ test('startSession: regenerate nhưng giữ pendingBooking; không gán user tr�
     save(cb) { cb(null); } } };
   assert.equal(req.session.user, undefined);
   await startSession(req, { id: 'u1', role: 'CUSTOMER' });
-  assert.deepEqual(req.session.user, { id: 'u1', role: 'CUSTOMER' });
+  assert.deepEqual(req.session.user, { id: 'u1', role: 'CUSTOMER', pwdAt: 0 });
   assert.deepEqual(req.session.pendingBooking, { spaceId: 's1' });
   assert.equal(req.session.pending2FA, undefined);
 });

@@ -16,5 +16,18 @@ async function ensureIndexes(db) {
   // Truy vấn lịch sử theo user, sắp theo thời gian
   await db.collection('loyalty_transactions').createIndex({ user_id: 1, created_at: -1 });
   await db.collection('loyalty_histories').createIndex({ user_id: 1, created_at: -1 });
+
+  // Payment indexes
+  await db.collection('payment_transactions').createIndex({ idempotency_key: 1 }, { unique: true }); // idempotent
+  await db.collection('payment_transactions').createIndex({ booking_id: 1, created_at: -1 });
+  await db.collection('payment_transactions').createIndex({ user_id: 1, created_at: -1 });
+
+  // Catalog indexes
+  await db.collection('spaces').createIndex({ zone_id: 1, status: 1 });
+  await db.collection('packages').createIndex({ space_id: 1, status: 1 });
+  await db.collection('space_pricing').createIndex({ space_id: 1 });
+  await db.collection('addons').createIndex({ status: 1 });
+  await db.collection('products').createIndex({ status: 1 });
+  await db.collection('recipes').createIndex({ product_id: 1 });
 }
 module.exports = { ensureIndexes };
