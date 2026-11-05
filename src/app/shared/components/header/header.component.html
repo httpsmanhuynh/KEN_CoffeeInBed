@@ -1,0 +1,187 @@
+<header class="navbar">
+
+  <!-- Khối Brand: Kế thừa 100% cấu trúc & class của Khánh (.brand, .brand-mark, .brand-copy, .brand-title, .brand-sub) -->
+  <a class="brand" routerLink="/" (click)="closeMobileMenu()">
+    <div class="brand-mark">
+      <img src="/images/Logo.png" alt="Logo KÉN" />
+    </div>
+    <div class="brand-copy">
+      <span class="brand-title">KÉN</span>
+      <span class="brand-sub">Lười một chút, chill một góc</span>
+    </div>
+  </a>
+
+  <!-- Nút hamburger trên mobile -->
+  <button
+    type="button"
+    class="mobile-toggle-btn"
+    (click)="toggleMobileMenu()"
+    aria-label="Toggle navigation"
+    [attr.aria-expanded]="mobileMenuOpen"
+  >
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path
+        *ngIf="!mobileMenuOpen"
+        d="M4 6H20M4 12H20M4 18H20"
+        stroke="#4A3123"
+        stroke-width="2"
+        stroke-linecap="round"
+      />
+      <path
+        *ngIf="mobileMenuOpen"
+        d="M6 6L18 18M6 18L18 6"
+        stroke="#4A3123"
+        stroke-width="2"
+        stroke-linecap="round"
+      />
+    </svg>
+  </button>
+
+  <!-- Menu điều hướng: Kế thừa nav và class .nav-menu của Khánh, bổ sung routerLink & active -->
+  <nav [class.mobile-open]="mobileMenuOpen">
+    <ul class="nav-menu">
+      <li>
+        <a
+          routerLink="/"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          (click)="closeMobileMenu()"
+        >
+          Trang chủ
+        </a>
+      </li>
+      <li>
+        <a
+          routerLink="/khong-gian"
+          routerLinkActive="active"
+          (click)="closeMobileMenu()"
+        >
+          Không gian
+        </a>
+      </li>
+      <li>
+        <a
+          routerLink="/menu"
+          routerLinkActive="active"
+          (click)="closeMobileMenu()"
+        >
+          Menu
+        </a>
+      </li>
+      <li>
+        <a
+          routerLink="/ho-tro"
+          routerLinkActive="active"
+          class="has-dropdown"
+          (click)="closeMobileMenu()"
+        >
+          <span>Hỗ trợ</span>
+          <svg class="dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none">
+            <path
+              d="M1 1L5 5L9 1"
+              stroke="#4A3123"
+              stroke-width="1.3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </a>
+      </li>
+      <li>
+        <a
+          routerLink="/chinh-sach"
+          routerLinkActive="active"
+          class="has-dropdown"
+          (click)="closeMobileMenu()"
+        >
+          <span>Chính sách</span>
+          <svg class="dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none">
+            <path
+              d="M1 1L5 5L9 1"
+              stroke="#4A3123"
+              stroke-width="1.3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </a>
+      </li>
+      <li>
+        <a
+          routerLink="/ve-chung-toi"
+          routerLinkActive="active"
+          class="has-dropdown"
+          (click)="closeMobileMenu()"
+        >
+          <span>Về chúng tôi</span>
+          <svg class="dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none">
+            <path
+              d="M1 1L5 5L9 1"
+              stroke="#4A3123"
+              stroke-width="1.3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </a>
+      </li>
+    </ul>
+
+    <!-- Menu Auth Mobile -->
+    <div class="nav-auth-mobile">
+      <ng-container *ngIf="!isLoggedIn">
+        <a class="link-login" routerLink="/dang-nhap" (click)="closeMobileMenu()">Đăng nhập</a>
+        <a class="btn-register" routerLink="/dang-ky" (click)="closeMobileMenu()">Đăng ký</a>
+      </ng-container>
+      <div class="auth-customer" *ngIf="isLoggedIn">
+        <div class="avatar-circle">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <circle cx="9" cy="6" r="3" stroke="#4A3123" stroke-width="1.3" />
+            <path
+              d="M3 15C3 12 5.5 10 9 10C12.5 10 15 12 15 15"
+              stroke="#4A3123"
+              stroke-width="1.3"
+              stroke-linecap="round"
+            />
+          </svg>
+        </div>
+        <span class="customer-name">{{ userName || 'Khách hàng' }}</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Khối Auth Desktop: Kế thừa class .nav-auth, .link-login, .btn-register của Khánh cho Guest + Bổ sung Customer theo Figma -->
+  <div class="nav-auth">
+    <!-- 1. Trạng thái GUEST: Kế thừa từ code của Khánh -->
+    <ng-container *ngIf="!isLoggedIn">
+      <a class="link-login" routerLink="/dang-nhap">Đăng nhập</a>
+      <a class="btn-register" routerLink="/dang-ky">Đăng ký</a>
+    </ng-container>
+
+    <!-- 2. Trạng thái CUSTOMER: Bổ sung theo ảnh Figma -->
+    <div class="auth-customer" *ngIf="isLoggedIn" tabindex="0" role="button">
+      <div class="avatar-circle">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <circle cx="9" cy="6" r="3" stroke="#4A3123" stroke-width="1.3" />
+          <path
+            d="M3 15C3 12 5.5 10 9 10C12.5 10 15 12 15 15"
+            stroke="#4A3123"
+            stroke-width="1.3"
+            stroke-linecap="round"
+          />
+        </svg>
+      </div>
+      <span class="customer-name">{{ userName || 'Khách hàng' }}</span>
+      <svg class="account-arrow" width="12" height="7" viewBox="0 0 12 7" fill="none">
+        <path
+          d="M1.5 1.5L6 5.5L10.5 1.5"
+          stroke="#4A3123"
+          stroke-width="1.3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </div>
+  </div>
+
+</header>

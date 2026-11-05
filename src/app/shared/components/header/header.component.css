@@ -1,0 +1,81 @@
+:host{display:block;width:100%}
+
+/* Header chính - Kế thừa .navbar của Khánh */
+.navbar{
+  display:flex;align-items:center;justify-content:space-between;width:100%;
+  min-height:74px;padding:18px 80px;background:#F7EFE2;
+  border-bottom:1px solid rgba(169,118,63,.2);box-sizing:border-box;position:relative;z-index:1000;
+}
+
+/* Brand - Kế thừa 100% .brand, .brand-mark, .brand-copy, .brand-title, .brand-sub */
+.brand{display:flex;align-items:center;gap:12px;color:#4A3123;text-decoration:none;cursor:pointer}
+.brand-mark{
+  display:flex;align-items:center;justify-content:center;width:38px;height:38px;
+  overflow:hidden;background:#E6D3B5;border:1px solid #A9763F;border-radius:19px;flex-shrink:0;
+}
+.brand-mark img{width:100%;height:100%;object-fit:cover;display:block}
+.brand-copy{display:flex;flex-direction:column}
+.brand-title{color:#4A3123;font-size:22px;font-weight:700;line-height:23px;letter-spacing:.036em}
+.brand-sub{color:#A9763F;font-family:"Lavishly Yours",cursive;font-size:18px;font-weight:400;line-height:18px;margin-top:-2px}
+
+/* Menu - Kế thừa .nav-menu của Khánh */
+.nav-menu{display:flex;align-items:center;gap:36px;margin:0;padding:0;list-style:none}
+.nav-menu a{
+  color:#4A3123;font-size:14px;font-weight:500;line-height:21px;text-decoration:none;
+  white-space:nowrap;transition:color .2s;padding-bottom:2px;
+}
+.nav-menu a:hover{color:#A9763F}
+.nav-menu a.active{font-weight:600;border-bottom:2px solid #4A3123;padding-bottom:4px}
+.has-dropdown{display:inline-flex;align-items:center;gap:4px}
+.dropdown-arrow{flex-shrink:0}
+
+/* Auth - Kế thừa .nav-auth, .link-login, .btn-register của Khánh */
+.nav-auth{display:flex;align-items:center;gap:20px}
+.link-login,.btn-register{
+  display:flex;align-items:center;justify-content:center;color:#4A3123;font-size:14px;
+  font-weight:600;line-height:21px;text-decoration:none;white-space:nowrap;transition:all .2s;
+  box-sizing:border-box;border-radius:999px;
+}
+.link-login{width:98px;height:39px;border:1px solid #D8C7B2;background:#FFF}
+.link-login:hover{background:#F7EFE2;border-color:#A9763F}
+.btn-register{padding:8px 20px;height:39px;background:#E3A52F;border:1px solid #E3A52F}
+.btn-register:hover{opacity:.9}
+
+/* Customer - Bổ sung theo Figma */
+.auth-customer{display:inline-flex;align-items:center;gap:10px;cursor:pointer;padding:4px 6px;border-radius:999px}
+.auth-customer:hover{background:rgba(230,211,181,.35)}
+.avatar-circle{
+  width:36px;height:36px;border-radius:50%;background:#E6D3B5;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.customer-name{font-size:14px;font-weight:600;color:#4A3123;white-space:nowrap}
+.account-arrow{flex-shrink:0;margin-left:2px}
+
+/* Responsive */
+.mobile-toggle-btn,.nav-auth-mobile{display:none}
+
+@media(max-width:1080px){
+  .navbar{padding:16px 32px}
+  .nav-menu{gap:20px}
+  .nav-auth{gap:12px}
+}
+
+@media(max-width:860px){
+  .navbar{padding:14px 20px}
+  .mobile-toggle-btn{display:flex;align-items:center;justify-content:center;background:transparent;border:none;cursor:pointer;padding:6px}
+  .nav-auth{display:none}
+  nav{
+    display:none;position:absolute;top:74px;left:0;width:100%;background:#F7EFE2;
+    flex-direction:column;padding:20px 24px 28px;box-shadow:0 8px 24px rgba(74,49,35,.1);
+    box-sizing:border-box;border-bottom:1px solid rgba(169,118,63,.2);
+  }
+  nav.mobile-open{display:flex}
+  .nav-menu{flex-direction:column;align-items:flex-start;gap:16px;width:100%}
+  .nav-menu a{font-size:16px;padding:8px 0;width:100%;display:flex;justify-content:space-between}
+  .nav-menu a.active{border-bottom:none;color:#A9763F;font-weight:700}
+  .nav-auth-mobile{
+    display:flex;align-items:center;gap:12px;margin-top:20px;padding-top:16px;
+    border-top:1px solid rgba(169,118,63,.2);width:100%;
+  }
+  .nav-auth-mobile .link-login,.nav-auth-mobile .btn-register{flex:1;text-align:center}
+}
