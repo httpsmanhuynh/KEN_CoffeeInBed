@@ -1,8 +1,8 @@
 ﻿import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-import { CustomerLayout } from './shared/layouts/customer-layout/customer-layout.component';
-import { SupportComponent } from './pages/customer/support/support.component';
+import { CustomerLayout } from './shared/layouts/customer-layout/customer-layout';
+import { SupportComponent } from './pages/customer/support/support';
 
 const routes: Routes = [
   {
@@ -20,4 +20,6 @@ const routes: Routes = [
   exports: [RouterModule]
 })
 export class AppRoutingModule {}
+
+
 

@@ -2,7 +2,7 @@
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { SupportComponent } from './support.component';
+import { SupportComponent } from './support';
 
 @NgModule({
   declarations: [SupportComponent],
@@ -49,3 +49,4 @@ describe('SupportComponent', () => {
     expect(component.supportForm.get('fullName')?.value).toBeNull();
   });
 });
+

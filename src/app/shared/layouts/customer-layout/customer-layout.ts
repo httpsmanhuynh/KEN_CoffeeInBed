@@ -3,8 +3,9 @@
 @Component({
   selector: 'app-customer-layout',
   standalone: false,
-  styleUrl: './customer-layout.component.css',
-  templateUrl: './customer-layout.component.html',
+  styleUrl: './customer-layout.css',
+  templateUrl: './customer-layout.html',
 })
 export class CustomerLayout {}
+
 

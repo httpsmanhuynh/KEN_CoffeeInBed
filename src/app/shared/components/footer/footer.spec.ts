@@ -1,5 +1,5 @@
 ﻿import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Footer } from './footer.component';
+import { Footer } from './footer';
 
 describe('Footer', () => {
   let component: Footer;
@@ -19,4 +19,5 @@ describe('Footer', () => {
     expect(component).toBeTruthy();
   });
 });
+
 

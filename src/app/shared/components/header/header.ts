@@ -1,11 +1,11 @@
-import { Component, Input, OnInit, isDevMode } from '@angular/core';
+﻿import { Component, Input, OnInit, isDevMode } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-header',
   standalone: false,
-  templateUrl: './header.component.html',
-  styleUrl: './header.component.css',
+  templateUrl: './header.html',
+  styleUrl: './header.css',
 })
 export class HeaderComponent implements OnInit {
   @Input() isLoggedIn = false;
@@ -39,3 +39,4 @@ export class HeaderComponent implements OnInit {
     this.mobileMenuOpen = false;
   }
 }
+

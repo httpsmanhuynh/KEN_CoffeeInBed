@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 interface FAQItem {
@@ -15,8 +15,8 @@ interface SupportCategory {
 @Component({
   selector: 'app-support',
   standalone: false,
-  templateUrl: './support.component.html',
-  styleUrl: './support.component.css',
+  templateUrl: './support.html',
+  styleUrl: './support.css',
 })
 export class SupportComponent implements OnInit {
   searchQuery = '';
@@ -154,3 +154,4 @@ export class SupportComponent implements OnInit {
     return '';
   }
 }
+
