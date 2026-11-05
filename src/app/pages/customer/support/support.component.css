@@ -123,3 +123,37 @@
   .section-title{font-size:18px}
   .contact-channels{flex-direction:column;align-items:center}
 }
+/* Hien thi nut tim kiem dung vi tri theo Figma */
+.search-bar {
+  display: flex;
+  align-items: center;
+}
+
+.search-input {
+  min-width: 0;
+}
+
+.search-btn {
+  flex: 0 0 48px;
+}
+/* Khoi lien he KEN theo Figma */
+.brand-box {
+  background: #4A3123;
+  border: none;
+}
+
+.brand-box .brand-icon {
+  display: none;
+}
+
+.brand-box .brand-name {
+  color: #E3A52F;
+  font-size: 44px;
+}
+
+.brand-box .brand-tagline {
+  color: #E6D3B5;
+}
+
+/* Mui ten danh muc theo Figma */
+.form-group select { background-size: 12px 8px; }

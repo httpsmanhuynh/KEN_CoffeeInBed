@@ -33,3 +33,15 @@
 @media (max-width: 600px) {
   .cafe-footer-main { display: flex; flex-direction: column; gap: 24px; }
 }
+/* Mau chu Footer theo Figma */
+.cafe-footer-column a {
+  color: #F7EFE2;
+}
+
+.cafe-footer-bottom {
+  color: #F7EFE2;
+}
+
+.cafe-footer-brand-text span {
+  color: #E6D3B5;
+}
