@@ -1,0 +1,118 @@
+<section class="reg">
+  <div class="reg__card" role="main">
+    <header class="reg__head">
+      <h1>Đăng ký</h1>
+      <p>Chào mừng bạn đến với KÉN</p>
+    </header>
+
+    <form class="reg__form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <!-- Họ và tên -->
+      <div class="field">
+        <label for="fullName">Họ và tên <span class="req" aria-hidden="true">*</span></label>
+        <input id="fullName" type="text" formControlName="fullName" placeholder="Nguyễn Văn A"
+               autocomplete="name" autofocus
+               [class.is-invalid]="showError('fullName')" [attr.aria-invalid]="showError('fullName')" />
+        @if (showError('fullName')) { <small class="field__err">{{ fieldMessage('fullName') }}</small> }
+      </div>
+
+      <!-- Email (không bắt buộc) -->
+      <div class="field">
+        <label for="email">Email <span class="opt">(không bắt buộc)</span></label>
+        <input id="email" type="email" formControlName="email" placeholder="VD: ken@email.com"
+               autocomplete="email" inputmode="email"
+               [class.is-invalid]="showError('email')" [attr.aria-invalid]="showError('email')" />
+        @if (showError('email')) { <small class="field__err">{{ fieldMessage('email') }}</small> }
+      </div>
+
+      <!-- Số điện thoại -->
+      <div class="field">
+        <label for="phone">Số điện thoại <span class="req" aria-hidden="true">*</span></label>
+        <input id="phone" type="tel" formControlName="phone" placeholder="(+84)"
+               autocomplete="tel" inputmode="tel" aria-describedby="phoneHint"
+               [class.is-invalid]="showError('phone')" [attr.aria-invalid]="showError('phone')" />
+        @if (showError('phone')) {
+          <small class="field__err">{{ fieldMessage('phone') }}</small>
+        } @else {
+          <small id="phoneHint" class="hint">
+            <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M2 3.5A1.5 1.5 0 0 1 3.5 2h9A1.5 1.5 0 0 1 14 3.5v6A1.5 1.5 0 0 1 12.5 11H7l-3 3v-3h-.5A1.5 1.5 0 0 1 2 9.5z" fill="none" stroke="#A9763F" stroke-width="1.4" stroke-linejoin="round"/></svg>
+            Mã OTP sẽ được gửi qua SMS để xác thực số điện thoại của bạn
+          </small>
+        }
+      </div>
+
+      <!-- Ngày sinh (BR-A03: bắt buộc) -->
+      <div class="field">
+        <label for="dob">Ngày sinh <span class="req" aria-hidden="true">*</span></label>
+        <input id="dob" type="date" formControlName="dateOfBirth" [max]="today" autocomplete="bday"
+               [class.is-invalid]="showError('dateOfBirth')" [attr.aria-invalid]="showError('dateOfBirth')" />
+        @if (showError('dateOfBirth')) { <small class="field__err">{{ fieldMessage('dateOfBirth') }}</small> }
+      </div>
+
+      <!-- Mật khẩu -->
+      <div class="field">
+        <label for="password">Mật khẩu <span class="req" aria-hidden="true">*</span></label>
+        <div class="pw" [class.is-invalid]="showError('password')">
+          <svg class="pw__lock" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M6 10V8a6 6 0 0 1 12 0v2h1a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V11a1 1 0 0 1 1-1zm2 0h8V8a4 4 0 0 0-8 0z" fill="currentColor"/></svg>
+          <input id="password" [type]="showPassword ? 'text' : 'password'" formControlName="password"
+                 placeholder="Tối thiểu 8 ký tự" autocomplete="new-password" [attr.aria-invalid]="showError('password')" />
+          <button type="button" class="pw__eye" (click)="showPassword = !showPassword"
+                  [attr.aria-label]="showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'" [attr.aria-pressed]="showPassword">
+            <ng-container *ngTemplateOutlet="eye; context: { $implicit: showPassword }"></ng-container>
+          </button>
+        </div>
+        @if (showError('password')) { <small class="field__err">{{ fieldMessage('password') }}</small> }
+      </div>
+
+      <!-- Xác nhận mật khẩu -->
+      <div class="field">
+        <label for="confirm">Xác nhận lại mật khẩu <span class="req" aria-hidden="true">*</span></label>
+        <div class="pw" [class.is-invalid]="showError('confirmPassword') || mismatch">
+          <svg class="pw__lock" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M6 10V8a6 6 0 0 1 12 0v2h1a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V11a1 1 0 0 1 1-1zm2 0h8V8a4 4 0 0 0-8 0z" fill="currentColor"/></svg>
+          <input id="confirm" [type]="showConfirm ? 'text' : 'password'" formControlName="confirmPassword"
+                 placeholder="Nhập lại mật khẩu" autocomplete="new-password" />
+          <button type="button" class="pw__eye" (click)="showConfirm = !showConfirm"
+                  [attr.aria-label]="showConfirm ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'" [attr.aria-pressed]="showConfirm">
+            <ng-container *ngTemplateOutlet="eye; context: { $implicit: showConfirm }"></ng-container>
+          </button>
+        </div>
+        @if (mismatch) {
+          <small class="field__err">Mật khẩu xác nhận không khớp.</small>
+        } @else if (showError('confirmPassword')) {
+          <small class="field__err">{{ fieldMessage('confirmPassword') }}</small>
+        }
+      </div>
+
+      <!-- Lỗi chung của form: AF1 (thiếu/sai dữ liệu), AF2 (trùng SĐT/email), 429, lỗi server -->
+      @if (formError !== 'none') {
+        <p class="reg__error" role="alert">{{ errorText }}</p>
+      }
+
+      <div class="reg__actions">
+        <button type="submit" class="btn" [disabled]="loading">
+          @if (loading) { <span class="spinner" aria-hidden="true"></span> Đang gửi mã OTP… }
+          @else { Tiếp theo — Gửi mã OTP }
+        </button>
+        <p class="note">
+          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="8" cy="8" r="6.3" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 7.2v3.6M8 5.2v.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          Tài khoản sẽ được tạo sau khi xác thực OTP thành công qua số điện thoại
+        </p>
+      </div>
+    </form>
+
+    <p class="reg__login">Đã có tài khoản? <a routerLink="/login">Đăng nhập ngay</a></p>
+
+    <p class="reg__legal">
+      Bằng cách đăng ký, bạn đồng ý với <a routerLink="/policy/terms">Điều khoản &amp; Điều kiện</a>
+      của chúng tôi và bạn đã đọc <a routerLink="/policy/privacy">Chính Sách Quyền Riêng Tư</a> của chúng tôi.
+    </p>
+  </div>
+</section>
+
+<!-- Icon con mắt dùng chung cho 2 ô mật khẩu -->
+<ng-template #eye let-open>
+  @if (open) {
+    <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+  } @else {
+    <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 4l16 16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  }
+</ng-template>

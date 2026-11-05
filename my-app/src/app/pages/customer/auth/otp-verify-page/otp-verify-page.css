@@ -1,0 +1,66 @@
+:host { display: block; }
+.otpv {
+  min-height: 60vh; display: flex; justify-content: center; align-items: center; padding: 64px 16px 80px;
+  background:
+    linear-gradient(rgba(247, 239, 226, 0.45), rgba(247, 239, 226, 0.45)),
+    url('/images/register-bg.jpg') center / cover no-repeat,
+    var(--ken-cream, #F7EFE2);
+}
+.otpv__card {
+  width: 100%; max-width: 560px; box-sizing: border-box; padding: 40px 48px 44px;
+  background: var(--ken-paper, #FFFCF7); border-radius: 24px; box-shadow: 0 12px 32px rgba(74, 49, 35, 0.08);
+  display: flex; flex-direction: column; gap: 28px;
+  font-family: Inter, system-ui, sans-serif; color: var(--ken-brown, #4A3123);
+}
+.back { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; padding: 0; border: 0; background: none; cursor: pointer;
+  font: 500 14px/21px Inter, system-ui, sans-serif; color: var(--ken-brown, #4A3123); }
+.back svg { color: #A9763F; }
+.back:hover { text-decoration: underline; }
+
+.otpv__head { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
+.eyebrow { font-size: 13px; line-height: 19.5px; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; }
+.otpv__head h1 { margin: 0; font-size: 28px; line-height: 36px; font-weight: 700; }
+.otpv__head p { margin: 4px 0 0; font-size: 16px; line-height: 1.6; color: var(--ken-muted, #7A6553); }
+.phone { font-size: 20px; line-height: 28px; font-weight: 700; letter-spacing: .02em; }
+
+.link { padding: 0; border: 0; background: none; cursor: pointer; font: 600 14px/21px Inter, system-ui, sans-serif; color: var(--ken-brown, #4A3123); }
+.link:hover:not(:disabled) { text-decoration: underline; }
+.link:disabled { opacity: .5; cursor: not-allowed; }
+.link--strong { font-size: 14px; }
+
+.otpv__form { display: flex; flex-direction: column; gap: 24px; }
+.field { display: flex; flex-direction: column; gap: 12px; }
+.field label { font-size: 14px; line-height: 21px; font-weight: 500; }
+.req { color: #995E4B; font-weight: 700; margin-left: 2px; }
+.err { font-size: 13px; line-height: 19.5px; color: #995E4B; }
+.ok { font-size: 13px; line-height: 19.5px; color: #5E7A4B; }
+
+.actions { display: flex; flex-direction: column; gap: 16px; }
+.btn {
+  display: inline-flex; justify-content: center; align-items: center; gap: 10px; width: 100%; padding: 16px 24px;
+  border: 0; border-radius: 999px; background: var(--ken-gold, #E3A52F); color: var(--ken-brown, #4A3123);
+  font: 600 16px/24px Inter, system-ui, sans-serif; letter-spacing: .8px; cursor: pointer; transition: background .15s, transform .05s;
+}
+.btn:hover:not(:disabled) { background: #D4961F; }
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.btn:focus-visible { outline: 3px solid rgba(74, 49, 35, .35); outline-offset: 3px; }
+.btn:disabled { opacity: .55; cursor: not-allowed; }
+.spinner { width: 16px; height: 16px; border: 2px solid rgba(74, 49, 35, .3); border-top-color: #4A3123; border-radius: 50%; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.note { margin: 0; text-align: center; font-size: 13px; line-height: 19.5px; color: var(--ken-muted, #7A6553); }
+
+.resend { text-align: center; display: flex; flex-direction: column; gap: 6px; }
+.resend p { margin: 0; font-size: 14px; line-height: 21px; color: var(--ken-muted, #7A6553); }
+.resend .wait { font-weight: 600; color: var(--ken-brown, #4A3123); }
+.resend small { font-size: 13px; line-height: 19.5px; color: var(--ken-muted, #7A6553); }
+
+.legal { margin: 0; padding-top: 14px; border-top: 1px solid rgba(216, 199, 178, 0.62); text-align: center; font-size: 13px; line-height: 19.5px; color: var(--ken-muted, #7A6553); }
+.legal a { color: var(--ken-brown, #4A3123); font-weight: 600; text-decoration: underline; }
+
+@media (max-width: 600px) {
+  .otpv { padding: 24px 12px 48px; }
+  .otpv__card { padding: 28px 20px; gap: 24px; border-radius: 20px; }
+  .otpv__head h1 { font-size: 24px; line-height: 32px; }
+}
+@media (prefers-reduced-motion: reduce) { .spinner { animation: none; } .btn { transition: none; } }
