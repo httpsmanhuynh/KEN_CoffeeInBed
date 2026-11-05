@@ -25,7 +25,6 @@ app.use((req, res, next) => {
 }); // Express 5: req.body là undefined khi không có body
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
 // 2. MongoDB (Chương VII). URI lấy từ env; mặc định là Mongo local. Tạo trước để session store dùng chung kết nối.
 const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017';
 const client = new MongoClient(uri);
@@ -49,7 +48,6 @@ async function startServer() {
   try {
     await client.connect();
     app.locals.db = client.db(DB_NAME); // route dùng req.app.locals.db
-    console.log('Mongo host:', client.options.hosts.map((h) => h.host).join(','));
     console.log('Đã kết nối thành công tới MongoDB!');
     // await require('./src/config/indexes').ensureIndexes(app.locals.db); // BR-A02: unique phone/email (idempotent)
 
