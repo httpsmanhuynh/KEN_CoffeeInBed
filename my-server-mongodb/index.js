@@ -56,8 +56,11 @@ async function startServer() {
     // 4. Routes
     app.get('/', (req, res) => res.send('This Web server is processed for MongoDB (KEN Platform)'));
     const authRouter = require('./src/routes/auth');
+    const catalogRouter = require('./src/routes/catalog');
     app.use('/api/loyalty', require('./src/routes/loyalty'));
-    app.use('/api', require('./src/routes/catalog'));
+    app.use('/api/payments', require('./src/routes/payments'));
+    app.use('/api/catalog', catalogRouter);
+    app.use('/api', catalogRouter);
     app.use('/api/bookings', require('./src/routes/bookings'));
     app.use('/api', authRouter);
     app.use('/api/auth', authRouter);
