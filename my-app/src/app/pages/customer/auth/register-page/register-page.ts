@@ -1,8 +1,7 @@
-import { Component, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
-  FormGroup,
   ValidationErrors,
   ValidatorFn,
   Validators,
@@ -36,6 +35,11 @@ const notFuture: ValidatorFn = (c: AbstractControl): ValidationErrors | null =>
   styleUrl: './register-page.css',
 })
 export class RegisterPage {
+  // Tiêm các service bằng hàm inject() để khởi tạo trước khi tạo thuộc tính form
+  private readonly fb = inject(FormBuilder);
+  private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
+
   readonly today = new Date().toISOString().split('T')[0];
 
   showPassword = false;
@@ -43,25 +47,19 @@ export class RegisterPage {
   loading = false;
   formError: FormError = 'none';
 
-  readonly form: FormGroup;
+  readonly form = this.fb.nonNullable.group(
+    {
+      fullName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
+      email: ['', [Validators.email, Validators.maxLength(100)]], // không bắt buộc (BR-A03)
+      phone: ['', [Validators.required, Validators.pattern(/^(?:\+84|84|0)(?:3|5|7|8|9)\d{8}$/)]],
+      dateOfBirth: ['', [Validators.required, notFuture]], // bắt buộc theo BR-A03
+      password: ['', [Validators.required, Validators.minLength(8), maxBytes(72)]],
+      confirmPassword: ['', [Validators.required]],
+    },
+    { validators: passwordsMatch },
+  );
 
-  constructor(
-    private fb: FormBuilder,
-    @Inject(AuthService) private auth: AuthService,
-    private router: Router,
-  ) {
-    this.form = this.fb.nonNullable.group(
-      {
-        fullName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-        email: ['', [Validators.email, Validators.maxLength(100)]], // không bắt buộc (BR-A03)
-        phone: ['', [Validators.required, Validators.pattern(/^(?:\+84|84|0)(?:3|5|7|8|9)\d{8}$/)]],
-        dateOfBirth: ['', [Validators.required, notFuture]], // bắt buộc theo BR-A03
-        password: ['', [Validators.required, Validators.minLength(8), maxBytes(72)]],
-        confirmPassword: ['', [Validators.required]],
-      },
-      { validators: passwordsMatch },
-    );
-
+  constructor() {
     // Người dùng sửa dữ liệu thì xóa thông báo lỗi chung (vd. "đã được sử dụng").
     this.form.valueChanges.subscribe(() => {
       if (this.formError !== 'none') this.formError = 'none';
@@ -99,7 +97,7 @@ export class RegisterPage {
   }
 
   get mismatch(): boolean {
-    return !!this.form.errors?.['mismatch'] && this.form.get('confirmPassword')!.touched;
+    return !!this.form.errors?.['mismatch'] && !!this.form.get('confirmPassword')?.touched;
   }
 
   get errorText(): string {

@@ -5,7 +5,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../../../core/auth.service';
 
 /** Trạng thái lỗi chung (khớp các frame Figma). */
-type LoginError = 'none' | 'invalid' | 'locked' | 'rate-limit' | 'server';
+type LoginError = 'none' | 'invalid' | 'locked' | 'rate-limit' | 'server' | 'two-factor-unavailable';
 
 @Component({
   selector: 'app-login-page',
@@ -19,6 +19,9 @@ export class LoginPage {
   error: LoginError = 'none';
   /** Vừa đăng ký xong (nhận từ trang OTP) → hiện lời chào. */
   readonly justRegistered = !!(history.state as { registered?: boolean } | null)?.registered;
+
+  /** Vừa đặt lại mật khẩu xong (nhận từ trang Đặt lại mật khẩu). */
+  readonly justReset = !!(history.state as { passwordReset?: boolean } | null)?.passwordReset;
 
   readonly form: FormGroup;
 
@@ -50,6 +53,8 @@ export class LoginPage {
         return 'Bạn đã thử quá nhiều lần. Vui lòng thử lại sau ít phút.';
       case 'server':
         return 'Có lỗi xảy ra. Vui lòng thử lại.';
+      case 'two-factor-unavailable':
+        return 'Tài khoản yêu cầu xác thực hai bước, nhưng màn hình xác thực 2FA chưa được triển khai.';
       default:
         return '';
     }
@@ -67,9 +72,9 @@ export class LoginPage {
 
     this.auth.login({ identifier: v.identifier.trim(), password: v.password }).subscribe({
       next: (res) => {
-        // Tài khoản bật 2FA → sang bước nhập OTP 2FA (trang này chưa thiết kế).
-        if (res?.twoFactorRequired) this.router.navigate(['/login/2fa']);
-        else this.router.navigate(['/']);
+        // Không điều hướng tới route 2FA chưa tồn tại; hiển thị trạng thái rõ ràng.
+        if (res?.twoFactorRequired) { this.loading = false; this.error = 'two-factor-unavailable'; }
+        else this.router.navigate(['/points-tier']);
       },
       error: (err: HttpErrorResponse) => {
         this.loading = false;

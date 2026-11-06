@@ -9,6 +9,10 @@
       <p class="lg__welcome" role="status">Đăng ký thành công. Vui lòng đăng nhập để tiếp tục.</p>
     }
 
+    @if (justReset) {
+      <p class="lg__welcome" role="status">Đặt lại mật khẩu thành công. Vui lòng đăng nhập bằng mật khẩu mới.</p>
+    }
+
     <form class="lg__form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
       <!-- Email hoặc SĐT -->
       <div class="field">
@@ -63,8 +67,8 @@
     <p class="lg__signup">Chưa có tài khoản? <a routerLink="/register">Đăng ký ngay</a></p>
 
     <p class="lg__legal">
-      Bằng cách đăng nhập, bạn đồng ý với <a routerLink="/policy/terms">Điều khoản &amp; Điều kiện</a>
-      của chúng tôi và bạn đã đọc <a routerLink="/policy/privacy">Chính Sách Quyền Riêng Tư</a> của chúng tôi.
+      Bằng cách đăng nhập, bạn đồng ý với Điều khoản &amp; Điều kiện
+      của chúng tôi và bạn đã đọc Chính Sách Quyền Riêng Tư của chúng tôi.
     </p>
   </div>
 </section>

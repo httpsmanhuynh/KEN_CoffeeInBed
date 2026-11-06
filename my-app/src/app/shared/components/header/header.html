@@ -1,0 +1,48 @@
+<header class="hd">
+  <div class="hd__inner">
+    <a class="brand" routerLink="/register" aria-label="KÉN – Đăng ký tài khoản" (click)="closeAll()">
+      <img class="brand__logo" src="/images/KEN_logo_tron.png" alt="" />
+      <span class="brand__text"><b>KÉN</b><i>Lười một chút, chill một góc</i></span>
+    </a>
+
+    <button type="button" class="burger" (click)="mobileOpen = !mobileOpen"
+            [attr.aria-expanded]="mobileOpen" aria-controls="hd-panel" aria-label="Mở menu">
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+        @if (mobileOpen) { <path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/> }
+        @else { <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/> }
+      </svg>
+    </button>
+
+    <div class="panel" id="hd-panel" [class.is-open]="mobileOpen">
+      <nav class="nav" aria-label="Điều hướng chính">
+        <ul>
+          @for (item of nav; track item.label) {
+            <li class="nav__item" (pointerenter)="enter($event, item.label)" (pointerleave)="leave($event, item.label)">
+              @if (item.children) {
+                <button type="button" class="nav__link" aria-haspopup="true"
+                        [attr.aria-expanded]="open === item.label" (click)="toggle(item.label)">
+                  {{ item.label }} <span class="caret" aria-hidden="true"></span>
+                </button>
+                @if (open === item.label) {
+                  <ul class="sub">
+                    @for (c of item.children; track c.path) {
+                      <li><a [routerLink]="c.path" routerLinkActive="is-active" (click)="closeAll()">{{ c.label }}</a></li>
+                    }
+                  </ul>
+                }
+              } @else {
+                <a class="nav__link" [routerLink]="item.path" routerLinkActive="is-active"
+                   [routerLinkActiveOptions]="{ exact: true }" (click)="closeAll()">{{ item.label }}</a>
+              }
+            </li>
+          }
+        </ul>
+      </nav>
+
+      <div class="actions">
+        <a class="hbtn hbtn--outline" routerLink="/login" (click)="closeAll()">Đăng nhập</a>
+        <a class="hbtn hbtn--gold" routerLink="/register" (click)="closeAll()">Đăng ký</a>
+      </div>
+    </div>
+  </div>
+</header>

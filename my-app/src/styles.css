@@ -1,1 +1,30 @@
-/* You can add global styles to this file, and also import other style files */
+/* Design tokens KÉN – lấy từ Figma (PTWKDNC-KÉN) */
+:root {
+  --ken-font: 'Inter', system-ui, sans-serif;
+  --ken-heading: 'Lora', Georgia, serif;
+  --ken-script: 'Lavishly Yours', cursive;
+
+  --ken-page: #F7EFE2;       /* Quarter Spanish White */
+  --ken-cream: #F7EFE2;
+  --ken-gold-light: #E6D3B5; /* Double Spanish White */
+  --ken-gold: #E3A52F;
+  --ken-gold-accent: #E3A52F;
+  --ken-gold-dark: #A9763F;  /* Cape Palliser */
+  --ken-brown: #4A3123;      /* Saddle */
+  --ken-muted: #7A6553;
+  --ken-paper: #FFFCF7;
+  --ken-border: rgba(216, 199, 178, 0.62);
+  --ken-red: #995E4B;
+  --ken-green: #49634C;
+  --ken-green-light: #EDF2E9;
+  --ken-yellow-light: #F6ECD8;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--ken-page);
+  color: var(--ken-brown);
+  font-family: var(--ken-font);
+  -webkit-font-smoothing: antialiased;
+}
+button, input, select { font: inherit; }

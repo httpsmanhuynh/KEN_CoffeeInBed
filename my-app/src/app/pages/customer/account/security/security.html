@@ -1,0 +1,178 @@
+<section class="security-layout">
+    <!-- BREADCRUMB -->
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a routerLink="/">Trang chủ</a></li>
+        <li><span class="separator">/</span></li>
+        <li><a routerLink="/user-profile">Tài khoản của tôi</a></li>
+        <li><span class="separator">/</span></li>
+        <li class="active" aria-current="page">Mật khẩu & Bảo mật</li>
+      </ol>
+    </nav>
+  
+    <div class="security-container">
+      <!-- SIDEBAR -->
+      <app-account-sidebar active="account"></app-account-sidebar>
+  
+      <!-- MAIN CONTENT -->
+      <main class="content-area">
+        <!-- Header -->
+        <header class="content-header">
+          <span class="eyebrow">GÓC RIÊNG CỦA BẠN</span>
+          <h1 class="page-title">Mật khẩu & Bảo mật</h1>
+          <p class="page-desc">Góc riêng của bạn xứng đáng được an tâm. Cùng kiểm tra mật khẩu và các thiết bị nhé.</p>
+        </header>
+  
+        <!-- Sub Tabs -->
+        <nav class="sub-tabs">
+          <a routerLink="/user-profile" class="tab-item">Thông tin của bạn</a>
+          <a routerLink="/security" class="tab-item active">Mật khẩu & Bảo mật</a>
+        </nav>
+  
+        <!-- SECTION 1: ĐỔI MẬT KHẨU & MỘT NHẮC NHỎ -->
+        <div class="password-grid-wrapper">
+          <!-- Đổi mật khẩu Form -->
+          <div class="card password-card">
+            <div class="card-section-title">
+              <div class="lock-icon"></div>
+              <h2>Đổi mật khẩu</h2>
+            </div>
+  
+            <!-- Mật khẩu hiện tại -->
+            <div class="input-group">
+              <label>Mật khẩu hiện tại</label>
+              <div class="input-field">
+                <span class="masked-text">••••••••••••</span>
+                <div class="eye-icon"></div>
+              </div>
+            </div>
+  
+            <!-- Mật khẩu mới -->
+            <div class="input-group">
+              <label>Mật khẩu mới</label>
+              <div class="input-field active-outline">
+                <span class="placeholder-text">Nhập mật khẩu mới</span>
+                <div class="eye-icon"></div>
+              </div>
+            </div>
+  
+            <!-- Xác nhận mật khẩu mới -->
+            <div class="input-group">
+              <label>Xác nhận mật khẩu mới</label>
+              <div class="input-field">
+                <span class="placeholder-text">Nhập lại mật khẩu mới</span>
+                <div class="eye-icon"></div>
+              </div>
+            </div>
+  
+            <!-- Mã OTP qua SMS -->
+            <div class="input-group">
+              <label>Mã OTP qua SMS</label>
+              <div class="otp-row">
+                <div class="input-field flex-grow">
+                  <span class="placeholder-text">Nhập mã OTP 6 chữ số</span>
+                  <div class="sms-icon"></div>
+                </div>
+                <button type="button" class="btn-send-otp" (click)="onSendOtp()">Gửi mã</button>
+              </div>
+              <p class="input-hint">Gửi mã đến số điện thoại đã đăng ký. Chưa xác thực OTP thì chưa thể đổi mật khẩu.</p>
+            </div>
+  
+            <!-- Nút Xác nhận -->
+            <div class="submit-action-wrapper">
+              <button type="button" class="btn-disabled-custom" (click)="onSubmitPassword()">Xác nhận OTP & đổi mật khẩu</button>
+              <a href="#" class="forgot-pwd-link">Bạn quên mật khẩu hiện tại?</a>
+            </div>
+          </div>
+  
+          <!-- MỘT NHẮC NHỎ CARD -->
+          <div class="card reminder-card">
+            <span class="reminder-eyebrow">MỘT NHẮC NHỎ</span>
+            <h3 class="reminder-title">Một mật khẩu, chỉ dành cho KÉN</h3>
+            
+            <ul class="reminder-list">
+              <li>
+                <span class="bullet-dot"></span>
+                <span>Nên dùng ít nhất 12 ký tự, kết hợp chữ, số và ký hiệu.</span>
+              </li>
+              <li>
+                <span class="bullet-dot"></span>
+                <span>Tránh tên, ngày sinh hoặc mật khẩu đã dùng ở nơi khác.</span>
+              </li>
+              <li>
+                <span class="bullet-dot"></span>
+                <span>Không gửi mật khẩu, mã OTP qua tin nhắn hay cuộc gọi.</span>
+              </li>
+            </ul>
+            
+            <p class="reminder-footer">Đây là gợi ý bảo mật, không phải thông báo mật khẩu đã được thay đổi.</p>
+          </div>
+        </div>
+  
+        <!-- SECTION 2: XÁC THỰC HAI LỚP -->
+        <div class="card security-feature-card">
+          <div class="feature-row-space">
+            <div class="feature-info">
+              <div class="feature-title-row">
+                <h2>Xác thực hai lớp</h2>
+                <span class="badge badge-subtle">Chưa bật</span>
+              </div>
+              <p class="feature-desc-bold">Thêm một bước xác minh khi đăng nhập để bảo vệ tài khoản tốt hơn.</p>
+              <p class="feature-desc">Chưa thiết lập phương thức xác thực. Chọn "Thiết lập" để bắt đầu, tính năng vẫn đang tắt.</p>
+            </div>
+            <button type="button" class="btn-outline-custom" (click)="onSetup2FA()">Thiết lập</button>
+          </div>
+        </div>
+  
+        <!-- SECTION 3: THIẾT BỊ ĐANG ĐĂNG NHẬP -->
+        <div class="card security-feature-card">
+          <div class="feature-row-space">
+            <div class="feature-title-group">
+              <div class="devices-icon"></div>
+              <h2>Thiết bị đang đăng nhập</h2>
+            </div>
+            <span class="session-count">2 phiên hoạt động</span>
+          </div>
+  
+          <!-- Thiết bị 1 -->
+          <div class="device-item">
+            <div class="device-type-icon laptop-icon"></div>
+            <div class="device-details">
+              <h4>Chrome · macOS</h4>
+              <p>Máy tính · TP. Hồ Chí Minh · 23/10/2026, 10:42</p>
+            </div>
+            <span class="badge badge-success">Thiết bị này</span>
+          </div>
+  
+          <!-- Thiết bị 2 -->
+          <div class="device-item">
+            <div class="device-type-icon phone-icon"></div>
+            <div class="device-details">
+              <h4>Safari · iPhone</h4>
+              <p>Điện thoại · TP. Hồ Chí Minh · 22/10/2026, 20:15</p>
+            </div>
+            <button type="button" class="text-btn" (click)="onLogoutSession('Safari · iPhone')">Đăng xuất phiên</button>
+          </div>
+  
+          <div class="device-footer-row">
+            <p class="device-footer-hint">Không nhận ra thiết bị? Hãy đăng xuất phiên lạ và đổi mật khẩu.</p>
+            <button type="button" class="btn-outline-custom" (click)="onLogoutOtherDevices()">Đăng xuất các thiết bị khác</button>
+          </div>
+        </div>
+  
+        <!-- SECTION 4: XOÁ TÀI KHOẢN -->
+        <div class="card danger-card">
+          <div class="feature-row-space">
+            <div class="feature-info">
+              <h2 class="danger-title">Xoá tài khoản</h2>
+              <p class="danger-desc">Yêu cầu xoá có thể làm mất quyền truy cập lịch sử, Coins và quyền lợi thành viên. Hãy kiểm tra các đặt chỗ, yêu cầu đang xử lý trước khi tiếp tục.</p>
+            </div>
+            <button type="button" class="btn-outline-custom" (click)="onRequestDeleteAccount()">Yêu cầu xoá tài khoản</button>
+          </div>
+          <p class="danger-hint">Bạn sẽ cần xác minh danh tính và xác nhận riêng. Chưa có yêu cầu xoá nào được gửi.</p>
+        </div>
+  
+        <p class="global-hint">Giao diện trạng thái minh hoạ của đồ án KÉN; không thay đổi mật khẩu, phiên đăng nhập hay tài khoản thật.</p>
+      </main>
+    </div>
+  </section>

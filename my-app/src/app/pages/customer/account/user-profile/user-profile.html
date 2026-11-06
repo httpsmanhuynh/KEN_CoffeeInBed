@@ -1,0 +1,142 @@
+<section class="profile-layout">
+    <!-- BREADCRUMB -->
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a routerLink="/">Trang chủ</a></li>
+        <li><span class="separator">/</span></li>
+        <li><a routerLink="/user-profile">Tài khoản của tôi</a></li>
+        <li><span class="separator">/</span></li>
+        <li class="active" aria-current="page">Thông tin tài khoản</li>
+      </ol>
+    </nav>
+  
+    <div class="profile-container">
+      <!-- SIDEBAR -->
+      <app-account-sidebar active="account"></app-account-sidebar>
+  
+      <!-- MAIN CONTENT -->
+      <main class="content-area">
+        <!-- Header -->
+        <header class="content-header">
+          <span class="eyebrow">GÓC RIÊNG CỦA BẠN</span>
+          <h1 class="page-title">Thông tin của bạn</h1>
+          <p class="page-desc">Để KÉN biết cách gọi bạn và gửi những lời nhắn đúng nơi.</p>
+        </header>
+  
+        <!-- Sub Tabs -->
+        <nav class="sub-tabs">
+          <a routerLink="/user-profile" class="tab-item active">Thông tin của bạn</a>
+          <a routerLink="/security" class="tab-item">Mật khẩu & Bảo mật</a>
+        </nav>
+  
+        <!-- Grid Layout for Forms and Cards -->
+        <div class="form-grid-wrapper">
+          <!-- FORM COLUMN -->
+          <div class="form-column">
+            <div class="card main-form-card">
+              
+              <!-- Avatar Upload Section -->
+              <div class="avatar-upload-row">
+                <div class="avatar-large"></div>
+                <div class="avatar-info">
+                  <h3>Ảnh đại diện của bạn</h3>
+                  <p>JPG, PNG · Dung lượng tối đa 5 MB</p>
+                  <a href="#" class="link-action">Thay ảnh đại diện ↗</a>
+                </div>
+              </div>
+  
+              <div class="divider"></div>
+  
+              <!-- Họ và tên -->
+              <div class="input-group">
+                <label>Họ và tên</label>
+                <div class="input-field">
+                  <span>{{ user.name }}</span>
+                </div>
+              </div>
+  
+              <!-- Email & Phone Row -->
+              <div class="input-row-double">
+                <div class="input-group">
+                  <label>Email</label>
+                  <div class="input-field">
+                    <span>{{ user.email }}</span>
+                  </div>
+                </div>
+                <div class="input-group">
+                  <label>Số điện thoại</label>
+                  <div class="input-field">
+                    <span>{{ user.phone }}</span>
+                  </div>
+                  <div class="badge-verified-wrapper">
+                    <span class="badge badge-success">Đã xác minh</span>
+                  </div>
+                </div>
+              </div>
+  
+              <!-- Giới tính & Ngày sinh -->
+              <div class="input-row-double">
+                <div class="input-group">
+                  <label>Giới tính</label>
+                  <div class="input-field select-field">
+                    <span>{{ user.gender }}</span>
+                    <span class="dropdown-arrow"></span>
+                  </div>
+                </div>
+                <div class="input-group">
+                  <label>Ngày sinh (không bắt buộc)</label>
+                  <div class="input-field select-field">
+                    <span>{{ user.birthday }}</span>
+                    <span class="calendar-icon"></span>
+                  </div>
+                </div>
+              </div>
+  
+              <!-- Thành phố -->
+              <div class="input-group">
+                <label>Thành phố</label>
+                <div class="input-field select-field">
+                  <span>{{ user.city }}</span>
+                  <span class="dropdown-arrow"></span>
+                </div>
+              </div>
+  
+              <p class="form-hint">Ngày sinh là thông tin tùy chọn. Số điện thoại được che để bảo vệ riêng tư.</p>
+  
+              <div class="divider"></div>
+  
+              <!-- Action Buttons -->
+              <div class="form-actions">
+                <button type="button" class="btn-primary" (click)="onUpdate()">Cập nhật</button>
+                <button type="button" class="btn-outline" (click)="onCancel()">Huỷ chỉnh sửa</button>
+              </div>
+            </div>
+  
+            <p class="footer-hint">Thay đổi email hoặc số điện thoại sẽ cần xác minh lại trước khi dùng làm thông tin liên hệ.</p>
+          </div>
+  
+          <!-- SIDE CARDS COLUMN -->
+          <div class="side-column">
+            <!-- Member Tier Card -->
+            <div class="card tier-card">
+              <span class="tier-eyebrow">BẠN VÀ KÉN</span>
+              <h2 class="tier-title">Thân quen từng chút</h2>
+              <div class="badge rank-silver">Hạng Bạc</div>
+              <div class="tier-points">{{ user.points }} KÉN Điểm</div>
+              <p class="tier-desc">Ưu đãi hiện tại: {{ user.discount }}. Coins đổi thưởng được quản lý độc lập.</p>
+              <div class="divider-light"></div>
+              <a routerLink="/points-tier" class="link-action-dark">Xem quyền lợi thành viên →</a>
+            </div>
+  
+            <!-- Privacy Protection Card -->
+            <div class="card privacy-card">
+              <div class="shield-icon"></div>
+              <h3 class="privacy-title">Thông tin của bạn, được giữ riêng</h3>
+              <p class="privacy-desc">KÉN dùng thông tin để hỗ trợ đặt chỗ và liên hệ về tài khoản. Không chia sẻ mật khẩu hoặc mã xác minh với bất kỳ ai.</p>
+              <a href="/policy" class="link-action">Chính sách bảo mật ↗</a>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </section>

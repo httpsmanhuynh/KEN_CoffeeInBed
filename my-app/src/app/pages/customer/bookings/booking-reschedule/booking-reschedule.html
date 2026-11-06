@@ -1,0 +1,319 @@
+<section class="booking-layout">
+
+    <!-- BREADCRUMB -->
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a routerLink="/">Trang chủ</a></li>
+        <li class="separator">/</li>
+        <li><a routerLink="/user-profile">Tài khoản của tôi</a></li>
+        <li class="separator">/</li>
+        <li class="active" aria-current="page">Đổi / Huỷ lịch</li>
+      </ol>
+    </nav>
+  
+    <div class="booking-container">
+  
+      <!-- SIDEBAR -->
+      <app-account-sidebar active="reschedule"></app-account-sidebar>
+  
+      <!-- MAIN CONTENT -->
+      <main class="content-area">
+  
+        <!-- PAGE HEADER -->
+        <header class="content-header">
+          <span class="eyebrow">GÓC RIÊNG CỦA BẠN</span>
+          <h1 class="page-title">Đổi / Huỷ lịch</h1>
+          <p class="page-desc">
+            Kế hoạch thay đổi một chút? KÉN cùng bạn sắp xếp lại khoảng riêng.
+          </p>
+        </header>
+  
+        <!-- TABS -->
+        <div class="tabs-container">
+          <button type="button" class="tab active">Đổi lịch</button>
+          <button type="button" class="tab">Huỷ lịch</button>
+        </div>
+  
+        <!-- RESCHEDULE GRID -->
+        <div class="reschedule-grid">
+  
+          <!-- 1. CHỌN ĐƠN -->
+          <section class="card booking-select-card">
+  
+            <div class="card-head">
+              <h2>Chọn đơn muốn đổi lịch</h2>
+              <p>Chỉ hiển thị đơn tương lai có thể gửi yêu cầu.</p>
+            </div>
+  
+            <div class="booking-options">
+  
+              <div class="booking-item active">
+                <div class="radio-icon">
+                  <span>✓</span>
+                </div>
+  
+                <div class="item-info">
+                  <strong>Ô tập trung cá nhân (Focus Pod)</strong>
+                  <span>#KEN-241026-006 · 24/10/2026 · 09:00–13:00</span>
+                </div>
+  
+                <span class="badge badge-confirmed">Đã xác nhận</span>
+              </div>
+  
+              <div class="booking-item">
+                <div class="radio-icon"></div>
+  
+                <div class="item-info">
+                  <strong>KÉN nghỉ đơn</strong>
+                  <span>#KEN-261026-009 · 26/10/2026 · 13:00–15:00</span>
+                </div>
+  
+                <span class="badge badge-pending">Chờ xác nhận</span>
+              </div>
+  
+              <div class="booking-item">
+                <div class="radio-icon"></div>
+  
+                <div class="item-info">
+                  <strong>Phòng họp nhỏ</strong>
+                  <span>#KEN-251026-024 · 25/10/2026 · 14:00–17:00</span>
+                </div>
+  
+                <span class="badge badge-pending">Chờ xác nhận</span>
+              </div>
+  
+            </div>
+          </section>
+  
+          <!-- 2. LỊCH HIỆN TẠI -->
+          <section class="card current-card">
+  
+            <div class="current-header">
+              <h2>Lịch hiện tại</h2>
+              <span class="badge badge-confirmed">Đã xác nhận</span>
+            </div>
+  
+            <div class="current-space-info">
+              <strong>Ô tập trung cá nhân</strong>
+              <span>#KEN-241026-006 · Focus Pod</span>
+            </div>
+  
+            <div class="divider"></div>
+  
+            <div class="detail-list">
+  
+              <div class="detail-row">
+                <svg viewBox="0 0 24 24" width="16" height="16"
+                     fill="none" stroke="currentColor" stroke-width="1.7">
+                  <rect x="3" y="5" width="18" height="16" rx="2"/>
+                  <path d="M16 3v4M8 3v4M3 10h18"/>
+                </svg>
+                <span class="label">Ngày sử dụng</span>
+                <strong class="value">24/10/2026</strong>
+              </div>
+  
+              <div class="detail-row">
+                <svg viewBox="0 0 24 24" width="16" height="16"
+                     fill="none" stroke="currentColor" stroke-width="1.7">
+                  <circle cx="12" cy="12" r="9"/>
+                  <path d="M12 7v5l3 2"/>
+                </svg>
+                <span class="label">Khung giờ</span>
+                <strong class="value">09:00–13:00</strong>
+              </div>
+  
+              <div class="detail-row">
+                <svg viewBox="0 0 24 24" width="16" height="16"
+                     fill="none" stroke="currentColor" stroke-width="1.7">
+                  <circle cx="9" cy="8" r="3"/>
+                  <path d="M3 20v-2a6 6 0 0 1 12 0v2"/>
+                  <path d="M16 5a3 3 0 0 1 0 6m2 3a5 5 0 0 1 3 5v1"/>
+                </svg>
+                <span class="label">Thời lượng · Số khách</span>
+                <strong class="value">4 giờ · 01 khách</strong>
+              </div>
+  
+            </div>
+  
+            <div class="divider"></div>
+  
+            <div class="total-row">
+              <span class="label">Tổng tiền đơn</span>
+              <strong class="value">140.000đ</strong>
+            </div>
+  
+          </section>
+  
+          <!-- 3. FORM LỊCH MỚI -->
+          <section class="card form-card">
+  
+            <h2>Lịch mới</h2>
+  
+            <div class="form-row-2">
+  
+              <div class="form-group">
+                <label>Ngày mong muốn</label>
+  
+                <div class="input-display">
+                  <span>25/10/2026</span>
+                  <svg viewBox="0 0 24 24" width="17" height="17"
+                       fill="none" stroke="currentColor" stroke-width="1.7">
+                    <rect x="3" y="5" width="18" height="16" rx="2"/>
+                    <path d="M16 3v4M8 3v4M3 10h18"/>
+                  </svg>
+                </div>
+              </div>
+  
+              <div class="form-group">
+                <label>Thời lượng</label>
+  
+                <div class="input-display">
+                  <span>4 giờ · Giữ gói hiện tại</span>
+                  <svg viewBox="0 0 24 24" width="16" height="16"
+                       fill="none" stroke="currentColor" stroke-width="1.7">
+                    <path d="m7 10 5 5 5-5"/>
+                  </svg>
+                </div>
+              </div>
+  
+            </div>
+  
+            <div class="form-group">
+              <label>Giờ bắt đầu</label>
+  
+              <div class="time-pills">
+                <button type="button" class="pill">08:00</button>
+                <button type="button" class="pill active">09:00</button>
+                <button type="button" class="pill">14:00</button>
+              </div>
+  
+              <p class="helper-text">
+                Giờ kết thúc: 09:00 + 4 giờ = 13:00.
+                Lịch trống được KÉN kiểm tra khi tiếp nhận yêu cầu.
+              </p>
+            </div>
+  
+            <div class="form-group">
+              <label>Ghi chú (không bắt buộc)</label>
+  
+              <div class="input-display textarea-like">
+                Mình muốn dời sang Chủ nhật, giữ nguyên gói 4 giờ và 01 khách.
+              </div>
+            </div>
+  
+            <div class="checkbox-group">
+              <input type="checkbox" checked id="agree">
+              <label for="agree">
+                Tôi đã đọc điều kiện đặt chỗ và hiểu đây là yêu cầu đổi lịch.
+              </label>
+            </div>
+  
+          </section>
+  
+          <!-- CỘT PHẢI - PHẦN DƯỚI -->
+          <div class="right-stack">
+  
+            <!-- 4. LỊCH MỚI ĐỀ XUẤT -->
+            <section class="card proposed-card">
+  
+              <span class="card-eyebrow">LỊCH MỚI ĐỀ XUẤT</span>
+  
+              <h3 class="highlight-date">Chủ nhật, 25/10</h3>
+  
+              <div class="detail-list small-gap">
+  
+                <div class="detail-row">
+                  <svg viewBox="0 0 24 24" width="16" height="16"
+                       fill="none" stroke="currentColor" stroke-width="1.7">
+                    <rect x="3" y="5" width="18" height="16" rx="2"/>
+                    <path d="M16 3v4M8 3v4M3 10h18"/>
+                  </svg>
+                  <span class="label">Ngày bắt đầu</span>
+                  <strong class="value">25/10/2026</strong>
+                </div>
+  
+                <div class="detail-row">
+                  <svg viewBox="0 0 24 24" width="16" height="16"
+                       fill="none" stroke="currentColor" stroke-width="1.7">
+                    <circle cx="12" cy="12" r="9"/>
+                    <path d="M12 7v5l3 2"/>
+                  </svg>
+                  <span class="label">Giờ bắt đầu</span>
+                  <strong class="value">09:00</strong>
+                </div>
+  
+                <div class="detail-row">
+                  <svg viewBox="0 0 24 24" width="16" height="16"
+                       fill="none" stroke="currentColor" stroke-width="1.7">
+                    <circle cx="12" cy="12" r="9"/>
+                    <path d="M12 7v5l3 2"/>
+                  </svg>
+                  <span class="label">Giờ kết thúc</span>
+                  <strong class="value">13:00</strong>
+                </div>
+  
+              </div>
+  
+              <div class="divider dark"></div>
+  
+              <div class="total-row">
+                <span class="label">Chênh lệch</span>
+                <strong class="value">Chờ đối chiếu</strong>
+              </div>
+  
+              <p class="helper-text-dark">
+                Lịch hiện tại vẫn có hiệu lực đến khi đổi được xác nhận.
+              </p>
+  
+            </section>
+  
+            <!-- 5. KIỂM TRA CHỖ -->
+            <section class="card status-submit-card">
+  
+              <h2>Còn chỗ?</h2>
+  
+              <div class="status-box">
+                <span class="status-icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16"
+                       fill="currentColor">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                  </svg>
+                </span>
+  
+                <span class="status-text">25/10/2026 · 09:00–13:00</span>
+  
+                <span class="badge badge-confirmed">Còn chỗ</span>
+              </div>
+  
+              <p class="helper-text">
+                KÉN đã kiểm tra lịch trống. Đảm bảo gửi yêu cầu trước cut-off
+                time theo chính sách đặt chỗ.
+              </p>
+  
+              <div class="action-buttons">
+                <button type="button" class="btn btn-secondary">
+                  Kiểm tra chỗ lại
+                </button>
+  
+                <button type="button" class="btn btn-primary">
+                  Xác nhận đổi →
+                </button>
+              </div>
+  
+              <p class="helper-text">
+                Đổi thành công, đơn vẫn giữ trạng thái Đã xác nhận.
+              </p>
+  
+            </section>
+  
+            <!-- 6. GIỮ LỊCH HIỆN TẠI -->
+            <button type="button" class="btn-ghost-full">
+              Giữ lịch hiện tại
+            </button>
+  
+          </div>
+  
+        </div>
+      </main>
+    </div>
+  </section>

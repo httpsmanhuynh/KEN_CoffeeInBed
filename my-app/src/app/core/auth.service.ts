@@ -42,4 +42,22 @@ export class AuthService {
   resendOtp(phone: string): Observable<unknown> {
     return this.http.post(`${this.base}/resend-otp`, { phone }, { withCredentials: true });
   }
+
+  // ───────── Quên mật khẩu (3 bước: SĐT → OTP → mật khẩu mới) ─────────
+  // TODO: xác nhận đường dẫn + tên trường với backend (đang giả định bên dưới).
+
+  /** Bước 1 – gửi OTP. Cũng dùng để gửi lại OTP. 200 = đã gửi · 404 = SĐT chưa đăng ký · 422 = sai định dạng · 429 = quá hạn mức */
+  forgotPassword(phone: string): Observable<unknown> {
+    return this.http.post(`${this.base}/forgot-password`, { phone }, { withCredentials: true });
+  }
+
+  /** Bước 2 – xác minh OTP, trả về resetToken dùng 1 lần. 422 = sai/hết hạn · 429 = nhập sai quá 5 lần */
+  verifyResetOtp(body: { phone: string; code: string }): Observable<{ resetToken?: string }> {
+    return this.http.post<{ resetToken?: string }>(`${this.base}/forgot-password/verify-otp`, body, { withCredentials: true });
+  }
+
+  /** Bước 3 – đặt mật khẩu mới. 200 = ok · 401/410 = token hết hạn · 422 = mật khẩu không hợp lệ */
+  resetPassword(body: { phone: string; resetToken: string; newPassword: string }): Observable<unknown> {
+    return this.http.post(`${this.base}/reset-password`, body, { withCredentials: true });
+  }
 }

@@ -1,0 +1,24 @@
+<main class="member-page">
+  <div class="crumb"><a routerLink="/">Trang chủ</a> <span>/</span> Tài khoản của tôi <span>/</span> Điểm & Hạng thành viên</div>
+  <div class="member-layout">
+    <app-account-sidebar active="points"></app-account-sidebar>
+    <section class="content">
+      <div class="intro"><span>GÓC RIÊNG CỦA BẠN</span><h1>Điểm & Hạng thành viên</h1><p>Mừng bạn ghé lại. Cùng KÉN nhìn xem mình đã thân quen đến đâu nhé.</p></div>
+      <div class="summary-grid">
+        <article class="summary points"><div class="eyebrow">KÉN ĐIỂM <span>✧</span></div><strong>3.250</strong><p>KÉN Điểm xét hạng</p><div class="progress-meta"><span>3.250 / 5.000 điểm → Vàng</span><b>65%</b></div><div class="progress"><i></i></div></article>
+        <article class="summary coins"><div class="eyebrow">KÉN COINS <span>♧</span></div><strong>650</strong><p>Coins có thể đổi voucher</p><div class="summary-link"><span>Đổi Coins lấy voucher không trừ Điểm xét hạng.</span><a routerLink="/coins-rewards">Xem Voucher →</a></div></article>
+        <article class="summary tier"><div class="eyebrow">HẠNG THÀNH VIÊN <span>Hạng hiện tại</span></div><strong>Bạc</strong><div class="tier-divider"></div><b>Giảm 5% tổng hóa đơn</b><p>Hạng tiếp theo: Vàng · 5.000 điểm</p></article>
+      </div>
+      <div class="rules-grid"><article><b>MỖI LẦN GHÉ, THÊM GẮN BÓ</b><h2>10.000đ = 1 KÉN Điểm</h2><p>Điểm xét hạng tích trong chu kỳ 1 năm. Sang năm hạ 1 bậc, không thấp hơn Bạc.</p></article><article><b>HAI GIÁ TRỊ, HAI VAI TRÒ</b><h2>Đổi quà thoải mái, vẫn giữ điểm hạng</h2><p>Kim Cương → Vàng; Vàng → Bạc; Bạc giữ bậc thấp nhất. Đổi Coins không trừ điểm xét hạng.</p></article></div>
+      <div class="section-heading"><h2>Mỗi lần ghé, thêm một nấc thân quen</h2></div>
+      <div class="tiers"><article class="tier-card silver"><div class="tier-icon">♙ <small>Ban đang ở đây</small></div><h3>Bạc</h3><b>1.000 điểm</b><p>Giảm 5% tổng hóa đơn</p></article><article class="tier-card gold"><div class="tier-icon">♜ <small>MỐC TIẾP THEO</small></div><h3>Vàng</h3><b>5.000 điểm</b><p>Giảm 10% tổng hóa đơn</p></article><article class="tier-card diamond"><div class="tier-icon">◇ <small>MỐC TIẾP THEO</small></div><h3>Kim cương</h3><b>10.000 điểm</b><p>Giảm 15% tổng hóa đơn</p></article></div>
+      <section class="transactions"><div class="transaction-head"><h2>Lịch sử giao dịch</h2><div class="tools"><button (click)="filterOpen=!filterOpen">▣　{{selectedPeriod}}　⌄</button><button aria-label="Lọc giao dịch" (click)="filterOpen=!filterOpen">☷</button><button aria-label="Hiển thị dạng bảng">▦</button></div></div>
+        @if(filterOpen){<div class="filter"><label for="period">Khoảng thời gian</label><select id="period" [(ngModel)]="selectedPeriod"><option>Tất cả thời gian</option><option>30 ngày gần đây</option><option>90 ngày gần đây</option><option>Năm 2026</option></select><button (click)="filterOpen=false">Áp dụng</button></div>}
+        <div class="recent">Giao dịch gần đây <span>Điểm hiện tại: <b>3.250</b>　 Coins hiện tại: <b>650</b></span></div>
+        <div class="tx-table"><div class="tx-labels"><span>NGÀY</span><span>LOẠI GIAO DỊCH</span><span>ĐIỂM</span><span>COINS</span><span>GHI CHÚ</span></div>
+          @for (t of transactions; track t.date) {<div class="tx-row"><time>{{t.date}}</time><div class="tx-title"><b>{{t.title}}</b><small>{{t.sub}}</small></div><b class="gain">{{t.points}}</b><b [class.loss]="t.coins.startsWith('−')" class="gain">{{t.coins}}</b><small class="note">{{t.note}}</small></div>}
+        </div><p class="tx-foot">Số dư trước 18/10: 3.200 điểm. Các giao dịch trên thuộc dữ liệu minh họa của đồ án.</p>
+      </section>
+    </section>
+  </div>
+</main>

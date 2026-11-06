@@ -1,0 +1,68 @@
+:host { display: block; position: relative; z-index: 100; flex: 0 0 auto; }
+.hd {
+  width: 100%;
+  background: #F7EFE2;
+  border-bottom: 1px solid rgba(216, 199, 178, .62);
+}
+.hd__inner {
+  width: min(100% - 80px, 1280px);
+  min-height: 78px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(24px, 4vw, 64px);
+}
+.brand { display: inline-flex; align-items: center; gap: 11px; color: #4A3123; text-decoration: none; flex: 0 0 auto; }
+.brand__logo { width: 42px; height: 42px; display: block; object-fit: contain; border-radius: 50%; }
+.brand__text { display: flex; flex-direction: column; line-height: 1.05; }
+.brand__text b { font-size: 22px; letter-spacing: .04em; font-weight: 700; }
+.brand__text i { margin-top: 3px; color: #4A3123; font-family: var(--ken-script); font-size: 16px; font-style: normal; white-space: nowrap; }
+.panel { display: flex; align-items: center; justify-content: space-between; gap: 28px; flex: 1; min-width: 0; }
+.nav ul { display: flex; align-items: center; gap: clamp(18px, 2.8vw, 42px); list-style: none; padding: 0; margin: 0; }
+.nav__item { position: relative; }
+.nav__link {
+  display: inline-flex; align-items: center; gap: 7px; padding: 10px 0;
+  border: 0; background: transparent; color: #4A3123; text-decoration: none;
+  font-size: 14px; font-weight: 500; line-height: 21px; white-space: nowrap; cursor: pointer;
+  transition: color .18s ease;
+}
+.nav__link:hover, .nav__link.is-active { color: #A9763F; }
+.caret { width: 7px; height: 7px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg) translateY(-2px); }
+.sub {
+  position: absolute; top: calc(100% + 4px); left: -14px; z-index: 20;
+  display: flex !important; flex-direction: column; align-items: stretch !important; gap: 2px !important;
+  min-width: 190px; padding: 8px !important; border: 1px solid rgba(216,199,178,.8);
+  border-radius: 12px; background: #FFFCF7; box-shadow: 0 12px 28px rgba(53, 34, 24, .12);
+}
+.sub a { display: block; padding: 9px 11px; border-radius: 7px; color: #4A3123; font-size: 13px; text-decoration: none; white-space: nowrap; }
+.sub a:hover, .sub a.is-active { background: #F7EFE2; color: #9A672B; }
+.actions { display: flex; align-items: center; gap: 20px; flex: 0 0 auto; }
+.hbtn { display: inline-flex; justify-content: center; align-items: center; min-height: 39px; padding: 0 20px; border: 1px solid transparent; border-radius: 999px; text-decoration: none; font-size: 14px; font-weight: 600; line-height: 21px; white-space: nowrap; transition: .18s ease; }
+.hbtn--outline { border-color: rgba(169, 118, 63, .45); color: #4A3123; background: #FFFCF7; }
+.hbtn--outline:hover { border-color: #E3A52F; background: #fff8ec; }
+.hbtn--gold { border-color: #E3A52F; background: #E3A52F; color: #4A3123; }
+.hbtn--gold:hover { background: #edb64b; border-color: #edb64b; }
+.burger { display: none; width: 42px; height: 42px; border: 1px solid rgba(216,199,178,.8); border-radius: 10px; background: #FFFCF7; color: #4A3123; cursor: pointer; }
+@media (max-width: 1100px) {
+  .hd__inner { width: min(100% - 48px, 1280px); gap: 22px; }
+  .panel { gap: 20px; }
+  .nav ul { gap: 18px; }
+  .actions { gap: 10px; }
+  .hbtn { padding-inline: 16px; }
+}
+@media (max-width: 820px) {
+  .hd__inner { width: calc(100% - 36px); min-height: 70px; }
+  .brand__logo { width: 40px; height: 40px; }
+  .brand__text b { font-size: 21px; }
+  .brand__text i { font-size: 15px; }
+  .burger { display: inline-grid; place-items: center; margin-left: auto; }
+  .panel { display: none; position: absolute; top: 100%; left: 0; right: 0; padding: 14px 20px 20px; background: #F7EFE2; border-bottom: 1px solid rgba(216,199,178,.8); box-shadow: 0 12px 20px rgba(53,34,24,.1); }
+  .panel.is-open { display: flex; flex-direction: column; align-items: stretch; gap: 14px; }
+  .nav ul { display: flex; flex-direction: column; align-items: stretch; gap: 2px; }
+  .nav__item { width: 100%; }
+  .nav__link { display: flex; justify-content: space-between; width: 100%; padding: 11px 4px; font-size: 14px; }
+  .sub { position: static; min-width: 0; margin: 0 0 8px 10px; box-shadow: none; }
+  .actions { width: 100%; }
+  .hbtn { flex: 1; }
+}

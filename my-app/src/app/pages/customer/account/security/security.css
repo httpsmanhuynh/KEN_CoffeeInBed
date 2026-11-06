@@ -1,0 +1,284 @@
+:host {
+    display: block;
+    min-height: 100vh;
+    font-family: 'Inter', sans-serif;
+    color: #4A3123;
+    background: #F7EFE2;
+  
+    --ken-brown: #4A3123;
+    --ken-cream-bg: #F7EFE2;
+    --ken-gold-light: #E6D3B5;
+    --ken-gold-dark: #A9763F;
+    --ken-white-card: #FFFCF7;
+    --ken-muted: #8A7562;
+    --reminder-bg: #F1E2CA;
+    --danger-bg: #F8EEE8;
+    --placeholder-color: #C0A080;
+  }
+  
+  * {
+    box-sizing: border-box;
+  }
+  
+  .security-layout {
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 26px 52px 48px;
+  }
+  
+  .security-container {
+    display: grid;
+    grid-template-columns: 235px minmax(0, 1fr);
+    gap: 38px;
+    align-items: start;
+  }
+  
+  .sidebar {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .content-area {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .password-grid-wrapper {
+    display: grid;
+    grid-template-columns: minmax(0, 1.85fr) minmax(210px, 1fr);
+    gap: 16px;
+    align-items: start;
+  }
+  
+  .card {
+    background: #FFFCF7;
+    border: 1px solid rgba(216, 199, 178, 0.65);
+    border-radius: 17px;
+    padding: 20px;
+    box-shadow: 0 7px 22px rgba(74, 49, 35, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .password-card {
+    min-width: 0;
+  }
+  
+  .reminder-card {
+    min-width: 0;
+    background: #F1E2CA;
+    border: none;
+    border-radius: 16px;
+    padding: 20px 18px;
+    gap: 13px;
+    box-shadow: none;
+  }
+  
+  .reminder-eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: #765A40;
+  }
+  
+  .reminder-title {
+    font-family: 'Lora', serif;
+    font-size: 21px;
+    font-weight: 400;
+    line-height: 1.35;
+    color: #4A3123;
+  }
+  
+  .reminder-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+  }
+  
+  .reminder-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    font-size: 11px;
+    line-height: 1.55;
+    color: #6F5844;
+  }
+  
+  .bullet-dot {
+    width: 5px;
+    height: 5px;
+    margin-top: 5px;
+    border-radius: 50%;
+    background: #A9763F;
+    flex-shrink: 0;
+  }
+  
+  .reminder-footer {
+    font-size: 10px;
+    line-height: 1.6;
+    color: #765F4A;
+  }
+  .security-feature-card {
+    background: #FFFCF7;
+    border: 1px solid rgba(216, 199, 178, 0.65);
+    border-radius: 17px;
+    padding: 20px;
+    box-shadow: 0 7px 22px rgba(74, 49, 35, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  
+  .feature-title-row h2,
+  .feature-title-group h2,
+  .card-section-title h2 {
+    font-family: 'Lora', serif;
+    font-size: 19px;
+    font-weight: 400;
+    color: #4A3123;
+  }
+  
+  .feature-desc-bold {
+    font-size: 12px;
+    color: #806B58;
+    line-height: 1.5;
+  }
+  
+  .feature-desc {
+    font-size: 10px;
+    color: #9A8571;
+    line-height: 1.5;
+  }
+  
+  .btn-outline-custom {
+    min-height: 38px;
+    padding: 0 17px;
+    background: transparent;
+    color: #4A3123;
+    border: 1px solid #E6D3B5;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  
+  .btn-outline-custom:hover {
+    background: #F7EFE2;
+    border-color: #A9763F;
+  }
+  
+  .danger-card {
+    background: #F8EEE8;
+    border: 1px solid #EAD9C9;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: none;
+  }
+  .card-section-title h2 {
+    font-size: 19px;
+  }
+  
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .input-group label {
+    font-size: 11px;
+    font-weight: 600;
+  }
+  
+  .input-field {
+    min-height: 39px;
+    padding: 0 11px;
+    border: 1px solid #E8DCCB;
+    border-radius: 10px;
+    background: #FFFCF7;
+    font-size: 12px;
+  }
+  
+  .otp-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  
+  .btn-send-otp {
+    min-height: 39px;
+    padding: 0 15px;
+    border-radius: 999px;
+    background: #E6A52B;
+    color: #4A3123;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  
+  .input-hint {
+    font-size: 10px;
+    line-height: 1.5;
+  }
+  
+  .btn-disabled-custom {
+    width: 100%;
+    min-height: 37px;
+    padding: 0 15px;
+    border-radius: 999px;
+    background: #EEEAE4;
+    border: 1px solid #E5D9CA;
+    font-size: 11px;
+  }
+  
+  .forgot-pwd-link {
+    align-self: flex-end;
+    font-size: 11px;
+  }
+  @media (max-width: 1000px) {
+    .security-layout {
+      padding: 24px 28px 40px;
+    }
+  
+    .security-container {
+      grid-template-columns: 190px minmax(0, 1fr);
+      gap: 24px;
+    }
+  
+    .password-grid-wrapper {
+      grid-template-columns: minmax(0, 1.6fr) minmax(180px, 1fr);
+    }
+  }
+  
+  @media (max-width: 760px) {
+    .security-layout {
+      padding: 20px 16px 32px;
+    }
+  
+    .security-container {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+  
+    .password-grid-wrapper {
+      grid-template-columns: 1fr;
+    }
+  
+    .sidebar {
+      display: none;
+    }
+  
+    .feature-row-space,
+    .device-footer-row {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 12px;
+    }
+  }
