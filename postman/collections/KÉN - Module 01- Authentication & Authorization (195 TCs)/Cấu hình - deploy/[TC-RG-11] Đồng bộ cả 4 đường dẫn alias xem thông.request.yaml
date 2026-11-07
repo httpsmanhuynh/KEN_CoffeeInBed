@@ -1,0 +1,24 @@
+$kind: http-request
+name: "[TC-RG-11] Đồng bộ cả 4 đường dẫn alias xem thông tin phiên hiện tại"
+description: |-
+  **Mã TC:** TC-RG-11
+  **Loại:** Positive
+  **Nhóm:** Cấu hình / deploy
+  **Tiền điều kiện:** User đã đăng nhập.
+  **Các bước:** 1) Lần lượt gọi GET /api/me, GET /api/profile, GET /api/auth/me, GET /api/auth/profile
+  **Kết quả mong đợi:** Cả 4 endpoint đều trả 200 OK với cùng cấu trúc dữ liệu publicUser.
+  **Nhánh code:** GLB-B07; ME2-B03
+  **Ghi chú:** Tham chiếu RG-11 (BR-A05)
+url: "{{baseUrl}}/api/me"
+method: GET
+headers:
+  Content-Type: application/json
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-RG-11] Đồng bộ cả 4 đường dẫn alias xem thông tin phiên hiện tại
+      pm.test("[TC-RG-11] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 5000

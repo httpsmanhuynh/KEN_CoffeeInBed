@@ -1,0 +1,32 @@
+$kind: http-request
+name: "[TC-RL-10] Bộ đếm chung sensitiveLimiter của 4 route thao tác nhạy cảm"
+description: |-
+  **Mã TC:** TC-RL-10
+  **Loại:** Negative
+  **Nhóm:** Rate limit
+  **Tiền điều kiện:** User đã đăng nhập, server mới khởi động.
+  **Các bước:** 1) Gọi trộn 10 request gồm POST /me/password, POST /me/2fa, POST /me/phone, PATCH /me (có email) với currentPassword sai
+  2) Gọi thêm 1 request thứ 11 ở bất kỳ route nào trong 4 route trên
+  **Kết quả mong đợi:** 10 request đầu trả 422 INVALID_CURRENT_PASSWORD (không bị 429); request thứ 11 trả 429 TOO_MANY_REQUESTS dù gọi ở route nào (4 route dùng chung sensitiveLimiter theo user).
+  **Nhánh code:** RL2-B06
+  **Ghi chú:** Tham chiếu RL-10 (BR-A08)
+url: "{{baseUrl}}/me/password"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: '{"currentPassword": "sai", ...}'
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-RL-10] Bộ đếm chung sensitiveLimiter của 4 route thao tác nhạy cảm
+      pm.test("[TC-RL-10] Status code is 429", function () {
+          pm.expect(pm.response.code).to.be.oneOf([429]);
+      });
+      pm.test("[TC-RL-10] Response contains expected code or keyword: INVALID_CURRENT_PASSWORD", function () {
+          var resText = pm.response.text();
+          pm.expect(resText).to.include("INVALID_CURRENT_PASSWORD");
+      });
+    language: text/javascript
+order: 12000

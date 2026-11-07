@@ -1,0 +1,27 @@
+$kind: http-request
+name: "[TC-DB-04] Validator users: status ngoài enum"
+description: |-
+  **Mã TC:** TC-DB-04
+  **Loại:** Negative
+  **Nhóm:** Ràng buộc CSDL
+  **Tiền điều kiện:** Server chạy; đã chạy npm run setup (có membership_tiers, otp_codes, users trên Atlas).
+  **Các bước:** 1) Chèn/cập nhật status không hợp lệ
+  **Kết quả mong đợi:** Lỗi 121 Document failed validation
+  **Nhánh code:** DB-B03
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/test"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: status='BLOCKED'
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-DB-04] Validator users: status ngoài enum
+      pm.test("[TC-DB-04] Status code is —", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 4000

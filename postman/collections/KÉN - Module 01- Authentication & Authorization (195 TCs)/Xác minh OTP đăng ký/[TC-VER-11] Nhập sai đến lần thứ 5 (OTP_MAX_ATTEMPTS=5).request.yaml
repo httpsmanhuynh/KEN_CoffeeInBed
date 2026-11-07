@@ -1,0 +1,35 @@
+$kind: http-request
+description: |-
+  **Mã TC:** TC-VER-11
+  **Loại:** Negative
+  **Nhóm:** Xác minh OTP đăng ký
+  **Tiền điều kiện:** Đã gọi register với SĐT 0909123456 và lấy OTP từ terminal ([SMS mock]).
+  **Các bước:** 1) Gọi verify-otp với code sai 5 lần liên tiếp
+  2) Quan sát phản hồi lần 1-4 và lần 5
+  **Kết quả mong đợi:** Lần 1-4: 422 OTP_INVALID. Lần 5: 429 {code:'OTP_TOO_MANY_ATTEMPTS'}; attempt_count=5
+  **Nhánh code:** VER-B04; OTP-B12; OTP-B13
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/verify-otp"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "phone": "0909123456",
+      "code": "000000"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-VER-11] Nhập sai đến lần thứ 5 (OTP_MAX_ATTEMPTS=5)
+      pm.test("[TC-VER-11] Status code is 429", function () {
+          pm.expect(pm.response.code).to.be.oneOf([429]);
+      });
+      pm.test("[TC-VER-11] Response contains expected code or keyword: OTP_TOO_MANY_ATTEMPTS", function () {
+          var resText = pm.response.text();
+          pm.expect(resText).to.include("OTP_TOO_MANY_ATTEMPTS");
+      });
+    language: text/javascript
+order: 11000

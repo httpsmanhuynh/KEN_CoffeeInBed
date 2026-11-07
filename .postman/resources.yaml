@@ -2,6 +2,8 @@
 workspace:
   id: ffa1aed1-c66a-4054-8943-e30e42a0de54
 
+# Each entry here maps a local resource to one or more corresponding objects in Postman Cloud
+
 cloudResources:
   collections:
     ../postman/collections/KÉN - Module 01- Authentication & Authorization (195 TCs): 8b2c434a-7046-49bd-b639-431121a0917f

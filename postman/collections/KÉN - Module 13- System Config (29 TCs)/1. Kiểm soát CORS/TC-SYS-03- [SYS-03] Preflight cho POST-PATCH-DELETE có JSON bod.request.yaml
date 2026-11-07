@@ -1,0 +1,32 @@
+$kind: http-request
+name: "TC-SYS-03: [SYS-03] Preflight cho POST/PATCH/DELETE có JSON body (Branch: SYS-B03)"
+description: |-
+  **Mã TC:** SYS-03 (TC-SYS-03)
+  **Nhóm:** CORS
+  **API / Thành phần:** OPTIONS (preflight)
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.
+  **Dữ liệu vào:** OPTIONS kèm Access-Control-Request-Method
+  **Các bước thực hiện:**
+  1) Gửi OPTIONS /api/bookings
+  **Kết quả mong đợi:** 204 kèm Allow-Methods/Allow-Headers đúng (HTTP: 204)
+  **Nhánh code bao phủ:** SYS-B03
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/bookings"
+method: OPTIONS
+headers:
+  Origin: http://localhost:4200
+  Access-Control-Request-Method: POST
+  Access-Control-Request-Headers: Content-Type
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Preflight OPTIONS returns 204 or 200", function () {
+          pm.expect([200, 204]).to.include(pm.response.code);
+      });
+      pm.test("Preflight CORS headers valid", function () {
+          pm.response.to.have.header("Access-Control-Allow-Origin");
+          pm.response.to.have.header("Access-Control-Allow-Methods");
+      });
+    language: text/javascript
+order: 3000

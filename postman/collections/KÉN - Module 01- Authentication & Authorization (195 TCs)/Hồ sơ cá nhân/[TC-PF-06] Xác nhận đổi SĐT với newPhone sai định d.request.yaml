@@ -1,0 +1,36 @@
+$kind: http-request
+name: "[TC-PF-06] Xác nhận đổi SĐT với newPhone sai định dạng"
+description: |-
+  **Mã TC:** TC-PF-06
+  **Loại:** Negative
+  **Nhóm:** Hồ sơ cá nhân
+  **Tiền điều kiện:** User đã đăng nhập.
+  **Các bước:** 1) Gửi POST /api/profile/me/phone với newPhone='123'
+  **Kết quả mong đợi:** Trả 422 {code:'VALIDATION_ERROR', message:'Số điện thoại mới không hợp lệ'}.
+  **Nhánh code:** PRF-B09
+  **Ghi chú:** Tham chiếu PF-06 (BR-A06)
+url: "{{baseUrl}}/api/profile/me/phone"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "newPhone": "123",
+      "currentPassword": "password123",
+      "code": "123456"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-PF-06] Xác nhận đổi SĐT với newPhone sai định dạng
+      pm.test("[TC-PF-06] Status code is 422", function () {
+          pm.expect(pm.response.code).to.be.oneOf([422]);
+      });
+      pm.test("[TC-PF-06] Response contains expected code or keyword: VALIDATION_ERROR", function () {
+          var resText = pm.response.text();
+          pm.expect(resText).to.include("VALIDATION_ERROR");
+      });
+    language: text/javascript
+order: 6000

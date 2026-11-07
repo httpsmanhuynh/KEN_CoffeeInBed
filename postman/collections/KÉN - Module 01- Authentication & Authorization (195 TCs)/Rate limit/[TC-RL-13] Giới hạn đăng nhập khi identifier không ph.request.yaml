@@ -1,0 +1,37 @@
+$kind: http-request
+name: "[TC-RL-13] Giới hạn đăng nhập khi identifier không phải chuỗi (object NoSQL)"
+description: |-
+  **Mã TC:** TC-RL-13
+  **Loại:** Security
+  **Nhóm:** Rate limit
+  **Tiền điều kiện:** Server mới khởi động.
+  **Các bước:** 1) Gửi 11 lần POST /api/auth/login với body JSON {'identifier':{'$ne':null},'password':'x'}
+  **Kết quả mong đợi:** 10 lần đầu trả 401 INVALID_CREDENTIALS (không lỗi 500); lần thứ 11 trả 429 TOO_MANY_REQUESTS (mọi identifier rỗng/không phải chuỗi rơi vào key chung 'login:').
+  **Nhánh code:** RL2-B07
+  **Ghi chú:** Tham chiếu RL-13
+url: "{{baseUrl}}/api/auth/login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "identifier": {
+        "$ne": null
+      },
+      "password": "x"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-RL-13] Giới hạn đăng nhập khi identifier không phải chuỗi (object NoSQL)
+      pm.test("[TC-RL-13] Status code is 429", function () {
+          pm.expect(pm.response.code).to.be.oneOf([429]);
+      });
+      pm.test("[TC-RL-13] Response contains expected code or keyword: INVALID_CREDENTIALS", function () {
+          var resText = pm.response.text();
+          pm.expect(resText).to.include("INVALID_CREDENTIALS");
+      });
+    language: text/javascript
+order: 15000
