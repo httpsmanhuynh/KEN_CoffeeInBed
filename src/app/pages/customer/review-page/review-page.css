@@ -62,6 +62,7 @@
 }
 
 .review-workspace {
+  margin-top: 32px;
   display: grid;
   grid-template-columns: 390px minmax(0, 1fr);
   gap: 26px;

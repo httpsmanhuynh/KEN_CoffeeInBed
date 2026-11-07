@@ -7,5 +7,10 @@ import { Component } from '@angular/core';
   styleUrl: './about-page.css',
 })
 export class AboutPage {
+  selectedSpace: 'connect' | 'focus' | 'rest' | null = null;
+
+  selectSpace(space: 'connect' | 'focus' | 'rest'): void {
+    this.selectedSpace = space;
+  }
 
 }

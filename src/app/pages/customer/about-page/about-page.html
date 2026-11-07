@@ -21,7 +21,7 @@
     <section class="about-stats" aria-label="Thông tin KÉN">
       <div><strong>3</strong><span>không gian</span></div>
       <div><strong>08:00</strong><span>– 22:00 · hằng ngày</span></div>
-      <div><strong>60 Hai Bà Trưng</strong><span>Bến Nghé, Q1, TPHCM</span></div>
+      <div><strong>123 Nguyễn Văn Cừ</strong><span>Phường Chợ Lớn, TPHCM</span></div>
       <div><strong>45.000đ</strong><span>/ người / giờ từ</span></div>
     </section>
 
@@ -37,9 +37,10 @@
       <p class="about-section-sub">Mỗi người đến KÉN với một nhu cầu khác nhau · cả ba không gian đều đón bạn theo cách riêng.</p>
 
       <div class="about-spaces-grid">
-        <article class="about-space-card connect">
+        <article class="about-space-card connect" [class.is-selected]="selectedSpace === 'connect'" (click)="selectSpace('connect')" (keydown.enter)="selectSpace('connect')" (keydown.space)="$event.preventDefault(); selectSpace('connect')" tabindex="0" role="button">
           <div class="about-space-image">
             <img src="/images/ken-about/connect.jpg" alt="Không gian KÉN Kết Nối" />
+            <span *ngIf="selectedSpace === 'connect'" class="about-selected">Đang chọn</span>
           </div>
           <div class="about-space-content">
             <h3><img src="/images/ken-about/connect-icon.svg" alt="" />KÉN Kết Nối</h3>
@@ -55,9 +56,10 @@
           </div>
         </article>
 
-        <article class="about-space-card focus">
+        <article class="about-space-card focus" [class.is-selected]="selectedSpace === 'focus'" (click)="selectSpace('focus')" (keydown.enter)="selectSpace('focus')" (keydown.space)="$event.preventDefault(); selectSpace('focus')" tabindex="0" role="button">
           <div class="about-space-image">
             <img src="/images/ken-about/focus.jpg" alt="Không gian KÉN Tập Trung" />
+            <span *ngIf="selectedSpace === 'focus'" class="about-selected">Đang chọn</span>
           </div>
           <div class="about-space-content">
             <h3><img src="/images/ken-about/focus-icon.svg" alt="" />KÉN Tập Trung</h3>
@@ -73,10 +75,10 @@
           </div>
         </article>
 
-        <article class="about-space-card rest">
+        <article class="about-space-card rest" [class.is-selected]="selectedSpace === 'rest'" (click)="selectSpace('rest')" (keydown.enter)="selectSpace('rest')" (keydown.space)="$event.preventDefault(); selectSpace('rest')" tabindex="0" role="button">
           <div class="about-space-image">
             <img src="/images/ken-about/rest.jpg" alt="Không gian KÉN Tái Tạo" />
-            <span class="about-selected">Đang chọn</span>
+            <span *ngIf="selectedSpace === 'rest'" class="about-selected">Đang chọn</span>
           </div>
           <div class="about-space-content">
             <h3><img src="/images/ken-about/rest-icon.svg" alt="" />KÉN Tái Tạo</h3>

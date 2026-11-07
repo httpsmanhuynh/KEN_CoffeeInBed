@@ -1,4 +1,4 @@
-﻿:host { display: block; }
+:host { display: block; }
 
 .about-ken {
   background: #f7efe2;
@@ -147,7 +147,7 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 20px;
-  align-items: start;
+  align-items: stretch;
 }
 .about-space-card {
   background: #e6d3b5;
@@ -158,7 +158,7 @@
   flex-direction: column;
   box-shadow: 0 4px 12px #4a312325;
 }
-.about-space-card.connect { min-height: 553px; }
+.about-space-card.connect { min-height: 529px; }
 .about-space-image {
   position: relative;
   height: 180px;
@@ -428,4 +428,19 @@
   .about-ending-images img { height: 75px; }
   .about-timeline-list article { grid-template-columns: 90px 1fr; }
   .about-timeline-list article > strong { font-size: 12px; }
+}
+
+/* KEN ABOUT: Equal cards and selected state */
+.about-spaces-grid .about-space-card {
+  cursor: pointer;
+}
+
+.about-spaces-grid .about-space-card.is-selected {
+  outline: 3px solid #e3a52f;
+  outline-offset: 3px;
+}
+
+.about-spaces-grid .about-space-card:focus-visible {
+  outline: 3px solid #a9763f;
+  outline-offset: 3px;
 }

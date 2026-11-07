@@ -1,6 +1,7 @@
 import { KenBookingShell } from './pages/customer/ken-booking/booking-shell/booking-shell';
 import { KenCafeCatalogPage } from './pages/customer/ken-booking/cafe-catalog/cafe-catalog';
 import { KenSpaceListingPage } from './pages/customer/ken-booking/space-listing/space-listing';
+import { KenOtherSpacePage } from './pages/customer/ken-booking/other-space-booking/other-space-booking';
 import { KenFocusPodPage } from './pages/customer/ken-booking/focus-pod/focus-pod';
 import { KenDrinkPickerPage } from './pages/customer/ken-booking/drink-picker/drink-picker';
 import { KenBookingReviewPage } from './pages/customer/ken-booking/booking-review/booking-review';
@@ -66,6 +67,7 @@ import { MeetingPage } from './pages/customer/space-details/meeting-page/meeting
     KenCafeCatalogPage,
     KenBookingShell,
     KenSpaceListingPage,
+    KenOtherSpacePage,
     KenFocusPodPage,
     KenDrinkPickerPage,
     KenBookingReviewPage,

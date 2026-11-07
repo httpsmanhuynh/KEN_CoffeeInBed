@@ -40,7 +40,7 @@ export class KenSpaceListingPage {
   }
 
   zone: 'all' | 'focus' | 'rest' = 'all';
-  feedback = '';
+  selectedSpaceId: string | null = null;
   readonly guestOptions = Array.from({ length: 12 }, (_, i) => i + 1);
   readonly hours = Array.from({ length: 14 }, (_, i) => i + 8);
   readonly cards: KenListingSpace[] = [
@@ -55,23 +55,36 @@ export class KenSpaceListingPage {
   constructor(public state: KenBookingState, private router: Router) {}
   get focusCards(): KenListingSpace[] { return this.zone === 'rest' ? [] : this.cards.filter(x => x.zone === 'focus'); }
   get restCards(): KenListingSpace[] { return this.zone === 'focus' ? [] : this.cards.filter(x => x.zone === 'rest'); }
-  setDate(value: string): void { this.state.set({ date: value }); this.feedback = ''; }
-  setHour(value: string): void { this.state.set({ startHour: Number(value) }); this.feedback = ''; }
+  setDate(value: string): void { this.state.set({ date: value }); }
+  setHour(value: string): void { this.state.set({ startHour: Number(value) }); }
+
   choose(space: KenListingSpace): void {
-    if (!space.canBook) {
-      this.feedback = 'Luồng đặt chỗ của không gian này chưa được xây dựng trong 6 màn hình được chọn. Bạn có thể xem chi tiết nếu trang đã có.';
+    if (this.selectedSpaceId !== space.id) {
+      this.selectedSpaceId = space.id;
+      this.state.set({ holdUntil: null });
       return;
     }
-    this.state.set({ guests: 1, holdUntil: null });
-    this.router.navigateByUrl('/booking/focus-pod');
-  }
-  open(space: KenListingSpace): void {
+
     if (space.id === 'focus') {
-      this.router.navigateByUrl('/spaces/focus-pod');
+      this.state.set({ guests: 1, holdUntil: null });
+      this.router.navigateByUrl('/booking/focus-pod');
       return;
     }
-    if (space.url) this.router.navigateByUrl(space.url);
-    else this.feedback = `Trang chi tiết “${space.name}” chưa được tích hợp.`;
+
+    this.router.navigateByUrl('/booking/space/' + space.id);
   }
+
+  open(space: KenListingSpace): void {
+    const details: Record<string, string> = {
+      work: '/spaces/work-lounge',
+      focus: '/spaces/focus-pod',
+      'meeting-small': '/spaces/small-meeting-room'
+    };
+
+    this.router.navigateByUrl(
+      details[space.id] || '/booking/space/' + space.id
+    );
+  }
+
   get minDate(): string { return kenNextDay(); }
 }
