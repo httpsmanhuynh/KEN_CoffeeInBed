@@ -1,0 +1,30 @@
+$kind: http-request
+description: |-
+  **Mã TC:** TC-OUT-04
+  **Loại:** Negative
+  **Nhóm:** Đăng xuất
+  **Tiền điều kiện:** Đã đăng nhập thành công (Postman giữ cookie connect.sid). Giả lập bằng unit test (mock req.session.destroy gọi cb(err)).
+  **Các bước:** 1) Gọi route với session.destroy trả lỗi
+  **Kết quả mong đợi:** 500 {code:'INTERNAL_ERROR'} qua error handler
+  **Nhánh code:** OUT-B02; MW-B07; GLB-B02
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/logout"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: "{}"
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-OUT-04] Kho session lỗi khi destroy
+      pm.test("[TC-OUT-04] Status code is 500", function () {
+          pm.expect(pm.response.code).to.be.oneOf([500]);
+      });
+      pm.test("[TC-OUT-04] Response contains expected code or keyword: INTERNAL_ERROR", function () {
+          var resText = pm.response.text();
+          pm.expect(resText).to.include("INTERNAL_ERROR");
+      });
+    language: text/javascript
+order: 4000

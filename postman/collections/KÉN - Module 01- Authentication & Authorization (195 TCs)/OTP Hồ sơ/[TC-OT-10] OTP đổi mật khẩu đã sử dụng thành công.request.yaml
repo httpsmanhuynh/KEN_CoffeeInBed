@@ -1,0 +1,37 @@
+$kind: http-request
+name: "[TC-OT-10] OTP đổi mật khẩu đã sử dụng thành công không thể dùng lại lần 2"
+description: |-
+  **Mã TC:** TC-OT-10
+  **Loại:** Negative
+  **Nhóm:** OTP Hồ sơ
+  **Tiền điều kiện:** Vừa đổi mật khẩu thành công bằng mã OTP X (từ password123 -> newpassword123).
+  **Các bước:** 1) Gửi tiếp POST /api/profile/me/password với cùng mã OTP X
+  **Kết quả mong đợi:** Trả 422 OTP_INVALID (do bản ghi OTP đã bị đánh dấu is_used=true).
+  **Nhánh code:** PRF-B06; OTP-B07
+  **Ghi chú:** Tham chiếu OT-10 (BR-A08)
+url: "{{baseUrl}}/api/profile/me/password"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "currentPassword": "newpassword123",
+      "newPassword": "anotherpassword123",
+      "confirmPassword": "anotherpassword123",
+      "code": "<OTP X vừa dùng>"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-OT-10] OTP đổi mật khẩu đã sử dụng thành công không thể dùng lại lần 2
+      pm.test("[TC-OT-10] Status code is 422", function () {
+          pm.expect(pm.response.code).to.be.oneOf([422]);
+      });
+      pm.test("[TC-OT-10] Response contains expected code or keyword: OTP_INVALID", function () {
+          var resText = pm.response.text();
+          pm.expect(resText).to.include("OTP_INVALID");
+      });
+    language: text/javascript
+order: 10000

@@ -1,0 +1,36 @@
+$kind: http-request
+name: "[TC-PW-01] Mật khẩu 73 byte ASCII bị từ chối ở cả 3 route (giới hạn 72 byte của bcrypt)"
+description: |-
+  **Mã TC:** TC-PW-01
+  **Loại:** Boundary
+  **Nhóm:** Mật khẩu
+  **Tiền điều kiện:** Server đang chạy; có tài khoản và OTP hợp lệ cho các luồng tương ứng.
+  **Các bước:** 1) Gửi POST /api/auth/register với password dài 73 ký tự ASCII
+  2) Gửi POST /api/auth/reset-password với newPassword dài 73 ký tự
+  3) Gửi POST /api/profile/me/password với newPassword dài 73 ký tự
+  **Kết quả mong đợi:** Cả 3 route đều trả 422 VALIDATION_ERROR (chặn cắt cụt ngầm 72 byte của thuật toán bcrypt).
+  **Nhánh code:** PWD-B01
+  **Ghi chú:** Tham chiếu PW-01 (BR-A04)
+url: "{{baseUrl}}/auth/register"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "password": "<chuỗi 73 ký tự a>"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-PW-01] Mật khẩu 73 byte ASCII bị từ chối ở cả 3 route (giới hạn 72 byte của bcrypt)
+      pm.test("[TC-PW-01] Status code is 422", function () {
+          pm.expect(pm.response.code).to.be.oneOf([422]);
+      });
+      pm.test("[TC-PW-01] Response contains expected code or keyword: VALIDATION_ERROR", function () {
+          var resText = pm.response.text();
+          pm.expect(resText).to.include("VALIDATION_ERROR");
+      });
+    language: text/javascript
+order: 1000

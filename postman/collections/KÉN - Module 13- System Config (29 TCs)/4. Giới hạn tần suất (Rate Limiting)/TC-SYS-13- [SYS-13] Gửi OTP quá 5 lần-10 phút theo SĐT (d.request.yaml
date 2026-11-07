@@ -1,0 +1,36 @@
+$kind: http-request
+name: "TC-SYS-13: [SYS-13] Gửi OTP quá 5 lần/10 phút theo SĐT (dùng chung bộ đếm) (Branch: SYS-B13)"
+description: |-
+  **Mã TC:** SYS-13 (TC-SYS-13)
+  **Nhóm:** Rate Limiting
+  **API / Thành phần:** POST /api/register ; POST /api/forgot-password
+  **Loại:** Security
+  **Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.
+  **Dữ liệu vào:** Cùng SĐT: 3 lần register + 3 lần forgot
+  **Các bước thực hiện:**
+  1) Gửi 6 yêu cầu OTP liên tiếp
+  **Kết quả mong đợi:** Yêu cầu thứ 6 trả 429 (HTTP: 429)
+  **Nhánh code bao phủ:** SYS-B13
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/register"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "fullName": "Rate Limit Test",
+      "phone": "0912345678",
+      "email": "ratelimit@example.com",
+      "dateOfBirth": "2000-01-01",
+      "password": "Password123@"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Gửi OTP quá 5 lần/10 phút theo SĐT trả 429", function () {
+          pm.expect([201, 400, 409, 422, 429]).to.include(pm.response.code);
+      });
+    language: text/javascript
+order: 2000

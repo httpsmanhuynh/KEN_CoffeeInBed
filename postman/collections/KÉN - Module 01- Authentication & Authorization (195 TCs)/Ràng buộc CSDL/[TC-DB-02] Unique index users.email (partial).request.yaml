@@ -1,0 +1,27 @@
+$kind: http-request
+description: |-
+  **Mã TC:** TC-DB-02
+  **Loại:** Negative
+  **Nhóm:** Ràng buộc CSDL
+  **Tiền điều kiện:** Đã đăng ký + xác minh OTP thành công cho SĐT 0909123456 (mật khẩu password123). (có email)
+  **Các bước:** 1) Chèn user trùng email
+  2) Chèn 2 user không có email
+  **Kết quả mong đợi:** Trùng email → E11000; nhiều user không email vẫn chèn được
+  **Nhánh code:** DB-B02
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/test"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: 2 user cùng email; 2 user không email
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-DB-02] Unique index users.email (partial)
+      pm.test("[TC-DB-02] Status code is —", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 2000

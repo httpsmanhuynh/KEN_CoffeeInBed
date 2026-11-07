@@ -1,0 +1,27 @@
+$kind: http-request
+name: "[TC-MW-09] destroySession: destroy lỗi → reject"
+description: |-
+  **Mã TC:** TC-MW-09
+  **Loại:** Negative
+  **Nhóm:** Middleware
+  **Tiền điều kiện:** Unit test
+  **Các bước:** npm test (node --test test/*.test.js)
+  **Kết quả mong đợi:** Promise bị reject
+  **Nhánh code:** MW-B07
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/test"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: session.destroy gọi cb(err)
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-MW-09] destroySession: destroy lỗi → reject
+      pm.test("[TC-MW-09] Status code is —", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 9000

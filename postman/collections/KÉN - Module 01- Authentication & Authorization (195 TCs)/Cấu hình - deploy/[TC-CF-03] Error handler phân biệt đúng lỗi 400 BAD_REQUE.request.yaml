@@ -1,0 +1,28 @@
+$kind: http-request
+name: "[TC-CF-03] Error handler phân biệt đúng lỗi 400 BAD_REQUEST (JSON hỏng) và 413 PAYLOAD_TOO_LARGE (>1MB)"
+description: |-
+  **Mã TC:** TC-CF-03
+  **Loại:** Negative
+  **Nhóm:** Cấu hình / deploy
+  **Tiền điều kiện:** Server đã cập nhật bản vá error handler trong index.js.
+  **Các bước:** 1) Gửi POST với raw JSON sai cú pháp
+  2) Gửi POST với payload > 1MB
+  **Kết quả mong đợi:** JSON sai cú pháp trả đúng 400 BAD_REQUEST; body > 1MB trả đúng 413 PAYLOAD_TOO_LARGE (đã khắc phục lỗi trả 500 ở bản cũ).
+  **Nhánh code:** GLB-B05; CFG-B02
+  **Ghi chú:** Tham chiếu CF-03 (Đã vá lỗi ghi chú ở TC-GLB-06/07)
+url: "{{baseUrl}}/api/auth/test"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: Body JSON cắt dở '{"a":' và Body > 1MB
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-CF-03] Error handler phân biệt đúng lỗi 400 BAD_REQUEST (JSON hỏng) và 413 PAYLOAD_TOO_LARGE (>1MB)
+      pm.test("[TC-CF-03] Status code is 400", function () {
+          pm.expect(pm.response.code).to.be.oneOf([400, 413]);
+      });
+    language: text/javascript
+order: 3000

@@ -1,0 +1,26 @@
+$kind: http-request
+description: |-
+  **Mã TC:** TC-RL-01
+  **Loại:** Positive
+  **Nhóm:** Rate limit
+  **Tiền điều kiện:** Server chạy; đã chạy npm run setup (có membership_tiers, otp_codes, users trên Atlas).
+  **Các bước:** 1) Gửi 30 request tới /api/auth/login (sai mật khẩu cũng được)
+  **Kết quả mong đợi:** 30 lần đều trả 401 (nếu gửi cùng identifier sẽ bị 429 từ lần 11 do limiter theo tài khoản).
+  **Nhánh code:** RL-B02
+  **Ghi chú:** Rate limit lưu trong RAM: restart server để đặt lại.
+url: "{{baseUrl}}/api/auth/test"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: Gửi 30 request tới /api/auth/login, mỗi request phải dùng identifier khác nhau (vd 0900000001…0900000030), mật khẩu sai.
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-RL-01] 30 request đầu trong cửa sổ không bị chặn
+      pm.test("[TC-RL-01] Status code is 401", function () {
+          pm.expect(pm.response.code).to.be.oneOf([401]);
+      });
+    language: text/javascript
+order: 1000

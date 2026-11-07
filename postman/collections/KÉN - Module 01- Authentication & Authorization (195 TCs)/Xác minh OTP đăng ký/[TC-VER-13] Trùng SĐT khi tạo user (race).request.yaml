@@ -1,0 +1,36 @@
+$kind: http-request
+description: |-
+  **Mã TC:** TC-VER-13
+  **Loại:** Negative
+  **Nhóm:** Xác minh OTP đăng ký
+  **Tiền điều kiện:** Đã gọi register với SĐT 0909123456 và lấy OTP từ terminal ([SMS mock]). Trước khi verify, tạo tay 1 user cùng SĐT trong Atlas.
+  **Các bước:** 1) POST /api/auth/verify-otp (Body: phone + code)
+  2) Quan sát phản hồi
+  3) Kiểm tra users/otp_codes trên Atlas
+  **Kết quả mong đợi:** 409 PHONE_EXISTS với message "Số điện thoại đã được đăng ký". Ghi chú: Trùng email xem TC-VER-16.
+  **Nhánh code:** VER-B06
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/verify-otp"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "phone": "0909123456",
+      "code": "<OTP>"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-VER-13] Trùng SĐT khi tạo user (race)
+      pm.test("[TC-VER-13] Status code is 409", function () {
+          pm.expect(pm.response.code).to.be.oneOf([409]);
+      });
+      pm.test("[TC-VER-13] Response contains expected code or keyword: PHONE_EXISTS", function () {
+          var resText = pm.response.text();
+          pm.expect(resText).to.include("PHONE_EXISTS");
+      });
+    language: text/javascript
+order: 13000

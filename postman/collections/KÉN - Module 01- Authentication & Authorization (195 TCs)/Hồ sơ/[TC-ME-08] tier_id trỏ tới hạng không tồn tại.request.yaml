@@ -1,0 +1,23 @@
+$kind: http-request
+description: |-
+  **Mã TC:** TC-ME-08
+  **Loại:** Negative
+  **Nhóm:** Hồ sơ
+  **Tiền điều kiện:** Đã đăng nhập thành công (Postman giữ cookie connect.sid). Đổi users.tier_id sang ObjectId không có trong membership_tiers.
+  **Các bước:** 1) GET /api/profile
+  **Kết quả mong đợi:** 200; membershipTier='BASIC' (fallback), không lỗi 500
+  **Nhánh code:** ME-B04
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/me"
+method: GET
+headers:
+  Content-Type: application/json
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ME-08] tier_id trỏ tới hạng không tồn tại
+      pm.test("[TC-ME-08] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 8000
