@@ -38,7 +38,7 @@ my-server-mongodb/
 │   │   └── rateLimit.js             # Bộ giới hạn tần suất theo IP / SĐT / User ID (BR-A08)
 │   ├── services/
 │   │   ├── bookingService.js        # Dịch vụ Đặt chỗ 5 bước, Transaction + lock_version, Check-in/out, Cron
-│   │   ├── otp.js                   # Phát hành & xác thực OTP băm bcrypt (chống race condition)
+│   │   ├── otp.js                   # Phát hành & xác thực OTP băm HMAC-SHA256 (chống race condition)
 │   │   └── reviewService.js         # Dịch vụ Tạo/Xem đánh giá trong Transaction, chống trùng & gắn lời nhắc đánh giá
 │   ├── routes/
 │   │   ├── auth.js                  # Đăng ký, OTP, Đăng nhập, 2FA, Quên/Đổi MK, Đăng xuất (/api & /api/auth)
@@ -51,7 +51,7 @@ my-server-mongodb/
 │   └── utils/
 │       └── http.js                  # Helper wrap, fail, str, publicUser, tierOf
 └── test/
-    ├── auth.mw.test.js              # 14 test cases middleware xác thực & thu hồi session (TC-MW-01..14)
+    ├── auth.mw.test.js              # 14 test cases middleware xác thực & thu hồi session (bao gồm 9 TC-MW-01..09 trên Excel + 5 ca kiểm tra phiên DB)
     ├── booking.test.js              # 8 kịch bản tích hợp Booking 5 bước & Concurrency (TC-BK-01..08)
     ├── domain.test.js               # 7 test cases domain thuần (pricing, loyalty, stateMachine, availability)
     ├── logout.test.js               # Test lỗi hủy session
