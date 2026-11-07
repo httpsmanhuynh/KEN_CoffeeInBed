@@ -1,962 +1,112 @@
-/* =========================================
-   KÉN - RESCHEDULE PAGE
-========================================= */
+:host { display: block; width: 100%; background: var(--ken-page); color: #4A3123; font-family: var(--ken-font); }
+.wrap { width: min(100% - 80px, 1280px); margin: 0 auto; }
+p, h1, h2, hr { margin: 0; }
+.crumb { padding: 26px 0; color: #7A6553; font-size: 12px; line-height: 1.6; }
+.crumb a { color: inherit; text-decoration: none; }
+.crumb a:hover { color: #4A3123; text-decoration: underline; }
+.layout { display: flex; align-items: flex-start; gap: 40px; padding: 10px 0 56px; }
+.content { flex: 1 1 0; min-width: 0; min-height: 780px; display: flex; flex-direction: column; gap: 28px; }
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); border: 0; }
+.h-serif { font-family: var(--ken-heading); font-size: 20px; font-weight: 400; line-height: 1.4; }
+.h-serif--sm { font-size: 18px; }
+.text { color: #7A6553; font-size: 14px; line-height: 22.4px; }
+.text--ok { color: #49634C; }
+.strong { font-size: 14px; font-weight: 600; line-height: 21px; }
+.line { width: 100%; height: 1px; border: 0; background: #E6D3B5; }
+.line--dark { background: #E6D3B5; }
 
-:host {
-    --ken-brown: #4A3123;
-    --ken-cream: #F7EFE2;
-    --ken-gold-light: #E6D3B5;
-    --ken-gold-dark: #A9763F;
-    --ken-gold-accent: #E3A52F;
-    --ken-muted: #8B7663;
-    --ken-paper: #FFFCF7;
-    --ken-border: #EADCC9;
-    --ken-green: #49634C;
-    --ken-green-light: #EDF2E9;
-    --ken-yellow-light: #F6ECD8;
-    --ken-red: #995E4B;
-  
-    display: block;
-    min-height: 100vh;
-    background: var(--ken-cream);
-    color: var(--ken-brown);
-    font-family: 'Inter', sans-serif;
-    box-sizing: border-box;
-  }
-  
-  :host *,
-  :host *::before,
-  :host *::after {
-    box-sizing: border-box;
-  }
-  
-  h1,
-  h2,
-  h3,
-  p {
-    margin: 0;
-  }
-  
-  a {
-    color: inherit;
-    text-decoration: none;
-  }
-  
-  button {
-    font-family: inherit;
-    cursor: pointer;
-  }
-  
-  /* =========================================
-     PAGE LAYOUT
-  ========================================= */
-  
-  .booking-layout {
-    width: 100%;
-    max-width: 1440px;
-    margin: 0 auto;
-    padding: 20px 5.5% 50px;
-  }
-  
-  .breadcrumb {
-    margin-bottom: 28px;
-    font-size: 11px;
-    color: var(--ken-muted);
-  }
-  
-  .breadcrumb ol {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 9px;
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  
-  .breadcrumb a:hover {
-    color: var(--ken-gold-dark);
-  }
-  
-  .breadcrumb .separator {
-    color: #B8A38D;
-  }
-  
-  .breadcrumb .active {
-    color: var(--ken-brown);
-    font-weight: 500;
-  }
-  
-  /* =========================================
-     MAIN CONTAINER
-  ========================================= */
-  
-  .booking-container {
-    display: grid;
-    grid-template-columns: 220px minmax(0, 1fr);
-    gap: 28px;
-    align-items: start;
-  }
-  
-  /* =========================================
-     SIDEBAR
-  ========================================= */
-  
-  .sidebar {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    min-width: 0;
-  }
-  
-  .profile-card {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-    padding-bottom: 18px;
-    border-bottom: 1px solid var(--ken-border);
-  }
-  
-  .profile-avatar {
-    width: 44px;
-    height: 44px;
-    display: grid;
-    place-items: center;
-    overflow: hidden;
-    border-radius: 50%;
-    background: var(--ken-gold-light);
-  }
-  
-  .profile-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  
-  .profile-name {
-    font-size: 12px;
-    font-weight: 650;
-    line-height: 1.5;
-  }
-  
-  .profile-rank {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    margin-top: 2px;
-    font-size: 10px;
-    color: var(--ken-muted);
-  }
-  
-  .rank-badge {
-    font-weight: 600;
-  }
-  
-  .rank-points {
-    color: var(--ken-muted);
-  }
-  
-  /* Sidebar navigation */
-  
-  .sidebar-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  
-  .nav-item {
-    width: 100%;
-    min-height: 36px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 10px;
-    border: none;
-    border-radius: 7px;
-    background: transparent;
-    color: var(--ken-brown);
-    font-size: 11px;
-    font-weight: 400;
-    text-align: left;
-    transition: background 0.2s ease;
-  }
-  
-  .nav-item svg {
-    flex-shrink: 0;
-    color: var(--ken-gold-dark);
-  }
-  
-  .nav-item:hover {
-    background: rgba(230, 211, 181, 0.35);
-  }
-  
-  .nav-item.active {
-    position: relative;
-    background: var(--ken-gold-light);
-    font-weight: 650;
-  }
-  
-  .nav-item.active::after {
-    content: '';
-    position: absolute;
-    right: 9px;
-    top: 8px;
-    bottom: 8px;
-    width: 3px;
-    border-radius: 3px;
-    background: var(--ken-gold-dark);
-  }
-  
-  .logout-btn {
-    color: var(--ken-red);
-  }
-  
-  .logout-btn svg {
-    color: var(--ken-red);
-  }
-  
-  /* Support */
-  
-  .support-card {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding: 14px;
-    border: 1px solid var(--ken-border);
-    border-radius: 10px;
-  }
-  
-  .support-card h3 {
-    font-size: 10px;
-    font-weight: 650;
-  }
-  
-  .support-card p {
-    color: var(--ken-muted);
-    font-size: 10px;
-    line-height: 1.6;
-  }
-  
-  .support-link {
-    margin-top: 2px;
-    color: var(--ken-brown);
-    font-size: 11px;
-    font-weight: 650;
-  }
-  
-  /* =========================================
-     CONTENT AREA
-  ========================================= */
-  
-  .content-area {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-  }
-  
-  .content-header {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 20px;
-  }
-  
-  .eyebrow {
-    color: var(--ken-brown);
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 0.3px;
-  }
-  
-  .page-title {
-    font-family: 'Lora', Georgia, serif;
-    font-size: 30px;
-    font-weight: 400;
-    line-height: 1.25;
-  }
-  
-  .page-desc {
-    color: var(--ken-muted);
-    font-size: 11px;
-    line-height: 1.6;
-  }
-  
-  /* =========================================
-     TABS
-  ========================================= */
-  
-  .tabs-container {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    margin-bottom: 18px;
-    border-bottom: 1px solid var(--ken-border);
-  }
-  
-  .tab {
-    position: relative;
-    padding: 0 0 11px;
-    border: none;
-    background: transparent;
-    color: var(--ken-muted);
-    font-size: 11px;
-    font-weight: 400;
-  }
-  
-  .tab.active {
-    color: var(--ken-brown);
-    font-weight: 650;
-  }
-  
-  .tab.active::after {
-    content: '';
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background: var(--ken-gold-dark);
-  }
-  
-  /* =========================================
-     RESCHEDULE GRID
-  ========================================= */
-  
-  .reschedule-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
-    grid-template-rows: auto auto;
-    gap: 20px 16px;
-    align-items: start;
-  }
-  
-  .booking-select-card {
-    grid-column: 1;
-    grid-row: 1;
-  }
-  
-  .current-card {
-    grid-column: 2;
-    grid-row: 1;
-  }
-  
-  .form-card {
-    grid-column: 1;
-    grid-row: 2;
-  }
-  
-  .right-stack {
-    grid-column: 2;
-    grid-row: 2;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    min-width: 0;
-  }
-  
-  /* =========================================
-     GENERIC CARD
-  ========================================= */
-  
-  .card {
-    width: 100%;
-    min-width: 0;
-    padding: 16px;
-    border: 1px solid var(--ken-border);
-    border-radius: 14px;
-    background: var(--ken-paper);
-    box-shadow: 0 3px 12px rgba(74, 49, 35, 0.035);
-  }
-  
-  .card h2 {
-    font-family: 'Lora', Georgia, serif;
-    font-size: 16px;
-    font-weight: 400;
-    line-height: 1.4;
-  }
-  
-  .card-head {
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-  }
-  
-  .card-head p {
-    color: var(--ken-muted);
-    font-size: 10px;
-    line-height: 1.5;
-  }
-  
-  /* =========================================
-     BADGES
-  ========================================= */
-  
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    padding: 4px 8px;
-    border-radius: 999px;
-    font-size: 9px;
-    font-weight: 650;
-    line-height: 1.2;
-    white-space: nowrap;
-  }
-  
-  .badge-confirmed {
-    background: var(--ken-green-light);
-    color: var(--ken-green);
-  }
-  
-  .badge-pending {
-    background: var(--ken-yellow-light);
-    color: #806B4D;
-  }
-  
-  /* =========================================
-     BOOKING SELECTION
-  ========================================= */
-  
-  .booking-options {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 10px;
-  }
-  
-  .booking-item {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    min-width: 0;
-    padding: 11px 9px;
-    border: 1px solid var(--ken-border);
-    border-radius: 9px;
-    background: var(--ken-paper);
-    cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
-  }
-  
-  .booking-item:hover {
-    border-color: var(--ken-gold-dark);
-  }
-  
-  .booking-item.active {
-    border-color: var(--ken-gold-dark);
-    background: #F8F0E4;
-  }
-  
-  .radio-icon {
-    width: 13px;
-    height: 13px;
-    display: grid;
-    place-items: center;
-    flex-shrink: 0;
-    border: 1.4px solid var(--ken-gold-dark);
-    border-radius: 50%;
-    color: var(--ken-gold-accent);
-    font-size: 9px;
-    font-weight: 700;
-  }
-  
-  .booking-item.active .radio-icon {
-    border: none;
-  }
-  
-  .item-info {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    gap: 3px;
-    min-width: 0;
-  }
-  
-  .item-info strong {
-    overflow: hidden;
-    color: var(--ken-brown);
-    font-size: 10px;
-    font-weight: 650;
-    line-height: 1.4;
-    text-overflow: ellipsis;
-  }
-  
-  .item-info span {
-    color: var(--ken-muted);
-    font-size: 9px;
-    line-height: 1.5;
-    overflow-wrap: anywhere;
-  }
-  
-  /* =========================================
-     CURRENT BOOKING
-  ========================================= */
-  
-  .current-card {
-    display: flex;
-    flex-direction: column;
-    gap: 11px;
-  }
-  
-  .current-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-  }
-  
-  .current-space-info {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-  }
-  
-  .current-space-info strong {
-    font-size: 11px;
-    font-weight: 650;
-  }
-  
-  .current-space-info span {
-    color: var(--ken-muted);
-    font-size: 10px;
-  }
-  
-  .divider {
-    width: 100%;
-    height: 1px;
-    border: none;
-    background: var(--ken-border);
-  }
-  
-  .divider.dark {
-    background: rgba(74, 49, 35, 0.18);
-  }
-  
-  /* Detail rows */
-  
-  .detail-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  
-  .detail-list.small-gap {
-    gap: 10px;
-  }
-  
-  .detail-row {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    min-width: 0;
-  }
-  
-  .detail-row svg {
-    flex-shrink: 0;
-    color: var(--ken-muted);
-  }
-  
-  .detail-row .label {
-    flex: 1;
-    min-width: 0;
-    color: var(--ken-muted);
-    font-size: 10px;
-    line-height: 1.4;
-  }
-  
-  .detail-row .value {
-    flex-shrink: 0;
-    color: var(--ken-brown);
-    font-size: 10px;
-    font-weight: 650;
-    text-align: right;
-  }
-  
-  .total-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-  }
-  
-  .total-row .label {
-    color: var(--ken-muted);
-    font-size: 10px;
-  }
-  
-  .total-row .value {
-    color: var(--ken-brown);
-    font-size: 11px;
-    font-weight: 700;
-  }
-  
-  /* =========================================
-     NEW SCHEDULE FORM
-  ========================================= */
-  
-  .form-card {
-    display: flex;
-    flex-direction: column;
-    gap: 13px;
-  }
-  
-  .form-row-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-  
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-    min-width: 0;
-  }
-  
-  .form-group label {
-    color: var(--ken-brown);
-    font-size: 10px;
-    font-weight: 650;
-  }
-  
-  .input-display {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    min-height: 38px;
-    padding: 9px 10px;
-    border: 1px solid var(--ken-border);
-    border-radius: 8px;
-    background: var(--ken-paper);
-    color: var(--ken-brown);
-    font-size: 10px;
-    line-height: 1.5;
-  }
-  
-  .input-display svg {
-    flex-shrink: 0;
-    color: var(--ken-muted);
-  }
-  
-  .textarea-like {
-    min-height: 70px;
-    align-items: flex-start;
-    justify-content: flex-start;
-    line-height: 1.6;
-  }
-  
-  /* Time selection */
-  
-  .time-pills {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 7px;
-  }
-  
-  .pill {
-    min-height: 38px;
-    padding: 8px;
-    border: 1px solid var(--ken-border);
-    border-radius: 7px;
-    background: #F8F0E4;
-    color: var(--ken-brown);
-    font-size: 10px;
-    transition: background 0.2s, color 0.2s;
-  }
-  
-  .pill:hover {
-    border-color: var(--ken-gold-dark);
-  }
-  
-  .pill.active {
-    border-color: var(--ken-brown);
-    background: var(--ken-brown);
-    color: var(--ken-cream);
-  }
-  
-  .helper-text {
-    color: var(--ken-muted);
-    font-size: 10px;
-    line-height: 1.6;
-  }
-  
-  .helper-text-dark {
-    color: var(--ken-brown);
-    font-size: 10px;
-    line-height: 1.6;
-  }
-  
-  /* Checkbox */
-  
-  .checkbox-group {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-  }
-  
-  .checkbox-group input {
-    width: 13px;
-    height: 13px;
-    flex-shrink: 0;
-    margin: 2px 0 0;
-    accent-color: var(--ken-gold-dark);
-  }
-  
-  .checkbox-group label {
-    color: var(--ken-muted);
-    font-size: 10px;
-    line-height: 1.5;
-  }
-  
-  /* =========================================
-     PROPOSED SCHEDULE
-  ========================================= */
-  
-  .proposed-card {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    border-color: transparent;
-    background: var(--ken-gold-light);
-    box-shadow: none;
-  }
-  
-  .card-eyebrow {
-    color: var(--ken-muted);
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 1px;
-  }
-  
-  .highlight-date {
-    color: var(--ken-brown);
-    font-family: 'Lora', Georgia, serif;
-    font-size: 20px;
-    font-weight: 400;
-    line-height: 1.35;
-  }
-  
-  /* =========================================
-     AVAILABILITY & ACTIONS
-  ========================================= */
-  
-  .status-submit-card {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  
-  .status-box {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 0;
-    padding: 10px;
-    border: 1px solid var(--ken-border);
-    border-radius: 8px;
-    background: #F8F0E4;
-  }
-  
-  .status-icon {
-    display: grid;
-    place-items: center;
-    flex-shrink: 0;
-    color: var(--ken-brown);
-  }
-  
-  .status-text {
-    flex: 1;
-    min-width: 0;
-    color: var(--ken-muted);
-    font-size: 10px;
-  }
-  
-  .action-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 9px;
-  }
-  
-  .btn {
-    width: 100%;
-    min-height: 38px;
-    padding: 9px 14px;
-    border-radius: 999px;
-    font-size: 10px;
-    font-weight: 650;
-    transition: background 0.2s, opacity 0.2s;
-  }
-  
-  .btn:hover {
-    opacity: 0.88;
-  }
-  
-  .btn-secondary {
-    border: 1px solid var(--ken-gold-dark);
-    background: var(--ken-paper);
-    color: var(--ken-brown);
-  }
-  
-  .btn-primary {
-    border: 1px solid var(--ken-gold-accent);
-    background: var(--ken-gold-accent);
-    color: var(--ken-brown);
-  }
-  
-  .btn-ghost-full {
-    width: 100%;
-    min-height: 36px;
-    padding: 8px 14px;
-    border: 1px solid var(--ken-border);
-    border-radius: 999px;
-    background: transparent;
-    color: var(--ken-brown);
-    font-size: 10px;
-    font-weight: 650;
-    transition: background 0.2s;
-  }
-  
-  .btn-ghost-full:hover {
-    background: rgba(230, 211, 181, 0.3);
-  }
-  
-  /* =========================================
-     RESPONSIVE
-  ========================================= */
-  
-  @media (max-width: 1100px) {
-    .booking-layout {
-      padding-right: 4%;
-      padding-left: 4%;
-    }
-  
-    .booking-container {
-      grid-template-columns: 190px minmax(0, 1fr);
-      gap: 20px;
-    }
-  
-    .reschedule-grid {
-      gap: 14px;
-    }
-  
-    .card {
-      padding: 13px;
-    }
-  
-    .booking-item {
-      flex-wrap: wrap;
-    }
-  }
-  
-  @media (max-width: 850px) {
-    .booking-container {
-      grid-template-columns: 1fr;
-    }
-  
-    .sidebar {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
-  
-    .profile-card {
-      display: grid;
-      grid-template-columns: 44px 1fr;
-      align-items: center;
-      column-gap: 12px;
-    }
-  
-    .profile-avatar {
-      grid-row: span 2;
-    }
-  
-    .profile-name,
-    .profile-rank {
-      grid-column: 2;
-    }
-  
-    .profile-card {
-      padding-bottom: 12px;
-    }
-  
-    .sidebar-nav {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-  
-    .support-card {
-      display: none;
-    }
-  }
-  
-  @media (max-width: 650px) {
-    .booking-layout {
-      padding: 16px 16px 35px;
-    }
-  
-    .breadcrumb {
-      margin-bottom: 20px;
-    }
-  
-    .page-title {
-      font-size: 26px;
-    }
-  
-    .reschedule-grid {
-      grid-template-columns: 1fr;
-      grid-template-rows: auto;
-    }
-  
-    .booking-select-card,
-    .current-card,
-    .form-card,
-    .right-stack {
-      grid-column: 1;
-      grid-row: auto;
-    }
-  
-    .right-stack {
-      gap: 12px;
-    }
-  
-    .form-row-2 {
-      grid-template-columns: 1fr;
-    }
-  
-    .sidebar-nav {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  
-    .booking-item {
-      flex-wrap: nowrap;
-    }
-  
-    .action-buttons {
-      flex-direction: column;
-    }
-  }
-  
-  @media (max-width: 380px) {
-    .booking-layout {
-      padding-right: 12px;
-      padding-left: 12px;
-    }
-  
-    .card {
-      padding: 12px;
-    }
-  
-    .booking-item {
-      flex-wrap: wrap;
-    }
-  
-    .item-info {
-      flex-basis: calc(100% - 30px);
-    }
-  
-    .form-row-2 {
-      grid-template-columns: 1fr;
-    }
-  }
+.intro { display: flex; flex-direction: column; gap: 10px; }
+.intro__eyebrow { font-size: 12px; font-weight: 600; line-height: 1.6; }
+.intro__title { font-family: var(--ken-heading); font-size: 36px; font-weight: 400; line-height: 1.3; }
+.intro__desc { color: #7A6553; font-size: 14px; line-height: 22.4px; }
+.tabs { display: flex; gap: 24px; border-bottom: 1px solid rgba(216,199,178,.62); }
+.tab { padding: 4px 0 14px; border-bottom: 2px solid transparent; color: #7A6553; font-size: 14px; line-height: 22.4px; text-decoration: none; white-space: nowrap; }
+.tab:hover { color: #4A3123; }
+.tab.is-active { border-bottom-color: rgba(216,199,178,.62); color: #4A3123; font-weight: 600; line-height: 21px; }
+
+.pair { display: flex; align-items: flex-start; gap: 24px; }
+.pair > * { flex: 1 1 0; min-width: 0; }
+.card { display: flex; flex-direction: column; gap: 16px; padding: 24px; background: #FFFCF7; border: 1px solid rgba(216,199,178,.62); border-radius: 20px; box-shadow: 0 4px 18px rgba(74,49,35,.04); }
+.card--tight { gap: 14px; }
+.card--form { gap: 18px; }
+.card__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+
+/* Chọn đơn */
+.orders { display: flex; flex-direction: column; gap: 16px; }
+.opt { display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px; border: 1px solid rgba(216,199,178,.62); border-radius: 10px; background: transparent; text-align: left; color: inherit; font: inherit; cursor: pointer; transition: border-color .18s ease, background .18s ease; }
+.opt:hover { border-color: #A9763F; }
+.opt.is-selected { background: #F7EFE2; border-color: #A9763F; }
+.opt img { flex: 0 0 18px; width: 18px; height: 18px; display: block; }
+.opt__body { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 2px; font-size: 14px; }
+.opt__body b { font-weight: 600; line-height: 21px; }
+.opt__body span { color: #7A6553; line-height: 22.4px; }
+.opt:focus-visible, .slot:focus-visible, .btn:focus-visible, .check:focus-within .check__box { outline: 2px solid #A9763F; outline-offset: 2px; }
+.badge { flex: 0 0 auto; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; line-height: 1.6; white-space: nowrap; }
+.badge--confirmed { background: #EDF2E9; color: #49634C; }
+.badge--pending { background: #F6ECD8; color: #7A6553; }
+.badge--bad { background: #F8EEE8; color: #995E4B; }
+
+/* Dòng key-value */
+.kv { display: flex; align-items: center; gap: 16px; font-size: 14px; line-height: 22.4px; }
+.kv img { flex: 0 0 16px; width: 16px; height: 16px; display: block; }
+.kv span { flex: 1 1 0; min-width: 0; color: #7A6553; }
+.kv b { font-weight: 600; line-height: 21px; white-space: nowrap; }
+.kv--total { align-items: baseline; }
+.kv--on { gap: 12px; }
+.kv--on span { color: #4A3123; }
+
+/* Form */
+.field { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+.field__label { font-size: 14px; font-weight: 500; line-height: 21px; }
+.two { display: flex; gap: 16px; }
+.two > .field { flex: 1 1 0; }
+.box { position: relative; display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 12px 14px; background: #FFFCF7; border: 1px solid rgba(216,199,178,.62); border-radius: 12px; }
+.box:focus-within { border-color: #A9763F; }
+.box input, .box select, .box textarea { flex: 1 1 0; min-width: 0; padding: 0; border: 0; background: transparent; color: #4A3123; font: inherit; font-size: 14px; line-height: 22.4px; outline: none; appearance: none; -webkit-appearance: none; }
+.box select { cursor: pointer; }
+.box--area { align-items: flex-start; min-height: 80px; }
+.box textarea { resize: vertical; min-height: 56px; }
+.box__icon { flex: 0 0 16px; width: 16px; height: 16px; display: block; pointer-events: none; }
+.box__icon--lg { flex-basis: 18px; width: 18px; height: 18px; }
+.box input[type='date']::-webkit-calendar-picker-indicator { opacity: 0; position: absolute; inset: 0; width: 100%; cursor: pointer; }
+.slots { display: flex; gap: 10px; }
+.slot { flex: 1 1 0; min-width: 0; min-height: 46px; padding: 10px; border: 1px solid rgba(216,199,178,.62); border-radius: 8px; background: #F7EFE2; color: #4A3123; font: inherit; font-size: 14px; line-height: 22.4px; cursor: pointer; transition: background .18s ease; }
+.slot:hover { border-color: #A9763F; }
+.slot.is-selected { background: #4A3123; border-color: #4A3123; color: #F7EFE2; }
+.check { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
+.check__box { flex: 0 0 18px; display: grid; place-items: center; width: 18px; height: 18px; margin-top: 2px; border: 1.5px solid #A9763F; border-radius: 4px; }
+.check__box img { width: 18px; height: 18px; display: block; margin: -1.5px; }
+
+/* Kết quả */
+.result { display: flex; flex-direction: column; gap: 16px; }
+.proposal { display: flex; flex-direction: column; gap: 14px; padding: 24px; border-radius: 16px; background: #E6D3B5; }
+.proposal__eyebrow { font-size: 10px; font-weight: 600; letter-spacing: 1.5px; line-height: 1.6; }
+.proposal__title { font-family: var(--ken-heading); font-size: 22px; font-weight: 400; line-height: 1.4; }
+.proposal__text { font-size: 14px; line-height: 22.4px; }
+.avail { display: flex; align-items: center; gap: 10px; padding: 12px; border: 1px solid rgba(216,199,178,.62); border-radius: 10px; background: #F7EFE2; }
+.avail img { flex: 0 0 16px; width: 16px; height: 16px; display: block; }
+.avail__text { flex: 1 1 0; min-width: 0; color: #7A6553; font-size: 14px; line-height: 22.4px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; width: 100%; padding: 11px 20px; border-radius: 999px; font: inherit; font-size: 14px; font-weight: 600; line-height: 21px; text-decoration: none; white-space: nowrap; cursor: pointer; transition: background .18s ease, border-color .18s ease; }
+.btn--outline-gold { border: 1px solid #A9763F; background: #FFFCF7; color: #4A3123; }
+.btn--outline-gold:hover:not(:disabled) { background: #F7EFE2; }
+.btn--gold { border: 0; background: #E3A52F; color: #4A3123; }
+.btn--gold:hover:not(:disabled) { background: #edb64b; }
+.btn--outline { padding-block: 10px; border: 1px solid rgba(216,199,178,.62); background: transparent; color: #4A3123; }
+.btn--outline:hover { background: #FFFCF7; border-color: #A9763F; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+@media (max-width: 1100px) {
+  .wrap { width: min(100% - 48px, 1280px); }
+  .pair { flex-direction: column; }
+  .pair > * { width: 100%; flex: none; }
+}
+@media (max-width: 1000px) {
+  .layout { flex-direction: column; gap: 28px; }
+  .content { width: 100%; min-height: 0; }
+}
+@media (max-width: 640px) {
+  .wrap { width: calc(100% - 36px); }
+  .intro__title { font-size: 28px; }
+  .two { flex-direction: column; }
+  .opt { flex-wrap: wrap; }
+}

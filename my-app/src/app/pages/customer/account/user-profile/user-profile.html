@@ -1,142 +1,122 @@
-<section class="profile-layout">
-    <!-- BREADCRUMB -->
-    <nav class="breadcrumb" aria-label="breadcrumb">
-      <ol>
-        <li><a routerLink="/">Trang chủ</a></li>
-        <li><span class="separator">/</span></li>
-        <li><a routerLink="/user-profile">Tài khoản của tôi</a></li>
-        <li><span class="separator">/</span></li>
-        <li class="active" aria-current="page">Thông tin tài khoản</li>
-      </ol>
-    </nav>
-  
-    <div class="profile-container">
-      <!-- SIDEBAR -->
-      <app-account-sidebar active="account"></app-account-sidebar>
-  
-      <!-- MAIN CONTENT -->
-      <main class="content-area">
-        <!-- Header -->
-        <header class="content-header">
-          <span class="eyebrow">GÓC RIÊNG CỦA BẠN</span>
-          <h1 class="page-title">Thông tin của bạn</h1>
-          <p class="page-desc">Để KÉN biết cách gọi bạn và gửi những lời nhắn đúng nơi.</p>
-        </header>
-  
-        <!-- Sub Tabs -->
-        <nav class="sub-tabs">
-          <a routerLink="/user-profile" class="tab-item active">Thông tin của bạn</a>
-          <a routerLink="/security" class="tab-item">Mật khẩu & Bảo mật</a>
-        </nav>
-  
-        <!-- Grid Layout for Forms and Cards -->
-        <div class="form-grid-wrapper">
-          <!-- FORM COLUMN -->
-          <div class="form-column">
-            <div class="card main-form-card">
-              
-              <!-- Avatar Upload Section -->
-              <div class="avatar-upload-row">
-                <div class="avatar-large"></div>
-                <div class="avatar-info">
-                  <h3>Ảnh đại diện của bạn</h3>
-                  <p>JPG, PNG · Dung lượng tối đa 5 MB</p>
-                  <a href="#" class="link-action">Thay ảnh đại diện ↗</a>
-                </div>
+<div class="wrap">
+  <nav class="crumb" aria-label="breadcrumb">
+    <a routerLink="/">Trang chủ</a>　/　<a routerLink="/user-profile">Tài khoản của tôi</a>　/　<span aria-current="page">Thông tin tài khoản</span>
+  </nav>
+
+  <div class="layout">
+    <app-account-sidebar active="account" (logout)="logout()"></app-account-sidebar>
+
+    <main class="content">
+      <header class="intro">
+        <p class="intro__eyebrow">GÓC RIÊNG CỦA BẠN</p>
+        <h1 class="intro__title">Thông tin của bạn</h1>
+        <p class="intro__desc">Để KÉN biết cách gọi bạn và gửi những lời nhắn đúng nơi.</p>
+      </header>
+
+      <nav class="tabs" aria-label="Tài khoản">
+        <a class="tab is-active" routerLink="/user-profile" aria-current="page">Thông tin của bạn</a>
+        <a class="tab" routerLink="/security">Mật khẩu & Bảo mật</a>
+      </nav>
+
+      <div class="row">
+        <div class="main">
+          <form class="card" (submit)="$event.preventDefault(); onUpdate()" novalidate>
+            <div class="avatar-row">
+              <div class="avatar">
+                @if (avatarUrl) { <img class="avatar__photo" [src]="avatarUrl" alt="Ảnh đại diện mới" /> }
+                @else { <img src="/images/figma/nguoi-dung-xl.svg" alt="" width="36.8" height="36.8" /> }
               </div>
-  
-              <div class="divider"></div>
-  
-              <!-- Họ và tên -->
-              <div class="input-group">
-                <label>Họ và tên</label>
-                <div class="input-field">
-                  <span>{{ user.name }}</span>
-                </div>
-              </div>
-  
-              <!-- Email & Phone Row -->
-              <div class="input-row-double">
-                <div class="input-group">
-                  <label>Email</label>
-                  <div class="input-field">
-                    <span>{{ user.email }}</span>
-                  </div>
-                </div>
-                <div class="input-group">
-                  <label>Số điện thoại</label>
-                  <div class="input-field">
-                    <span>{{ user.phone }}</span>
-                  </div>
-                  <div class="badge-verified-wrapper">
-                    <span class="badge badge-success">Đã xác minh</span>
-                  </div>
-                </div>
-              </div>
-  
-              <!-- Giới tính & Ngày sinh -->
-              <div class="input-row-double">
-                <div class="input-group">
-                  <label>Giới tính</label>
-                  <div class="input-field select-field">
-                    <span>{{ user.gender }}</span>
-                    <span class="dropdown-arrow"></span>
-                  </div>
-                </div>
-                <div class="input-group">
-                  <label>Ngày sinh (không bắt buộc)</label>
-                  <div class="input-field select-field">
-                    <span>{{ user.birthday }}</span>
-                    <span class="calendar-icon"></span>
-                  </div>
-                </div>
-              </div>
-  
-              <!-- Thành phố -->
-              <div class="input-group">
-                <label>Thành phố</label>
-                <div class="input-field select-field">
-                  <span>{{ user.city }}</span>
-                  <span class="dropdown-arrow"></span>
-                </div>
-              </div>
-  
-              <p class="form-hint">Ngày sinh là thông tin tùy chọn. Số điện thoại được che để bảo vệ riêng tư.</p>
-  
-              <div class="divider"></div>
-  
-              <!-- Action Buttons -->
-              <div class="form-actions">
-                <button type="button" class="btn-primary" (click)="onUpdate()">Cập nhật</button>
-                <button type="button" class="btn-outline" (click)="onCancel()">Huỷ chỉnh sửa</button>
+              <div class="avatar-text">
+                <p class="avatar-text__title">Ảnh đại diện của bạn</p>
+                <p class="small">JPG, PNG · Dung lượng tối đa 5 MB</p>
+                <label class="avatar-text__link" for="avatar-file" tabindex="0" (keydown.enter)="avatarInput.click()" (keydown.space)="avatarInput.click(); $event.preventDefault()">Thay ảnh đại diện ↗</label>
+                <input #avatarInput id="avatar-file" class="sr-only" type="file" accept="image/png,image/jpeg" (change)="onAvatarPicked($event)" />
               </div>
             </div>
-  
-            <p class="footer-hint">Thay đổi email hoặc số điện thoại sẽ cần xác minh lại trước khi dùng làm thông tin liên hệ.</p>
-          </div>
-  
-          <!-- SIDE CARDS COLUMN -->
-          <div class="side-column">
-            <!-- Member Tier Card -->
-            <div class="card tier-card">
-              <span class="tier-eyebrow">BẠN VÀ KÉN</span>
-              <h2 class="tier-title">Thân quen từng chút</h2>
-              <div class="badge rank-silver">Hạng Bạc</div>
-              <div class="tier-points">{{ user.points }} KÉN Điểm</div>
-              <p class="tier-desc">Ưu đãi hiện tại: {{ user.discount }}. Coins đổi thưởng được quản lý độc lập.</p>
-              <div class="divider-light"></div>
-              <a routerLink="/points-tier" class="link-action-dark">Xem quyền lợi thành viên →</a>
+
+            <hr class="line" />
+
+            <div class="field">
+              <label class="field__label" for="pf-name">Họ và tên</label>
+              <div class="box" [class.box--error]="errors.name"><input id="pf-name" name="name" type="text" autocomplete="name" [(ngModel)]="form.name" [attr.aria-invalid]="!!errors.name" /></div>
+              @if (errors.name) { <p class="err" role="alert">{{ errors.name }}</p> }
             </div>
-  
-            <!-- Privacy Protection Card -->
-            <div class="card privacy-card">
-              <div class="shield-icon"></div>
-              <h3 class="privacy-title">Thông tin của bạn, được giữ riêng</h3>
-              <p class="privacy-desc">KÉN dùng thông tin để hỗ trợ đặt chỗ và liên hệ về tài khoản. Không chia sẻ mật khẩu hoặc mã xác minh với bất kỳ ai.</p>
-              <a href="/policy" class="link-action">Chính sách bảo mật ↗</a>
+
+            <div class="two">
+              <div class="field">
+                <label class="field__label" for="pf-email">Email</label>
+                <div class="box" [class.box--error]="errors.email"><input id="pf-email" name="email" type="email" autocomplete="email" [(ngModel)]="form.email" [attr.aria-invalid]="!!errors.email" /></div>
+                @if (errors.email) { <p class="err" role="alert">{{ errors.email }}</p> }
+              </div>
+              <div class="field field--phone">
+                <label class="field__label" for="pf-phone">Số điện thoại</label>
+                <div class="box"><input id="pf-phone" type="text" [value]="phoneMasked" readonly aria-describedby="pf-phone-hint" /></div>
+                @if (phoneVerified) { <span class="pill pill--ok" id="pf-phone-hint">Đã xác minh</span> }
+              </div>
             </div>
-          </div>
+
+            <div class="two">
+              <div class="field">
+                <label class="field__label" for="pf-gender">Giới tính</label>
+                <div class="box">
+                  <select id="pf-gender" name="gender" [(ngModel)]="form.gender">
+                    @for (g of genders; track g) { <option [value]="g">{{ g }}</option> }
+                  </select>
+                  <img class="box__icon" src="/images/figma/chon-gia-tri.svg" alt="" width="16" height="16" />
+                </div>
+              </div>
+              <div class="field">
+                <label class="field__label" for="pf-birthday">Ngày sinh (không bắt buộc)</label>
+                <div class="box">
+                  <input id="pf-birthday" name="birthday" type="date" [max]="today" [(ngModel)]="form.birthday" />
+                  <img class="box__icon box__icon--lg" src="/images/figma/chon-ngay.svg" alt="" width="18" height="18" />
+                </div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="field__label" for="pf-city">Thành phố</label>
+              <div class="box">
+                <select id="pf-city" name="city" [(ngModel)]="form.city">
+                  @for (c of cities; track c) { <option [value]="c">{{ c }}</option> }
+                </select>
+                <img class="box__icon" src="/images/figma/chon-gia-tri.svg" alt="" width="16" height="16" />
+              </div>
+            </div>
+
+            <p class="small">Ngày sinh là thông tin tùy chọn. Số điện thoại được che để bảo vệ riêng tư.</p>
+
+            <hr class="line" />
+
+            <div class="actions">
+              <button type="submit" class="btn btn--dark">Cập nhật</button>
+              <button type="button" class="btn btn--outline" (click)="onCancel()">Huỷ chỉnh sửa</button>
+            </div>
+            <p class="msg" [class.msg--ok]="messageType === 'ok'" [class.msg--error]="messageType === 'error'" role="status" aria-live="polite">{{ message }}</p>
+          </form>
+
+          <p class="small">Thay đổi email hoặc số điện thoại sẽ cần xác minh lại trước khi dùng làm thông tin liên hệ.</p>
         </div>
-      </main>
-    </div>
-  </section>
+
+        <aside class="side">
+          <section class="summary">
+            <p class="summary__eyebrow">BẠN VÀ KÉN</p>
+            <h2 class="summary__title">Thân quen từng chút</h2>
+            <span class="pill pill--cream">Hạng {{ tier }}</span>
+            <p class="summary__pts">{{ points }} KÉN Điểm</p>
+            <p class="summary__text">Ưu đãi hiện tại: giảm 5% tổng hoá đơn. Coins đổi thưởng được quản lý độc lập.</p>
+            <hr class="line" />
+            <a class="summary__link" routerLink="/points-tier">Xem quyền lợi thành viên →</a>
+          </section>
+
+          <section class="card card--privacy">
+            <img src="/images/figma/shield-check.svg" alt="" width="25" height="25" />
+            <h2 class="privacy__title">Thông tin của bạn, được giữ riêng</h2>
+            <p class="small">KÉN dùng thông tin để hỗ trợ đặt chỗ và liên hệ về tài khoản. Không chia sẻ mật khẩu hoặc mã xác minh với bất kỳ ai.</p>
+            <a class="privacy__link" routerLink="/policy">Chính sách bảo mật ↗</a>
+          </section>
+        </aside>
+      </div>
+    </main>
+  </div>
+</div>

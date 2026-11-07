@@ -1,24 +1,142 @@
-<main class="member-page">
-  <div class="crumb"><a routerLink="/">Trang chủ</a> <span>/</span> Tài khoản của tôi <span>/</span> Điểm & Hạng thành viên</div>
-  <div class="member-layout">
-    <app-account-sidebar active="points"></app-account-sidebar>
-    <section class="content">
-      <div class="intro"><span>GÓC RIÊNG CỦA BẠN</span><h1>Điểm & Hạng thành viên</h1><p>Mừng bạn ghé lại. Cùng KÉN nhìn xem mình đã thân quen đến đâu nhé.</p></div>
-      <div class="summary-grid">
-        <article class="summary points"><div class="eyebrow">KÉN ĐIỂM <span>✧</span></div><strong>3.250</strong><p>KÉN Điểm xét hạng</p><div class="progress-meta"><span>3.250 / 5.000 điểm → Vàng</span><b>65%</b></div><div class="progress"><i></i></div></article>
-        <article class="summary coins"><div class="eyebrow">KÉN COINS <span>♧</span></div><strong>650</strong><p>Coins có thể đổi voucher</p><div class="summary-link"><span>Đổi Coins lấy voucher không trừ Điểm xét hạng.</span><a routerLink="/coins-rewards">Xem Voucher →</a></div></article>
-        <article class="summary tier"><div class="eyebrow">HẠNG THÀNH VIÊN <span>Hạng hiện tại</span></div><strong>Bạc</strong><div class="tier-divider"></div><b>Giảm 5% tổng hóa đơn</b><p>Hạng tiếp theo: Vàng · 5.000 điểm</p></article>
+<div class="wrap">
+  <nav class="crumb" aria-label="breadcrumb">
+    <a routerLink="/">Trang chủ</a>　/　<a routerLink="/user-profile">Tài khoản của tôi</a>　/　<span aria-current="page">Điểm & Hạng thành viên</span>
+  </nav>
+
+  <div class="layout">
+    <app-account-sidebar active="points" (logout)="logout()"></app-account-sidebar>
+
+    <main class="content">
+      <header class="intro">
+        <p class="intro__eyebrow">GÓC RIÊNG CỦA BẠN</p>
+        <h1 class="intro__title">Điểm & Hạng thành viên</h1>
+        <p class="intro__desc">Mừng bạn ghé lại. Cùng KÉN nhìn xem mình đã thân quen đến đâu nhé.</p>
+      </header>
+
+      <!-- 3 thẻ tổng quan -->
+      <div class="overview">
+        <article class="ov ov--points">
+          <div class="ov__head"><span class="ov__label">KÉN ĐIỂM</span><img src="/images/figma/sparkles-icon.svg" alt="" width="18" height="18" /></div>
+          <div class="ov__value"><strong>3.250</strong><span>KÉN Điểm xét hạng</span></div>
+          <hr class="ov__line" />
+          <div class="progress">
+            <div class="progress__label"><span>3.250 / 5.000 điểm → Vàng</span><b>65%</b></div>
+            <div class="progress__bar" role="progressbar" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100" aria-label="Tiến độ lên hạng Vàng"><i style="width:65%"></i></div>
+          </div>
+        </article>
+
+        <article class="ov ov--coins">
+          <div class="ov__head"><span class="ov__label">KÉN COINS</span><img src="/images/figma/coins-icon.svg" alt="" width="18" height="18" /></div>
+          <div class="ov__value"><strong>650</strong><span>Coins có thể đổi voucher</span></div>
+          <hr class="ov__line" />
+          <p class="ov__note">Đổi Coins lấy voucher không trừ Điểm xét hạng.</p>
+          <a class="btn-gold" routerLink="/coins-rewards">Xem Voucher →</a>
+        </article>
+
+        <article class="ov ov--tier">
+          <div class="ov__head"><span class="ov__label">HẠNG THÀNH VIÊN</span><span class="badge-now">Hạng hiện tại</span></div>
+          <strong class="tier-name">Bạc</strong>
+          <hr class="ov__line" />
+          <div class="tier-info"><b>Giảm 5% tổng hoá đơn</b><span>Hạng tiếp theo: Vàng · 5.000 điểm</span></div>
+        </article>
       </div>
-      <div class="rules-grid"><article><b>MỖI LẦN GHÉ, THÊM GẮN BÓ</b><h2>10.000đ = 1 KÉN Điểm</h2><p>Điểm xét hạng tích trong chu kỳ 1 năm. Sang năm hạ 1 bậc, không thấp hơn Bạc.</p></article><article><b>HAI GIÁ TRỊ, HAI VAI TRÒ</b><h2>Đổi quà thoải mái, vẫn giữ điểm hạng</h2><p>Kim Cương → Vàng; Vàng → Bạc; Bạc giữ bậc thấp nhất. Đổi Coins không trừ điểm xét hạng.</p></article></div>
-      <div class="section-heading"><h2>Mỗi lần ghé, thêm một nấc thân quen</h2></div>
-      <div class="tiers"><article class="tier-card silver"><div class="tier-icon">♙ <small>Ban đang ở đây</small></div><h3>Bạc</h3><b>1.000 điểm</b><p>Giảm 5% tổng hóa đơn</p></article><article class="tier-card gold"><div class="tier-icon">♜ <small>MỐC TIẾP THEO</small></div><h3>Vàng</h3><b>5.000 điểm</b><p>Giảm 10% tổng hóa đơn</p></article><article class="tier-card diamond"><div class="tier-icon">◇ <small>MỐC TIẾP THEO</small></div><h3>Kim cương</h3><b>10.000 điểm</b><p>Giảm 15% tổng hóa đơn</p></article></div>
-      <section class="transactions"><div class="transaction-head"><h2>Lịch sử giao dịch</h2><div class="tools"><button (click)="filterOpen=!filterOpen">▣　{{selectedPeriod}}　⌄</button><button aria-label="Lọc giao dịch" (click)="filterOpen=!filterOpen">☷</button><button aria-label="Hiển thị dạng bảng">▦</button></div></div>
-        @if(filterOpen){<div class="filter"><label for="period">Khoảng thời gian</label><select id="period" [(ngModel)]="selectedPeriod"><option>Tất cả thời gian</option><option>30 ngày gần đây</option><option>90 ngày gần đây</option><option>Năm 2026</option></select><button (click)="filterOpen=false">Áp dụng</button></div>}
-        <div class="recent">Giao dịch gần đây <span>Điểm hiện tại: <b>3.250</b>　 Coins hiện tại: <b>650</b></span></div>
-        <div class="tx-table"><div class="tx-labels"><span>NGÀY</span><span>LOẠI GIAO DỊCH</span><span>ĐIỂM</span><span>COINS</span><span>GHI CHÚ</span></div>
-          @for (t of transactions; track t.date) {<div class="tx-row"><time>{{t.date}}</time><div class="tx-title"><b>{{t.title}}</b><small>{{t.sub}}</small></div><b class="gain">{{t.points}}</b><b [class.loss]="t.coins.startsWith('−')" class="gain">{{t.coins}}</b><small class="note">{{t.note}}</small></div>}
-        </div><p class="tx-foot">Số dư trước 18/10: 3.200 điểm. Các giao dịch trên thuộc dữ liệu minh họa của đồ án.</p>
+
+      <!-- Giải thích -->
+      <div class="rules">
+        <article class="rule rule--cream">
+          <p class="rule__eyebrow">MỖI LẦN GHÉ, THÊM GẮN BÓ</p>
+          <h2 class="rule__title">10.000đ = 1 KÉN Điểm</h2>
+          <p class="rule__text">Điểm xét hạng tích trong chu kỳ 1 năm. Sang năm hạ 1 bậc, không thấp hơn Bạc.</p>
+        </article>
+        <article class="rule">
+          <p class="rule__eyebrow">HAI GIÁ TRỊ, HAI VAI TRÒ</p>
+          <h2 class="rule__title">Đổi quà thoải mái, vẫn giữ điểm hạng</h2>
+          <p class="rule__text">Kim Cương → Vàng; Vàng → Bạc; Bạc giữ bậc thấp nhất. Đổi Coins không trừ điểm xét hạng.</p>
+        </article>
+      </div>
+
+      <!-- Các hạng -->
+      <section class="tiers">
+        <h2 class="h-serif">Mỗi lần ghé, thêm một nấc thân quen</h2>
+        <div class="tiers__row">
+          <article class="tier tier--silver">
+            <div class="tier__head"><img src="/images/figma/award-bac.svg" alt="" width="22" height="22" /><span class="badge-here">Bạn đang ở đây</span></div>
+            <h3 class="tier__name">Bạc</h3>
+            <p class="tier__pts">1.000 điểm</p>
+            <hr class="tier__line" />
+            <p class="tier__perk">Giảm 5% tổng hoá đơn</p>
+          </article>
+          <article class="tier tier--gold">
+            <div class="tier__head"><img src="/images/figma/medal-vang.svg" alt="" width="22" height="22" /><span class="tier__next">MỐC TIẾP THEO</span></div>
+            <h3 class="tier__name">Vàng</h3>
+            <p class="tier__pts">5.000 điểm</p>
+            <hr class="tier__line" />
+            <p class="tier__perk">Giảm 10% tổng hoá đơn</p>
+          </article>
+          <article class="tier tier--diamond">
+            <div class="tier__head"><img src="/images/figma/gem-kim.svg" alt="" width="22" height="22" /><span class="tier__next">MỐC TIẾP THEO</span></div>
+            <h3 class="tier__name">Kim cương</h3>
+            <p class="tier__pts">10.000 điểm</p>
+            <hr class="tier__line" />
+            <p class="tier__perk">Giảm 15% tổng hoá đơn</p>
+          </article>
+        </div>
       </section>
-    </section>
+
+      <!-- Lịch sử giao dịch -->
+      <section class="tx">
+        <div class="tx__head">
+          <h2 class="h-serif">Lịch sử giao dịch</h2>
+          <div class="tools">
+            <button type="button" class="tools__btn" (click)="filterOpen = !filterOpen" [attr.aria-expanded]="filterOpen">
+              <img src="/images/figma/calendar-date.svg" alt="" width="16" height="16" />
+              <span>Lọc theo ngày</span>
+            </button>
+            <button type="button" class="tools__icon" aria-label="Lọc giao dịch" (click)="filterOpen = !filterOpen"><img src="/images/figma/filter.svg" alt="" width="16" height="16" /></button>
+            <span class="tools__icon" aria-hidden="true"><img src="/images/figma/table.svg" alt="" width="16" height="16" /></span>
+          </div>
+        </div>
+
+        @if (filterOpen) {
+          <form class="filter" (submit)="$event.preventDefault(); applyFilter()">
+            <label>Từ ngày <input type="date" name="from" [(ngModel)]="fromDate" /></label>
+            <label>Đến ngày <input type="date" name="to" [(ngModel)]="toDate" /></label>
+            <button type="submit" class="btn-gold btn-gold--sm">Áp dụng</button>
+            <button type="button" class="btn-ghost" (click)="clearFilter()">Xoá lọc</button>
+          </form>
+        }
+
+        <div class="balance">
+          <span>Giao dịch gần đây</span>
+          <div class="balance__vals">
+            <span>Điểm hiện tại: <b>3.250</b></span>
+            <span>Coins hiện tại: <b>650</b></span>
+          </div>
+        </div>
+
+        <div class="grid" role="table" aria-label="Lịch sử giao dịch">
+          <div class="grid__head" role="row">
+            <span class="c-date" role="columnheader">NGÀY</span>
+            <span class="c-type" role="columnheader">LOẠI GIAO DỊCH</span>
+            <span class="c-num" role="columnheader">ĐIỂM</span>
+            <span class="c-num" role="columnheader">COINS</span>
+            <span class="c-note" role="columnheader">GHI CHÚ</span>
+          </div>
+          @for (t of rows; track t.iso + t.title) {
+            <div class="grid__row" role="row">
+              <time class="c-date" role="cell">{{ fmtDate(t.iso) }}</time>
+              <div class="c-type c-type--stack" role="cell"><b>{{ t.title }}</b><small>{{ t.sub }}</small></div>
+              <span class="c-num" role="cell" [class.pos]="t.points" [class.dash]="!t.points">{{ t.points ?? '—' }}</span>
+              <span class="c-num" role="cell" [class.pos]="!t.coinsNegative" [class.neg]="t.coinsNegative">{{ t.coins }}</span>
+              <small class="c-note" role="cell">{{ t.note }}</small>
+            </div>
+          } @empty {
+            <p class="empty">Không có giao dịch trong khoảng này.</p>
+          }
+        </div>
+
+        <p class="foot">Số dư trước 18/10: 3.200 điểm. Các giao dịch trên thuộc dữ liệu minh hoạ của đồ án.</p>
+      </section>
+    </main>
   </div>
-</main>
+</div>
