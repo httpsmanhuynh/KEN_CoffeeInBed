@@ -1,3 +1,4 @@
+import { KenCafeCatalogPage, KenBookingShell, KenSpaceListingPage, KenFocusPodPage, KenDrinkPickerPage, KenBookingReviewPage, KenBookingPaymentPage } from './pages/customer/ken-booking/booking-pages';
 import { HomeGuestPage, HomeMemberPage, KenHomeContent } from './pages/customer/home-page/home-pages';
 import { NgModule, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
@@ -53,7 +54,15 @@ import { MeetingPage } from './pages/customer/space-details/meeting-page/meeting
     MeetingPage,
     HomeGuestPage,
     HomeMemberPage,
-    KenHomeContent,],
+    KenHomeContent,
+    KenCafeCatalogPage,
+    KenBookingShell,
+    KenSpaceListingPage,
+    KenFocusPodPage,
+    KenDrinkPickerPage,
+    KenBookingReviewPage,
+    KenBookingPaymentPage,
+  ],
   imports: [
     BrowserModule,
     AppRoutingModule,

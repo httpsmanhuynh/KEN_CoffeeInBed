@@ -521,3 +521,19 @@
     font-size: 10px;
   }
 }
+
+/* KEN_CTA_NAV_FIX_V1 */
+.km-booking a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 10px 20px;
+  border-radius: 999px;
+  background: var(--km-gold);
+  color: var(--km-text);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.km-booking a:hover { background: #f0b849; }

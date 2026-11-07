@@ -1,3 +1,4 @@
+import { KenCafeCatalogPage, KenBookingShell, KenSpaceListingPage, KenFocusPodPage, KenDrinkPickerPage, KenBookingReviewPage, KenBookingPaymentPage } from './pages/customer/ken-booking/booking-pages';
 import { HomeGuestPage, HomeMemberPage } from './pages/customer/home-page/home-pages';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
@@ -22,11 +23,20 @@ import { FocusPage } from './pages/customer/space-details/focus-page/focus-page'
 import { MeetingPage } from './pages/customer/space-details/meeting-page/meeting-page';
 
 const routes: Routes = [
+  { path: 'booking', component: KenBookingShell, children: [
+      { path: '', redirectTo: 'spaces', pathMatch: 'full' },
+      { path: 'spaces', component: KenSpaceListingPage },
+      { path: 'focus-pod', component: KenFocusPodPage },
+      { path: 'drinks', component: KenDrinkPickerPage },
+      { path: 'review', component: KenBookingReviewPage },
+      { path: 'payment', component: KenBookingPaymentPage }
+  ] },
   { path: 'home-logged-in', component: HomeMemberPage },
   {
     path: '',
     component: CustomerLayout,
     children: [
+      { path: 'menu', component: KenCafeCatalogPage },
       // English routes - Public pages
       { path: 'support', component: SupportComponent },
       { path: 'policy', component: PolicyPage },
@@ -69,7 +79,9 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule.forRoot(routes, {
+      scrollPositionRestoration: 'enabled'
+    })],
   exports: [RouterModule]
 })
 export class AppRoutingModule {}

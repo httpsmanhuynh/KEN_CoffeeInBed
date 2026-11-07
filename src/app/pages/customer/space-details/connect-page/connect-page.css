@@ -461,3 +461,6 @@
     height: 120px;
   }
 }
+
+/* KEN_CTA_NAV_FIX_V1 */
+.kc-menu-action a.kc-menu-button { color: inherit; text-decoration: none; }

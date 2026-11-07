@@ -206,39 +206,18 @@
           <p class="ks-script">Lười một chút, chill một góc</p>
           <h2>Bạn đã tìm thấy góc của mình?</h2>
           <p>
-            Đăng nhập để chọn gói và khung giờ phù hợp.
+            Chọn không gian, gói và khung giờ phù hợp.
             Nếu chỉ muốn một ly cà phê và một cuộc trò chuyện,
             cứ ghé KÉN Kết Nối.
           </p>
         </div>
 
         <div class="ks-cta-actions">
-          <button
-            type="button"
-            class="ks-primary-button"
-            (click)="bookingNotice = !bookingNotice; menuNotice = false"
-          >
-            Đăng nhập để đặt không gian
-          </button>
+          <a class="ks-primary-button" routerLink="/booking/spaces">Đặt không gian của bạn</a>
 
-          <button
-            type="button"
-            class="ks-outline-button"
-            (click)="menuNotice = !menuNotice; bookingNotice = false"
-          >
-            Xem menu café
-          </button>
+          <a class="ks-outline-button" routerLink="/menu">Xem menu café</a>
 
           <small>08:00–22:00 · Một cơ sở duy nhất</small>
-
-          <p class="ks-feature-notice" *ngIf="bookingNotice" role="status">
-            Chức năng đăng nhập và đặt chỗ sẽ được kết nối
-            khi nhóm tích hợp phần tài khoản.
-          </p>
-
-          <p class="ks-feature-notice" *ngIf="menuNotice" role="status">
-            Trang Menu chưa được kết nối trong nhánh hiện tại.
-          </p>
         </div>
       </div>
     </div>

@@ -33,10 +33,10 @@ export class KenHomeContent implements OnInit, OnDestroy {
   ];
 
   readonly advantages = [
-    { symbol: '◌', title: 'Yên Tĩnh', description: 'Không gian tách biệt khỏi tiếng ồn phố thị, để bạn tập trung trọn vẹn.' },
-    { symbol: '♙', title: 'Riêng Tư', description: 'Cabin và phòng riêng có rèm che, giữ trọn khoảng không của riêng bạn.' },
-    { symbol: '◷', title: 'Linh Động', description: 'Đặt theo giờ hoặc theo combo cố định, bạn là người quyết định.' },
-    { symbol: '◆', title: 'Minh Bạch', description: 'Giá niêm yết rõ ràng, lưu vết tại thời điểm đặt, không phát sinh.' }
+    { symbol: '/images/ken-home/icons/quiet.svg', title: 'Yên Tĩnh', description: 'Không gian tách biệt khỏi tiếng ồn phố thị, để bạn tập trung trọn vẹn.' },
+    { symbol: '/images/ken-home/icons/private.svg', title: 'Riêng Tư', description: 'Cabin và phòng riêng có rèm che, giữ trọn khoảng không của riêng bạn.' },
+    { symbol: '/images/ken-home/icons/flexible.svg', title: 'Linh Động', description: 'Đặt theo giờ hoặc theo combo cố định, bạn là người quyết định.' },
+    { symbol: '/images/ken-home/icons/transparent.svg', title: 'Minh Bạch', description: 'Giá niêm yết rõ ràng, lưu vết tại thời điểm đặt, không phát sinh.' }
   ];
 
   readonly mascots = [
@@ -61,21 +61,21 @@ export class KenHomeContent implements OnInit, OnDestroy {
   ];
 
   readonly prices = [
-    { eyebrow: 'KÉN TẬP TRUNG · GÓI LINH HOẠT', title: 'Bàn chung', price: '30.000đ', sub: 'mỗi người / giờ · tối thiểu 1 giờ', items: ['Wi-Fi, ổ cắm điện, bàn làm việc chung', 'Từ 2 giờ: mỗi khách 01 chai nước suối', 'Gói Nửa ngày (4 giờ): 90.000đ/người', 'Gói 4 giờ: 01 đồ uống tiêu chuẩn/khách'], note: 'Giá tính theo người; nước suối của gói giờ chỉ áp dụng khi đặt từ 2 giờ.', route: '/spaces/work-lounge', featured: false },
-    { eyebrow: 'KÉN TẬP TRUNG · HỌP NHÓM NHỎ (3 GIỜ)', title: 'Phòng họp nhỏ', price: '250.000đ', sub: 'mỗi không gian / gói 3 giờ · 3–6 người', items: ['Không gian riêng cho nhóm 3–6 người', 'Bao gồm máy chiếu', 'Bao gồm bảng từ và Wi-Fi', 'Mỗi khách 01 chai nước suối'], note: 'Phù hợp họp nhóm, học nhóm.', route: '/spaces/small-meeting-room', featured: true },
-    { eyebrow: 'KÉN TÁI TẠO · KÉN RIÊNG', title: 'KÉN nghỉ đơn', price: '70.000đ', sub: 'mỗi kén / gói Nghỉ nhanh 1 giờ · 1 khách', items: ['Giường nằm đơn, ổ cắm điện', 'Gói 1 giờ: không bao gồm F&B', 'Gói Ngả lưng (2 giờ): 130.000đ/kén', 'Gói 2 giờ: 01 đồ uống tiêu chuẩn/khách'], note: '15 phút dọn sau giờ sử dụng, không tính trong gói.', route: '/spaces', featured: false }
+    { eyebrow: 'KÉN TẬP TRUNG · GÓI LINH HOẠT', title: 'Bàn chung', icon: '/images/ken-home/icons/price-laptop.svg', price: '30.000đ', sub: 'mỗi người / giờ · tối thiểu 1 giờ', items: ['Wi-Fi, ổ cắm điện, bàn làm việc chung', 'Từ 2 giờ: mỗi khách 01 chai nước suối', 'Gói Nửa ngày (4 giờ): 90.000đ/người', 'Gói 4 giờ: 01 đồ uống tiêu chuẩn/khách'], note: 'Giá tính theo người; nước suối của gói giờ chỉ áp dụng khi đặt từ 2 giờ.', route: '/spaces/work-lounge', featured: false },
+    { eyebrow: 'KÉN TẬP TRUNG · HỌP NHÓM NHỎ (3 GIỜ)', title: 'Phòng họp nhỏ', icon: '/images/ken-home/icons/price-door.svg', price: '250.000đ', sub: 'mỗi không gian / gói 3 giờ · 3–6 người', items: ['Không gian riêng cho nhóm 3–6 người', 'Bao gồm máy chiếu', 'Bao gồm bảng từ và Wi-Fi', 'Mỗi khách 01 chai nước suối'], note: 'Phù hợp họp nhóm, học nhóm.', route: '/spaces/small-meeting-room', featured: true },
+    { eyebrow: 'KÉN TÁI TẠO · KÉN RIÊNG', title: 'KÉN nghỉ đơn', icon: '/images/ken-home/icons/price-moon.svg', price: '70.000đ', sub: 'mỗi kén / gói Nghỉ nhanh 1 giờ · 1 khách', items: ['Giường nằm đơn, ổ cắm điện', 'Gói 1 giờ: không bao gồm F&B', 'Gói Ngả lưng (2 giờ): 130.000đ/kén', 'Gói 2 giờ: 01 đồ uống tiêu chuẩn/khách'], note: '15 phút dọn sau giờ sử dụng, không tính trong gói.', route: '/spaces', featured: false }
   ];
 
   readonly addons = [
-    { name: 'Americano', price: '40.000đ', icon: '☕' },
-    { name: 'Matcha Latte / Hojicha Latte', price: '55.000đ', icon: '🍃' },
-    { name: 'Bánh sừng bò (Croissant) cơ bản', price: '35.000đ', icon: '🥐' },
-    { name: 'Bộ nghỉ ngơi (bịt mắt, nút tai)', price: '20.000đ', icon: '♧' },
-    { name: 'Chăn mỏng thêm', price: '15.000đ', icon: '▤' },
-    { name: 'Khăn ấm', price: '10.000đ', icon: '♨' }
+    { name: 'Americano', price: '40.000đ', icon: '/images/ken-home/icons/addon-coffee.svg' },
+    { name: 'Matcha Latte / Hojicha Latte', price: '55.000đ', icon: '/images/ken-home/icons/addon-leaf.svg' },
+    { name: 'Bánh sừng bò (Croissant) cơ bản', price: '35.000đ', icon: '/images/ken-home/icons/addon-croissant.svg' },
+    { name: 'Bộ nghỉ ngơi (bịt mắt, nút tai)', price: '20.000đ', icon: '/images/ken-home/icons/addon-headphones.svg' },
+    { name: 'Chăn mỏng thêm', price: '15.000đ', icon: '/images/ken-home/icons/addon-blanket.svg' },
+    { name: 'Khăn ấm', price: '10.000đ', icon: '/images/ken-home/icons/addon-hand.svg' }
   ];
 
-  readonly gallery = ['moments-1.png', 'moments-2.png', 'moments-3.png', 'moments-4.png', 'moments-5.png', 'moments-6.png', 'moments-7.png', 'moments-8.png'];
+  readonly gallery = ['moments-8.png', 'moments-7.png', 'moments-6.png', 'moments-5.png', 'moments-4.png', 'moments-3.png', 'moments-2.png', 'moments-1.png'];
 
   readonly faqs = [
     { question: 'KÉN khác gì một quán cà phê thông thường?', answer: 'KÉN không chỉ bán cà phê mà bán quyền sử dụng không gian và thời gian. Bạn có thể chọn làm việc yên tĩnh ở KÉN Tập Trung hoặc chợp mắt trong kén riêng ở KÉN Tái Tạo, tất cả ở cùng một điểm đến.' },

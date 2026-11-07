@@ -271,3 +271,25 @@
  .kh-contact-form{padding:22px}
 }
 @media(max-width:390px){.kh-hero .kh-actions{flex-direction:column;align-items:stretch}.kh-btn{white-space:normal}.kh-advantage-grid{gap:9px}.kh-member-card{padding:19px}.kh-addon strong{font-size:12px}}
+
+/* KEN FIGMA ORIGINAL SVG ICONS - added by home icon fix */
+.kh-advantage-icon{display:flex;align-items:center;justify-content:center}
+.kh-advantage-icon img{width:40px;height:40px;object-fit:contain;display:block}
+.kh-price-icon img{width:24px;height:24px;object-fit:contain;display:block}
+.kh-addon img.kh-addon-symbol{width:24px;height:24px;object-fit:contain;flex:0 0 24px;display:block}
+.kh-member-grid span img{width:20px;height:20px;object-fit:contain;display:block}
+.kh-branch-icon{display:inline-block!important;width:19px;height:19px;max-width:none!important;vertical-align:-4px;object-fit:contain}
+.kh-mini-pill img{display:inline-block!important;width:15px;height:15px;max-width:none!important;vertical-align:-3px;margin-right:3px;object-fit:contain}
+.kh-staff-icon{display:inline-block!important;width:14px;height:14px;max-width:none!important;vertical-align:-2px;margin-right:3px;object-fit:contain}
+/* KEN_CTA_NAV_FIX_V1 */
+.kh-addons-head .kh-menu-full-link {
+  border: 0;
+  background: transparent;
+  font-size: 14px;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+.kh-addons-head .kh-menu-full-link:hover {
+  text-decoration: underline;
+}
