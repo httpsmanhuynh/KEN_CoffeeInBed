@@ -1,0 +1,51 @@
+@if (popup.isOpen()) {
+  <div class="overlay" (click)="onBackdrop($event)">
+    <div #dialog class="dialog" role="dialog" aria-modal="true" aria-labelledby="sg-title" tabindex="-1"
+         (mouseenter)="paused = true" (mouseleave)="paused = false"
+         (focusin)="paused = true" (focusout)="paused = false">
+      @for (s of current; track s.id) {
+        <div class="content">
+          <div class="media">
+            <img class="media__photo" [src]="s.image" [alt]="s.name" />
+            <span class="when"><img src="/images/figma/sun.svg" alt="" width="16" height="16" />BUỔI CHIỀU · 14:00–17:00</span>
+            <p class="quote">Lười một chút, chill một góc</p>
+          </div>
+
+          <div class="copy">
+            <div class="copy__top">
+              <p class="eyebrow">MỘT CHÚT GỢI Ý TỪ KÉN</p>
+              <button type="button" class="close" (click)="close()" aria-label="Đóng gợi ý">
+                <span>Đóng</span><img src="/images/figma/x.svg" alt="" width="20" height="20" />
+              </button>
+            </div>
+            <h2 class="headline" id="sg-title">Chiều rồi, nghỉ một chút nhé.</h2>
+            <div class="dish">
+              <p class="dish__name">{{ s.name }}</p>
+              <p class="dish__price">{{ s.price }}</p>
+              <p class="dish__desc">{{ s.desc }}</p>
+            </div>
+            <div class="actions">
+              <button type="button" class="cta" (click)="explore()">
+                <span>Khám phá Top Trending</span><img src="/images/figma/mui-ten.svg" alt="" width="20" height="20" />
+              </button>
+              <button type="button" class="later" (click)="later()">Để sau, mình xem Menu</button>
+            </div>
+          </div>
+        </div>
+      }
+
+      <div class="controls">
+        <p class="counter" aria-live="off">{{ counter }}</p>
+        <div class="bars" aria-hidden="true">
+          @for (b of slides; track b.id; let i = $index) {
+            <span class="bar"><i [style.width.%]="fill(i)"></i></span>
+          }
+        </div>
+        <div class="nav">
+          <button type="button" class="nav__btn" (click)="prev()" aria-label="Món trước"><img src="/images/figma/chevron-left.svg" alt="" width="16" height="16" /></button>
+          <button type="button" class="nav__btn nav__btn--dark" (click)="next()" aria-label="Món tiếp theo"><img src="/images/figma/chevron-right.svg" alt="" width="16" height="16" /></button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

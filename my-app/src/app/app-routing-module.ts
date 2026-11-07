@@ -13,6 +13,8 @@ import { BookingList } from './pages/customer/bookings/booking-list/booking-list
 import { BookingReschedule } from './pages/customer/bookings/booking-reschedule/booking-reschedule';
 import { UserProfile } from './pages/customer/account/user-profile/user-profile';
 import { Security } from './pages/customer/account/security/security';
+import { TopTrending } from './pages/customer/menu/top-trending/top-trending';
+import { MenuPage } from './pages/customer/menu/menu-page/menu-page';
 
 const routes: Routes = [
   { path: '', redirectTo: 'register', pathMatch: 'full' },
@@ -31,6 +33,8 @@ const routes: Routes = [
   { path: 'booking-reschedule', component: BookingReschedule },
   { path: 'user-profile', component: UserProfile },
   { path: 'security', component: Security },
+  { path: 'menu', component: MenuPage },
+  { path: 'top-trending', component: TopTrending },
 
 
   // Giữ tương thích với các URL cũ đã được dùng trong giao diện.

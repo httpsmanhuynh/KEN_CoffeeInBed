@@ -24,6 +24,9 @@ import { ConfirmDialog } from './shared/components/confirm-dialog/confirm-dialog
 import { UserProfile } from './pages/customer/account/user-profile/user-profile';
 import { Security } from './pages/customer/account/security/security';
 import { AccountSidebar } from './shared/components/account-sidebar/account-sidebar';
+import { SuggestionPopup } from './shared/components/suggestion-popup/suggestion-popup';
+import { TopTrending } from './pages/customer/menu/top-trending/top-trending';
+import { MenuPage } from './pages/customer/menu/menu-page/menu-page';
 
 @NgModule({
   declarations: [
@@ -46,6 +49,9 @@ import { AccountSidebar } from './shared/components/account-sidebar/account-side
     UserProfile,
     Security,
     AccountSidebar,
+    SuggestionPopup,
+    TopTrending,
+    MenuPage,
     // Remove ConfirmDialog from declarations
   ],
   imports: [

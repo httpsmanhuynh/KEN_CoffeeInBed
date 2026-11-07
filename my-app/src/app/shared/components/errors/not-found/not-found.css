@@ -1,0 +1,185 @@
+/* Style dùng chung cho trang 404 / 403 – Figma PTWKDNC-KÉN (node 379-3195, 509-5061) */
+:host {
+  display: flex;
+  flex: 1 0 auto;
+  justify-content: center;
+  width: 100%;
+  background: var(--ken-page);
+  color: var(--ken-brown);
+  font-family: var(--ken-font);
+}
+p, h1 { margin: 0; }
+
+.err {
+  width: 100%;
+  min-height: 790px;
+  padding: 38px 24px 54px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  text-align: center;
+}
+
+/* Eyebrow */
+.err__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.6;
+  letter-spacing: 0;
+  color: var(--ken-brown);
+}
+.err__eyebrow::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--ken-gold-dark);
+}
+
+/* Số lớn + trang trí */
+.err__stage {
+  position: relative;
+  width: 860px;
+  max-width: 100%;
+  height: 300px;
+  display: flex;
+  justify-content: center;
+}
+.err__code {
+  width: 640px;
+  height: 300px;
+  font-family: var(--ken-heading);
+  font-size: 300px;
+  font-weight: 500;
+  line-height: 300px;
+  color: var(--ken-brown);
+  user-select: none;
+}
+.err__deco { position: absolute; display: block; }
+.err__dash {
+  left: 675px; top: 134px;
+  width: 115px; height: 99px;
+  border: 1.2px dashed var(--ken-gold-dark);
+  border-radius: 50%;
+}
+.err__icon {
+  left: 729px; top: 57px;
+  width: 46px; height: 46px;
+  transform: rotate(12deg);
+  transform-origin: top left;
+  color: var(--ken-gold-dark);
+}
+.err__note {
+  left: 680px; top: 239px;
+  width: 170px;
+  font-family: 'Dancing Script', cursive;
+  font-size: 21px;
+  font-weight: 400;
+  line-height: normal;
+  text-align: left;
+  color: var(--ken-brown);
+  transform: rotate(-6deg);
+  transform-origin: top left;
+  white-space: nowrap;
+}
+
+/* Nội dung */
+.err__body {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.err__title {
+  font-family: var(--ken-heading);
+  font-size: 44px;
+  font-weight: 500;
+  line-height: 55px;
+  color: var(--ken-brown);
+}
+.err__desc {
+  max-width: 650px;
+  font-size: 16px;
+  line-height: 25.6px;
+  color: var(--ken-muted);
+}
+
+/* Nút */
+.err__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  padding-top: 8px;
+}
+.btn {
+  height: 52px;
+  padding: 0 26px;
+  display: inline-flex;
+  align-items: center;
+  gap: 18px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 21px;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color .15s ease, box-shadow .15s ease, transform .15s ease;
+}
+.btn svg { width: 18px; height: 18px; flex: none; }
+.btn--primary {
+  background: var(--ken-brown);
+  color: var(--ken-cream);
+  box-shadow: inset 0 0 0 1px var(--ken-brown);
+}
+.btn--primary:hover { background: #5b3d2c; }
+.btn--ghost {
+  background: var(--ken-cream);
+  color: var(--ken-brown);
+  box-shadow: inset 0 0 0 1px var(--ken-border);
+}
+.btn--ghost:hover { background: var(--ken-gold-light); }
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible { outline: 2px solid var(--ken-gold-dark); outline-offset: 3px; }
+
+.err__hint {
+  font-size: 14px;
+  line-height: 22.4px;
+  color: var(--ken-muted);
+}
+
+/* Tablet / mobile: bỏ định vị tuyệt đối, thu nhỏ số lớn */
+@media (max-width: 900px) {
+  .err { min-height: 0; padding: 56px 20px 64px; gap: 20px; }
+  .err__stage { height: auto; flex-direction: column; align-items: center; }
+  .err__code {
+    width: auto; height: auto;
+    font-size: clamp(120px, 32vw, 240px);
+    line-height: 1;
+  }
+  .err__dash, .err__icon { display: none; }
+  .err__note {
+    position: static;
+    width: auto;
+    margin-top: 4px;
+    text-align: center;
+    transform: rotate(-3deg);
+  }
+  .err__title { font-size: 32px; line-height: 1.25; }
+}
+@media (max-width: 480px) {
+  .err__title { font-size: 28px; }
+  .err__desc { font-size: 15px; }
+  .err__actions { flex-direction: column; width: 100%; max-width: 320px; }
+  .btn { justify-content: space-between; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn { transition: none; }
+}
