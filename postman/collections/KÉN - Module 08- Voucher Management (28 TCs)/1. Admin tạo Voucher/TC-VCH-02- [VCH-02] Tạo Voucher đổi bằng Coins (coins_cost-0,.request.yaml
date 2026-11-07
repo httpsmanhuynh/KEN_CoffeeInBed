@@ -1,0 +1,42 @@
+$kind: http-request
+name: "TC-VCH-02: [VCH-02] Tạo Voucher đổi bằng Coins (coins_cost>0, usage_limit ≥ redeem_limit > 0, redeem_valid_to ≤ valid_to) (Branch: VCH-B02)"
+description: |-
+  **Mã TC:** VCH-02 (TC-VCH-02)
+  **Nhóm:** Admin tạo Voucher
+  **API / Thành phần:** POST /api/vouchers
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed vouchers.
+  **Dữ liệu vào:** {"code": "COIN30K", "discount_type": "FIXED_AMOUNT", "discount_value": 30000, "min_order_value": 150000, "usage_limit": 100, "redeem_limit": 100, "coins_cost": 30, "redeem_valid_to": "<ISO>", "valid_from": "<ISO>", "valid_to": "<ISO>"}
+  **Các bước thực hiện:**
+  1) POST /api/vouchers
+  **Kết quả mong đợi:** 201; redeem_count=0 (HTTP: 201)
+  **Nhánh code bao phủ:** VCH-B02
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/vouchers"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "code": "COIN30K",
+      "discount_type": "FIXED_AMOUNT",
+      "discount_value": 30000,
+      "min_order_value": 150000,
+      "usage_limit": 100,
+      "redeem_limit": 100,
+      "coins_cost": 30,
+      "redeem_valid_to": "2026-12-31T23:59:59.000Z",
+      "valid_from": "2026-12-31T23:59:59.000Z",
+      "valid_to": "2026-12-31T23:59:59.000Z"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-VCH-02] Tạo Voucher đổi bằng Coins (coins_cost>0, usage_limit ≥ redeem_limit > 0, redeem_valid_to ≤ valid_to)
+      pm.test("[TC-VCH-02] Status code is 201", function () {
+          pm.expect(pm.response.code).to.be.oneOf([201]);
+      });
+    language: text/javascript
+order: 2000

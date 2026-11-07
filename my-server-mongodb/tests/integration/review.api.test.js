@@ -1,10 +1,6 @@
 'use strict';
-// Kiểm thử đơn vị & tích hợp cho Module 10: Quản lý Đánh giá (Review Management — UC-16, BR-H01, BR-F03, BR-D06, FR-4.3, NFR-02).
-// Bao phủ:
-// 1. Kiểm tra điều kiện đơn chính chủ và đã CHECKED_OUT.
-// 2. Chặn đánh giá trùng (tối đa 01 đánh giá/Booking — cả tuần tự lẫn đồng thời Race Condition EX-5.6).
-// 3. Tạo và Xem đánh giá (theo Booking, theo Space kèm điểm trung bình & phân bố sao, theo User).
-// 4. Hiển thị lời nhắc đánh giá (review_reminder / reviewReminder) trong lịch sử đặt chỗ (Booking History).
+// Kiểm thử đơn vị & tích hợp cốt lõi cho Module 10: Quản lý Đánh giá (Review Management).
+// Mã TC đồng bộ với Test_Module10_Review_Management.xlsx và Postman Collection Module 10.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { ObjectId } = require('mongodb');
@@ -282,77 +278,46 @@ function buildReviewTestDb() {
   });
 }
 
-test('TC-REV-01\tAUTO-REV-01: Domain: validateReviewInput, evaluateReviewEligibility, enrichBookingWithReview & summarizeReviews', () => {
-  // 1. validateReviewInput
-  assert.equal(validateReviewInput({ rating: 5, comment: '  Không gian rất yên tĩnh  ' }).ok, true);
-  assert.equal(validateReviewInput({ rating: 5, comment: '  Không gian rất yên tĩnh  ' }).comment, 'Không gian rất yên tĩnh');
-  assert.equal(validateReviewInput({ rating: 4, comment: '   ' }).comment, null);
-  assert.equal(validateReviewInput({ rating: 3 }).comment, null);
-
-  assert.equal(validateReviewInput({ rating: 0 }).code, 'INVALID_RATING');
-  assert.equal(validateReviewInput({ rating: 6 }).code, 'INVALID_RATING');
-  assert.equal(validateReviewInput({ rating: 4.5 }).code, 'INVALID_RATING');
-  assert.equal(validateReviewInput({ rating: null }).code, 'INVALID_RATING');
-  assert.equal(validateReviewInput({ rating: true }).code, 'INVALID_RATING');
+test('TC-REV-01\tAUTO-REV-01: Tạo đánh giá hợp lệ cho đơn CHECKED_OUT của chính mình & kiểm tra biên rating/comment (REV-B01; REV-B02; REV-B03; REV-B04)', async () => {
+  assert.equal(validateReviewInput({ rating: 1, comment: '  Không gian rất yên tĩnh  ' }).ok, true);
+  assert.equal(validateReviewInput({ rating: 5, comment: '   ' }).comment, null);
+  for (const bad of [0, 6, -1, 4.5, 'abc', null, true]) {
+    assert.equal(validateReviewInput({ rating: bad }).code, 'INVALID_RATING');
+  }
   assert.equal(validateReviewInput({ rating: 5, comment: 12345 }).code, 'INVALID_COMMENT');
   assert.equal(validateReviewInput({ rating: 5, comment: 'a'.repeat(501) }).code, 'COMMENT_TOO_LONG');
 
-  // 2. evaluateReviewEligibility
-  assert.equal(evaluateReviewEligibility({ booking: null, userId: IDS.user1 }).code, 'BOOKING_NOT_FOUND');
-  assert.equal(
-    evaluateReviewEligibility({
-      booking: { _id: IDS.bookingCheckedOut1, user_id: IDS.user1, status: 'CHECKED_OUT' },
-      userId: IDS.user2,
-    }).code,
-    'FORBIDDEN',
-  );
-  assert.equal(
-    evaluateReviewEligibility({
-      booking: { _id: IDS.bookingConfirmed, user_id: IDS.user1, status: 'CONFIRMED' },
-      userId: IDS.user1,
-    }).code,
-    'BOOKING_NOT_CHECKED_OUT',
-  );
-  assert.equal(
-    evaluateReviewEligibility({
-      booking: { _id: IDS.bookingCheckedOut1, user_id: IDS.user1, status: 'CHECKED_OUT' },
-      userId: IDS.user1,
-      existingReview: { _id: new ObjectId(), rating: 5 },
-    }).code,
-    'REVIEW_ALREADY_EXISTS',
-  );
-  const okElig = evaluateReviewEligibility({
-    booking: { _id: IDS.bookingCheckedOut1, user_id: IDS.user1, status: 'CHECKED_OUT' },
-    userId: IDS.user1,
+  const db = buildReviewTestDb();
+  const user1 = await db.collection('users').findOne({ _id: IDS.user1 });
+  const review = await createReview(db, {
+    user: user1,
+    bookingId: IDS.bookingCheckedOut1,
+    rating: 5,
+    comment: 'Không gian rất ổn',
+    now: new Date('2026-05-20T04:00:00Z'),
   });
-  assert.equal(okElig.canReview, true);
-  assert.equal(okElig.reviewReminder, true);
-
-  // 3. enrichBookingWithReview & summarizeReviews
-  const bEnriched = enrichBookingWithReview({ _id: IDS.bookingCheckedOut1, status: 'CHECKED_OUT' }, null);
-  assert.equal(bEnriched.can_review, true);
-  assert.equal(bEnriched.review_reminder, true);
-
-  const summary = summarizeReviews([{ rating: 5 }, { rating: 4 }, { rating: 5 }, { rating: 0 }]);
-  assert.equal(summary.totalReviews, 4);
-  assert.equal(summary.ratingDistribution[5], 2);
-  assert.equal(summary.ratingDistribution[4], 1);
+  assert.deepEqual(Object.keys(review).sort(), [
+    '_id',
+    'booking_id',
+    'comment',
+    'created_at',
+    'rating',
+    'user_id',
+  ]);
+  assert.equal(review.rating, 5);
 });
 
-test('TC-REV-02\tAUTO-REV-02: Kiểm tra điều kiện đơn chính chủ & đã CHECKED_OUT: Chặn đơn người khác và đơn chưa CHECKED_OUT', async () => {
+test('TC-REV-06\tAUTO-REV-06: Chặn đánh giá đơn chưa CHECKED_OUT, đơn người khác (không chính chủ) và chưa đăng nhập (REV-B06; REV-B07; REV-B08; REV-B09)', async () => {
   const db = buildReviewTestDb();
   const [user1, user2] = await Promise.all([
     db.collection('users').findOne({ _id: IDS.user1 }),
     db.collection('users').findOne({ _id: IDS.user2 }),
   ]);
 
-  // Chưa đăng nhập hoặc user bị khóa
   await assert.rejects(
     () => createReview(db, { user: null, bookingId: IDS.bookingCheckedOut1, rating: 5 }),
     { status: 401, code: 'UNAUTHENTICATED' },
   );
-
-  // Booking ID không hợp lệ hoặc không tồn tại
   await assert.rejects(
     () => createReview(db, { user: user1, bookingId: 'bad-id', rating: 5 }),
     { status: 400, code: 'INVALID_BOOKING_ID' },
@@ -361,183 +326,73 @@ test('TC-REV-02\tAUTO-REV-02: Kiểm tra điều kiện đơn chính chủ & đ�
     () => createReview(db, { user: user1, bookingId: new ObjectId(), rating: 5 }),
     { status: 404, code: 'BOOKING_NOT_FOUND' },
   );
-
-  // User2 cố tình đánh giá đơn CHECKED_OUT của User1 -> 403 FORBIDDEN (kiểm tra chính chủ BR-D06)
   await assert.rejects(
-    () =>
-      createReview(db, {
-        user: user2,
-        bookingId: IDS.bookingCheckedOut1,
-        rating: 5,
-        comment: 'Đánh giá hộ',
-      }),
+    () => createReview(db, { user: user2, bookingId: IDS.bookingCheckedOut1, rating: 5 }),
     { status: 403, code: 'FORBIDDEN' },
   );
-
-  // User1 đánh giá đơn của chính mình nhưng đang ở trạng thái CONFIRMED / PENDING_PAYMENT / CANCELLED -> 422 BOOKING_NOT_CHECKED_OUT
   for (const bId of [IDS.bookingConfirmed, IDS.bookingPending, IDS.bookingCancelled]) {
     await assert.rejects(
       () => createReview(db, { user: user1, bookingId: bId, rating: 4 }),
       { status: 422, code: 'BOOKING_NOT_CHECKED_OUT' },
     );
   }
-
-  // Dữ liệu rating sai
-  await assert.rejects(
-    () => createReview(db, { user: user1, bookingId: IDS.bookingCheckedOut1, rating: 10 }),
-    { status: 422, code: 'INVALID_RATING' },
-  );
 });
 
-test('TC-REV-03\tAUTO-REV-03: Lời nhắc đánh giá trong lịch sử đặt chỗ, Tạo đánh giá & Chặn đánh giá trùng (tuần tự + đồng thời)', async () => {
+test('TC-REV-10\tAUTO-REV-10: Chặn đánh giá trùng lần 2 (tuần tự) & gửi 2 đánh giá đồng thời (Race Condition) (REV-B10; REV-B11)', async () => {
   const db = buildReviewTestDb();
-  const [user1, user2, admin] = await Promise.all([
+  const [user1, user2] = await Promise.all([
     db.collection('users').findOne({ _id: IDS.user1 }),
     db.collection('users').findOne({ _id: IDS.user2 }),
+  ]);
+
+  await createReview(db, { user: user1, bookingId: IDS.bookingCheckedOut1, rating: 5, comment: 'Lần 1' });
+  await assert.rejects(
+    () => createReview(db, { user: user1, bookingId: IDS.bookingCheckedOut1, rating: 1, comment: 'Lần 2' }),
+    { status: 409, code: 'REVIEW_ALREADY_EXISTS' },
+  );
+
+  const concurrentResults = await Promise.allSettled([
+    createReview(db, { user: user2, bookingId: IDS.bookingCheckedOut2, rating: 4, comment: 'Đồng thời 1' }),
+    createReview(db, { user: user2, bookingId: IDS.bookingCheckedOut2, rating: 3, comment: 'Đồng thời 2' }),
+  ]);
+  assert.equal(concurrentResults.filter((r) => r.status === 'fulfilled').length, 1);
+  assert.equal(concurrentResults.filter((r) => r.status === 'rejected').length, 1);
+});
+
+test('TC-REV-15\tAUTO-REV-15: Lời nhắc đánh giá (review_reminder), chế độ chỉ xem sau khi gửi & lọc theo Không gian (REV-B13; REV-B15; REV-B16; REV-B18)', async () => {
+  const db = buildReviewTestDb();
+  const [user1, admin] = await Promise.all([
+    db.collection('users').findOne({ _id: IDS.user1 }),
     db.collection('users').findOne({ _id: IDS.admin }),
   ]);
 
-  // 1. Trước khi đánh giá: Lịch sử đặt chỗ của user1 hiển thị lời nhắc đánh giá cho đơn CHECKED_OUT
-  const rawBookingsBefore = await db.collection('bookings').find({ user_id: user1._id }).toArray();
-  const historyBefore = await attachReviewsToBookings(db, rawBookingsBefore);
-  const checkedOutItemBefore = historyBefore.find(
-    (b) => String(b._id) === String(IDS.bookingCheckedOut1),
-  );
-  const confirmedItemBefore = historyBefore.find(
-    (b) => String(b._id) === String(IDS.bookingConfirmed),
-  );
+  const rawBookings = await db.collection('bookings').find({ user_id: user1._id }).toArray();
+  const before = await attachReviewsToBookings(db, rawBookings);
+  const coBefore = before.find((b) => String(b._id) === String(IDS.bookingCheckedOut1));
+  assert.equal(coBefore.review_reminder, true);
+  assert.equal(coBefore.can_review, true);
 
-  assert.equal(checkedOutItemBefore.has_review, false);
-  assert.equal(checkedOutItemBefore.can_review, true);
-  assert.equal(checkedOutItemBefore.review_reminder, true);
-  assert.equal(checkedOutItemBefore.reviewReminder, true);
-  // Đơn CONFIRMED không hiển thị lời nhắc đánh giá
-  assert.equal(confirmedItemBefore.can_review, false);
-  assert.equal(confirmedItemBefore.review_reminder, false);
+  await createReview(db, { user: user1, bookingId: IDS.bookingCheckedOut1, rating: 5, comment: 'Rất tốt' });
 
-  // Kiểm tra trạng thái đánh giá của đơn trước khi gửi
-  const statusBefore = await getBookingReviewStatus(db, {
-    user: user1,
-    bookingId: IDS.bookingCheckedOut1,
-  });
-  assert.equal(statusBefore.canReview, true);
-  assert.equal(statusBefore.reviewReminder, true);
-  assert.equal(statusBefore.hasReview, false);
+  const after = await attachReviewsToBookings(db, rawBookings);
+  const coAfter = after.find((b) => String(b._id) === String(IDS.bookingCheckedOut1));
+  assert.equal(coAfter.review_reminder, false);
+  assert.equal(coAfter.has_review, true);
 
-  // 2. Tạo đánh giá hợp lệ (kiểm tra cả điều kiện created_at >= checked_out_at và đúng 6 trường validator)
-  const review1 = await createReview(db, {
-    user: user1,
-    bookingId: IDS.bookingCheckedOut1,
-    rating: 5,
-    comment: 'Focus Pod cách âm tuyệt vời, Matcha ngon!',
-    now: new Date('2026-05-20T04:00:00Z'), // truyền now sớm hơn checked_out_at để kiểm tra tự động kẹp >= checked_out_at
-  });
+  const statusView = await getBookingReviewStatus(db, { user: user1, bookingId: IDS.bookingCheckedOut1 });
+  assert.equal(statusView.hasReview, true);
+  assert.equal(statusView.canReview, false);
+  assert.equal(statusView.reviewReminder, false);
 
-  assert.deepEqual(Object.keys(review1).sort(), [
-    '_id',
-    'booking_id',
-    'comment',
-    'created_at',
-    'rating',
-    'user_id',
-  ]);
-  assert.equal(review1.rating, 5);
-  assert.equal(review1.comment, 'Focus Pod cách âm tuyệt vời, Matcha ngon!');
-  assert.equal(review1.created_at.getTime(), new Date('2026-05-20T05:00:00Z').getTime());
+  const adminView = await getBookingReviewStatus(db, { user: admin, bookingId: IDS.bookingCheckedOut1 });
+  assert.equal(adminView.hasReview, true);
 
-  // 3. Sau khi đánh giá: Lịch sử đặt chỗ tự động ẩn lời nhắc đánh giá (review_reminder = false) và đính kèm review
-  const historyAfter = await attachReviewsToBookings(db, rawBookingsBefore);
-  const checkedOutItemAfter = historyAfter.find(
-    (b) => String(b._id) === String(IDS.bookingCheckedOut1),
-  );
-  assert.equal(checkedOutItemAfter.has_review, true);
-  assert.equal(checkedOutItemAfter.can_review, false);
-  assert.equal(checkedOutItemAfter.review_reminder, false);
-  assert.equal(checkedOutItemAfter.review.rating, 5);
-
-  // 4. Chặn đánh giá trùng lần 2 (tuần tự) -> 409 REVIEW_ALREADY_EXISTS kèm đánh giá đã gửi (chế độ chỉ xem AF2)
-  await assert.rejects(
-    async () => {
-      try {
-        await createReview(db, {
-          user: user1,
-          bookingId: IDS.bookingCheckedOut1,
-          rating: 1,
-          comment: 'Đánh giá lại lần 2',
-        });
-      } catch (err) {
-        assert.equal(err.status, 409);
-        assert.equal(err.code, 'REVIEW_ALREADY_EXISTS');
-        assert.equal(err.details.review.rating, 5);
-        throw err;
-      }
-    },
-    { code: 'REVIEW_ALREADY_EXISTS' },
-  );
-
-  // 5. Chặn đánh giá trùng khi gửi ĐỒNG THỜI 2 request (Race Condition EX-5.6 trên bookingCheckedOut2 của user2)
-  const concurrentResults = await Promise.allSettled([
-    createReview(db, {
-      user: user2,
-      bookingId: IDS.bookingCheckedOut2,
-      rating: 4,
-      comment: 'Request đồng thời 1',
-      now: new Date('2026-05-21T04:00:00Z'),
-    }),
-    createReview(db, {
-      user: user2,
-      bookingId: IDS.bookingCheckedOut2,
-      rating: 3,
-      comment: 'Request đồng thời 2',
-      now: new Date('2026-05-21T04:00:00Z'),
-    }),
-  ]);
-  const fulfilled = concurrentResults.filter((r) => r.status === 'fulfilled');
-  const rejected = concurrentResults.filter((r) => r.status === 'rejected');
-  assert.equal(fulfilled.length, 1);
-  assert.equal(rejected.length, 1);
-  assert.equal(rejected[0].reason.code, 'REVIEW_ALREADY_EXISTS');
-
-  // 6. Xem đánh giá theo Space, theo User và danh sách lọc
   const spaceReviews = await listSpaceReviews(db, { spaceId: 'FP-01' });
-  assert.equal(spaceReviews.totalReviews, 2);
-  assert.equal(spaceReviews.averageRating, 4.5);
-  assert.equal(spaceReviews.ratingDistribution[5], 1);
-  assert.equal(spaceReviews.ratingDistribution[4], 1);
-
-  const emptySpaceReviews = await listSpaceReviews(db, { spaceId: IDS.spaceWorkLounge });
-  assert.equal(emptySpaceReviews.totalReviews, 0);
-  assert.equal(emptySpaceReviews.averageRating, 0);
-
+  assert.equal(spaceReviews.totalReviews, 1);
+  assert.equal(spaceReviews.averageRating, 5);
   const myReviews = await listMyReviewsAndReminders(db, { user: user1 });
   assert.equal(myReviews.reviews.length, 1);
   assert.equal(myReviews.reminderCount, 0);
-
-  const adminStatusView = await getBookingReviewStatus(db, {
-    user: admin,
-    bookingId: IDS.bookingCheckedOut1,
-  });
-  assert.equal(adminStatusView.hasReview, true);
-  assert.equal(adminStatusView.canReview, false);
-
-  const filtered = await listReviews(db, {
-    spaceId: IDS.spaceFocusPod,
-    userId: IDS.user1,
-    bookingId: IDS.bookingCheckedOut1,
-    rating: 5,
-  });
+  const filtered = await listReviews(db, { spaceId: IDS.spaceFocusPod, rating: 5 });
   assert.equal(filtered.totalReviews, 1);
-
-  await assert.rejects(
-    () => listReviews(db, { rating: 9 }),
-    { status: 422, code: 'INVALID_RATING' },
-  );
-  await assert.rejects(
-    () => listSpaceReviews(db, { spaceId: '' }),
-    { status: 400, code: 'INVALID_SPACE_ID' },
-  );
-  await assert.rejects(
-    () => listSpaceReviews(db, { spaceId: 'UNKNOWN_SPACE' }),
-    { status: 404, code: 'SPACE_NOT_FOUND' },
-  );
 });

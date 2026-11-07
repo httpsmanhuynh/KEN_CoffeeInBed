@@ -1,0 +1,25 @@
+$kind: http-request
+name: "TC-REV-13: [REV-13] Lọc đánh giá theo Space (Branch: REV-B13)"
+description: |-
+  **Mã TC:** REV-13 (TC-REV-13)
+  **Nhóm:** Xem đánh giá
+  **API / Thành phần:** GET /api/reviews?spaceId
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đã có đánh giá ở nhiều Space.
+  **Dữ liệu vào:** ?spaceId=<_id>
+  **Các bước thực hiện:**
+  1) GET /api/reviews?spaceId=...
+  **Kết quả mong đợi:** 200 chỉ gồm đánh giá của Space đó (HTTP: 200)
+  **Nhánh code bao phủ:** REV-B13
+  **Ghi chú:** Xác nhận tên tham số lọc
+url: "{{baseUrl}}/api/reviews?spaceId={{spaceId}}"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-REV-13] Lọc đánh giá theo Space
+      pm.test("[TC-REV-13] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 2000

@@ -1,0 +1,31 @@
+$kind: http-request
+name: "TC-LOY-07: [LOY-07] Đơn NO_SHOW / CANCELLED / EXPIRED không cộng Điểm (Branch: LOY-B07)"
+description: |-
+  **Mã TC:** LOY-07 (TC-LOY-07)
+  **Nhóm:** Cộng Điểm & Coins
+  **API / Thành phần:** POST /api/bookings/:id/no-show
+  **Loại:** Negative
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed membership_tiers.
+  **Dữ liệu vào:** Đơn NO_SHOW
+  **Các bước thực hiện:**
+  1) Đánh dấu NO_SHOW&#10;2) Kiểm tra loyalty_transactions
+  **Kết quả mong đợi:** Không có bản ghi EARN (HTTP: 200)
+  **Nhánh code bao phủ:** LOY-B07
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/bookings/{{bookingId}}/no-show"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {}
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-LOY-07] Đơn NO_SHOW / CANCELLED / EXPIRED không cộng Điểm
+      pm.test("[TC-LOY-07] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 6000

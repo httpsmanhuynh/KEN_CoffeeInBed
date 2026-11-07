@@ -1,0 +1,33 @@
+$kind: http-request
+name: "TC-REV-05: [REV-05] XSS trong comment (Branch: REV-B05)"
+description: |-
+  **Mã TC:** REV-05 (TC-REV-05)
+  **Nhóm:** Tạo đánh giá
+  **API / Thành phần:** POST /api/reviews
+  **Loại:** Security
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; có đơn CHECKED_OUT của Customer.
+  **Dữ liệu vào:** {"comment": "<script>alert(1)</script>"}
+  **Các bước thực hiện:**
+  1) POST /api/reviews&#10;2) GET đánh giá và hiển thị trên giao diện
+  **Kết quả mong đợi:** Nội dung được lưu/hiển thị dạng text, không thực thi script (HTTP: 201)
+  **Nhánh code bao phủ:** REV-B05
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/reviews"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "comment": "<script>alert(1)</script>"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-REV-05] XSS trong comment
+      pm.test("[TC-REV-05] Status code is 201", function () {
+          pm.expect(pm.response.code).to.be.oneOf([201]);
+      });
+    language: text/javascript
+order: 5000

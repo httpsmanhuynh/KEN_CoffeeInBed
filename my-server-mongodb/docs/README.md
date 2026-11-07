@@ -50,15 +50,24 @@ my-server-mongodb/
 │   │   └── reviews.js               # Tạo & Xem đánh giá, kiểm tra điều kiện & lời nhắc đánh giá (/api/reviews)
 │   └── utils/
 │       └── http.js                  # Helper wrap, fail, str, publicUser, tierOf
-└── test/
-    ├── auth.mw.test.js              # 14 test cases middleware xác thực & thu hồi session (bao gồm 9 TC-MW-01..09 trên Excel + 5 ca kiểm tra phiên DB)
-    ├── booking.test.js              # 8 kịch bản tích hợp Booking 5 bước & Concurrency (TC-BK-01..08)
-    ├── domain.test.js               # 7 test cases domain thuần (pricing, loyalty, stateMachine, availability)
-    ├── logout.test.js               # Test lỗi hủy session
-    ├── loyalty.test.js              # 26 test cases domain & tích hợp Loyalty (BR-H03..H06)
-    ├── otp.test.js                  # 15 test cases dịch vụ OTP (100% coverage)
-    ├── payment_catalog.test.js      # 15 test cases Payment domain, Idempotency & Catalog Admin RBAC
-    └── review.test.js               # 3 bộ kịch bản Domain & Tích hợp Review Management (TC-REV-01..03)
+└── tests/
+    ├── helpers/
+    │   └── mockDb.js                    # In-Memory MongoDB Mock hỗ trợ Transaction & WriteConflict
+    ├── unit/
+    │   ├── auth.test.js                 # 21 test cases OTP & Session (TC-OTP-01..17, TC-MW-06..09)
+    │   ├── availability.test.js         # Kiểm tra chỗ trống EXCLUSIVE + buffer & SHARED (TC-AVAIL-01)
+    │   ├── bookingStateMachine.test.js  # Vòng đời 7 trạng thái đơn (TC-BSM-01)
+    │   ├── loyalty.test.js              # 20 test cases Loyalty Management đồng bộ Excel (TC-LOY-01..20)
+    │   ├── pricing.test.js              # 5 test cases Pricing & Catalog (TC-PRC-01..05)
+    │   └── system.test.js               # 18 test cases System Config (TC-SYS-01..29)
+    ├── integration/
+    │   ├── auth.api.test.js             # 12 test cases middleware xác thực & thu hồi session (bao gồm 9 TC-MW-01..09 trên Excel)
+    │   ├── booking.api.test.js          # 7 kịch bản tích hợp Booking & Concurrency (TC-BK-02..08)
+    │   ├── payment.api.test.js          # 15 test cases Payment domain, Idempotency & RBAC (TC-PAY-01..15)
+    │   ├── review.api.test.js           # 18 test cases Review Management đồng bộ Excel (TC-REV-01..18)
+    │   └── voucher.api.test.js          # 28 test cases Voucher Management đồng bộ Excel (TC-VCH-01..28)
+    └── e2e/
+        └── customer-flow.test.js        # Quy trình chuẩn 5 bước End-to-End (TC-BK-01)
 ```
 
 ---
@@ -165,11 +174,11 @@ my-server-mongodb/
 
 ---
 
-## 4. Hướng dẫn chạy kiểm thử (94 Tests — 100% Pass)
+## 4. Hướng dẫn chạy kiểm thử (109 Tests — 100% Pass)
 
 ```powershell
 cd d:\hk7\PTWKDNC\KEN\my-server-mongodb
-# Chạy toàn bộ 94 test cases
+# Chạy toàn bộ 109 test cases
 npm test
 
 # Chạy kèm báo cáo độ phủ dòng lệnh (Line / Branch / Function Coverage)
