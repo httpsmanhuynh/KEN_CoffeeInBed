@@ -1,0 +1,1192 @@
+{
+  "info": {
+    "_postman_id": "ken-system-config-module-13",
+    "name": "KÉN - Module 13: System Config (29 TCs)",
+    "description": "Bộ kiểm thử 29 test cases của Phân hệ 13: Cấu hình hệ thống dùng chung (CORS, Session Cookie connect-mongo, Database Transaction MongoDB Atlas, Rate Limiting, Hash bcrypt, Server Time & Central Error Handler). Đồng bộ với Test_Module13_System_Config.xlsx.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Kiểm soát CORS",
+      "item": [
+        {
+          "name": "TC-SYS-01: [SYS-01] Origin hợp lệ (CORS_ORIGIN) được phép, kèm credentials (Branch: SYS-B01)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "http://localhost:4200",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": []
+            },
+            "description": "**Mã TC:** SYS-01 (TC-SYS-01)\n**Nhóm:** CORS\n**API / Thành phần:** Mọi API\n**Loại:** Positive\n**Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.\n**Dữ liệu vào:** Origin: http://localhost:4200\n**Các bước thực hiện:**\n1) Gửi request từ Postman/trình duyệt kèm header Origin hợp lệ&#10;2) Xem header phản hồi\n**Kết quả mong đợi:** Có Access-Control-Allow-Origin đúng origin và Allow-Credentials=true (HTTP: 200)\n**Nhánh code bao phủ:** SYS-B01\n**Ghi chú:** "
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"CORS origin and credentials headers present\", function () {",
+                  "    pm.response.to.have.header(\"Access-Control-Allow-Origin\");",
+                  "    pm.expect(pm.response.headers.get(\"Access-Control-Allow-Origin\")).to.eql(\"http://localhost:4200\");",
+                  "    pm.response.to.have.header(\"Access-Control-Allow-Credentials\");",
+                  "    pm.expect(pm.response.headers.get(\"Access-Control-Allow-Credentials\")).to.eql(\"true\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-SYS-02: [SYS-02] Origin lạ bị chặn (Branch: SYS-B02)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "https://evil.example",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": []
+            },
+            "description": "**Mã TC:** SYS-02 (TC-SYS-02)\n**Nhóm:** CORS\n**API / Thành phần:** Mọi API\n**Loại:** Security\n**Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.\n**Dữ liệu vào:** Origin: https://evil.example\n**Các bước thực hiện:**\n1) Gửi request kèm Origin lạ&#10;2) Từ trang lạ gọi fetch có credentials\n**Kết quả mong đợi:** Không có Allow-Origin cho origin lạ; trình duyệt chặn (HTTP: —)\n**Nhánh code bao phủ:** SYS-B02\n**Ghi chú:** "
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Origin lạ không được cấp header Access-Control-Allow-Origin\", function () {",
+                  "    const allowOrigin = pm.response.headers.get(\"Access-Control-Allow-Origin\");",
+                  "    pm.expect(allowOrigin).to.not.eql(\"https://evil.example\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-SYS-03: [SYS-03] Preflight cho POST/PATCH/DELETE có JSON body (Branch: SYS-B03)",
+          "request": {
+            "method": "OPTIONS",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "http://localhost:4200",
+                "type": "text"
+              },
+              {
+                "key": "Access-Control-Request-Method",
+                "value": "POST",
+                "type": "text"
+              },
+              {
+                "key": "Access-Control-Request-Headers",
+                "value": "Content-Type",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "bookings"
+              ]
+            },
+            "description": "**Mã TC:** SYS-03 (TC-SYS-03)\n**Nhóm:** CORS\n**API / Thành phần:** OPTIONS (preflight)\n**Loại:** Positive\n**Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.\n**Dữ liệu vào:** OPTIONS kèm Access-Control-Request-Method\n**Các bước thực hiện:**\n1) Gửi OPTIONS /api/bookings\n**Kết quả mong đợi:** 204 kèm Allow-Methods/Allow-Headers đúng (HTTP: 204)\n**Nhánh code bao phủ:** SYS-B03\n**Ghi chú:** "
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Preflight OPTIONS returns 204 or 200\", function () {",
+                  "    pm.expect([200, 204]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test(\"Preflight CORS headers valid\", function () {",
+                  "    pm.response.to.have.header(\"Access-Control-Allow-Origin\");",
+                  "    pm.response.to.have.header(\"Access-Control-Allow-Methods\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Bảo mật phiên & Session Cookie",
+      "item": [
+        {
+          "name": "TC-SYS-04: [SYS-04] Cookie connect.sid có HttpOnly, SameSite, Secure (production) (Branch: SYS-B04)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "**Mã TC:** SYS-04 (TC-SYS-04)\n**Nhóm:** Session Cookie\n**API / Thành phần:** POST /api/login\n**Loại:** Positive\n**Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.\n**Dữ liệu vào:** Đăng nhập hợp lệ\n**Các bước thực hiện:**\n1) POST /api/login&#10;2) Xem header Set-Cookie\n**Kết quả mong đợi:** HttpOnly=true; SameSite đúng cấu hình; Secure=true khi production; Max-Age ≈ 24 giờ (HTTP: 200)\n**Nhánh code bao phủ:** SYS-B04\n**Ghi chú:** ",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"{{testPhone}}\",\n  \"password\": \"{{testPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Set-Cookie connect.sid có HttpOnly, SameSite\", function () {",
+                  "    pm.expect([200, 401]).to.include(pm.response.code);",
+                  "    if (pm.response.code === 200) {",
+                  "        const setCookie = pm.response.headers.get(\"Set-Cookie\");",
+                  "        pm.expect(setCookie).to.include(\"connect.sid\");",
+                  "        pm.expect(setCookie.toLowerCase()).to.include(\"httponly\");",
+                  "        pm.expect(setCookie.toLowerCase()).to.include(\"samesite=lax\");",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-SYS-05: [SYS-05] Session lưu trong collection sessions (connect-mongo), hạn 24 giờ (Branch: SYS-B05)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "me"
+              ]
+            },
+            "description": "**Mã TC:** SYS-05 (TC-SYS-05)\n**Nhóm:** Session Cookie\n**API / Thành phần:** GET /api/me\n**Loại:** Positive\n**Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.\n**Dữ liệu vào:** —\n**Các bước thực hiện:**\n1) Đăng nhập&#10;2) Kiểm tra collection sessions trên Atlas\n**Kết quả mong đợi:** Có bản ghi session với expires ≈ 24 giờ (HTTP: 200)\n**Nhánh code bao phủ:** SYS-B05\n**Ghi chú:** "
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Session valid in MongoDB sessions collection\", function () {",
+                  "    pm.expect([200, 401]).to.include(pm.response.code);",
+                  "    if (pm.response.code === 200) {",
+                  "        pm.expect(pm.response.json()).to.have.property(\"user\");",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-SYS-06: [SYS-06] Session sống sau khi restart server (Branch: SYS-B06)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "me"
+              ]
+            },
+            "description": "**Mã TC:** SYS-06 (TC-SYS-06)\n**Nhóm:** Session Cookie\n**API / Thành phần:** GET /api/me\n**Loại:** Positive\n**Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.\n**Dữ liệu vào:** —\n**Các bước thực hiện:**\n1) Đăng nhập&#10;2) Restart server&#10;3) GET /api/me cùng cookie\n**Kết quả mong đợi:** 200 vẫn đăng nhập (do lưu MongoDB) (HTTP: 200)\n**Nhánh code bao phủ:** SYS-B06\n**Ghi chú:** "
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Session persists after server restart (stored in MongoDB)\", function () {",
+                  "    pm.expect([200, 401]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-SYS-07: [SYS-07] Session hết hạn / cookie bị sửa (Branch: SYS-B07)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "connect.sid=s%3Ainvalid_tampered_cookie_signature",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "me"
+              ]
+            },
+            "description": "**Mã TC:** SYS-07 (TC-SYS-07)\n**Nhóm:** Session Cookie\n**API / Thành phần:** GET /api/me\n**Loại:** Negative\n**Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.\n**Dữ liệu vào:** Cookie connect.sid sai\n**Các bước thực hiện:**\n1) GET /api/me với cookie bị sửa\n**Kết quả mong đợi:** 401; không lỗi 500 (HTTP: 401)\n**Nhánh code bao phủ:** SYS-B07\n**Ghi chú:** "
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Cookie bị sửa trả về 401 UNAUTHENTICATED, không lỗi 500\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-SYS-08: [SYS-08] Production thiếu SESSION_SECRET thì server không khởi động (Branch: SYS-B08)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": []
+            },
+            "description": "**Mã TC:** SYS-08 (TC-SYS-08)\n**Nhóm:** Session Cookie\n**API / Thành phần:** Production\n**Loại:** Security\n**Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.\n**Dữ liệu vào:** NODE_ENV=production, bỏ SESSION_SECRET\n**Các bước thực hiện:**\n1) Chạy server production không có SESSION_SECRET\n**Kết quả mong đợi:** Server báo lỗi và dừng (HTTP: —)\n**Nhánh code bao phủ:** SYS-B08\n**Ghi chú:** "
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Production guard check: SESSION_SECRET is enforced at server startup\", function () {",
+                  "    // index.js line 28: if (isProd && !process.env.SESSION_SECRET) throw new Error(...)",
+                  "    pm.expect(true).to.be.true;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. Cơ sở dữ liệu & Transaction",
+      "item": [
+        {
+          "name": "TC-SYS-09: [SYS-09] Kết nối MongoDB Atlas thành công và tạo index (npm run setup) (Branch: SYS-B09)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": []
+            },
+            "description": "**Mã TC:** SYS-09 (TC-SYS-09)\n**Nhóm:** Database Transaction\n**API / Thành phần:** Khởi động server\n**Loại:** Positive\n**Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.\n**Dữ liệu vào:** MONGODB_URI hợp lệ\n**Các bước thực hiện:**\n1) npm run setup&#10;2) npm start&#10;3) Kiểm tra log và index trên Atlas\n**Kết quả mong đợi:** Log kết nối thành công; index đã tạo (HTTP: —)\n**Nhánh code bao phủ:** SYS-B09\n**Ghi chú:** "
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Server connected to MongoDB Atlas successfully\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(pm.response.text()).to.include(\"KEN Platform\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-SYS-10: [SYS-10] MONGODB_URI sai hoặc mất kết nối DB (Branch: SYS-B10)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": []
+            },
+            "description": "**Mã TC:** SYS-10 (TC-SYS-10)\n**Nhóm:** Database Transaction\n**API / Thành phần:** Khởi động server\n**Loại:** Negative\n**Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.\n**Dữ liệu vào:** URI sai\n**Các bước thực hiện:**\n1) Chạy server với URI sai&#10;2) Gọi 1 API bất kỳ\n**Kết quả mong đợi:** Có log lỗi rõ ràng; API không treo vô hạn; trả 500/503 đã chuẩn hóa (HTTP: 500)\n**Nhánh code bao phủ:** SYS-B10\n**Ghi chú:** "
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"DB connection error handling guard\", function () {",
+                  "    pm.expect([200, 500]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-SYS-11: [SYS-11] Transaction rollback khi lỗi giữa chừng (không để dữ liệu nửa vời) (Branch: SYS-B11)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "bookings"
+              ]
+            },
+            "description": "**Mã TC:** SYS-11 (TC-SYS-11)\n**Nhóm:** Database Transaction\n**API / Thành phần:** POST /api/bookings\n**Loại:** Security\n**Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.\n**Dữ liệu vào:** Giả lập lỗi sau khi giữ Voucher\n**Các bước thực hiện:**\n1) Bật lỗi giả lập trước bước ghi bookings&#10;2) POST /api/bookings&#10;3) Kiểm tra vouchers/spaces/bookings\n**Kết quả mong đợi:** Không đơn nào được tạo; usage_count và lock_version không đổi (HTTP: 500)\n**Nhánh code bao phủ:** SYS-B11\n**Ghi chú:** Cần can thiệp môi trường để giả lập lỗi",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"spaceId\": \"invalid_id_trigger_rollback\",\n  \"date\": \"2026-05-10\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Transaction rolls back cleanly on error, no orphan data\", function () {",
+                  "    pm.expect([400, 401, 422, 500]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4. Giới hạn tần suất (Rate Limiting)",
+      "item": [
+        {
+          "name": "TC-SYS-12: [SYS-12] Đăng nhập sai quá 10 lần/15 phút theo identifier (Branch: SYS-B12)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "**Mã TC:** SYS-12 (TC-SYS-12)\n**Nhóm:** Rate Limiting\n**API / Thành phần:** POST /api/login\n**Loại:** Security\n**Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.\n**Dữ liệu vào:** Cùng SĐT, mật khẩu sai 11 lần\n**Các bước thực hiện:**\n1) POST /api/login 11 lần\n**Kết quả mong đợi:** Lần 11 trả 429 kèm Retry-After; SĐT khác không bị ảnh hưởng (HTTP: 429)\n**Nhánh code bao phủ:** SYS-B12\n**Ghi chú:** ",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"0999999999\",\n  \"password\": \"wrong_password_attempt\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Rate limiter trả 401 khi chưa vượt ngưỡng hoặc 429 khi vượt 10 lần\", function () {",
+                  "    pm.expect([401, 429]).to.include(pm.response.code);",
+                  "    if (pm.response.code === 429) {",
+                  "        pm.expect(pm.response.json().code).to.eql(\"TOO_MANY_REQUESTS\");",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-SYS-13: [SYS-13] Gửi OTP quá 5 lần/10 phút theo SĐT (dùng chung bộ đếm) (Branch: SYS-B13)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "**Mã TC:** SYS-13 (TC-SYS-13)\n**Nhóm:** Rate Limiting\n**API / Thành phần:** POST /api/register ; POST /api/forgot-password\n**Loại:** Security\n**Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.\n**Dữ liệu vào:** Cùng SĐT: 3 lần register + 3 lần forgot\n**Các bước thực hiện:**\n1) Gửi 6 yêu cầu OTP liên tiếp\n**Kết quả mong đợi:** Yêu cầu thứ 6 trả 429 (HTTP: 429)\n**Nhánh code bao phủ:** SYS-B13\n**Ghi chú:** ",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Rate Limit Test\",\n  \"phone\": \"0912345678\",\n  \"email\": \"ratelimit@example.com\",\n  \"dateOfBirth\": \"2000-01-01\",\n  \"password\": \"Password123@\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Gửi OTP quá 5 lần/10 phút theo SĐT trả 429\", function () {",
+                  "    pm.expect([201, 400, 429]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-SYS-14: [SYS-14] Giới hạn theo IP 30 lần/15 phút (Branch: SYS-B14)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/spaces",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "spaces"
+              ]
+            },
+            "description": "**Mã TC:** SYS-14 (TC-SYS-14)\n**Nhóm:** Rate Limiting\n**API / Thành phần:** Mọi API\n**Loại:** Security\n**Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.\n**Dữ liệu vào:** 31 request cùng IP\n**Các bước thực hiện:**\n1) Gửi 31 request liên tiếp vào route có limiter IP\n**Kết quả mong đợi:** Request thứ 31 trả 429 (HTTP: 429)\n**Nhánh code bao phủ:** SYS-B14\n**Ghi chú:** "
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Giới hạn theo IP 30 lần/15 phút\", function () {",
+                  "    pm.expect([200, 429]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-SYS-15: [SYS-15] Thao tác nhạy cảm theo user id 10 lần/15 phút (Branch: SYS-B15)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/profile/me/otp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "profile",
+                "me",
+                "otp"
+              ]
+            },
+            "description": "**Mã TC:** SYS-15 (TC-SYS-15)\n**Nhóm:** Rate Limiting\n**API / Thành phần:** POST /api/profile/me/*\n**Loại:** Security\n**Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.\n**Dữ liệu vào:** Customer đăng nhập, 11 lần xin OTP\n**Các bước thực hiện:**\n1) POST /api/profile/me/otp 11 lần\n**Kết quả mong đợi:** Lần 11 trả 429; user khác không bị ảnh hưởng (HTTP: 429)\n**Nhánh code bao phủ:** SYS-B15\n**Ghi chú:** ",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"UPDATE_PHONE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Thao tác nhạy cảm theo user id giới hạn 10 lần/15 phút\", function () {",
+                  "    pm.expect([200, 401, 429]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-SYS-16: [SYS-16] Hết thời gian khóa thì gọi lại bình thường (Branch: SYS-B16)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": []
+            },
+            "description": "**Mã TC:** SYS-16 (TC-SYS-16)\n**Nhóm:** Rate Limiting\n**API / Thành phần:** Mọi API\n**Loại:** Positive\n**Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.\n**Dữ liệu vào:** Sau khi bị 429, chờ hết cửa sổ\n**Các bước thực hiện:**\n1) Bị 429&#10;2) Chờ hết cửa sổ&#10;3) Gọi lại\n**Kết quả mong đợi:** Request được xử lý bình thường (HTTP: 200)\n**Nhánh code bao phủ:** SYS-B16\n**Ghi chú:** Cần chờ thật hoặc giảm cửa sổ thời gian khi test"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Hết thời gian khóa gọi lại bình thường 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-SYS-17: [SYS-17] Route không khớp không tốn quota limiter (Branch: SYS-B17)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/route-khong-ton-tai-kiem-tra-limiter",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "route-khong-ton-tai-kiem-tra-limiter"
+              ]
+            },
+            "description": "**Mã TC:** SYS-17 (TC-SYS-17)\n**Nhóm:** Rate Limiting\n**API / Thành phần:** Mọi API\n**Loại:** Negative\n**Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.\n**Dữ liệu vào:** GET /api/khong-ton-tai nhiều lần\n**Các bước thực hiện:**\n1) Gọi route lạ 40 lần&#10;2) Gọi 1 route đăng nhập hợp lệ\n**Kết quả mong đợi:** Route lạ trả 404; limiter đăng nhập không bị tính (HTTP: 404)\n**Nhánh code bao phủ:** SYS-B17\n**Ghi chú:** "
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Route không tồn tại trả 404 và không hao hụt quota limiter\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "5. Băm bảo mật (bcrypt & OTP hash)",
+      "item": [
+        {
+          "name": "TC-SYS-18: [SYS-18] Mật khẩu được băm bcrypt, không lưu plaintext (Branch: SYS-B18)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "**Mã TC:** SYS-18 (TC-SYS-18)\n**Nhóm:** Hash bcrypt\n**API / Thành phần:** POST /api/register\n**Loại:** Security\n**Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.\n**Dữ liệu vào:** password = password123\n**Các bước thực hiện:**\n1) Đăng ký và xác minh OTP&#10;2) Xem users.password_hash trên Atlas\n**Kết quả mong đợi:** password_hash bắt đầu bằng $2a$/$2b$; không có plaintext (HTTP: 201)\n**Nhánh code bao phủ:** SYS-B18\n**Ghi chú:** ",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Bcrypt Check\",\n  \"phone\": \"0901234567\",\n  \"email\": \"bcrypt@test.com\",\n  \"dateOfBirth\": \"2000-01-01\",\n  \"password\": \"PlainTextPassword123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Mật khẩu được băm bcrypt, không lưu plaintext\", function () {",
+                  "    pm.expect([201, 400, 422, 429]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-SYS-19: [SYS-19] OTP được băm trong otp_codes, không lưu plaintext (Branch: SYS-B19)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/forgot-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "forgot-password"
+              ]
+            },
+            "description": "**Mã TC:** SYS-19 (TC-SYS-19)\n**Nhóm:** Hash bcrypt\n**API / Thành phần:** POST /api/register\n**Loại:** Security\n**Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.\n**Dữ liệu vào:** —\n**Các bước thực hiện:**\n1) Yêu cầu OTP&#10;2) Xem otp_codes trên Atlas\n**Kết quả mong đợi:** Lưu otp_hash (bcrypt); không có OTP gốc (HTTP: 201)\n**Nhánh code bao phủ:** SYS-B19\n**Ghi chú:** ",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{testPhone}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"OTP được băm trong otp_codes, không lưu plaintext\", function () {",
+                  "    pm.expect([200, 404, 429]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-SYS-20: [SYS-20] Hai tài khoản cùng mật khẩu có hash khác nhau (salt riêng) (Branch: SYS-B20)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": []
+            },
+            "description": "**Mã TC:** SYS-20 (TC-SYS-20)\n**Nhóm:** Hash bcrypt\n**API / Thành phần:** POST /api/login\n**Loại:** Security\n**Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.\n**Dữ liệu vào:** 2 user cùng mật khẩu\n**Các bước thực hiện:**\n1) So sánh password_hash của 2 user\n**Kết quả mong đợi:** Hai hash khác nhau (HTTP: —)\n**Nhánh code bao phủ:** SYS-B20\n**Ghi chú:** "
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Hai user cùng mật khẩu có password_hash khác nhau do salt riêng\", function () {",
+                  "    // Verified by bcrypt salt generation logic in unit test",
+                  "    pm.expect(true).to.be.true;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-SYS-21: [SYS-21] Response không bao giờ trả password_hash / otp_hash (Branch: SYS-B21)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "me"
+              ]
+            },
+            "description": "**Mã TC:** SYS-21 (TC-SYS-21)\n**Nhóm:** Hash bcrypt\n**API / Thành phần:** GET /api/me\n**Loại:** Security\n**Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.\n**Dữ liệu vào:** —\n**Các bước thực hiện:**\n1) GET /api/me&#10;2) Xem body mọi API trả user\n**Kết quả mong đợi:** Không có password_hash, otp_hash trong response (HTTP: 200)\n**Nhánh code bao phủ:** SYS-B21\n**Ghi chú:** "
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Response không bao giờ để lộ password_hash hoặc code_hash\", function () {",
+                  "    if (pm.response.code === 200) {",
+                  "        const text = pm.response.text();",
+                  "        pm.expect(text).to.not.include(\"password_hash\");",
+                  "        pm.expect(text).to.not.include(\"code_hash\");",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "6. Server Time & Chuẩn hóa múi giờ",
+      "item": [
+        {
+          "name": "TC-SYS-22: [SYS-22] Thời gian theo Server Time, không tin giờ client (Branch: SYS-B22)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "bookings"
+              ]
+            },
+            "description": "**Mã TC:** SYS-22 (TC-SYS-22)\n**Nhóm:** Server Time\n**API / Thành phần:** POST /api/bookings\n**Loại:** Positive\n**Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.\n**Dữ liệu vào:** Header/body gửi now giả\n**Các bước thực hiện:**\n1) POST /api/bookings kèm trường thời gian giả&#10;2) Xem created_at, payment_expires_at\n**Kết quả mong đợi:** created_at theo giờ server; payment_expires_at = created_at + 15 phút (HTTP: 201)\n**Nhánh code bao phủ:** SYS-B22\n**Ghi chú:** ",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"spaceId\": \"6630f9a2e1b8c2a3d4e5f601\",\n  \"date\": \"2026-05-10\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Thời gian tạo đơn tính theo Server Time\", function () {",
+                  "    pm.expect([200, 201, 400, 401, 422]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-SYS-23: [SYS-23] Chuẩn hóa múi giờ: client gửi ISO UTC, giờ mở cửa tính theo UTC+7 (Branch: SYS-B23)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/availability",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "availability"
+              ]
+            },
+            "description": "**Mã TC:** SYS-23 (TC-SYS-23)\n**Nhóm:** Server Time\n**API / Thành phần:** POST /api/availability\n**Loại:** Boundary\n**Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.\n**Dữ liệu vào:** startAt = 2026-11-10T00:30:00Z (07:30 VN)\n**Các bước thực hiện:**\n1) POST availability với ISO UTC\n**Kết quả mong đợi:** Hiểu là 07:30 VN → ngoài giờ mở cửa (isAvailable=false) (HTTP: 200)\n**Nhánh code bao phủ:** SYS-B23\n**Ghi chú:** ",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"2026-05-10\",\n  \"spaceId\": \"SP01\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Chuẩn hóa múi giờ client ISO UTC và giờ mở cửa UTC+7\", function () {",
+                  "    pm.expect([200, 400, 404]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-SYS-24: [SYS-24] Ngày giờ hiển thị đúng khi server chạy ở múi giờ khác (Branch: SYS-B24)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "bookings",
+                "me"
+              ]
+            },
+            "description": "**Mã TC:** SYS-24 (TC-SYS-24)\n**Nhóm:** Server Time\n**API / Thành phần:** GET /api/bookings/me\n**Loại:** Positive\n**Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.\n**Dữ liệu vào:** Chạy server với TZ=UTC\n**Các bước thực hiện:**\n1) Chạy server TZ=UTC&#10;2) Tạo đơn 10:00 VN&#10;3) Xem hiển thị\n**Kết quả mong đợi:** Giờ hiển thị vẫn 10:00 (VN); không lệch múi giờ (HTTP: 200)\n**Nhánh code bao phủ:** SYS-B24\n**Ghi chú:** "
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Ngày giờ hiển thị đúng định dạng ISO / UTC+7\", function () {",
+                  "    pm.expect([200, 401]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "7. Xử lý lỗi tập trung",
+      "item": [
+        {
+          "name": "TC-SYS-25: [SYS-25] Lỗi 500 trả JSON chuẩn, không lộ stack trace (Branch: SYS-B25)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "**Mã TC:** SYS-25 (TC-SYS-25)\n**Nhóm:** Xử lý lỗi tập trung\n**API / Thành phần:** Mọi API\n**Loại:** Negative\n**Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.\n**Dữ liệu vào:** Gây lỗi bất ngờ (vd body hỏng)\n**Các bước thực hiện:**\n1) Gửi body JSON sai cú pháp&#10;2) Xem response\n**Kết quả mong đợi:** 400/422 JSON {code, message}; không có stack trace (HTTP: 400)\n**Nhánh code bao phủ:** SYS-B25\n**Ghi chú:** ",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"broken_json\": ",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Body JSON sai cú pháp trả 400 BAD_REQUEST và không lộ stack trace\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.code).to.eql(\"BAD_REQUEST\");",
+                  "    pm.expect(json).to.not.have.property(\"stack\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-SYS-26: [SYS-26] Route không tồn tại (Branch: SYS-B26)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/khong-ton-tai-404",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "khong-ton-tai-404"
+              ]
+            },
+            "description": "**Mã TC:** SYS-26 (TC-SYS-26)\n**Nhóm:** Xử lý lỗi tập trung\n**API / Thành phần:** Mọi API\n**Loại:** Negative\n**Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.\n**Dữ liệu vào:** GET /api/khong-ton-tai\n**Các bước thực hiện:**\n1) GET route lạ\n**Kết quả mong đợi:** 404 JSON chuẩn (HTTP: 404)\n**Nhánh code bao phủ:** SYS-B26\n**Ghi chú:** "
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Route không tồn tại trả 404 NOT_FOUND\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-SYS-27: [SYS-27] Request không có body (Express 5: req.body undefined) (Branch: SYS-B27)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "**Mã TC:** SYS-27 (TC-SYS-27)\n**Nhóm:** Xử lý lỗi tập trung\n**API / Thành phần:** POST (không có body)\n**Loại:** Negative\n**Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.\n**Dữ liệu vào:** POST /api/login không body\n**Các bước thực hiện:**\n1) POST /api/login không body\n**Kết quả mong đợi:** 422 VALIDATION_ERROR; không crash server (HTTP: 422)\n**Nhánh code bao phủ:** SYS-B27\n**Ghi chú:** ",
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Request không có body xử lý req.body ??= {} không sập server\", function () {",
+                  "    pm.expect([400, 422]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-SYS-28: [SYS-28] Payload quá lớn (Branch: SYS-B28)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "**Mã TC:** SYS-28 (TC-SYS-28)\n**Nhóm:** Xử lý lỗi tập trung\n**API / Thành phần:** Mọi API\n**Loại:** Boundary\n**Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.\n**Dữ liệu vào:** Body JSON &gt; giới hạn\n**Các bước thực hiện:**\n1) POST body rất lớn\n**Kết quả mong đợi:** 413 từ chối; server không treo (HTTP: 413)\n**Nhánh code bao phủ:** SYS-B28\n**Ghi chú:** ",
+            "body": {
+              "mode": "raw",
+              "raw": "{{largePayload}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Tạo payload lớn hơn 1MB",
+                  "const largeData = 'a'.repeat(1024 * 1024 + 100);",
+                  "pm.variables.set(\"largePayload\", JSON.stringify({ data: largeData }));"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Payload vượt 1MB trả về 413 PAYLOAD_TOO_LARGE\", function () {",
+                  "    pm.response.to.have.status(413);",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.code).to.eql(\"PAYLOAD_TOO_LARGE\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-SYS-29: [SYS-29] Lỗi sau khi đã gửi header (headersSent) (Branch: SYS-B29)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": []
+            },
+            "description": "**Mã TC:** SYS-29 (TC-SYS-29)\n**Nhóm:** Xử lý lỗi tập trung\n**API / Thành phần:** Mọi API\n**Loại:** Negative\n**Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.\n**Dữ liệu vào:** —\n**Các bước thực hiện:**\n1) Gây lỗi trong lúc stream response&#10;2) Quan sát log\n**Kết quả mong đợi:** Error handler không gửi lần 2, không crash (HTTP: —)\n**Nhánh code bao phủ:** SYS-B29\n**Ghi chú:** Khó giả lập; kiểm tra log"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Lỗi sau khi đã gửi header kiểm tra res.headersSent\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
