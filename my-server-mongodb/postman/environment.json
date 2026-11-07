@@ -1,0 +1,37 @@
+{
+  "id": "ken-environment-local",
+  "name": "KÉN Local Environment",
+  "values": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3002",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "testPhone",
+      "value": "0909123456",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "testPassword",
+      "value": "password123",
+      "type": "secret",
+      "enabled": true
+    },
+    {
+      "key": "otpCode",
+      "value": "123456",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "connectSid",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    }
+  ],
+  "_postman_variable_scope": "environment"
+}
