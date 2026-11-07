@@ -79,3 +79,129 @@
   }
   .nav-auth-mobile .link-login,.nav-auth-mobile .btn-register{flex:1;text-align:center}
 }
+
+
+/* KEN PROTOTYPE NAV DROPDOWNS */
+
+.ken-nav-dropdown-item {
+  position: relative;
+}
+
+.ken-nav-dropdown {
+  position: relative;
+}
+
+.ken-nav-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #4a3123;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 21px;
+  cursor: pointer;
+  list-style: none;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.ken-nav-trigger::-webkit-details-marker {
+  display: none;
+}
+
+.ken-nav-trigger:hover,
+.ken-nav-dropdown[open] > .ken-nav-trigger {
+  color: #a9763f;
+}
+
+.ken-nav-caret {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+  transition: transform .2s;
+}
+
+.ken-nav-dropdown[open] .ken-nav-caret {
+  transform: translateY(2px) rotate(225deg);
+}
+
+.ken-nav-dropdown-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: absolute;
+  z-index: 100;
+  top: calc(100% + 16px);
+  left: -18px;
+  min-width: 220px;
+  padding: 10px;
+  background: #f7efe2;
+  border: 1px solid #e6d3b5;
+  border-radius: 14px;
+  box-shadow: 0 12px 28px rgba(74,49,35,.13);
+}
+
+.ken-nav-dropdown:not([open]) .ken-nav-dropdown-menu {
+  display: none;
+}
+
+.nav-menu .ken-nav-dropdown-menu a {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-size: 14px;
+  line-height: 1.5;
+  text-decoration: none;
+  border: none;
+}
+
+.nav-menu .ken-nav-dropdown-menu a:hover {
+  background: #e6d3b5;
+  color: #4a3123;
+}
+
+.ken-nav-trigger:focus-visible,
+.ken-nav-dropdown-menu a:focus-visible {
+  outline: 2px solid #a9763f;
+  outline-offset: 3px;
+}
+
+@media (max-width: 860px) {
+  .ken-nav-dropdown-item,
+  .ken-nav-dropdown {
+    width: 100%;
+  }
+
+  .ken-nav-trigger {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 16px;
+    box-sizing: border-box;
+  }
+
+  .ken-nav-dropdown-menu {
+    position: static;
+    min-width: 0;
+    width: 100%;
+    margin-top: 8px;
+    padding: 6px 0 6px 12px;
+    border: none;
+    border-left: 2px solid #e6d3b5;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+    box-sizing: border-box;
+  }
+
+  .nav-menu .ken-nav-dropdown-menu a {
+    padding: 9px 12px;
+    font-size: 14px;
+  }
+}

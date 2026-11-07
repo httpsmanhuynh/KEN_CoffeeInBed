@@ -1,0 +1,517 @@
+:host {
+  display: block;
+}
+
+.ken-work-lounge-page {
+  --kw-bg: #f7efe2;
+  --kw-text: #4a3123;
+  --kw-muted: #7a6553;
+  --kw-border: rgba(216, 199, 178, .62);
+  --kw-gold: #e3a52f;
+
+  background: var(--kw-bg);
+  color: var(--kw-text);
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.ken-work-lounge-page *,
+.ken-work-lounge-page *::before,
+.ken-work-lounge-page *::after {
+  box-sizing: border-box;
+}
+
+.ken-work-lounge-page h1,
+.ken-work-lounge-page h2,
+.ken-work-lounge-page h3,
+.ken-work-lounge-page p,
+.ken-work-lounge-page figure {
+  margin: 0;
+}
+
+.ken-work-lounge-page a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.kw-container {
+  width: min(1280px, calc(100% - 64px));
+  margin: 0 auto;
+  padding: 24px 0 40px;
+}
+
+.kw-breadcrumb {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 41px;
+  margin-bottom: 28px;
+}
+
+.kw-breadcrumb > div {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.kw-breadcrumb > div span {
+  margin-left: 5px;
+}
+
+.kw-breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.kw-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 41px;
+  padding: 9px 16px;
+  border: 1px solid #e4c8a9;
+  background: #fffcf7;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.kw-back img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+.kw-back:hover {
+  background: #f1e2ca;
+}
+
+/* Header of detail page */
+
+.kw-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 800fr) minmax(0, 432fr);
+  gap: 48px;
+  align-items: end;
+  min-height: 144px;
+  margin-bottom: 28px;
+}
+
+.kw-heading-copy {
+  align-self: start;
+}
+
+.kw-eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+}
+
+.kw-heading h1 {
+  margin: 12px 0;
+  font-size: 44px;
+  font-weight: 700;
+  line-height: 1.18;
+  letter-spacing: -.02em;
+}
+
+.kw-intro {
+  max-width: 800px;
+  color: var(--kw-muted);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.kw-facts {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-bottom: 2px;
+}
+
+.kw-facts-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.kw-facts-row strong {
+  font-weight: 600;
+}
+
+.kw-facts-row > img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+.kw-badge {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #e6d3b5;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* 3 Figma images */
+
+.kw-gallery {
+  display: grid;
+  grid-template-columns: minmax(0, 800fr) minmax(0, 456fr);
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.kw-gallery figure {
+  min-width: 0;
+}
+
+.kw-gallery img {
+  display: block;
+  width: 100%;
+  object-fit: cover;
+  border-radius: 24px;
+}
+
+.kw-gallery figcaption {
+  margin-top: 7px;
+  color: var(--kw-muted);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.kw-gallery-main img {
+  height: 430px;
+}
+
+.kw-gallery-side {
+  display: grid;
+  grid-template-rows: repeat(2, 219px);
+  gap: 20px;
+}
+
+.kw-gallery-side img {
+  height: 194px;
+}
+
+/* Information and pricing */
+
+.kw-content {
+  display: grid;
+  grid-template-columns: minmax(0, 648fr) minmax(0, 600fr);
+  gap: 32px;
+  align-items: start;
+}
+
+.kw-experience h2 {
+  font-size: 24px;
+  line-height: 1.3;
+  font-weight: 600;
+  margin-bottom: 18px;
+}
+
+.kw-description {
+  color: var(--kw-muted);
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 16px !important;
+}
+
+.kw-amenities {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+
+.kw-amenities img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+.kw-advice {
+  border: 1px solid var(--kw-border);
+  border-radius: 24px;
+  padding: 24px;
+}
+
+.kw-advice h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.kw-advice p {
+  color: var(--kw-muted);
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.kw-advice a {
+  text-decoration: underline;
+  text-decoration-color: #caa985;
+  text-underline-offset: 3px;
+}
+
+.kw-advice-divider {
+  width: 100%;
+  height: 1px;
+  background: var(--kw-border);
+  margin: 18px 0;
+}
+
+.kw-pricing {
+  border: 1px solid var(--kw-border);
+  border-radius: 24px;
+  padding: 24px;
+}
+
+.kw-pricing-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.kw-pricing-heading h2 {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.kw-pricing-heading span {
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.kw-package {
+  padding-bottom: 18px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--kw-border);
+}
+
+.kw-package-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.kw-package h3 {
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 600;
+}
+
+.kw-package-price {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.kw-package-price strong {
+  font-size: 22px;
+  line-height: 1.3;
+}
+
+.kw-package-price small {
+  font-size: 12px;
+  color: var(--kw-muted);
+}
+
+.kw-package p {
+  color: var(--kw-muted);
+  font-size: 14px;
+  line-height: 1.5;
+  margin-top: 8px;
+}
+
+.kw-booking {
+  max-width: 280px;
+  margin: 2px 0 16px;
+}
+
+.kw-booking summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 10px 20px;
+  color: var(--kw-text);
+  background: var(--kw-gold);
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+
+.kw-booking summary::-webkit-details-marker {
+  display: none;
+}
+
+.kw-booking summary:hover {
+  background: #f0b849;
+}
+
+.kw-booking-message {
+  margin-top: 12px;
+  padding: 12px;
+  background: #f1e2ca;
+  border-radius: 12px;
+  font-size: 13px;
+}
+
+.kw-pricing-footer {
+  color: var(--kw-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* Notice before footer */
+
+.kw-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 20px;
+  margin-top: 28px;
+  background: #e6d3b5;
+  border-radius: 16px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.kw-notice img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.ken-work-lounge-page :focus-visible {
+  outline: 3px solid #a9763f;
+  outline-offset: 3px;
+}
+
+/* Responsive layout */
+
+@media (max-width: 1100px) {
+  .kw-heading {
+    grid-template-columns: 1.4fr 1fr;
+    gap: 24px;
+  }
+
+  .kw-gallery {
+    grid-template-columns: 1.5fr 1fr;
+  }
+
+  .kw-content {
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+}
+
+@media (max-width: 760px) {
+  .kw-container {
+    width: min(100% - 32px, 600px);
+    padding: 20px 0 48px;
+  }
+
+  .kw-breadcrumb {
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .kw-back {
+    font-size: 12px;
+  }
+
+  .kw-heading {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    min-height: 0;
+  }
+
+  .kw-heading h1 {
+    font-size: 38px;
+  }
+
+  .kw-intro {
+    font-size: 15px;
+  }
+
+  .kw-gallery,
+  .kw-content {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  .kw-gallery-main img {
+    height: 300px;
+  }
+
+  .kw-gallery-side {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto;
+    gap: 12px;
+  }
+
+  .kw-gallery-side img {
+    height: 160px;
+    border-radius: 16px;
+  }
+
+  .kw-experience,
+  .kw-pricing {
+    width: 100%;
+  }
+
+  .kw-pricing {
+    padding: 20px;
+  }
+
+  .kw-experience h2,
+  .kw-pricing-heading h2 {
+    font-size: 22px;
+  }
+
+  .kw-notice {
+    margin-top: 22px;
+  }
+}
+
+@media (max-width: 420px) {
+  .kw-gallery-main img {
+    height: 240px;
+  }
+
+  .kw-gallery-side img {
+    height: 120px;
+  }
+
+  .kw-package-price strong {
+    font-size: 19px;
+  }
+
+  .kw-pricing-heading span {
+    font-size: 10px;
+  }
+}

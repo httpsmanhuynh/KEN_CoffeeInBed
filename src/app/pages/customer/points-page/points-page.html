@@ -1,0 +1,228 @@
+<div class="points-page">
+
+  <section class="points-hero">
+    <div class="points-container">
+      <h1>KÉN ĐIỂM · Hệ Thống Hạng Thành Viên</h1>
+      <p>Tích KÉN ĐIỂM, lên hạng và nhận đặc quyền từ Bạc đến Kim Cương</p>
+      <span>Lười một chút, chill một góc</span>
+    </div>
+  </section>
+
+  <section class="points-overview">
+    <div class="points-container">
+
+      <div class="points-heading">
+        <h2>KÉN ĐIỂM, KÉN Coins và Hạng</h2>
+        <p>Ba khái niệm độc lập – hiểu đúng để tận dụng tối đa</p>
+      </div>
+
+      <div class="points-info-grid">
+        <article
+          class="points-info-card"
+          *ngFor="let card of cards"
+        >
+          <div class="points-icon-box">
+            <img
+              [src]="'/images/ken-points/' + card.icon"
+              alt=""
+            />
+          </div>
+
+          <h3>{{ card.title }}</h3>
+          <strong>{{ card.label }}</strong>
+          <p>{{ card.description }}</p>
+          <small>{{ card.note }}</small>
+        </article>
+      </div>
+
+      <div class="points-callout">
+        <img src="/images/ken-points/receipt.svg" alt="" />
+        <p>
+          Cách tích: 10.000đ chi tiêu hợp lệ tại KÉN =
+          1 KÉN ĐIỂM và 1 Coin · Điểm + Coins được cộng
+          sau khi hoàn thành dịch vụ · Huỷ/hoàn tiền
+          sẽ điều chỉnh tương ứng
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="points-ranks">
+    <div class="points-container">
+
+      <div class="points-heading">
+        <h2>Hãy thăng hạng và gom thêm quyền lợi!</h2>
+        <p>
+          Tích điểm xét hạng trong 1 năm ·
+          Sang năm mới hạ 1 bậc ·
+          Hạng thấp nhất là Bạc
+        </p>
+      </div>
+
+      <div class="points-rank-grid">
+        <article
+          class="points-rank"
+          *ngFor="let rank of ranks"
+          [ngClass]="rank.tone"
+        >
+          <div class="points-rank-top">
+            <h3>{{ rank.name }}</h3>
+            <img
+              [src]="'/images/ken-points/' + rank.icon"
+              alt=""
+            />
+          </div>
+
+          <p>{{ rank.requirement }}</p>
+
+          <ul>
+            <li *ngFor="let perk of rank.perks">
+              <img
+                *ngIf="rank.checkIcon"
+                [src]="'/images/ken-points/' + rank.checkIcon"
+                alt=""
+              />
+              <span>{{ perk }}</span>
+            </li>
+          </ul>
+        </article>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="points-process">
+    <div class="points-container">
+
+      <div class="points-heading">
+        <h2>Tích KÉN ĐIỂM chỉ 3 bước</h2>
+        <p>Đặt chỗ, trải nghiệm, nhận điểm – đơn giản và minh bạch</p>
+      </div>
+
+      <div class="points-process-grid">
+        <ng-container *ngFor="let step of steps; let i = index">
+
+          <article class="points-step">
+            <div class="points-step-title">
+              <span>{{ step.number }}</span>
+              <h3>{{ step.title }}</h3>
+            </div>
+
+            <p>{{ step.description }}</p>
+          </article>
+
+          <img
+            *ngIf="i < 2"
+            class="points-process-arrow"
+            src="/images/ken-points/arrow-right.svg"
+            alt=""
+          />
+        </ng-container>
+      </div>
+
+      <div class="points-action">
+        <a routerLink="/spaces">
+          Đặt chỗ tại KÉN ngay →
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="points-faq">
+    <div class="points-faq-container">
+
+      <h2>FAQ</h2>
+
+      <div class="points-tabs" role="group" aria-label="Chủ đề FAQ">
+        <button
+          type="button"
+          [class.active]="activeTab === 'points'"
+          (click)="selectTab('points')"
+        >
+          KÉN ĐIỂM
+        </button>
+
+        <button
+          type="button"
+          [class.active]="activeTab === 'steps'"
+          (click)="selectTab('steps')"
+        >
+          Cách thực hiện
+        </button>
+
+        <button
+          type="button"
+          [class.active]="activeTab === 'terms'"
+          (click)="selectTab('terms')"
+        >
+          Điều khoản và điều kiện
+        </button>
+      </div>
+
+      <div
+        *ngIf="activeTab === 'points'"
+        class="points-questions"
+      >
+        <article
+          class="points-question"
+          *ngFor="let item of questions; let i = index"
+        >
+          <button
+            type="button"
+            [attr.aria-expanded]="openQuestion === i"
+            (click)="toggleQuestion(i)"
+          >
+            <strong>{{ item.question }}</strong>
+
+            <img
+              src="/images/ken-points/caret-down.svg"
+              [class.rotated]="openQuestion === i"
+              alt=""
+            />
+          </button>
+
+          <p *ngIf="openQuestion === i">
+            {{ item.answer }}
+          </p>
+        </article>
+      </div>
+
+      <div
+        *ngIf="activeTab === 'steps'"
+        class="points-tab-content"
+      >
+        <div *ngFor="let step of steps">
+          <strong>
+            {{ step.number }}. {{ step.title }}
+          </strong>
+          <p>{{ step.description }}</p>
+        </div>
+      </div>
+
+      <div
+        *ngIf="activeTab === 'terms'"
+        class="points-tab-content"
+      >
+        <p>
+          Chu kỳ xét hạng: 1 năm.
+          Sang năm mới: Kim Cương → Vàng,
+          Vàng → Bạc; Bạc giữ bậc thấp nhất.
+        </p>
+
+        <a routerLink="/terms">
+          Đọc Điều kiện &amp; Điều khoản →
+        </a>
+      </div>
+
+      <p class="points-faq-note">
+        Chu kỳ xét hạng: 1 năm ·
+        Sang năm mới: Kim Cương → Vàng, Vàng → Bạc;
+        Bạc giữ bậc thấp nhất
+      </p>
+
+    </div>
+  </section>
+
+</div>

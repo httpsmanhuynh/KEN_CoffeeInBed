@@ -1,0 +1,213 @@
+<div class="review-page">
+  <section class="review-hero">
+    <h1>Đánh giá Dịch vụ KÉN</h1>
+    <p>Lười một chút, chill một góc</p>
+  </section>
+
+  <main class="review-container">
+    <div class="review-alert">
+      <span aria-hidden="true"><img src="/images/review-icons/info.svg" alt="" /></span>
+      Chỉ các đặt chỗ đã hoàn tất (CHECKED_OUT) mới có thể đánh giá.
+      Mỗi đặt chỗ tối đa một đánh giá.
+    </div>
+
+    <div class="review-workspace">
+      <aside class="review-bookings">
+        <h2><img class="review-inline-icon" src="/images/review-icons/receipt-heading.svg" alt="" /> Chọn đặt chỗ để đánh giá</h2>
+
+        <button
+          *ngFor="let b of bookings; let i = index"
+          type="button"
+          class="review-booking"
+          [class.active]="selectedBooking === i"
+          [attr.aria-pressed]="selectedBooking === i"
+          (click)="chooseBooking(i)"
+        >
+          <span class="review-booking-icon" aria-hidden="true"><img [src]="b.icon" alt="" /></span>
+
+          <span class="review-booking-info">
+            <strong>{{ b.label }}</strong>
+            <small>{{ b.date }} · {{ b.code }}</small>
+          </span>
+
+          <span class="review-selected" *ngIf="selectedBooking === i">
+            Đang chọn
+          </span>
+        </button>
+      </aside>
+
+      <section class="review-form" aria-label="Viết đánh giá">
+        <h2><img class="review-inline-icon" src="/images/review-icons/form-heading.svg" alt="" /> Viết đánh giá</h2>
+
+        <div class="review-form-content">
+          <div class="review-receipt">
+            <div class="review-receipt-icon" aria-hidden="true">
+              <img [src]="selectedBooking === 0 ? '/images/review-icons/coffee-detail.svg' : booking.icon" alt="" />
+            </div>
+
+            <div class="review-receipt-info">
+              <div class="review-receipt-title">
+                <strong>{{ booking.label }}</strong>
+                <span>Đã hoàn tất</span>
+              </div>
+
+              <small>
+                <img class="review-calendar-icon" src="/images/review-icons/calendar.svg" alt="" /> {{ booking.date }}
+                <ng-container *ngIf="booking.time">
+                  · {{ booking.time }}
+                </ng-container>
+              </small>
+
+              <small>
+                Hóa đơn {{ booking.code }}
+                <ng-container *ngIf="booking.amount">
+                  · {{ booking.amount }}
+                </ng-container>
+              </small>
+            </div>
+          </div>
+
+          <div class="review-space">
+            <span>Không gian</span>
+            <div class="review-tags">
+              <span>{{ booking.area }}</span>
+              <span>{{ booking.detail }}</span>
+            </div>
+          </div>
+
+          <div class="review-field">
+            <label>Chất lượng dịch vụ <em>*</em></label>
+
+            <div class="review-rating">
+              <button
+                *ngFor="let star of stars"
+                type="button"
+                class="review-star"
+                [class.active]="star <= rating"
+                [attr.aria-label]="'Đánh giá ' + star + ' sao'"
+                [attr.aria-pressed]="rating === star"
+                (click)="setRating(star)"
+              ><img [src]="star <= rating ? '/images/review-icons/star-on.svg' : '/images/review-icons/star-off.svg'" alt="" /></button>
+
+              <span>{{ rating }} / 5 sao</span>
+            </div>
+          </div>
+
+          <div class="review-field">
+            <label for="ken-review-text">
+              Nhận xét của bạn <em>*</em>
+            </label>
+
+            <textarea
+              id="ken-review-text"
+              [(ngModel)]="reviewText"
+              rows="5"
+              maxlength="2000"
+              placeholder="Chia sẻ trải nghiệm tại KÉN (ít nhất 20 ký tự)"
+            ></textarea>
+
+            <small>{{ reviewText.length }} ký tự · tối thiểu 20</small>
+          </div>
+
+          <div class="review-field">
+            <label for="ken-review-images">
+              Đính kèm ảnh · tối đa 3, mỗi ảnh dưới 2 MB (tùy chọn)
+            </label>
+
+            <input
+              #imageInput
+              id="ken-review-images"
+              type="file"
+              accept="image/*"
+              multiple
+              (change)="onFile($event)"
+              class="review-hidden-input"
+            />
+
+            <div
+              class="review-upload"
+              (dragover)="allowDrop($event)"
+              (drop)="onDrop($event)"
+            >
+              <span aria-hidden="true"><img src="/images/review-icons/upload.svg" alt="" /></span>
+              <button type="button" (click)="imageInput.click()">
+                Kéo thả hoặc click để chọn ảnh
+              </button>
+            </div>
+
+            <ul class="review-file-list" *ngIf="selectedFiles.length">
+              <li *ngFor="let file of selectedFiles; let i = index">
+                <span>{{ file.name }}</span>
+                <button
+                  type="button"
+                  (click)="removeFile(i)"
+                  [attr.aria-label]="'Xóa ảnh ' + file.name"
+                >×</button>
+              </li>
+            </ul>
+          </div>
+
+          <label class="review-public">
+            <input type="checkbox" [(ngModel)]="isPublic" />
+            Cho phép hiển thị đánh giá công khai
+          </label>
+
+          <button type="button" class="review-submit" (click)="submit()">
+            <img src="/images/review-icons/submit-arrow.svg" alt="" /> Gửi đánh giá
+          </button>
+
+          <p class="review-hint">
+            Đánh giá của bạn giúp KÉN cải thiện dịch vụ.
+            Cảm ơn bạn đã chia sẻ!
+          </p>
+
+          <p class="review-notice" *ngIf="notice" role="status">
+            {{ notice }}
+          </p>
+        </div>
+      </section>
+    </div>
+
+    <section class="review-recent" aria-label="Đánh giá gần đây">
+      <div class="review-recent-heading">
+        <h2><img class="review-inline-icon" src="/images/review-icons/recent-info.svg" alt="" /> Đánh giá gần đây</h2>
+        <span>Đánh giá minh họa</span>
+      </div>
+
+      <div class="review-recent-content">
+        <div class="review-recent-grid">
+          <article *ngFor="let r of recentReviews" class="review-recent-card">
+            <div class="review-recent-card-top">
+              <strong>{{ r.name }}</strong>
+              <span>
+                <ng-container *ngFor="let star of stars"><img class="review-recent-star" [src]="star <= r.rating ? '/images/review-icons/star-filled.svg' : '/images/review-icons/star-empty-small.svg'" alt="" /></ng-container>
+                <small>{{ r.rating }}/5</small>
+              </span>
+            </div>
+
+            <p class="review-recent-meta">{{ r.place }} · {{ r.date }}</p>
+            <p class="review-recent-text">{{ r.content }}</p>
+          </article>
+        </div>
+
+        <div class="review-recent-bottom">
+          <button type="button" class="review-more" (click)="showMoreReviews()">
+            <img src="/images/review-icons/arrow-left.svg" alt="" />
+            Xem thêm đánh giá
+            <img src="/images/review-icons/arrow-right.svg" alt="" />
+          </button>
+
+          <div class="review-points-note">
+            <img src="/images/review-icons/info.svg" alt="" /> Đánh giá sao phản ánh chất lượng dịch vụ.
+            KÉN ĐIỂM và KÉN Coins hoạt động độc lập với hệ thống đánh giá này.
+          </div>
+        </div>
+
+        <p class="review-more-message" *ngIf="moreNotice">
+          Hiện chỉ có ba đánh giá minh họa.
+          Danh sách đánh giá thật sẽ được tải khi tích hợp API.
+        </p>
+      </div>
+    </section>
+  </main>
+</div>

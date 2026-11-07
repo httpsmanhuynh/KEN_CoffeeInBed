@@ -1,0 +1,125 @@
+<main class="kh-home">
+  <section class="kh-hero" aria-label="Giới thiệu KÉN">
+    <img *ngFor="let slide of slides; let i = index" class="kh-hero-image" [class.kh-hero-image--active]="heroIndex === i" [src]="slide" [alt]="'Không gian KÉN, ảnh banner ' + (i + 1)">
+    <div class="kh-hero-shade"></div>
+    <div class="kh-container kh-hero-body">
+      <p class="kh-hero-eyebrow">—&nbsp; NỀN TẢNG CÀ PHÊ &amp; KHÔNG GIAN ĐA TIỆN ÍCH</p>
+      <h1>KÉN</h1>
+      <p class="kh-script kh-hero-slogan">Lười một chút, chill một góc</p>
+      <p class="kh-hero-description">Một điểm đến, ba trạng thái trải nghiệm. Gặp gỡ bạn bè, cày deadline trong yên tĩnh, hoặc chợp mắt trong chiếc kén riêng — tất cả theo cách bạn chủ động.</p>
+      <div class="kh-actions">
+        <a class="kh-btn kh-btn--gold" routerLink="/spaces">Đặt không gian của bạn <span aria-hidden="true">→</span></a>
+        <a class="kh-btn kh-btn--outline-light" routerLink="/spaces">Xem các không gian</a>
+      </div>
+    </div>
+    <div class="kh-slide-dots" aria-label="Chọn banner">
+      <button *ngFor="let slide of slides; let i = index" type="button" [class.active]="i === heroIndex" [attr.aria-label]="'Banner ' + (i + 1)" [attr.aria-pressed]="i === heroIndex" (click)="setSlide(i)"></button>
+    </div>
+  </section>
+
+  <section class="kh-section kh-about kh-container" aria-labelledby="kh-about-title">
+    <div class="kh-about-top">
+      <div class="kh-about-pictures">
+        <img src="/images/ken-home/about-cafe.png" alt="Không gian quán cà phê KÉN" class="kh-about-a">
+        <img src="/images/ken-home/about-work.png" alt="Góc làm việc bên bàn gỗ" class="kh-about-b">
+        <img src="/images/ken-home/about-meeting.png" alt="Phòng họp tại KÉN" class="kh-about-c">
+        <img src="/images/ken-home/about-rest.png" alt="Cabin nghỉ ngơi riêng tư" class="kh-about-d">
+      </div>
+      <div class="kh-about-copy">
+        <p class="kh-eyebrow">—&nbsp; VỀ CHÚNG TÔI</p>
+        <h2 id="kh-about-title">Ở KÉN, bạn luôn có một không gian của riêng mình</h2>
+        <p>Giữa thành phố vội vã, một khoảng không riêng đã trở thành điều xa xỉ. KÉN là chiếc vỏ nhỏ mà sâu bướm tạo ra để <strong>ẩn mình và nghỉ ngơi</strong>, cũng như những cabin, giường nằm và góc làm việc tại đây, để bạn <strong>rút khỏi ồn ào và trở lại với chính mình.</strong></p>
+        <p>KÉN không bán cà phê thuần túy. KÉN mang đến cho bạn <strong>quyền sử dụng không gian và thời gian, một điểm đến, ba trạng thái trải nghiệm.</strong></p>
+        <a class="kh-btn kh-btn--beige" routerLink="/spaces">Khám phá không gian của bạn <span aria-hidden="true">→</span></a>
+      </div>
+    </div>
+    <div class="kh-advantage-grid">
+      <article class="kh-advantage" *ngFor="let item of advantages"><div class="kh-advantage-icon" aria-hidden="true">{{ item.symbol }}</div><h3>{{ item.title }}</h3><p>{{ item.description }}</p></article>
+    </div>
+  </section>
+
+  <section class="kh-section kh-mascot kh-container" aria-labelledby="kh-mascot-title">
+    <div class="kh-center-intro">
+      <p class="kh-eyebrow">LINH VẬT KÉN</p>
+      <h2 id="kh-mascot-title">Gặp chú KÉN người dẫn đường nhỏ bé</h2>
+      <p>Giữa thành phố chưa bao giờ ngủ, có một chú kén nhỏ nhả tơ quấn quanh mình để dừng lại một nhịp. Trong chiếc kén ấy, chú tìm thấy ba điều: kết nối, tập trung và tái tạo. Đó cũng chính là ba trạng thái mà KÉN dành cho bạn.</p>
+    </div>
+    <div class="kh-mascot-grid">
+      <a *ngFor="let mascot of mascots" [routerLink]="mascot.route" class="kh-mascot-card">
+        <img [src]="mascot.image" [alt]="mascot.title">
+        <span class="kh-mini-pill">♧ {{ mascot.label }}</span>
+        <h3>{{ mascot.title }}</h3>
+        <p>{{ mascot.description }}</p>
+      </a>
+    </div>
+    <p class="kh-quote">“Khi chồi lá nhỏ trên đỉnh kén nảy mầm, chú biết mình đã sẵn sàng bước ra, không phải để chạy nhanh hơn, mà để trở lại nhịp sống với một phiên bản tốt hơn của chính mình.”</p>
+  </section>
+
+  <section class="kh-section kh-steps kh-container" aria-labelledby="kh-steps-title">
+    <div class="kh-center-intro kh-steps-heading">
+      <h2 id="kh-steps-title">Để giữ một góc nhỏ của riêng bạn tại KÉN...</h2>
+      <p>Chỉ với vài bước, bạn đã có chỗ để làm việc, họp nhóm hay nghỉ ngơi, giá minh bạch, không phát sinh.</p>
+    </div>
+    <div class="kh-steps-layout">
+      <div class="kh-steps-list">
+        <div class="kh-step" *ngFor="let item of steps; let i = index"><span class="kh-step-number">{{ i + 1 }}</span><div><h3>{{ item.title }}</h3><p>{{ item.description }}</p></div></div>
+        <a routerLink="/spaces" class="kh-btn kh-btn--beige">Khám phá không gian của bạn <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="kh-step-images"><img class="kh-step-image-big" src="/images/ken-home/steps-rest.png" alt="Khách thư giãn tại KÉN"><img class="kh-step-image-small" src="/images/ken-home/steps-coffee.png" alt="Cà phê và laptop tại KÉN"><span class="kh-decor-circle" aria-hidden="true"></span></div>
+    </div>
+  </section>
+
+  <section class="kh-section kh-spaces-section" aria-labelledby="kh-spaces-title">
+    <div class="kh-container"><div class="kh-center-intro">
+      <p class="kh-eyebrow kh-eyebrow--pill">KHÔNG GIAN TẠI KÉN</p>
+      <h2 id="kh-spaces-title">Bạn cần riêng tư bao nhiêu, KÉN đều có không gian vừa đủ</h2>
+      <p>Kéo từ trái sang phải để chọn mức riêng tư phù hợp — từ góc cà phê cởi mở đến chiếc kén khép kín nhất.</p>
+    </div>
+    <div class="kh-space-rail" role="group" aria-label="Chọn mức riêng tư">
+      <span class="kh-rail-line" aria-hidden="true"></span>
+      <button type="button" *ngFor="let space of spaces; let i = index" class="kh-rail-option" [class.kh-rail-option--active]="selectedSpace === i" [attr.aria-pressed]="selectedSpace === i" (click)="selectSpace(i)"><img [src]="space.thumb" [alt]="space.label"><strong>{{ space.label }}</strong><small>{{ space.privacy }}</small></button>
+    </div>
+    <div class="kh-privacy-caption"><span>← Cởi mở hơn</span><span>Riêng tư hơn →</span></div>
+    <div class="kh-space-detail">
+      <div class="kh-space-collage">
+        <img class="kh-collage-first" [src]="spaces[selectedSpace].images[0]" alt="Góc không gian KÉN">
+        <img [src]="spaces[selectedSpace].images[1]" alt="Chi tiết không gian KÉN">
+        <img [src]="spaces[selectedSpace].images[2] || spaces[selectedSpace].images[0]" alt="Góc nhìn bên trong KÉN">
+        <img [src]="spaces[selectedSpace].images[3] || spaces[selectedSpace].images[1]" alt="Không gian và đồ uống tại KÉN">
+      </div>
+      <div class="kh-space-detail-copy">
+        <p class="kh-eyebrow">SPACE</p><h3>{{ spaces[selectedSpace].heading }}</h3><p>{{ spaces[selectedSpace].description }}</p>
+        <div class="kh-benefit-row"><span *ngFor="let item of spaces[selectedSpace].benefits">{{ item }}</span></div>
+        <a class="kh-btn kh-btn--white" [routerLink]="spaces[selectedSpace].route">Xem chi tiết không gian <span aria-hidden="true">→</span></a>
+        <button class="kh-btn kh-btn--white" type="button" disabled title="Trang Menu đang chờ tích hợp">Xem menu đồ uống <span aria-hidden="true">→</span></button>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <section class="kh-section kh-pricing-section" aria-labelledby="kh-pricing-title"><div class="kh-container">
+    <div class="kh-center-intro"><p class="kh-eyebrow kh-eyebrow--pill">BẢNG GIÁ THAM KHẢO</p><h2 id="kh-pricing-title">Minh bạch từng khoản</h2><p>KÉN tách bạch giữa gói không gian và dịch vụ mua thêm để bạn tối ưu chi phí. Giá được lưu lại ngay tại thời điểm bạn đặt chỗ.</p></div>
+    <div class="kh-price-grid"><article *ngFor="let p of prices" class="kh-price-card" [class.kh-price-card--featured]="p.featured"><div class="kh-price-icon" aria-hidden="true">{{ p.featured ? '♙' : '♧' }}</div><p class="kh-price-eyebrow">{{ p.eyebrow }}</p><h3>{{ p.title }}</h3><strong class="kh-price-amount">{{ p.price }}</strong><small>{{ p.sub }}</small><ul><li *ngFor="let item of p.items">{{ item }}</li></ul><p class="kh-price-note">{{ p.note }}</p><a class="kh-btn kh-btn--gold" [routerLink]="p.route">Đặt gói này</a></article></div>
+    <p class="kh-pricing-caption">Ba gói đại diện: Bàn chung tính theo người × số giờ; phòng họp và kén nghỉ tính trọn gói theo không gian. Add-on tính riêng.</p>
+    <a class="kh-btn kh-btn--white kh-price-more" routerLink="/spaces">Xem chi tiết bảng giá <span aria-hidden="true">→</span></a>
+    <div class="kh-addons"><div class="kh-addons-head"><div><h3>Dịch vụ mua thêm (Add-on)</h3><p>Mua kèm khi đặt chỗ, không bắt buộc</p></div><button type="button" disabled title="Trang Menu đang chờ tích hợp">Xem menu đầy đủ →</button></div><div class="kh-addon-grid"><div class="kh-addon" *ngFor="let add of addons"><span aria-hidden="true">{{ add.icon }}</span><span>{{ add.name }}</span><strong>{{ add.price }}</strong></div></div></div>
+    <p class="kh-info-notice">ⓘ &nbsp; KÉN Kết Nối chỉ giới thiệu menu, không nhận đặt chỗ trực tuyến. Đồ uống và bánh có thể mua kèm khi đặt không gian; bộ nghỉ ngơi, chăn mỏng thêm và khăn ấm chỉ áp dụng cho KÉN Tái Tạo, được chuẩn bị trước giờ Check-in.</p>
+  </div></section>
+
+  <section class="kh-section kh-branch-section" aria-labelledby="kh-branch-title"><div class="kh-container"><div class="kh-center-intro"><p class="kh-eyebrow kh-eyebrow--pill">CƠ SỞ KÉN</p><h2 id="kh-branch-title">Một điểm hẹn tại Chợ Lớn</h2><p>KÉN tập trung vận hành một cơ sở duy nhất để giữ chất lượng không gian và dịch vụ ổn định. Ghé thăm và trải nghiệm trọn vẹn cả ba khu vực.</p></div>
+    <div class="kh-branch-card"><img src="/images/ken-home/branch.png" alt="Mặt tiền cửa hàng KÉN"><div><h3>KÉN · Café &amp; Space</h3><p>KÉN hoạt động với một cơ sở duy nhất, gồm cả ba không gian Kết Nối, Tập Trung và Tái Tạo trong cùng một mặt bằng. Một nơi để gặp gỡ, làm việc và nghỉ ngơi theo cách của bạn.</p><p>⌖ &nbsp; 123 Nguyễn Văn Cừ, Phường Chợ Lớn, TPHCM</p><p>◷ &nbsp; 08:00 – 22:00 mỗi ngày</p><p>☎ &nbsp; Hotline 1900 123456</p><div class="kh-branch-tags"><span>✓ Kết Nối</span><span>✓ Tập Trung</span><span>✓ Tái Tạo</span></div><button type="button" class="kh-btn kh-btn--gold" disabled title="Chưa kết nối địa chỉ bản đồ chính thức">Chỉ đường tới KÉN <span aria-hidden="true">→</span></button></div></div>
+    <div class="kh-map" aria-label="Sơ đồ minh họa vị trí, không dùng để điều hướng"><span class="kh-map-area">PHƯỜNG CHỢ LỚN</span><span class="kh-map-road">Nguyễn Văn Cừ</span><span class="kh-map-pin">⌖ KÉN · Café &amp; Space<br><small>123 Nguyễn Văn Cừ</small></span><small>Sơ đồ minh họa vị trí · Không dùng để điều hướng</small></div>
+  </div></section>
+
+  <section class="kh-section kh-gallery-section" aria-labelledby="kh-gallery-title"><div class="kh-container"><div class="kh-center-intro"><p class="kh-eyebrow kh-eyebrow--pill">BẠN CỦA KÉN</p><h2 class="kh-script" id="kh-gallery-title">Những khoảnh khắc ở KÉN</h2><p>Cảm ơn bạn đã ghé qua và để lại những khoảnh khắc thật dễ thương tại KÉN.</p></div><div class="kh-gallery-mosaic"><img *ngFor="let photo of gallery; let i = index" [src]="'/images/ken-home/' + photo" [alt]="'Khoảnh khắc tại KÉN ' + (i + 1)"></div></div></section>
+
+  <section class="kh-section kh-member-section" aria-labelledby="kh-member-title"><div class="kh-container"><div class="kh-member-card"><div class="kh-member-copy"><p class="kh-eyebrow kh-eyebrow--pill">HỘI VIÊN KÉN</p><h2 id="kh-member-title">Bạn đã là hội viên KÉN chưa?</h2><p>KÉN trân trọng những vị khách đã đồng hành cùng quán. Chương trình hội viên giúp bạn tích lũy điểm sau mỗi đơn hoàn tất, theo dõi lịch sử và đổi điểm lấy voucher.</p><div class="kh-member-grid"><div><span>♛</span><strong>Tích điểm sau mỗi lần ghé</strong><small>Điểm được ghi nhận sau khi đơn hoàn tất CHECKED_OUT.</small></div><div><span>♙</span><strong>Hạng hội viên</strong><small>Đồng hành cùng KÉN với ba hạng Basic, Silver và Gold.</small></div><div><span>▣</span><strong>Lịch sử điểm</strong><small>Theo dõi các lượt tích điểm và sử dụng điểm của bạn.</small></div><div><span>♧</span><strong>Đổi điểm lấy voucher</strong><small>Dùng điểm đã tích lũy để đổi voucher cho lần ghé sau.</small></div></div><button type="button" class="kh-btn kh-btn--gold" disabled title="Chức năng đăng ký hội viên sẽ được kết nối khi tích hợp tài khoản">Đăng ký hội viên <span aria-hidden="true">→</span></button></div><img src="/images/ken-home/member.png" alt="Nhân viên KÉN phục vụ khách hàng"></div></div></section>
+
+  <section class="kh-section kh-day-section" aria-labelledby="kh-day-title"><div class="kh-container kh-day-grid"><div><p class="kh-eyebrow kh-eyebrow--pill">MỘT NGÀY Ở KÉN</p><h2 id="kh-day-title">Cùng KÉN tạo nên những khoảng lặng dễ chịu</h2><p>Ở KÉN, chúng tôi tin rằng một nơi yên tĩnh được vận hành bởi những con người tận tâm. Đội ngũ KÉN gọn gàng, thân thiện, luôn chuẩn bị từng cabin, từng góc bàn để khách có trải nghiệm trọn vẹn nhất.</p><div class="kh-branch-tags"><span>♧ Barista</span><span>♧ Nhân viên phục vụ</span><span>♧ Housekeeping cabin</span></div><div class="kh-actions"><a class="kh-btn kh-btn--white" routerLink="/support">Liên hệ đội ngũ KÉN <span aria-hidden="true">→</span></a><a class="kh-btn kh-btn--beige" routerLink="/spaces">Ghé KÉN chơi <span aria-hidden="true">→</span></a></div></div><div class="kh-staff-images"><img src="/images/ken-home/staff-1.png" alt="Barista phục vụ tại quầy"><img src="/images/ken-home/staff-2.png" alt="Nhân viên chuẩn bị không gian nghỉ"></div></div></section>
+
+  <section class="kh-section kh-faq-section" aria-labelledby="kh-faq-title"><div class="kh-container"><div class="kh-center-intro"><p class="kh-eyebrow kh-eyebrow--pill">GIẢI ĐÁP NHANH</p><h2 id="kh-faq-title">Những điều bạn có thể thắc mắc</h2><p>Câu hỏi thường gặp về cách đặt chỗ, không gian và dịch vụ tại KÉN.</p></div><div class="kh-faq-list"><div *ngFor="let faq of faqs; let i = index" class="kh-faq-item"><button type="button" class="kh-faq-toggle" [attr.aria-expanded]="expandedFaq === i" (click)="toggleFaq(i)"><strong>{{ faq.question }}</strong><span aria-hidden="true">{{ expandedFaq === i ? '−' : '+' }}</span></button><p *ngIf="expandedFaq === i">{{ faq.answer }}</p></div></div></div></section>
+
+  <section class="kh-section kh-contact-section" aria-labelledby="kh-contact-title"><div class="kh-container"><div class="kh-center-intro"><p class="kh-eyebrow">LIÊN HỆ &amp; TƯ VẤN</p><h2 id="kh-contact-title">Để KÉN tư vấn cho bạn nhé</h2><p>Để lại thông tin để đội ngũ KÉN tư vấn không gian và khung giờ phù hợp. Gửi yêu cầu này chưa tạo đơn hoặc giữ chỗ; KÉN Kết Nối có thể ghé trực tiếp.</p></div>
+    <form class="kh-contact-form" [formGroup]="consultation" (ngSubmit)="submitConsultation()" novalidate><label>Họ và tên<input formControlName="fullName" type="text" placeholder="VD: Nguyễn Thị KÉN"><small *ngIf="consultation.get('fullName')?.touched && consultation.get('fullName')?.invalid">Vui lòng nhập họ tên ít nhất 2 ký tự.</small></label><label>Số điện thoại<input formControlName="phone" type="tel" placeholder="VD: 0987654321"><small *ngIf="consultation.get('phone')?.touched && consultation.get('phone')?.invalid">Vui lòng nhập số điện thoại hợp lệ.</small></label><label>Email<input formControlName="email" type="email" placeholder="VD: Ken@email.com"><small *ngIf="consultation.get('email')?.touched && consultation.get('email')?.invalid">Vui lòng nhập email hợp lệ.</small></label><label>Không gian quan tâm<select formControlName="space"><option value="" disabled>– Chọn không gian –</option><option *ngFor="let space of spaces" [value]="space.label">{{ space.label }}</option></select></label><label>Khung giờ dự kiến<input formControlName="hours" type="text" placeholder="VD: 14:00 - 17:00 hôm nay"></label><label>Ghi chú thêm<textarea formControlName="note" rows="4" maxlength="500" placeholder="Cho KÉN biết nếu bạn cần thêm thông tin (tối đa 500 ký tự)"></textarea></label><button class="kh-btn kh-btn--gold" type="submit">Gửi yêu cầu</button><p class="kh-form-message" *ngIf="submittedMessage" role="status">{{ submittedMessage }}</p></form>
+  </div></section>
+</main>

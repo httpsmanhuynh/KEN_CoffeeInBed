@@ -52,7 +52,7 @@
       </li>
       <li>
         <a
-          routerLink="/khong-gian"
+          routerLink="/spaces"
           routerLinkActive="active"
           (click)="closeMobileMenu()"
         >
@@ -68,63 +68,44 @@
           Menu
         </a>
       </li>
-      <li>
-        <a
-          routerLink="/ho-tro"
-          routerLinkActive="active"
-          class="has-dropdown"
-          (click)="closeMobileMenu()"
-        >
-          <span>Hỗ trợ</span>
-          <svg class="dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none">
-            <path
-              d="M1 1L5 5L9 1"
-              stroke="#4A3123"
-              stroke-width="1.3"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-        </a>
-      </li>
-      <li>
-        <a
-          routerLink="/chinh-sach"
-          routerLinkActive="active"
-          class="has-dropdown"
-          (click)="closeMobileMenu()"
-        >
-          <span>Chính sách</span>
-          <svg class="dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none">
-            <path
-              d="M1 1L5 5L9 1"
-              stroke="#4A3123"
-              stroke-width="1.3"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-        </a>
-      </li>
-      <li>
-        <a
-          routerLink="/ve-chung-toi"
-          routerLinkActive="active"
-          class="has-dropdown"
-          (click)="closeMobileMenu()"
-        >
-          <span>Về chúng tôi</span>
-          <svg class="dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none">
-            <path
-              d="M1 1L5 5L9 1"
-              stroke="#4A3123"
-              stroke-width="1.3"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-        </a>
-      </li>
+      <li class="ken-nav-dropdown-item">
+  <details class="ken-nav-dropdown" name="ken-navigation">
+    <summary class="ken-nav-trigger">
+      Hỗ trợ
+      <span class="ken-nav-caret" aria-hidden="true"></span>
+    </summary>
+    <div class="ken-nav-dropdown-menu">
+      <a routerLink="/support" (click)="closeMobileMenu()">Trung tâm hỗ trợ</a>
+      <a routerLink="/reviews" (click)="closeMobileMenu()">Đánh giá</a>
+      <a routerLink="/blog" (click)="closeMobileMenu()">Blog</a>
+      <a routerLink="/points" (click)="closeMobileMenu()">KÉN Điểm</a>
+    </div>
+  </details>
+</li>
+      <li class="ken-nav-dropdown-item">
+  <details class="ken-nav-dropdown" name="ken-navigation">
+    <summary class="ken-nav-trigger">
+      Chính sách
+      <span class="ken-nav-caret" aria-hidden="true"></span>
+    </summary>
+    <div class="ken-nav-dropdown-menu">
+      <a routerLink="/policy" (click)="closeMobileMenu()">Chính sách hoạt động</a>
+      <a routerLink="/terms" (click)="closeMobileMenu()">Điều khoản &amp; điều kiện</a>
+    </div>
+  </details>
+</li>
+      <li class="ken-nav-dropdown-item">
+  <details class="ken-nav-dropdown" name="ken-navigation">
+    <summary class="ken-nav-trigger">
+      Về chúng tôi
+      <span class="ken-nav-caret" aria-hidden="true"></span>
+    </summary>
+    <div class="ken-nav-dropdown-menu">
+      <a routerLink="/our-story" (click)="closeMobileMenu()">Câu chuyện</a>
+      <a routerLink="/about" (click)="closeMobileMenu()">Về chúng tôi</a>
+    </div>
+  </details>
+</li>
     </ul>
 
     <!-- Menu Auth Mobile -->

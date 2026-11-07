@@ -1,23 +1,68 @@
-﻿import { NgModule, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { HomeGuestPage, HomeMemberPage, KenHomeContent } from './pages/customer/home-page/home-pages';
+import { NgModule, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+
 import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
-import { SupportComponent } from './pages/customer/support/support';
+
 import { HeaderComponent } from './shared/components/header/header';
 import { Footer } from './shared/components/footer/footer';
 import { CustomerLayout } from './shared/layouts/customer-layout/customer-layout';
 
+import { SupportComponent } from './pages/customer/support/support';
+
+import { PolicyPage } from './pages/customer/policy-page/policy-page';
+import { TermsPage } from './pages/customer/terms-page/terms-page';
+import { ReviewPage } from './pages/customer/review-page/review-page';
+import { StoryPage } from './pages/customer/story-page/story-page';
+import { PointsPage } from './pages/customer/points-page/points-page';
+import { CoinsPage } from './pages/customer/coins-page/coins-page';
+import { JourneysPage } from './pages/customer/journeys-page/journeys-page';
+import { AboutPage } from './pages/customer/about-page/about-page';
+import { SpacesPage } from './pages/customer/spaces-page/spaces-page';
+
+import { ConnectPage } from './pages/customer/space-details/connect-page/connect-page';
+import { CoworkPage } from './pages/customer/space-details/cowork-page/cowork-page';
+import { FocusPage } from './pages/customer/space-details/focus-page/focus-page';
+import { MeetingPage } from './pages/customer/space-details/meeting-page/meeting-page';
+
 @NgModule({
-  declarations: [App, SupportComponent, HeaderComponent, Footer, CustomerLayout],
-  imports: [BrowserModule, AppRoutingModule, ReactiveFormsModule],
-  providers: [provideBrowserGlobalErrorListeners()],
-  bootstrap: [App],
+  declarations: [
+    App,
+
+    HeaderComponent,
+    Footer,
+    CustomerLayout,
+
+    SupportComponent,
+
+    PolicyPage,
+    TermsPage,
+    ReviewPage,
+    StoryPage,
+    PointsPage,
+    CoinsPage,
+    JourneysPage,
+    AboutPage,
+
+    SpacesPage,
+    ConnectPage,
+    CoworkPage,
+    FocusPage,
+    MeetingPage,
+    HomeGuestPage,
+    HomeMemberPage,
+    KenHomeContent,],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    FormsModule,
+    ReactiveFormsModule
+  ],
+  providers: [
+    provideBrowserGlobalErrorListeners()
+  ],
+  bootstrap: [App]
 })
 export class AppModule {}
-
-
-
-
-
-
