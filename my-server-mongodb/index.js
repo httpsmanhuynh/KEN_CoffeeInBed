@@ -16,7 +16,21 @@ const isProd = process.env.NODE_ENV === 'production';
 // 1. Middleware cơ bản
 app.use(morgan('combined'));
 if (isProd) app.set('trust proxy', 1); // sau reverse proxy HTTPS: cookie secure + req.ip (rate limit) mới đúng
-app.use(cors({ origin: process.env.CORS_ORIGIN || 'http://localhost:4200', credentials: true }));
+const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:4200')
+  .split(',')
+  .map((o) => o.trim());
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(null, false);
+      }
+    },
+    credentials: true,
+  }),
+);
 app.use(express.json({ limit: '1mb' })); // 50mb quá lớn nếu không upload ảnh qua JSON
 app.use(express.urlencoded({ limit: '1mb', extended: true }));
 app.use((req, res, next) => {
