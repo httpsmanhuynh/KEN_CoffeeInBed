@@ -129,9 +129,3 @@ export class KenHomeContent implements OnInit, OnDestroy {
     this.submittedMessage = 'Thông tin đã hợp lệ. Chức năng gửi yêu cầu đến KÉN đang chờ kết nối máy chủ; chưa có yêu cầu nào được gửi.';
   }
 }
-
-@Component({ selector: 'app-ken-home-guest-page', standalone: false, template: '<app-ken-home-content [member]="false"></app-ken-home-content>' })
-export class HomeGuestPage {}
-
-@Component({ selector: 'app-ken-home-member-page', standalone: false, template: '<app-header [isLoggedIn]="true" userName="Tài khoản của tôi"></app-header><app-ken-home-content [member]="true"></app-ken-home-content><app-footer></app-footer>' })
-export class HomeMemberPage {}

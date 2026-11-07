@@ -1,5 +1,13 @@
-import { KenCafeCatalogPage, KenBookingShell, KenSpaceListingPage, KenFocusPodPage, KenDrinkPickerPage, KenBookingReviewPage, KenBookingPaymentPage } from './pages/customer/ken-booking/booking-pages';
-import { HomeGuestPage, HomeMemberPage } from './pages/customer/home-page/home-pages';
+import { KenBookingShell } from './pages/customer/ken-booking/booking-shell/booking-shell';
+import { KenCafeCatalogPage } from './pages/customer/ken-booking/cafe-catalog/cafe-catalog';
+import { KenSpaceListingPage } from './pages/customer/ken-booking/space-listing/space-listing';
+import { KenFocusPodPage } from './pages/customer/ken-booking/focus-pod/focus-pod';
+import { KenDrinkPickerPage } from './pages/customer/ken-booking/drink-picker/drink-picker';
+import { KenBookingReviewPage } from './pages/customer/ken-booking/booking-review/booking-review';
+import { KenBookingPaymentPage } from './pages/customer/ken-booking/booking-payment/booking-payment';
+import { KenHomeContent } from './pages/customer/home-page/home-content/home-content';
+import { HomeGuestPage } from './pages/customer/home-page/home-guest/home-guest';
+import { HomeMemberPage } from './pages/customer/home-page/home-member/home-member';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
