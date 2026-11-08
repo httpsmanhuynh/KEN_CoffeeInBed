@@ -51,7 +51,7 @@ router.post(
     const purpose = str(req.body.purpose);
 
     if (purpose === 'CHANGE_PASSWORD' || purpose === 'TOGGLE_2FA') {
-      await issueOtp(db, { userId: user._id, purpose, phone: user.phone });
+      await issueOtp(db, { userId: user._id, purpose, phone: user.phone, email: user.email });
       return res.json({ message: 'Đã gửi OTP về số điện thoại đã đăng ký' });
     }
     if (purpose === 'CHANGE_PHONE') {
@@ -62,7 +62,7 @@ router.post(
         return fail(res, 422, 'PHONE_UNCHANGED', 'Số điện thoại mới trùng số hiện tại');
       if (await db.collection('users').findOne({ phone: newPhone }))
         return fail(res, 409, 'PHONE_EXISTS', 'Số điện thoại đã được đăng ký');
-      await issueOtp(db, { userId: user._id, purpose, phone: newPhone });
+      await issueOtp(db, { userId: user._id, purpose, phone: newPhone, email: user.email });
       return res.json({ message: 'Đã gửi OTP về số điện thoại mới' });
     }
     return fail(res, 422, 'VALIDATION_ERROR', 'Mục đích OTP không hợp lệ');

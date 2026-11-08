@@ -74,7 +74,7 @@ router.post(
       password_hash: await bcrypt.hash(password, 10),
     };
     if (email) pendingData.email = email;
-    await issueOtp(db, { userId: null, purpose: 'REGISTER', phone, pendingData });
+    await issueOtp(db, { userId: null, purpose: 'REGISTER', phone, email, pendingData });
     res.status(201).json({ message: 'Đã gửi OTP xác minh' });
   }),
 );
@@ -151,7 +151,7 @@ router.post(
       if (!phoneOtpLimiter.hit(otpKey(user.phone)))
         return fail(res, 429, 'TOO_MANY_REQUESTS', 'Thử lại sau ít phút');
       req.session.pending2FA = { userId: String(user._id) }; // KHÔNG gán session.user ở bước này
-      await issueOtp(db, { userId: user._id, purpose: '2FA_LOGIN', phone: user.phone });
+      await issueOtp(db, { userId: user._id, purpose: '2FA_LOGIN', phone: user.phone, email: user.email });
       return res.json({ requires2FA: true });
     }
     await startSession(req, user);
@@ -195,7 +195,7 @@ router.post(
       .collection('users')
       .findOne({ phone: str(req.body.phone), status: 'ACTIVE' });
     if (user)
-      await issueOtp(db, { userId: user._id, purpose: 'FORGOT_PASSWORD', phone: user.phone });
+      await issueOtp(db, { userId: user._id, purpose: 'FORGOT_PASSWORD', phone: user.phone, email: user.email });
     res.json({ message: 'Nếu số điện thoại đã đăng ký, OTP đã được gửi' });
   }),
 );
