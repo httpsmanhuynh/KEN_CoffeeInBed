@@ -1,0 +1,64 @@
+$kind: http-request
+name: "TC-PRICING-050: [PRICING-050] Bộ số 2: Voucher trừ trước, hạng tính trên phần còn lại (Branch: ALL-B02; VCH-B06; TIE-B04)"
+description: |-
+  **Mã TC:** PRICING-050 (TC-PRICING-050)
+  **Nhóm:** Tổng hợp & thứ tự
+  **API / Thành phần:** POST /api/bookings/quote (UI Checkout / Tóm tắt đơn (Customer))
+  **Loại:** Business Rule
+  **Điều kiện tiên quyết:** Server chạy (http://localhost:3002) và ứng dụng giao diện chạy; đã chạy npm run setup (có hạng thành viên); dữ liệu giá/Inclusion/Add-on/Voucher theo cột 'Dữ liệu vào' đã có trong MongoDB (tạo bằng Compass nếu chưa có).
+  **Dữ liệu vào:** Tài khoản: Customer hạng Vàng (giảm 10%)&#10;Package: trọn gói, tính theo không gian, đơn giá 200.000đ&#10;Inclusion: không có phụ phí&#10;Add-on: không chọn&#10;Voucher: giảm cố định 50.000đ
+  **Các bước thực hiện:**
+  1) Đăng nhập UI bằng tài khoản ở 'Dữ liệu vào'.&#10;2) Chọn Package theo 'Dữ liệu vào' (nhập số khách/số giờ nếu có).&#10;3) Nhập/chọn Voucher theo 'Dữ liệu vào'.&#10;4) Mở màn hình Checkout/Tóm tắt đơn, ghi lại Tạm tính, Giảm Voucher, Giảm hạng, Thành tiền.&#10;5) Đối chiếu từng dòng với 'Kết quả mong đợi' (tính tay theo công thức, không dùng số do UI tự tính làm chuẩn).
+  **Kết quả mong đợi:** Tạm tính 200.000đ (Package 200.000đ + phụ phí Inclusion 0đ + Add-on 0đ); Giảm Voucher 50.000đ; Giảm hạng 15.000đ; Tổng giảm 65.000đ; Thành tiền 135.000đ. UI hiển thị đúng các số này, không có phần thập phân. Giảm hạng = 10% × (200.000 − 50.000) = 15.000đ, KHÔNG phải 10% × 200.000 = 20.000đ. (HTTP: 200)
+  **Nhánh code bao phủ:** ALL-B02; VCH-B06; TIE-B04
+  **Ghi chú:** CẦN XEM XÉT – ánh xạ không 1-1 (1 Manual TC ↔ 4 Automated TC; AUTO-PRICING-046 dùng chung cho 2 Manual TC; AUTO-PRICING-047 dùng chung cho 2 Manual TC). Automated TC ứng viên (chưa xác nhận, chỉ để truy vết, KHÔNG phải kết quả Manual): AUTO-PRICING-029: tính trên (Tạm tính − Voucher), không phải trên Tạm tính | AUTO-PRICING-036: thứ tự áp dụng: Voucher trước, hạng sau (khác thứ tự ngược lại) | AUTO-PRICING-046: giảm hạng làm tròn xuống trên (Tạm tính − Voucher) | AUTO-PRICING-047: trả cùng kết quả với calculatePricing cho cùng dữ liệu
+url: "{{baseUrl}}/api/bookings/quote"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "spaceId": "{{spaceId}}",
+      "packageId": "{{pkgFixedSpace200kId}}",
+      "startAt": "2026-12-20T02:00:00.000Z",
+      "guestCount": 1,
+      "inclusions": [],
+      "addons": [],
+      "voucherCode": "KEN50K"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-PRICING-050] Bộ số 2: Voucher trừ trước, hạng tính trên phần còn lại
+      pm.test("[TC-PRICING-050] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+      pm.test("[TC-PRICING-050] Cấu trúc JSON báo giá hợp lệ và mọi số tiền là số nguyên VNĐ không âm", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.have.property("pricing");
+          const pr = json.pricing;
+          ["packagePrice", "inclusionSurcharge", "addonTotal", "subtotal", "voucherDiscount", "tierDiscount", "discountAmount", "finalAmount"].forEach(function (k) {
+              pm.expect(Number.isInteger(pr[k]), k + " phải là số nguyên").to.be.true;
+              pm.expect(pr[k], k + " không được âm").to.be.at.least(0);
+          });
+      });
+      pm.test("[TC-PRICING-050] Kết quả tính giá khớp công thức nghiệp vụ Pricing", function () {
+          const json = pm.response.json();
+          const pr = json.pricing;
+          pm.expect(pr.packagePrice).to.eql(200000);
+          pm.expect(pr.inclusionSurcharge).to.eql(0);
+          pm.expect(pr.addonTotal).to.eql(0);
+          pm.expect(pr.subtotal).to.eql(200000);
+          pm.expect(pr.voucherDiscount).to.eql(50000);
+          pm.expect(pr.tierDiscount).to.eql(15000);
+          pm.expect(pr.discountAmount).to.eql(65000);
+          pm.expect(pr.finalAmount).to.eql(135000);
+          pm.expect(json.tierRate).to.eql(0.1);
+          pm.expect(pr.subtotal).to.eql(pr.packagePrice + pr.inclusionSurcharge + pr.addonTotal);
+          pm.expect(pr.discountAmount).to.eql(pr.voucherDiscount + pr.tierDiscount);
+          pm.expect(pr.finalAmount).to.eql(pr.subtotal - pr.discountAmount);
+      });
+    language: text/javascript
+order: 2000
