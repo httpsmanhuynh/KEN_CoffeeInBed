@@ -1,0 +1,33 @@
+$kind: http-request
+name: "TC-BKG-23- [BKG-23] Đổi giờ đơn CONFIRMED trước Cut-off (Branch- BKG-B23)"
+description: |-
+  **Mã TC:** BKG-23 (TC-BKG-23)
+  **Nhóm:** Đổi lịch
+  **API / Thành phần:** POST /api/bookings/:id/reschedule
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; đơn CONFIRMED, trước Cut-off.
+  **Dữ liệu vào:** newStartAt hợp lệ
+  **Các bước thực hiện:**
+  1) POST reschedule
+  **Kết quả mong đợi:** 200 đổi giờ thành công (HTTP: 200)
+  **Nhánh code bao phủ:** BKG-B23
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/bookings/{{confirmedBookingId}}/reschedule"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "newStartAt": "{{newStartAt}}"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-BKG-23] Đổi giờ đơn CONFIRMED trước Cut-off
+      pm.test("[TC-BKG-23] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 23000

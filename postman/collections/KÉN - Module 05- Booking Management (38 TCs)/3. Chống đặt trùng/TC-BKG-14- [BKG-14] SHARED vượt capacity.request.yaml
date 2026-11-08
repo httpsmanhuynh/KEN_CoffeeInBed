@@ -1,0 +1,36 @@
+$kind: http-request
+name: "TC-BKG-14- [BKG-14] SHARED vượt capacity (Branch- BKG-B14)"
+description: |-
+  **Mã TC:** BKG-14 (TC-BKG-14)
+  **Nhóm:** Chống đặt trùng
+  **API / Thành phần:** POST /api/bookings
+  **Loại:** Negative
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; Space SHARED đã gần đầy.
+  **Dữ liệu vào:** guestCount vượt remaining capacity
+  **Các bước thực hiện:**
+  1) POST /api/bookings
+  **Kết quả mong đợi:** 409 vượt capacity (HTTP: 409)
+  **Nhánh code bao phủ:** BKG-B14
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/bookings"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "spaceId": "{{sharedSpaceId}}",
+      "packageId": "{{packageId}}",
+      "startAt": "{{bookingStartAt}}",
+      "guestCount": 99
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-BKG-14] SHARED vượt capacity
+      pm.test("[TC-BKG-14] Status code is 409", function () {
+          pm.expect(pm.response.code).to.be.oneOf([409]);
+      });
+    language: text/javascript
+order: 14000

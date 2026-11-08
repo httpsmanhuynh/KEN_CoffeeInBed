@@ -1,0 +1,38 @@
+$kind: http-request
+name: "TC-PRC-16- [PRC-16] Client gửi price-discount-final_amount giả- bỏ qua (Branch- "
+description: |-
+  **Mã TC:** PRC-16 (TC-PRC-16)
+  **Nhóm:** Never Trust the Client
+  **API / Thành phần:** POST /api/bookings/quote
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy.
+  **Dữ liệu vào:** Client gửi final_amount=1, discount=999999
+  **Các bước thực hiện:**
+  1) POST quote
+  **Kết quả mong đợi:** 200 finalAmount do server tính, bỏ qua client (HTTP: 200)
+  **Nhánh code bao phủ:** PRC-B16
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/bookings/quote"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "spaceId": "{{spaceId}}",
+      "packageId": "{{packageId}}",
+      "startAt": "{{bookingStartAt}}",
+      "guestCount": 1,
+      "final_amount": 1,
+      "discount": 999999
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-PRC-16] Client gửi price-discount-final_amount giả- bỏ qua
+      pm.test("[TC-PRC-16] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 16000

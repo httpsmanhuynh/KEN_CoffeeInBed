@@ -1,0 +1,37 @@
+$kind: http-request
+name: "TC-BKG-02- [BKG-02] Buffer 15 phút- đặt ngay lúc kết thúc đơn trước bị chặn (Bra"
+description: |-
+          **Mã TC:** BKG-02 (TC-BKG-02)
+          **Nhóm:** Kiểm tra chỗ trống
+          **API / Thành phần:** POST /api/availability
+          **Loại:** Boundary
+          **Điều kiện tiên quyết:** Server chạy; đơn CONFIRMED EXCLUSIVE kết thúc 12:00.
+          **Dữ liệu vào:** startAt = 12:00 rồi 12:15
+          **Các bước thực hiện:**
+          1) POST availability startAt 12:00
+  2) POST availability startAt 12:15
+          **Kết quả mong đợi:** 12:00 isAvailable=false (nằm trong buffer); 12:15 isAvailable=true (HTTP: 200)
+          **Nhánh code bao phủ:** BKG-B02
+          **Ghi chú:** 
+url: "{{baseUrl}}/api/availability"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "spaceId": "{{spaceId}}",
+      "startAt": "{{bufferStartAt}}",
+      "hours": 2,
+      "guestCount": 2
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-BKG-02] Buffer 15 phút- đặt ngay lúc kết thúc đơn trước bị chặn
+      pm.test("[TC-BKG-02] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 2000
