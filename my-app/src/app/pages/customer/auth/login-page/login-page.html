@@ -1,0 +1,74 @@
+<section class="lg">
+  <div class="lg__card" role="main">
+    <header class="lg__head">
+      <h1>Đăng nhập</h1>
+      <p>Mừng bạn trở lại, KÉN luôn có một góc dành cho bạn.</p>
+    </header>
+
+    @if (justRegistered) {
+      <p class="lg__welcome" role="status">Đăng ký thành công. Vui lòng đăng nhập để tiếp tục.</p>
+    }
+
+    @if (justReset) {
+      <p class="lg__welcome" role="status">Đặt lại mật khẩu thành công. Vui lòng đăng nhập bằng mật khẩu mới.</p>
+    }
+
+    <form class="lg__form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <!-- Email hoặc SĐT -->
+      <div class="field">
+        <label for="identifier">Email hoặc số điện thoại</label>
+        <input id="identifier" type="text" formControlName="identifier"
+               placeholder="Nhập email hoặc số điện thoại" autocomplete="username" autofocus
+               [class.is-invalid]="showFieldError('identifier') || error === 'invalid'"
+               [attr.aria-invalid]="showFieldError('identifier')" />
+        @if (showFieldError('identifier')) { <small class="field__err">Vui lòng nhập email hoặc số điện thoại.</small> }
+      </div>
+
+      <!-- Mật khẩu -->
+      <div class="field">
+        <div class="field__row">
+          <label for="password">Mật khẩu</label>
+          <a class="forgot" routerLink="/forgot-password">Quên mật khẩu?</a>
+        </div>
+        <div class="pw" [class.is-invalid]="showFieldError('password') || error === 'invalid'">
+          <svg class="pw__lock" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M6 10V8a6 6 0 0 1 12 0v2h1a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V11a1 1 0 0 1 1-1zm2 0h8V8a4 4 0 0 0-8 0z" fill="currentColor"/></svg>
+          <input id="password" [type]="showPassword ? 'text' : 'password'" formControlName="password"
+                 placeholder="Nhập mật khẩu" autocomplete="current-password" />
+          <button type="button" class="pw__eye" (click)="showPassword = !showPassword"
+                  [attr.aria-label]="showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'" [attr.aria-pressed]="showPassword">
+            @if (showPassword) {
+              <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+            } @else {
+              <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 4l16 16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            }
+          </button>
+        </div>
+        @if (showFieldError('password')) { <small class="field__err">Vui lòng nhập mật khẩu.</small> }
+
+        <!-- EF1: tài khoản bị khóa -->
+        @if (error === 'locked') {
+          <div class="locked" role="alert">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 10V8a6 6 0 0 1 12 0v2h1a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V11a1 1 0 0 1 1-1zm2 0h8V8a4 4 0 0 0-8 0z" fill="currentColor"/></svg>
+            Tài khoản của bạn đang bị khóa và không thể đăng nhập.
+          </div>
+        }
+        <!-- AF1: sai thông tin; 429; lỗi server -->
+        @else if (error !== 'none') {
+          <p class="lg__error" role="alert">{{ errorText }}</p>
+        }
+      </div>
+
+      <button type="submit" class="btn" [disabled]="loading">
+        @if (loading) { <span class="spinner" aria-hidden="true"></span> Đang đăng nhập… }
+        @else { Đăng nhập }
+      </button>
+    </form>
+
+    <p class="lg__signup">Chưa có tài khoản? <a routerLink="/register">Đăng ký ngay</a></p>
+
+    <p class="lg__legal">
+      Bằng cách đăng nhập, bạn đồng ý với Điều khoản &amp; Điều kiện
+      của chúng tôi và bạn đã đọc Chính Sách Quyền Riêng Tư của chúng tôi.
+    </p>
+  </div>
+</section>

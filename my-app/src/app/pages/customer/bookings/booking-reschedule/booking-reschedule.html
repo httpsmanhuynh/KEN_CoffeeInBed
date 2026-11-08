@@ -1,0 +1,143 @@
+<div class="wrap">
+  <nav class="crumb" aria-label="breadcrumb">
+    <a routerLink="/">Trang chủ</a>　/　<a routerLink="/user-profile">Tài khoản của tôi</a>　/　<span aria-current="page">Đổi / Huỷ lịch</span>
+  </nav>
+
+  <div class="layout">
+    <app-account-sidebar active="reschedule" (logout)="logout()"></app-account-sidebar>
+
+    <main class="content">
+      <header class="intro">
+        <p class="intro__eyebrow">GÓC RIÊNG CỦA BẠN</p>
+        <h1 class="intro__title">Đổi / Huỷ lịch</h1>
+        <p class="intro__desc">Kế hoạch thay đổi một chút? KÉN cùng bạn sắp xếp lại khoảng riêng.</p>
+      </header>
+
+      <nav class="tabs" aria-label="Đổi hoặc huỷ lịch">
+        <a class="tab is-active" routerLink="/booking-reschedule" aria-current="page">Đổi lịch</a>
+        <a class="tab" routerLink="/booking-cancel">Huỷ lịch</a>
+      </nav>
+
+      <!-- Hàng 1: chọn đơn + lịch hiện tại -->
+      <div class="pair">
+        <section class="card" aria-labelledby="pick-title">
+          <h2 class="h-serif" id="pick-title">Chọn đơn muốn đổi lịch</h2>
+          <p class="text">Chỉ hiển thị đơn tương lai có thể gửi yêu cầu.</p>
+          <div role="radiogroup" aria-labelledby="pick-title" class="orders">
+            @for (o of orders; track o.id) {
+              <button type="button" role="radio" class="opt" [class.is-selected]="o.id === selectedId" [attr.aria-checked]="o.id === selectedId" (click)="select(o.id)">
+                <img [src]="o.id === selectedId ? '/images/figma/check.svg' : '/images/figma/circle.svg'" alt="" width="18" height="18" />
+                <span class="opt__body">
+                  <b>{{ o.name }}</b>
+                  <span>{{ o.code }} · {{ fmtDate(o.date) }} · {{ o.start }}–{{ endOf(o) }}</span>
+                </span>
+                <span class="badge badge--{{ o.status }}">{{ statusLabel[o.status] }}</span>
+              </button>
+            }
+          </div>
+        </section>
+
+        <section class="card card--tight" aria-labelledby="cur-title">
+          <div class="card__head">
+            <h2 class="h-serif" id="cur-title">Lịch hiện tại</h2>
+            <span class="badge badge--{{ order.status }}">{{ statusLabel[order.status] }}</span>
+          </div>
+          <p class="strong">{{ shortName(order) }}</p>
+          <p class="text">{{ order.code }} · {{ order.zone }}</p>
+          <hr class="line" />
+          <div class="kv"><img src="/images/figma/calendar-date.svg" alt="" width="16" height="16" /><span>Ngày sử dụng</span><b>{{ fmtDate(order.date) }}</b></div>
+          <div class="kv"><img src="/images/figma/clock-history.svg" alt="" width="16" height="16" /><span>Khung giờ</span><b>{{ order.start }}–{{ orderEnd }}</b></div>
+          <div class="kv"><img src="/images/figma/clock.svg" alt="" width="16" height="16" /><span>Thời lượng · Số khách</span><b>{{ order.hours }} giờ · {{ guests(order) }} khách</b></div>
+          <hr class="line" />
+          <div class="kv kv--total"><span>Tổng tiền đơn</span><b>{{ fmtMoney(order.total) }}</b></div>
+        </section>
+      </div>
+
+      <!-- Hàng 2: lịch mới + kết quả -->
+      <div class="pair">
+        <section class="card card--form" aria-labelledby="new-title">
+          <h2 class="h-serif" id="new-title">Lịch mới</h2>
+
+          <div class="two">
+            <div class="field">
+              <label class="field__label" for="rs-date">Ngày mong muốn</label>
+              <div class="box">
+                <input id="rs-date" type="date" [(ngModel)]="newDate" (ngModelChange)="touch()" />
+                <img class="box__icon box__icon--lg" src="/images/figma/chon-ngay.svg" alt="" width="18" height="18" />
+              </div>
+            </div>
+            <div class="field">
+              <label class="field__label" for="rs-hours">Thời lượng</label>
+              <div class="box">
+                <select id="rs-hours" [(ngModel)]="hours" (ngModelChange)="touch()">
+                  @for (h of durations; track h) { <option [ngValue]="h">{{ h }} giờ{{ h === order.hours ? ' · Giữ gói hiện tại' : '' }}</option> }
+                </select>
+                <img class="box__icon" src="/images/figma/chon-gia-tri.svg" alt="" width="16" height="16" />
+              </div>
+            </div>
+          </div>
+
+          <div class="field">
+            <span class="field__label" id="rs-start-label">Giờ bắt đầu</span>
+            <div class="slots" role="radiogroup" aria-labelledby="rs-start-label">
+              @for (s of slots; track s) {
+                <button type="button" role="radio" class="slot" [class.is-selected]="s === start" [attr.aria-checked]="s === start" (click)="pickSlot(s)">{{ s }}</button>
+              }
+            </div>
+            <p class="text">Giờ kết thúc: {{ start }} + {{ hours }} giờ = {{ end }}. Lịch trống được KÉN kiểm tra khi tiếp nhận yêu cầu.</p>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="rs-note">Ghi chú (không bắt buộc)</label>
+            <div class="box box--area"><textarea id="rs-note" rows="3" [(ngModel)]="note" maxlength="300"></textarea></div>
+          </div>
+
+          <label class="check">
+            <input type="checkbox" class="sr-only" [(ngModel)]="acknowledged" />
+            <span class="check__box" aria-hidden="true">@if (acknowledged) { <img src="/images/figma/square-check.svg" alt="" width="18" height="18" /> }</span>
+            <span class="text">Tôi đã đọc điều kiện đặt chỗ và hiểu đây là yêu cầu đổi lịch.</span>
+          </label>
+        </section>
+
+        <div class="result">
+          <section class="proposal" aria-label="Lịch mới đề xuất">
+            <p class="proposal__eyebrow">LỊCH MỚI ĐỀ XUẤT</p>
+            <h2 class="proposal__title">{{ proposedTitle }}</h2>
+            <div class="kv kv--on"><img src="/images/figma/calendar-date.svg" alt="" width="16" height="16" /><span>Ngày bắt đầu</span><b>{{ fmtDate(newDate) }}</b></div>
+            <div class="kv kv--on"><img src="/images/figma/clock-history.svg" alt="" width="16" height="16" /><span>Giờ bắt đầu</span><b>{{ start }}</b></div>
+            <div class="kv kv--on"><img src="/images/figma/clock.svg" alt="" width="16" height="16" /><span>Giờ kết thúc</span><b>{{ end }}</b></div>
+            <hr class="line line--dark" />
+            <div class="kv kv--on kv--total"><span>Chênh lệch</span><b>Chờ đối chiếu</b></div>
+            <p class="proposal__text">Lịch hiện tại vẫn có hiệu lực đến khi đổi được xác nhận.</p>
+          </section>
+
+          <section class="card" aria-labelledby="avail-title">
+            <h2 class="h-serif h-serif--sm" id="avail-title">Còn chỗ?</h2>
+            <div class="avail" role="status" aria-live="polite">
+              <img src="/images/figma/eye-fill.svg" alt="" width="16" height="16" />
+              <span class="avail__text">{{ rechecking ? 'Đang kiểm tra lịch trống…' : fmtDate(newDate) + ' · ' + start + '–' + end }}</span>
+              @if (!rechecking) {
+                <span class="badge" [class.badge--confirmed]="availability === 'ok'" [class.badge--bad]="availability !== 'ok'">
+                  {{ availability === 'ok' ? 'Còn chỗ' : availability === 'same' ? 'Trùng lịch' : 'Chưa chọn ngày' }}
+                </span>
+              }
+            </div>
+            <p class="text">
+              @if (availability === 'same') { Lịch mới đang trùng với lịch hiện tại, vui lòng chọn ngày hoặc giờ khác. }
+              @else { KÉN đã kiểm tra lịch trống. Đảm bảo gửi yêu cầu trước cut-off time theo chính sách đặt chỗ. }
+            </p>
+            <button type="button" class="btn btn--outline-gold" (click)="recheck()" [disabled]="rechecking">Kiểm tra chỗ lại</button>
+            <button type="button" class="btn btn--gold" [disabled]="!canSubmit" (click)="confirm()">Xác nhận đổi →</button>
+            @if (submitted) {
+              <p class="text text--ok" role="status">Đã gửi yêu cầu đổi lịch. Đơn vẫn giữ trạng thái {{ statusLabel[order.status] }} cho đến khi KÉN xác nhận.</p>
+            } @else {
+              <p class="text">{{ acknowledged ? 'Đổi thành công, đơn vẫn giữ trạng thái ' + statusLabel[order.status] + '.' : 'Vui lòng tích xác nhận đã đọc điều kiện để gửi yêu cầu.' }}</p>
+            }
+          </section>
+
+          <a class="btn btn--outline" routerLink="/booking-list">Giữ lịch hiện tại</a>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

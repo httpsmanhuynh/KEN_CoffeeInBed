@@ -1,0 +1,31 @@
+<aside class="side" aria-label="Điều hướng tài khoản">
+  <div class="profile">
+    <div class="avatar"><img src="/images/figma/nguoi-dung-lg.svg" alt="" width="23.92" height="23.92" /></div>
+    <p class="profile__name">{{ userName }}</p>
+    <div class="rank">
+      <span class="rank__badge">{{ tier }}</span>
+      <span class="rank__points">{{ points }}</span>
+    </div>
+  </div>
+
+  <nav class="menu">
+    @for (it of items; track it.key) {
+      <a class="item" [class.is-active]="it.key === active" [routerLink]="it.path"
+         [attr.aria-current]="it.key === active ? 'page' : null">
+        <img [src]="'/images/figma/' + it.icon + '.svg'" alt="" width="20" height="20" />
+        <span>{{ it.label }}</span>
+        @if (it.key === active) { <i class="item__bar" aria-hidden="true"></i> }
+      </a>
+    }
+    <button type="button" class="item item--logout" (click)="logout.emit()">
+      <img src="/images/figma/dang-xuat.svg" alt="" width="20" height="20" />
+      <span>Đăng xuất</span>
+    </button>
+  </nav>
+
+  <div class="help">
+    <p class="help__title">Một chút hỗ trợ từ KÉN</p>
+    <p class="help__text">Về đặt chỗ, quyền lợi hay tài khoản — KÉN luôn sẵn lòng.</p>
+    <a class="help__link" href="#">Nhắn KÉN ↗</a>
+  </div>
+</aside>

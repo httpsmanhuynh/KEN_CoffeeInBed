@@ -1,0 +1,48 @@
+<section class="otpv">
+  <div class="otpv__card" role="main">
+    <button type="button" class="back" (click)="backToRegister()">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M13 8H3m0 0 4-4M3 8l4 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Quay lại đăng ký
+    </button>
+
+    <header class="otpv__head">
+      <span class="eyebrow">Hoàn tất đăng ký</span>
+      <h1>Xác thực mã OTP</h1>
+      <p>Nhập mã 6 chữ số được gửi qua SMS đến</p>
+      <strong class="phone">{{ masked }}</strong>
+      <button type="button" class="link" (click)="backToRegister()">Thay đổi số điện thoại</button>
+    </header>
+
+    <form class="otpv__form" (ngSubmit)="verify()">
+      <div class="field">
+        <label>Mã OTP <span class="req" aria-hidden="true">*</span></label>
+        <app-otp-input [invalid]="!!error" [disabled]="loading"
+                       (changed)="onCodeChange($event)" (completed)="verify()"></app-otp-input>
+        @if (error) { <small class="err" role="alert">{{ error }}</small> }
+        @else if (info) { <small class="ok" role="status">{{ info }}</small> }
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="btn" [disabled]="!canSubmit">
+          @if (loading) { <span class="spinner" aria-hidden="true"></span> Đang xác thực… }
+          @else { Xác thực &amp; Tạo tài khoản }
+        </button>
+        <p class="note">Tài khoản chỉ được tạo sau khi xác thực OTP thành công qua số điện thoại.</p>
+      </div>
+    </form>
+
+    <div class="resend">
+      <p>
+        Chưa nhận được mã?
+        @if (cooldown > 0) { <span class="wait">Gửi lại sau {{ cooldown }}s</span> }
+        @else { <button type="button" class="link link--strong" (click)="resend()" [disabled]="resending">Gửi lại mã OTP</button> }
+      </p>
+      <small>Vui lòng kiểm tra tin nhắn SMS và kết nối di động. Nếu số điện thoại chưa đúng, hãy thay đổi để nhận mã.</small>
+    </div>
+
+    <p class="legal">
+      Bằng cách đăng ký, bạn đồng ý với Điều khoản &amp; Điều kiện
+      của chúng tôi và bạn đã đọc Chính Sách Quyền Riêng Tư của chúng tôi.
+    </p>
+  </div>
+</section>

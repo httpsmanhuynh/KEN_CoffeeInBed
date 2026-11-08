@@ -1,0 +1,59 @@
+:host { display: contents; }
+p, h2 { margin: 0; }
+.overlay { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 24px; overflow-y: auto; background: rgba(40, 29, 22, .5); animation: fade .2s ease; }
+.dialog { width: 1020px; max-width: 100%; overflow: hidden; background: #FFFCF7; border-radius: 24px; box-shadow: 0 24px 80px rgba(40, 29, 22, .22); outline: none; font-family: var(--ken-font); color: #4A3123; }
+.content { display: flex; height: 510px; animation: fade .35s ease; }
+
+/* Ảnh món */
+.media { position: relative; flex: 0 0 460px; height: 100%; overflow: hidden; background: #E6D3B5; }
+.media__photo { display: block; width: 100%; height: 100%; object-fit: cover; }
+.when { position: absolute; top: 24px; left: 24px; display: inline-flex; align-items: center; gap: 7px; padding: 9px 14px; border-radius: 999px; background: #FFFCF7; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.when img { width: 16px; height: 16px; display: block; }
+.quote { position: absolute; left: 24px; bottom: 24px; width: calc(100% - 48px); padding: 12px 18px; border-radius: 12px; background: #FFFCF7; font-family: var(--ken-hand); font-size: 23px; }
+
+/* Lời gợi ý */
+.copy { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; justify-content: space-between; padding: 32px 40px 36px; }
+.copy__top { display: flex; align-items: center; justify-content: space-between; }
+.eyebrow { color: #A9763F; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; white-space: nowrap; }
+.close { display: inline-flex; align-items: center; gap: 5px; padding: 4px 0 4px 8px; border: 0; background: transparent; color: #7A6553; font-size: 11px; cursor: pointer; }
+.close:hover { color: #4A3123; }
+.close img { width: 20px; height: 20px; display: block; }
+.headline { font-family: var(--ken-heading); font-size: 30px; font-weight: 400; line-height: 1.3; }
+.dish { display: flex; flex-direction: column; gap: 10px; }
+.dish__name { font-family: var(--ken-heading); font-size: 26px; line-height: 1.3; }
+.dish__price { color: #A9763F; font-size: 20px; font-weight: 600; }
+.dish__desc { color: #7A6553; font-size: 14px; line-height: 1.75; }
+.actions { display: flex; flex-direction: column; gap: 12px; }
+.cta { display: flex; align-items: center; justify-content: center; gap: 12px; height: 50px; border: 0; border-radius: 999px; background: #E3A52F; color: #4A3123; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .18s ease; }
+.cta:hover { background: #edb64b; }
+.cta img { width: 20px; height: 20px; display: block; }
+.later { align-self: center; padding: 4px 8px; border: 0; background: transparent; color: #7A6553; font-size: 12px; font-weight: 500; cursor: pointer; }
+.later:hover { color: #4A3123; text-decoration: underline; }
+
+/* Điều khiển slider */
+.controls { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 74px; padding: 0 28px; border-top: 1px solid rgba(216, 199, 178, .62); }
+.counter { color: #7A6553; font-size: 12px; white-space: nowrap; }
+.bars { display: flex; gap: 8px; }
+.bar { position: relative; width: 80px; height: 4px; overflow: hidden; border-radius: 3px; background: #E8DCCB; }
+.bar i { position: absolute; inset: 0 auto 0 0; display: block; border-radius: 3px; background: #A9763F; }
+.nav { display: flex; align-items: center; gap: 10px; }
+.nav__btn { display: grid; place-items: center; width: 34px; height: 34px; padding: 0; border: 1px solid rgba(216, 199, 178, .62); border-radius: 999px; background: transparent; cursor: pointer; transition: background .18s ease; }
+.nav__btn:hover { background: #F7EFE2; }
+.nav__btn--dark { border-color: #4A3123; background: #4A3123; }
+.nav__btn--dark:hover { background: #5d4130; }
+.nav__btn img { width: 16px; height: 16px; display: block; }
+.close:focus-visible, .cta:focus-visible, .later:focus-visible, .nav__btn:focus-visible { outline: 2px solid #A9763F; outline-offset: 2px; }
+
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .overlay, .content { animation: none; } }
+
+@media (max-width: 860px) {
+  .overlay { align-items: start; }
+  .content { flex-direction: column; height: auto; }
+  .media { flex-basis: auto; height: 260px; }
+  .copy { gap: 20px; padding: 24px; }
+  .headline { font-size: 26px; }
+  .dish__name { font-size: 22px; }
+  .controls { flex-wrap: wrap; height: auto; padding: 16px 20px; }
+  .bar { width: 48px; }
+}

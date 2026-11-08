@@ -1,0 +1,56 @@
+/** Điều hướng dùng chung – nhãn lấy đúng theo Figma (header + footer). */
+export interface NavChild { label: string; path: string; }
+export interface NavItem {
+  label: string; path?: string; children?: NavChild[];
+  /** Các đường dẫn làm mục này sáng/gạch chân (mặc định chỉ `path`). */
+  match?: string[];
+}
+
+// TODO: các route /spaces, /menu, /support, /policy, /terms, /about, /blog, /reviews chưa có trang.
+export const MAIN_NAV: NavItem[] = [
+  { label: 'Trang chủ', path: '/' },
+  { label: 'Không gian', path: '/spaces' },
+  { label: 'Menu', path: '/menu', match: ['/menu', '/top-trending'] }, // Figma: Top Trending vẫn gạch chân "Menu"
+  { label: 'Hỗ trợ', children: [
+    { label: 'Trung tâm hỗ trợ', path: '/support' },
+  ] },
+  { label: 'Chính sách', children: [
+    { label: 'Chính sách hoạt động', path: '/policy' },
+    { label: 'Điều kiện & điều khoản', path: '/terms' },
+  ] },
+  { label: 'Về chúng tôi', children: [
+    { label: 'Giới thiệu', path: '/about' },
+    { label: 'Blog', path: '/blog' },
+    { label: 'Đánh giá', path: '/reviews' },
+  ] },
+];
+
+export const FOOTER_ABOUT: NavChild[] = [
+  { label: 'Giới thiệu', path: '/about' },
+  { label: 'Blog', path: '/blog' },
+  { label: 'Đánh giá', path: '/reviews' },
+  { label: 'Trung tâm hỗ trợ', path: '/support' },
+  { label: 'Đặt chỗ của tôi', path: '/booking-list' },
+];
+
+export const FOOTER_POLICY: NavChild[] = [
+  { label: 'Chính sách hoạt động', path: '/policy' },
+  { label: 'Điều kiện & điều khoản', path: '/terms' },
+];
+
+/**
+ * Chỉ các trang xác thực (auth) dùng header khách (Đăng nhập / Đăng ký).
+ * MỌI trang customer khác (tài khoản, đặt chỗ, thành viên, menu, top trending...)
+ * dùng header đã đăng nhập - nên trang mới thêm sau này tự động đúng, không cần khai báo lại.
+ */
+export const GUEST_PATHS = [
+  '/register', '/otp-verify', '/login',
+  '/forgot-password', '/forgot-otp', '/reset-password',
+];
+
+/** true nếu URL thuộc nhóm trang auth (kể cả có query, hash, dấu "/" cuối hoặc route con). */
+export function isGuestPath(url: string): boolean {
+  const path = '/' + url.split(/[?#]/)[0].replace(/^\/+|\/+$/g, '').toLowerCase();
+  if (path === '/') return true; // "/" được điều hướng về /register
+  return GUEST_PATHS.some(g => path === g || path.startsWith(g + '/'));
+}

@@ -1,0 +1,78 @@
+:host { display: block; position: relative; z-index: 100; flex: 0 0 auto; }
+.hd {
+  width: 100%;
+  background: #F7EFE2;
+  border-bottom: 1px solid rgba(216, 199, 178, .62);
+}
+.hd__inner {
+  width: min(100% - 80px, 1280px);
+  min-height: 77px; /* + viền dưới 1px = 78px như Figma */
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Figma: thương hiệu / nav / tài khoản cách đều nhau */
+  gap: 24px;
+}
+.brand { display: inline-flex; align-items: center; gap: 12px; color: #4A3123; text-decoration: none; flex: 0 0 auto; }
+.brand__logo { width: 42px; height: 42px; display: block; object-fit: contain; border-radius: 50%; }
+.brand__text { display: flex; flex-direction: column; }
+.brand__text b { font-size: 22px; line-height: 23.1px; letter-spacing: .8px; font-weight: 700; }
+.brand__text i { color: #4A3123; font-family: var(--ken-script); font-size: 18px; line-height: 18px; font-style: normal; white-space: nowrap; }
+/* Desktop: panel "biến mất" để nav và tài khoản trở thành phần tử trực tiếp của .hd__inner (cách đều 3 nhóm). */
+.panel { display: contents; }
+.nav ul { display: flex; align-items: center; gap: 32px; list-style: none; padding: 0; margin: 0; }
+.nav__item { position: relative; }
+.nav__link {
+  display: inline-flex; align-items: center; gap: 4px; padding: 10px 0;
+  border: 0; background: transparent; color: #4A3123; text-decoration: none;
+  font-size: 14px; font-weight: 500; line-height: 21px; white-space: nowrap; cursor: pointer;
+  transition: color .18s ease;
+}
+.nav__link:hover { color: #A9763F; }
+.nav__link.is-active { color: #4A3123; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 5px; } /* Figma: mục đang xem (Menu) gạch chân */
+.caret { font-size: 14px; line-height: 21px; } /* Figma dùng ký tự ▾ ngay sau chữ */
+.sub {
+  position: absolute; top: calc(100% + 4px); left: -14px; z-index: 20;
+  display: flex !important; flex-direction: column; align-items: stretch !important; gap: 2px !important;
+  min-width: 190px; padding: 8px !important; border: 1px solid rgba(216,199,178,.8);
+  border-radius: 12px; background: #FFFCF7; box-shadow: 0 12px 28px rgba(53, 34, 24, .12);
+}
+.sub a { display: block; padding: 9px 11px; border-radius: 7px; color: #4A3123; font-size: 13px; text-decoration: none; white-space: nowrap; }
+.sub a:hover, .sub a.is-active { background: #F7EFE2; color: #9A672B; }
+.actions { display: flex; align-items: center; gap: 20px; flex: 0 0 auto; }
+.hbtn { display: inline-flex; justify-content: center; align-items: center; min-height: 39px; padding: 0 20px; border: 1px solid transparent; border-radius: 999px; text-decoration: none; font-size: 14px; font-weight: 600; line-height: 21px; white-space: nowrap; transition: .18s ease; }
+.hbtn--outline { border-color: rgba(169, 118, 63, .45); color: #4A3123; background: #FFFCF7; }
+.hbtn--outline:hover { border-color: #E3A52F; background: #fff8ec; }
+.hbtn--gold { border-color: #E3A52F; background: #E3A52F; color: #4A3123; }
+.hbtn--gold:hover { background: #edb64b; border-color: #edb64b; }
+.burger { display: none; width: 42px; height: 42px; border: 1px solid rgba(216,199,178,.8); border-radius: 10px; background: #FFFCF7; color: #4A3123; cursor: pointer; }
+/* Menu tài khoản (đã đăng nhập) – Figma: 223px, gap 10 */
+.account { position: relative; display: flex; align-items: center; gap: 10px; width: 223px; flex: 0 0 auto; }
+.account__avatar { display: grid; place-items: center; width: 32px; height: 32px; flex: 0 0 32px; border-radius: 999px; background: #E6D3B5; border: 1px solid rgba(216,199,178,.62); }
+.account__avatar img { width: 14.72px; height: 14.72px; display: block; }
+.account__name { flex: 1 1 0; min-width: 1px; color: #4A3123; font-size: 14px; font-weight: 600; line-height: 21px; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.account__toggle { display: grid; place-items: center; width: 16px; height: 16px; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.account__toggle img { width: 16px; height: 16px; display: block; }
+.account .sub--account { left: auto; right: 0; top: calc(100% + 10px); }
+.sub li { list-style: none; }
+@media (max-width: 1100px) {
+  .hd__inner { width: min(100% - 48px, 1280px); gap: 22px; }
+  .nav ul { gap: 18px; }
+  .actions { gap: 10px; }
+  .hbtn { padding-inline: 16px; }
+}
+@media (max-width: 1000px) {
+  .hd__inner { width: calc(100% - 36px); min-height: 70px; }
+  .brand__logo { width: 40px; height: 40px; }
+  .brand__text b { font-size: 21px; }
+  .brand__text i { font-size: 15px; }
+  .burger { display: inline-grid; place-items: center; margin-left: auto; }
+  .panel { display: none; position: absolute; top: 100%; left: 0; right: 0; padding: 14px 20px 20px; background: #F7EFE2; border-bottom: 1px solid rgba(216,199,178,.8); box-shadow: 0 12px 20px rgba(53,34,24,.1); }
+  .panel.is-open { display: flex; flex-direction: column; align-items: stretch; gap: 14px; }
+  .nav ul { display: flex; flex-direction: column; align-items: stretch; gap: 2px; }
+  .nav__item { width: 100%; }
+  .nav__link { display: flex; justify-content: space-between; width: 100%; padding: 11px 4px; font-size: 14px; }
+  .sub { position: static; min-width: 0; margin: 0 0 8px 10px; box-shadow: none; }
+  .actions, .account { width: 100%; }
+  .hbtn { flex: 1; }
+}

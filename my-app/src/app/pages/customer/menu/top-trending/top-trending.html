@@ -1,0 +1,128 @@
+<div class="crumbrow wrap">
+  <nav class="crumb" aria-label="breadcrumb">
+    <a routerLink="/menu">Menu</a><span aria-hidden="true">/</span><b aria-current="page">Top Trending</b>
+  </nav>
+  <a class="back" routerLink="/menu"><img src="/images/figma/arrow-left.svg" alt="" width="18" height="18" /><span>Quay về Menu</span></a>
+</div>
+
+<!-- Lời mời buổi chiều -->
+<section class="hero wrap" aria-labelledby="tt-title">
+  <div class="hero__text">
+    <p class="hero__time"><img src="/images/figma/sun.svg" alt="" width="18" height="18" />BUỔI CHIỀU Ở KÉN · 14:00–17:00</p>
+    <h1 class="hero__title" id="tt-title">Top Trending</h1>
+    <p class="hero__script">Một món hợp lúc, một chiều thảnh thơi.</p>
+    <p class="hero__desc">Chưa biết dùng gì? Dạo một vòng những hương vị gợi ý cho buổi chiều, từ ly trà dịu nhẹ đến một phần bánh nhỏ để nhâm nhi.</p>
+    <p class="hero__note">Menu tham khảo · Chọn món ở đây, gọi món tại quầy</p>
+  </div>
+  <figure class="hero__photo">
+    <img src="/images/figma/dish-matcha-hojicha.png" alt="Matcha latte và hojicha latte trên bàn gỗ" />
+    <figcaption><i aria-hidden="true"></i>Một góc nhỏ, hai hương trà.</figcaption>
+  </figure>
+</section>
+
+<!-- Bộ lọc + gợi ý buổi chiều -->
+<section class="explore wrap" aria-label="Khám phá gợi ý">
+  <div class="filters">
+    <div class="filters__row">
+      <label class="ctl ctl--search">
+        <img src="/images/figma/search.svg" alt="" width="18" height="18" />
+        <input type="search" name="q" placeholder="Tìm hương vị cho buổi chiều của bạn..." [(ngModel)]="query" aria-label="Tìm món" />
+      </label>
+      <label class="ctl">
+        <img src="/images/figma/filter-left.svg" alt="" width="18" height="18" />
+        <select name="price" [(ngModel)]="price" aria-label="Mức giá">
+          @for (o of priceOptions; track o.key) { <option [value]="o.key">{{ o.label }}</option> }
+        </select>
+        <img class="ctl__chev" src="/images/figma/chevron-down.svg" alt="" width="14" height="14" />
+      </label>
+      <label class="ctl">
+        <img src="/images/figma/sort-alpha-down-alt.svg" alt="" width="18" height="18" />
+        <select name="sort" [(ngModel)]="sort" aria-label="Sắp xếp">
+          @for (o of sortOptions; track o.key) { <option [value]="o.key">{{ o.label }}</option> }
+        </select>
+        <img class="ctl__chev" src="/images/figma/chevron-down.svg" alt="" width="14" height="14" />
+      </label>
+    </div>
+
+    <div class="cats">
+      <div class="chips" role="group" aria-label="Nhóm món">
+        @for (c of categories; track c) {
+          <button type="button" class="chip" [class.is-active]="category === c" [attr.aria-pressed]="category === c" (click)="setCategory(c)">{{ label(c) }}</button>
+        }
+      </div>
+      <p class="cats__note">12 nhóm món để khám phá</p>
+    </div>
+  </div>
+
+  @if (afternoonShown.length) {
+    <div class="head">
+      <div class="head__title">
+        <p class="eyebrow">HỢP LÚC NÀY</p>
+        <h2>Gợi ý cho buổi chiều</h2>
+      </div>
+      <p class="head__text">Một chút trà, một chút ngọt — dành cho khoảng nghỉ giữa ngày.</p>
+    </div>
+    <div class="grid">
+      @for (d of afternoonShown; track d.id) {
+        <article class="card">
+          <img class="card__img" [src]="d.image" [alt]="d.name" loading="lazy" />
+          <div class="card__body">
+            <p class="card__tag card__tag--green">{{ d.tag }}</p>
+            <h3 class="card__name">{{ d.name }}</h3>
+            <p class="card__desc">{{ d.desc }}</p>
+            <div class="card__price"><b>{{ fmt(d.price) }}</b><span>/ phần</span></div>
+          </div>
+        </article>
+      }
+    </div>
+  }
+</section>
+
+<!-- Đang được quan tâm -->
+@if (trendingShown.length) {
+  <section class="band" aria-label="Đang được quan tâm">
+    <div class="band__inner wrap">
+      <div class="head">
+        <div class="head__title">
+          <p class="eyebrow">THÊM MỘT CHÚT CẢM HỨNG</p>
+          <h2>Đang được quan tâm</h2>
+        </div>
+        <p class="head__text">Những hương vị để bạn khám phá thêm, không chỉ riêng buổi chiều.</p>
+      </div>
+      <div class="grid">
+        @for (d of trendingShown; track d.id) {
+          <article class="card">
+            <img class="card__img" [src]="d.image" [alt]="d.name" loading="lazy" />
+            <div class="card__body">
+              <p class="card__tag">{{ d.tag }}</p>
+              <h3 class="card__name">{{ d.name }}</h3>
+              <p class="card__desc">{{ d.desc }}</p>
+              <div class="card__price"><b>{{ fmt(d.price) }}</b><span>/ phần</span></div>
+            </div>
+          </article>
+        }
+      </div>
+      <div class="info">
+        <img src="/images/figma/info-sm.svg" alt="" width="16" height="16" />
+        <p>Bộ sưu tập gợi ý minh họa, không phải bảng xếp hạng theo lượt gọi món. Hình ảnh mang tính minh họa; vui lòng hỏi tại quầy về món và hương vị có sẵn.</p>
+      </div>
+    </div>
+  </section>
+}
+
+@if (total === 0) {
+  <section class="empty wrap" role="status">
+    <p class="empty__title">Chưa tìm thấy hương vị phù hợp</p>
+    <p class="empty__text">Thử đổi từ khoá, nhóm món hoặc mức giá nhé.</p>
+    <button type="button" class="btn-outline btn-outline--sm" (click)="reset()">Xoá bộ lọc</button>
+  </section>
+}
+
+<!-- Hẹn ở quầy -->
+<section class="cta wrap" aria-label="Ghé quầy">
+  <div class="cta__text">
+    <p class="cta__title">Tìm được món cho chiều nay rồi chứ?</p>
+    <p class="cta__sub">Cứ ghé quầy, KÉN sẽ giúp bạn chọn hương vị đang có.</p>
+  </div>
+  <a class="btn-outline" routerLink="/menu"><span>Xem Menu đầy đủ</span><img src="/images/figma/arrow-left.svg" alt="" width="18" height="18" /></a>
+</section>
