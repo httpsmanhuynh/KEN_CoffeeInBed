@@ -1,0 +1,36 @@
+$kind: http-request
+name: "TC-PRICING-058: [PRICING-058] Sửa giá trị Voucher sau khi đặt: Booking cũ giữ voucher_discount đã đóng băng (Branch: SNP-B02)"
+description: |-
+  **Mã TC:** PRICING-058 (TC-PRICING-058)
+  **Nhóm:** Price Snapshot
+  **API / Thành phần:** GET /api/bookings/{{bookingId}} (MongoDB Compass: collection bookings (price_snapshot))
+  **Loại:** State Transition
+  **Điều kiện tiên quyết:** Server chạy (http://localhost:3002) và ứng dụng giao diện chạy; đã chạy npm run setup (có hạng thành viên); dữ liệu giá/Inclusion/Add-on/Voucher theo cột 'Dữ liệu vào' đã có trong MongoDB (tạo bằng Compass nếu chưa có).
+  **Dữ liệu vào:** Tài khoản: Customer hạng BASIC; Package 200.000đ; Voucher cố định 50.000đ&#10;Sau khi đặt: sửa Voucher thành 80.000đ
+  **Các bước thực hiện:**
+  1) Đặt Booking với Package 200.000đ và Voucher 50.000đ; ghi lại voucher_discount.&#10;2) Compass: sửa discount_value của Voucher thành 80.000.&#10;3) UI/Compass: xem lại Booking đã tạo.&#10;4) Khôi phục Voucher gốc.
+  **Kết quả mong đợi:** Booking cũ: voucher_discount = 50.000đ, Thành tiền 150.000đ (không đổi). (HTTP: 200)
+  **Nhánh code bao phủ:** SNP-B02
+  **Ghi chú:** CẦN XEM XÉT – ánh xạ không 1-1 (AUTO-PRICING-041 dùng chung cho 4 Manual TC). Automated TC ứng viên (chưa xác nhận, chỉ để truy vết, KHÔNG phải kết quả Manual): AUTO-PRICING-041: toPriceSnapshot: đóng băng sâu, có chi tiết dòng, khớp trường phẳng
+url: "{{baseUrl}}/api/bookings/{{bookingId}}"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-PRICING-058] Sửa giá trị Voucher sau khi đặt: Booking cũ giữ voucher_discount đã đóng băng
+      pm.test("[TC-PRICING-058] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+      pm.test("[TC-PRICING-058] Snapshot giá trên Booking khớp đúng dữ liệu đóng băng từ DB", function () {
+          const json = pm.response.json();
+          pm.expect(json.package_price).to.eql(200000);
+          pm.expect(json.subtotal).to.eql(200000);
+          pm.expect(json.voucher_discount).to.eql(50000);
+          pm.expect(json.tier_discount).to.eql(0);
+          pm.expect(json.discount_amount).to.eql(50000);
+          pm.expect(json.final_amount).to.eql(150000);
+          pm.expect(Number.isInteger(json.final_amount) && json.final_amount >= 0).to.be.true;
+          if (json._id) { pm.collectionVariables.set("lastCreatedBookingId", String(json._id)); }
+      });
+    language: text/javascript
+order: 4000
