@@ -14,7 +14,7 @@ const {
   toBookingSnapshot,
   toPriceSnapshot,
   computePrice,
-} = require('../src/domain/pricing');
+} = require('../../src/domain/pricing');
 
 const throwsCode = (fn, code) =>
   assert.throws(fn, (e) => e instanceof PricingError && e.code === code);

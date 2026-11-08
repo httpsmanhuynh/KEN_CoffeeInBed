@@ -18,3 +18,15 @@
 
 ## Schema Atlas
 - Validator dùng `additionalProperties: false`: thêm field vào code thì phải thêm vào `database/schemas/*.validator.json` **và** `database/tools/build_schemas.py`, nếu không `setup.js` sẽ ghi đè mất.
+
+## Đổi trạng thái tài khoản (Admin)
+- **Vấn đề:** đọc user rồi ghi `status` dễ ghi đè khi 2 Admin thao tác song song.
+- **Quy tắc:** đưa trạng thái nguồn vào điều kiện `updateOne` (`{ _id, status: from }`) và kiểm tra `matchedCount`; thêm `role: { $ne: 'ADMIN' }` khi khóa. Không ghi field ngoài validator.
+- **Ví dụ:** `setUserStatus` trong `src/services/adminService.js`.
+
+## Thống kê theo ngày
+- **Quy tắc:** ngày nghiệp vụ là giờ VN (UTC+7). Đổi `YYYY-MM-DD` sang `[00:00 VN, 00:00 VN hôm sau)` rồi mới truy vấn; gom theo ngày bằng `$dateToString` với `timezone: '+07:00'`.
+- **Quy tắc:** tách công thức ra `src/domain/dashboard.js` để test bằng dữ liệu giả, không cần Mongo.
+
+## Trả dữ liệu user cho Admin
+- Luôn qua `sanitizeUser` (loại key chứa `pass|hash|secret|otp|token`), không trả nguyên document `users`.
