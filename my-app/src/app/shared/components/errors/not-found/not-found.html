@@ -1,0 +1,27 @@
+<section class="err" aria-labelledby="err-title">
+  <p class="err__eyebrow">KHÔNG TÌM THẤY TRANG</p>
+
+  <div class="err__stage">
+    <div class="err__code" aria-hidden="true">404</div>
+    <span class="err__deco err__dash" aria-hidden="true"></span>
+    <!-- TODO: thay bằng SVG cốc cà phê xuất từ Figma -->
+    <svg class="err__deco err__icon" viewBox="0 0 46 46" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M8 18h26v10a10 10 0 0 1-10 10h-6A10 10 0 0 1 8 28V18Z"/>
+      <path d="M34 21h2.5a4.5 4.5 0 0 1 0 9H33"/>
+      <path d="M15 7v5M21 5v6M27 7v5"/>
+    </svg>
+    <span class="err__deco err__note" aria-hidden="true">Lạc một chút thôi…</span>
+  </div>
+
+  <div class="err__body">
+    <h1 class="err__title" id="err-title">Bạn đi lạc khỏi KÉN rồi.</h1>
+    <p class="err__desc">Trang bạn tìm không tồn tại hoặc đã chuyển sang một góc khác. Để KÉN dẫn bạn về một nơi quen nhé.</p>
+  </div>
+
+  <div class="err__actions">
+    <a class="btn btn--primary" routerLink="/">Về trang chủ <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.25 3v12"/><path d="M6.75 9h8.25"/><path d="M11.25 5.25 15 9l-3.75 3.75"/></svg></a>
+    <a class="btn btn--ghost" routerLink="/spaces">Khám phá không gian <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.25 3v12"/><path d="M6.75 9h8.25"/><path d="M11.25 5.25 15 9l-3.75 3.75"/></svg></a>
+  </div>
+
+  <p class="err__hint">Không sao, một góc chill vẫn đang đợi bạn.</p>
+</section>

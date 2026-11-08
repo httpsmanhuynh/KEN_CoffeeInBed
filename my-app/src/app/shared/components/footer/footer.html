@@ -1,0 +1,64 @@
+<footer class="ft">
+  <div class="ft__inner">
+    <section class="ft__brand" aria-label="Thông tin KÉN">
+      <a class="ft__brand-link" routerLink="/" aria-label="KÉN - Trang chủ">
+        <img class="ft__logo" src="/images/KEN_logo_tron.png" alt="Logo KÉN" />
+        <span class="ft__word"><b>KÉN</b><i>Lười một chút, chill một góc</i></span>
+      </a>
+      <section class="ft__payment" aria-label="Đối tác thanh toán">
+        <h2>Đối tác thanh toán</h2>
+        <ul class="pay">
+          @for (p of payments; track p.id) {
+            <li><img [src]="'/images/payments/' + p.id + '.png'" [alt]="p.name" loading="lazy" /></li>
+          }
+        </ul>
+      </section>
+    </section>
+
+    <section class="ft__middle">
+      <nav class="ft__col" aria-label="Về KÉN">
+        <h2>Về KÉN</h2>
+        <ul>@for (l of about; track l.path) { <li><a [routerLink]="l.path">{{ l.label }}</a></li> }</ul>
+      </nav>
+      <section class="ft__col ft__social" aria-label="Theo dõi chúng tôi">
+        <h2>Theo dõi chúng tôi</h2>
+        <ul>
+          <li><img src="/images/facebook.png" alt="" /><span>Facebook</span></li>
+          <li><img src="/images/instagram.png" alt="" /><span>Instagram</span></li>
+          <li><img src="/images/tiktok.png" alt="" /><span>Tiktok</span></li>
+          <li><img src="/images/youtube.png" alt="" /><span>Youtube</span></li>
+          <li><img src="/images/telegram.png" alt="" /><span>Telegram</span></li>
+        </ul>
+      </section>
+    </section>
+
+    <section class="ft__right">
+      <nav class="ft__col" aria-label="Chính sách">
+        <h2>Chính sách</h2>
+        <ul>@for (l of policy; track l.path) { <li><a [routerLink]="l.path">{{ l.label }}</a></li> }</ul>
+      </nav>
+      <section class="ft__col ft__contact" aria-label="Liên hệ">
+        <h2>Liên hệ</h2>
+        <ul>
+          <li>
+            <img src="/images/telephone.png" alt="" class="contact-icon">
+            <span>Hotline: 1900 123 456</span>
+          </li>
+          <li>
+            <img src="/images/envelope.png" alt="" class="contact-icon">
+            <span>Email: helloken.vn</span> <!-- TODO: Figma ghi "helloken.vn" (thiếu @) – xác nhận email thật -->
+          </li>
+          <li>
+            <img src="/images/geo-alt.png" alt="" class="contact-icon">
+            <span>123 Nguyễn Văn Cừ, Phường Chợ Lớn, TPHCM</span>
+          </li>
+        </ul>
+      </section>
+    </section>
+
+    <div class="ft__bottom">
+      <p>Công ty TNHH KÉN Việt Nam - 123 Nguyễn Văn Cừ, Phường Chợ Lớn, TPHCM</p>
+      <p class="ft__copyright">Copyright 2025 KÉN. All rights reserved</p>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,128 @@
+<div class="wrap">
+  <nav class="crumb" aria-label="breadcrumb">
+    <a routerLink="/">Trang chủ</a>　/　<a routerLink="/user-profile">Tài khoản của tôi</a>　/　<span aria-current="page">Coins & Đổi quà</span>
+  </nav>
+
+  <div class="layout">
+    <app-account-sidebar active="coins" (logout)="logout()"></app-account-sidebar>
+
+    <main class="content">
+      <header class="intro">
+        <p class="intro__eyebrow">GÓC RIÊNG CỦA BẠN</p>
+        <h1 class="intro__title">Coins & Đổi quà</h1>
+        <p class="intro__desc">Để những lần ghé KÉN trở thành những món quà nhỏ, dành riêng cho bạn.</p>
+      </header>
+
+      <!-- Ví Coins -->
+      <section class="wallet" aria-label="Số dư Coins">
+        <div class="wallet__balance">
+          <span class="wallet__icon"><img src="/images/figma/wallet.svg" alt="" width="28" height="28" /></span>
+          <div class="wallet__num">
+            <p class="wallet__label">SỐ DƯ KHẢ DỤNG</p>
+            <p class="wallet__value">{{ balance }} Coins</p>
+          </div>
+        </div>
+        <span class="wallet__sep" aria-hidden="true"></span>
+        <div class="wallet__note">
+          <p class="wallet__rule">10.000đ chi tiêu hợp lệ = 1 Coin</p>
+          <p class="wallet__text">Coins ghi nhận sau khi hoàn tất dịch vụ. Chu kỳ 1 năm: hết chu kỳ, toàn bộ Coins còn lại về 0. Đổi Coins không trừ điểm xét hạng.</p>
+        </div>
+      </section>
+
+      <!-- Đổi voucher -->
+      <section class="block">
+        <div class="block__head"><h2 class="h-serif">Đổi voucher</h2><span class="muted">Dành cho những lần hẹn tiếp theo</span></div>
+
+        <div class="vt" role="table" aria-label="Danh sách voucher">
+          <div class="vt__row vt__row--head" role="row">
+            <span role="columnheader">VOUCHER</span>
+            <span role="columnheader">COINS YÊU CẦU</span>
+            <span class="vt__valid" role="columnheader"><img src="/images/figma/icon-hieuluc.svg" alt="" width="12" height="12" />HIỆU LỰC</span>
+            <span role="columnheader">TRẠNG THÁI</span>
+            <span class="center" role="columnheader">HÀNH ĐỘNG</span>
+          </div>
+          @for (v of vouchers; track v.name) {
+            <div class="vt__row" role="row">
+              <div class="vt__name" role="cell">
+                <span class="tag">{{ v.type }}</span>
+                <b>{{ v.name }}</b>
+                <small>{{ v.desc }}</small>
+              </div>
+              <div class="vt__cost" role="cell"><b>{{ v.cost }}</b><span>Coins</span></div>
+              <div class="vt__valid-text" role="cell">30 ngày sau khi đổi</div>
+              <div role="cell">
+                <span class="status" [class.status--lack]="!enough(v.cost)">{{ enough(v.cost) ? 'Đủ Coins' : 'Thiếu ' + missing(v.cost) }}</span>
+              </div>
+              <div class="center" role="cell">
+                <button type="button" class="btn-gold" [disabled]="!enough(v.cost)" (click)="redeem(v.name, v.cost)">
+                  {{ enough(v.cost) ? 'Đổi voucher' : 'Chưa đủ' }}
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="note">
+          <img src="/images/figma/icon-info.svg" alt="" width="16" height="16" />
+          <p>Đổi voucher chỉ trừ Coins, không ảnh hưởng điểm xét hạng. Giao dịch lỗi không trừ số dư.</p>
+        </div>
+      </section>
+
+      <!-- Quà lưu niệm -->
+      <section class="block">
+        <div class="block__head"><h2 class="h-serif">Quà lưu niệm</h2><span class="muted">Mang một chút KÉN về nhà</span></div>
+        <div class="gifts">
+          @for (g of gifts; track g.name) {
+            <article class="gift">
+              <div class="gift__photo"><img [src]="g.image" [alt]="g.name" loading="lazy" /></div>
+              <div class="gift__info">
+                <p class="gift__name">{{ g.name }}</p>
+                <p class="gift__desc">{{ g.desc }}</p>
+                <div class="gift__price">
+                  <b>{{ g.cost }} Coins</b>
+                  <span>{{ enough(g.cost) ? 'Đủ Coins' : 'Thiếu ' + missing(g.cost) + ' Coins' }}</span>
+                </div>
+                <button type="button" class="gift__btn" [class.gift__btn--off]="!enough(g.cost)" [disabled]="!enough(g.cost)" (click)="redeem(g.name, g.cost)">
+                  {{ enough(g.cost) ? 'Đổi quà' : 'Chưa đủ Coins' }}
+                </button>
+              </div>
+            </article>
+          }
+        </div>
+      </section>
+
+      <p class="muted">Giá đổi thưởng là dữ liệu minh hoạ. Xem điều kiện sử dụng và nhận quà trước khi xác nhận; không mặc định cộng dồn voucher với ưu đãi thành viên.</p>
+
+      <!-- Lịch sử Coins -->
+      <section class="hist">
+        <div class="hist__head">
+          <h2 class="h-serif">Lịch sử Coins</h2>
+          <button type="button" class="refresh" (click)="setTab('all')">
+            <img src="/images/figma/btn-refresh.svg" alt="" width="14" height="14" /><span>Làm mới</span>
+          </button>
+        </div>
+
+        <div class="tabs" role="tablist" aria-label="Lọc lịch sử Coins">
+          @for (t of tabs; track t.key) {
+            <button type="button" role="tab" class="tab" [class.is-active]="activeTab === t.key" [attr.aria-selected]="activeTab === t.key" (click)="setTab(t.key)">{{ t.label }}</button>
+          }
+        </div>
+
+        <div class="hist__list">
+          @for (h of filteredHistory; track h.date + h.detail) {
+            <div class="hrow">
+              <time class="hrow__date">{{ h.date }}</time>
+              <span class="hrow__detail">{{ h.detail }}</span>
+              <b class="hrow__amount" [class.pos]="h.plus">{{ h.amount }}</b>
+              <span class="pill pill--{{ h.kind }}">{{ h.state }}</span>
+            </div>
+          } @empty {
+            <p class="empty">Chưa có giao dịch nào ở mục này.</p>
+          }
+        </div>
+
+        <p class="muted">Số dư đầu kỳ 800 → hiện tại 650 Coins; +80 đang xử lý chưa tính. 10.000đ = 1 Coin. Coins còn lại về 0 khi hết chu kỳ 1 năm.</p>
+      </section>
+    </main>
+  </div>
+</div>

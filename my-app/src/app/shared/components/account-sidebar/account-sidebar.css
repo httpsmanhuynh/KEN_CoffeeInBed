@@ -1,0 +1,24 @@
+:host { display: block; width: 100%; max-width: 248px; flex: 0 0 248px; }
+.side { display: flex; flex-direction: column; gap: 22px; width: 100%; }
+.profile { display: flex; flex-direction: column; gap: 12px; padding-bottom: 20px; border-bottom: 1px solid rgba(216,199,178,.62); }
+.avatar { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 999px; background: #E6D3B5; border: 1px solid rgba(216,199,178,.62); }
+.avatar img { display: block; width: 23.92px; height: 23.92px; }
+.profile__name { margin: 0; color: #4A3123; font-size: 14px; font-weight: 600; line-height: 21px; }
+.rank { display: flex; align-items: center; gap: 8px; }
+.rank__badge { padding: 5px 11px; border-radius: 999px; background: #F7EFE2; color: #7A6553; font-size: 12px; font-weight: 600; line-height: 1.6; }
+.rank__points { color: #7A6553; font-size: 12px; line-height: 1.6; }
+.menu { display: flex; flex-direction: column; gap: 6px; }
+.item { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 12px 14px; border: 0; border-radius: 8px; background: transparent; color: #4A3123; font-size: 14px; font-weight: 400; line-height: 22.4px; text-align: left; text-decoration: none; cursor: pointer; transition: background .18s ease; }
+.item:hover { background: rgba(230,211,181,.45); }
+.item img { display: block; width: 20px; height: 20px; flex: 0 0 20px; }
+.item span { flex: 1 1 0; min-width: 1px; }
+.item.is-active { background: #E6D3B5; font-weight: 600; line-height: 21px; }
+.item__bar { width: 4px; height: 18px; border-radius: 2px; background: #A9763F; flex: 0 0 4px; }
+.item--logout { color: #995E4B; }
+.help { display: flex; flex-direction: column; gap: 10px; padding: 18px; border: 1px solid rgba(216,199,178,.62); border-radius: 12px; }
+.help p { margin: 0; font-size: 12px; line-height: 1.6; }
+.help__title { color: #4A3123; font-weight: 600; }
+.help__text { color: #7A6553; }
+.help__link { color: #4A3123; font-size: 14px; font-weight: 600; line-height: 21px; text-decoration: none; }
+.help__link:hover { color: #A9763F; }
+@media (max-width: 1000px) { :host { max-width: none; flex-basis: auto; } }
