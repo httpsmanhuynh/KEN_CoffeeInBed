@@ -1,0 +1,43 @@
+$kind: http-request
+name: "TC-PRICING-068: [PRICING-068] Thành tiền 0đ: Payment ghi method NONE, amount 0, không qua cổng mô phỏng (Branch: VCH-B07; TIE-B04)"
+description: |-
+  **Mã TC:** PRICING-068 (TC-PRICING-068)
+  **Nhóm:** Thanh toán 0đ
+  **API / Thành phần:** POST /api/bookings/{{bookingId}}/pay (UI Checkout + MongoDB Compass: collection payments (TBD tên collection))
+  **Loại:** Business Rule
+  **Điều kiện tiên quyết:** Server chạy (http://localhost:3002) và ứng dụng giao diện chạy; đã chạy npm run setup (có hạng thành viên); dữ liệu giá/Inclusion/Add-on/Voucher theo cột 'Dữ liệu vào' đã có trong MongoDB (tạo bằng Compass nếu chưa có).
+  **Dữ liệu vào:** Tài khoản: Customer hạng Kim Cương (giảm 15%)&#10;Package: trọn gói, tính theo không gian, đơn giá 70.000đ&#10;Inclusion: không có phụ phí&#10;Add-on: không chọn&#10;Voucher: giảm cố định 500.000đ
+  **Các bước thực hiện:**
+  1) Đăng nhập UI bằng tài khoản ở 'Dữ liệu vào'.&#10;2) Chọn Package theo 'Dữ liệu vào' (nhập số khách/số giờ nếu có).&#10;3) Nhập/chọn Voucher theo 'Dữ liệu vào'.&#10;4) Mở màn hình Checkout/Tóm tắt đơn, ghi lại Tạm tính, Giảm Voucher, Giảm hạng, Thành tiền.&#10;5) Đối chiếu từng dòng với 'Kết quả mong đợi' (tính tay theo công thức, không dùng số do UI tự tính làm chuẩn).&#10;7) Xác nhận đặt/thanh toán.&#10;8) Compass: xem bản ghi PAYMENT của Booking (tên collection: TBD) và bookings.
+  **Kết quả mong đợi:** Thành tiền 0đ; UI không hiển thị bước chọn cổng thanh toán mô phỏng; PAYMENT có method = NONE, amount = 0 (Data Dictionary 6.4.15); Booking được ghi nhận thành công. (HTTP: 200)
+  **Nhánh code bao phủ:** VCH-B07; TIE-B04
+  **Ghi chú:** CẦN XEM XÉT – ánh xạ không 1-1 (AUTO-PRICING-037 dùng chung cho 2 Manual TC). Automated TC ứng viên (chưa xác nhận, chỉ để truy vết, KHÔNG phải kết quả Manual): AUTO-PRICING-037: Voucher lớn hơn Tạm tính -> final_amount = 0, không âm, hạng không giảm thêm
+url: "{{baseUrl}}/api/bookings/{{bookingId}}/pay"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "result": "SUCCESS"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-PRICING-068] Thành tiền 0đ: Payment ghi method NONE, amount 0, không qua cổng mô phỏng
+      pm.test("[TC-PRICING-068] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+      const json = pm.response.json();
+            pm.test("[TC-PRICING-068] Booking chuyển sang CONFIRMED và Payment ghi method = NONE, amount = 0", function () {
+                pm.expect(json).to.have.property("booking");
+                pm.expect(json.booking.status).to.eql("CONFIRMED");
+                pm.expect(json.booking.final_amount).to.eql(0);
+                pm.expect(json).to.have.property("transaction");
+                pm.expect(json.transaction.method).to.eql("NONE");
+                pm.expect(json.transaction.amount).to.eql(0);
+                pm.expect(json.transaction.status).to.eql("SUCCESS");
+            });
+    language: text/javascript
+order: 1000

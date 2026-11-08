@@ -1,0 +1,64 @@
+$kind: http-request
+name: "TC-PRICING-045: [PRICING-045] Voucher % ra số lẻ: làm tròn xuống đến đồng (Branch: VCH-B05)"
+description: |-
+  **Mã TC:** PRICING-045 (TC-PRICING-045)
+  **Nhóm:** Làm tròn & biên tiền
+  **API / Thành phần:** POST /api/bookings/quote (UI Checkout / Tóm tắt đơn (Customer))
+  **Loại:** Boundary
+  **Điều kiện tiên quyết:** Server chạy (http://localhost:3002) và ứng dụng giao diện chạy; đã chạy npm run setup (có hạng thành viên); dữ liệu giá/Inclusion/Add-on/Voucher theo cột 'Dữ liệu vào' đã có trong MongoDB (tạo bằng Compass nếu chưa có).
+  **Dữ liệu vào:** Tài khoản: Customer hạng BASIC (giảm 0%)&#10;Package: trọn gói, tính theo không gian, đơn giá 123.457đ&#10;Inclusion: không có phụ phí&#10;Add-on: không chọn&#10;Voucher: giảm 7%
+  **Các bước thực hiện:**
+  1) Đăng nhập UI bằng tài khoản ở 'Dữ liệu vào'.&#10;2) Chọn Package theo 'Dữ liệu vào' (nhập số khách/số giờ nếu có).&#10;3) Nhập/chọn Voucher theo 'Dữ liệu vào'.&#10;4) Mở màn hình Checkout/Tóm tắt đơn, ghi lại Tạm tính, Giảm Voucher, Giảm hạng, Thành tiền.&#10;5) Đối chiếu từng dòng với 'Kết quả mong đợi' (tính tay theo công thức, không dùng số do UI tự tính làm chuẩn).
+  **Kết quả mong đợi:** Tạm tính 123.457đ (Package 123.457đ + phụ phí Inclusion 0đ + Add-on 0đ); Giảm Voucher 8.641đ; Giảm hạng 0đ; Tổng giảm 8.641đ; Thành tiền 114.816đ. UI hiển thị đúng các số này, không có phần thập phân. 7% × 123.457 = 8.641,99 → giảm 8.641đ (không phải 8.642đ). (HTTP: 200)
+  **Nhánh code bao phủ:** VCH-B05
+  **Ghi chú:** CẦN XEM XÉT – ánh xạ không 1-1 (AUTO-PRICING-025 dùng chung cho 2 Manual TC). Automated TC ứng viên (chưa xác nhận, chỉ để truy vết, KHÔNG phải kết quả Manual): AUTO-PRICING-025: PERCENT làm tròn xuống
+url: "{{baseUrl}}/api/bookings/quote"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "spaceId": "{{spaceId}}",
+      "packageId": "{{pkgFixedSpace123457Id}}",
+      "startAt": "2026-12-20T02:00:00.000Z",
+      "guestCount": 1,
+      "inclusions": [],
+      "addons": [],
+      "voucherCode": "KEN7PCT"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-PRICING-045] Voucher % ra số lẻ: làm tròn xuống đến đồng
+      pm.test("[TC-PRICING-045] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+      pm.test("[TC-PRICING-045] Cấu trúc JSON báo giá hợp lệ và mọi số tiền là số nguyên VNĐ không âm", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.have.property("pricing");
+          const pr = json.pricing;
+          ["packagePrice", "inclusionSurcharge", "addonTotal", "subtotal", "voucherDiscount", "tierDiscount", "discountAmount", "finalAmount"].forEach(function (k) {
+              pm.expect(Number.isInteger(pr[k]), k + " phải là số nguyên").to.be.true;
+              pm.expect(pr[k], k + " không được âm").to.be.at.least(0);
+          });
+      });
+      pm.test("[TC-PRICING-045] Kết quả tính giá khớp công thức nghiệp vụ Pricing", function () {
+          const json = pm.response.json();
+          const pr = json.pricing;
+          pm.expect(pr.packagePrice).to.eql(123457);
+          pm.expect(pr.inclusionSurcharge).to.eql(0);
+          pm.expect(pr.addonTotal).to.eql(0);
+          pm.expect(pr.subtotal).to.eql(123457);
+          pm.expect(pr.voucherDiscount).to.eql(8641);
+          pm.expect(pr.tierDiscount).to.eql(0);
+          pm.expect(pr.discountAmount).to.eql(8641);
+          pm.expect(pr.finalAmount).to.eql(114816);
+          pm.expect(json.tierRate).to.eql(0);
+          pm.expect(pr.subtotal).to.eql(pr.packagePrice + pr.inclusionSurcharge + pr.addonTotal);
+          pm.expect(pr.discountAmount).to.eql(pr.voucherDiscount + pr.tierDiscount);
+          pm.expect(pr.finalAmount).to.eql(pr.subtotal - pr.discountAmount);
+      });
+    language: text/javascript
+order: 1000

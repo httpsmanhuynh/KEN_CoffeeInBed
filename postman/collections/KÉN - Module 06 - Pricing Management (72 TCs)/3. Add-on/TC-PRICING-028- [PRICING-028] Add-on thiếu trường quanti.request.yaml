@@ -1,0 +1,47 @@
+$kind: http-request
+name: "TC-PRICING-028: [PRICING-028] Add-on thiếu trường quantity bị từ chối (Backend không tự đoán số lượng) (Branch: ADD-B03)"
+description: |-
+  **Mã TC:** PRICING-028 (TC-PRICING-028)
+  **Nhóm:** Add-on
+  **API / Thành phần:** POST /api/bookings (Backend – API tạo Booking (endpoint TBD) – Postman)
+  **Loại:** Validation
+  **Điều kiện tiên quyết:** Server chạy (http://localhost:3002); Postman bật Cookie jar và đã đăng nhập Customer; dữ liệu theo cột 'Dữ liệu vào' đã có trong MongoDB. Endpoint tạo Booking: TBD (chưa có trong tài liệu được cấp) – điền endpoint thực tế vào bước 2 trước khi chạy.
+  **Dữ liệu vào:** Tài khoản: Customer&#10;Package trọn gói 140.000đ&#10;Add-on 40.000đ, không gửi trường quantity
+  **Các bước thực hiện:**
+  1) Postman: gọi API tạo Booking với Add-on không có trường quantity.&#10;2) Ghi lại HTTP status và body.&#10;3) Kiểm tra bookings không có bản ghi mới.
+  **Kết quả mong đợi:** Backend từ chối yêu cầu: không tạo Booking (collection bookings không có bản ghi mới), không trừ lượt Voucher; người dùng nhận thông báo lỗi (nội dung thông báo: TBD – chưa có trong tài liệu). (HTTP: 400/422)
+  **Nhánh code bao phủ:** ADD-B03
+  **Ghi chú:** Auto liên quan (chỉ để truy vết, KHÔNG phải kết quả Manual): AUTO-PRICING-018: thiếu quantity bị từ chối (Backend không đoán số lượng)
+url: "{{baseUrl}}/api/bookings"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "spaceId": "{{spaceId}}",
+      "packageId": "{{packageId}}",
+      "startAt": "2026-12-20T02:00:00.000Z",
+      "guestCount": 1,
+      "addons": [
+        {
+          "addonId": "{{addon40kId}}"
+        }
+      ]
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-PRICING-028] Add-on thiếu trường quantity bị từ chối (Backend không tự đoán số lượng)
+      pm.test("[TC-PRICING-028] Status code is 400 or 422", function () {
+          pm.expect(pm.response.code).to.be.oneOf([400,422]);
+      });
+      pm.test("[TC-PRICING-028] Phản hồi từ chối hợp lệ kèm mã lỗi nghiệp vụ", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.have.property("code");
+          pm.expect(["INVALID_ADDON_QTY","INVALID_QUANTITY"]).to.include(json.code);
+          pm.expect(json).to.have.property("message");
+      });
+    language: text/javascript
+order: 7000

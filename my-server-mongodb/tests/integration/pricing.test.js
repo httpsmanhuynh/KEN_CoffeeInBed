@@ -19,42 +19,42 @@ const {
 const throwsCode = (fn, code) =>
   assert.throws(fn, (e) => e instanceof PricingError && e.code === code);
 
-describe('AUTO-PRICE-PKG: giá Package (Bảng A.4.2)', () => {
-  test('AUTO-PRICE-PKG-01: FIXED + PER_SPACE = giá trọn gói', () => {
+describe('giá Package (Bảng A.4.2)', () => {
+  test('AUTO-PRICING-001: FIXED + PER_SPACE = giá trọn gói', () => {
     assert.equal(calcPackagePrice({ packageType: 'FIXED', pricingUnit: 'PER_SPACE', price: 250000 }), 250000);
   });
-  test('AUTO-PRICE-PKG-02: FIXED + PER_PERSON = giá × số khách', () => {
+  test('AUTO-PRICING-002: FIXED + PER_PERSON = giá × số khách', () => {
     assert.equal(
       calcPackagePrice({ packageType: 'FIXED', pricingUnit: 'PER_PERSON', price: 90000, guestCount: 3 }),
       270000
     );
   });
-  test('AUTO-PRICE-PKG-03: HOURLY + PER_SPACE = đơn giá giờ × số giờ', () => {
+  test('AUTO-PRICING-003: HOURLY + PER_SPACE = đơn giá giờ × số giờ', () => {
     assert.equal(
       calcPackagePrice({ packageType: 'HOURLY', pricingUnit: 'PER_SPACE', price: 45000, hours: 3 }),
       135000
     );
   });
-  test('AUTO-PRICE-PKG-04: HOURLY + PER_PERSON = đơn giá × khách × giờ', () => {
+  test('AUTO-PRICING-004: HOURLY + PER_PERSON = đơn giá × khách × giờ', () => {
     assert.equal(
       calcPackagePrice({ packageType: 'HOURLY', pricingUnit: 'PER_PERSON', price: 30000, guestCount: 4, hours: 2 }),
       240000
     );
   });
-  test('AUTO-PRICE-PKG-05: biên: HOURLY đúng 1 giờ (tối thiểu) hợp lệ', () => {
+  test('AUTO-PRICING-005: biên: HOURLY đúng 1 giờ (tối thiểu) hợp lệ', () => {
     assert.equal(calcPackagePrice({ packageType: 'HOURLY', pricingUnit: 'PER_SPACE', price: 45000, hours: 1 }), 45000);
   });
-  test('AUTO-PRICE-PKG-06: HOURLY dưới minHours bị từ chối', () => {
+  test('AUTO-PRICING-006: HOURLY dưới minHours bị từ chối', () => {
     throwsCode(
       () => calcPackagePrice({ packageType: 'HOURLY', pricingUnit: 'PER_SPACE', price: 45000, hours: 1, minHours: 2 }),
       'HOURS_BELOW_MIN'
     );
   });
-  test('AUTO-PRICE-PKG-07: thiếu hours / guestCount bị từ chối', () => {
+  test('AUTO-PRICING-007: thiếu hours / guestCount bị từ chối', () => {
     throwsCode(() => calcPackagePrice({ packageType: 'HOURLY', pricingUnit: 'PER_SPACE', price: 1000 }), 'INVALID_QUANTITY');
     throwsCode(() => calcPackagePrice({ packageType: 'FIXED', pricingUnit: 'PER_PERSON', price: 1000 }), 'INVALID_QUANTITY');
   });
-  test('AUTO-PRICE-PKG-08: đầu vào không hợp lệ: giá âm, số thực, loại sai', () => {
+  test('AUTO-PRICING-008: đầu vào không hợp lệ: giá âm, số thực, loại sai', () => {
     throwsCode(() => calcPackagePrice({ packageType: 'FIXED', pricingUnit: 'PER_SPACE', price: -1 }), 'INVALID_AMOUNT');
     throwsCode(() => calcPackagePrice({ packageType: 'FIXED', pricingUnit: 'PER_SPACE', price: 100.5 }), 'INVALID_AMOUNT');
     throwsCode(() => calcPackagePrice({ packageType: 'DAILY', pricingUnit: 'PER_SPACE', price: 1 }), 'INVALID_PACKAGE_TYPE');
@@ -62,21 +62,21 @@ describe('AUTO-PRICE-PKG: giá Package (Bảng A.4.2)', () => {
   });
 });
 
-describe('AUTO-PRICE-INC: phụ phí Inclusion (chỉ cộng phần chênh lệch)', () => {
+describe('phụ phí Inclusion (chỉ cộng phần chênh lệch)', () => {
   const LIMIT = 50000;
-  test('AUTO-PRICE-INC-01: giá thấp hơn định mức -> phụ phí 0', () => {
+  test('AUTO-PRICING-009: giá thấp hơn định mức -> phụ phí 0', () => {
     assert.equal(calcInclusionSurcharge([{ unitPrice: 40000, quantity: 1, subsidyLimit: LIMIT }]).total, 0);
   });
-  test('AUTO-PRICE-INC-02: biên: giá đúng bằng định mức -> phụ phí 0', () => {
+  test('AUTO-PRICING-010: biên: giá đúng bằng định mức -> phụ phí 0', () => {
     assert.equal(calcInclusionSurcharge([{ unitPrice: 50000, quantity: 1, subsidyLimit: LIMIT }]).total, 0);
   });
-  test('AUTO-PRICE-INC-03: biên: vượt định mức 1đ -> phụ phí 1đ', () => {
+  test('AUTO-PRICING-011: biên: vượt định mức 1đ -> phụ phí 1đ', () => {
     assert.equal(calcInclusionSurcharge([{ unitPrice: 50001, quantity: 1, subsidyLimit: LIMIT }]).total, 1);
   });
-  test('AUTO-PRICE-INC-04: Matcha Latte 55.000 / định mức 50.000 -> chỉ cộng 5.000, không cộng 55.000', () => {
+  test('AUTO-PRICING-012: Matcha Latte 55.000 / định mức 50.000 -> chỉ cộng 5.000, không cộng 55.000', () => {
     assert.equal(calcInclusionSurcharge([{ unitPrice: 55000, quantity: 1, subsidyLimit: LIMIT }]).total, 5000);
   });
-  test('AUTO-PRICE-INC-05: nhiều suất: chênh lệch × số lượng, cộng dồn nhiều dòng', () => {
+  test('AUTO-PRICING-013: nhiều suất: chênh lệch × số lượng, cộng dồn nhiều dòng', () => {
     const r = calcInclusionSurcharge([
       { unitPrice: 55000, quantity: 2, subsidyLimit: LIMIT }, // 5.000 × 2
       { unitPrice: 40000, quantity: 1, subsidyLimit: LIMIT }, // 0
@@ -85,102 +85,102 @@ describe('AUTO-PRICE-INC: phụ phí Inclusion (chỉ cộng phần chênh lệc
     assert.equal(r.total, 40000);
     assert.deepEqual(r.lines.map((l) => l.surchargeAmount), [10000, 0, 30000]);
   });
-  test('AUTO-PRICE-INC-06: quyền lợi không có định mức (null) -> không phát sinh phụ phí', () => {
+  test('AUTO-PRICING-014: quyền lợi không có định mức (null) -> không phát sinh phụ phí', () => {
     assert.equal(calcInclusionSurcharge([{ unitPrice: 35000, quantity: 2, subsidyLimit: null }]).total, 0);
   });
-  test('AUTO-PRICE-INC-07: rỗng -> 0; quantity < 1 bị từ chối', () => {
+  test('AUTO-PRICING-015: rỗng -> 0; quantity < 1 bị từ chối', () => {
     assert.equal(calcInclusionSurcharge([]).total, 0);
     throwsCode(() => calcInclusionSurcharge([{ unitPrice: 1000, quantity: 0, subsidyLimit: 0 }]), 'INVALID_QUANTITY');
   });
 });
 
-describe('AUTO-PRICE-ADD: Add-on', () => {
-  test('AUTO-PRICE-ADD-01: PER_ITEM = đơn giá × số lượng, cộng nhiều dòng', () => {
+describe('Add-on', () => {
+  test('AUTO-PRICING-016: PER_ITEM = đơn giá × số lượng, cộng nhiều dòng', () => {
     const r = calcAddonTotal([
       { unit: 'PER_ITEM', unitPrice: 40000, quantity: 2 },
       { unit: 'PER_ITEM', unitPrice: 15000, quantity: 3 },
     ]);
     assert.equal(r.total, 125000);
   });
-  test('AUTO-PRICE-ADD-02: mọi Add-on = đơn giá × số lượng (kể cả unit PER_BOOKING cũ, không còn ép = 1)', () => {
+  test('AUTO-PRICING-017: mọi Add-on = đơn giá × số lượng (kể cả unit PER_BOOKING cũ, không còn ép = 1)', () => {
     assert.equal(calcAddonTotal([{ unit: 'PER_BOOKING', unitPrice: 50000, quantity: 5 }]).total, 250000);
     assert.equal(calcAddonTotal([{ unitPrice: 20000, quantity: 3 }]).total, 60000); // không truyền unit
   });
-  test('AUTO-PRICE-ADD-03: thiếu quantity bị từ chối (Backend không đoán số lượng)', () => {
+  test('AUTO-PRICING-018: thiếu quantity bị từ chối (Backend không đoán số lượng)', () => {
     throwsCode(() => calcAddonTotal([{ unit: 'PER_BOOKING', unitPrice: 50000 }]), 'INVALID_QUANTITY');
   });
-  test('AUTO-PRICE-ADD-04: không có Add-on -> 0', () => {
+  test('AUTO-PRICING-019: không có Add-on -> 0', () => {
     assert.equal(calcAddonTotal([]).total, 0);
     assert.equal(calcAddonTotal().total, 0);
   });
-  test('AUTO-PRICE-ADD-05: quantity không hợp lệ / unit sai bị từ chối', () => {
+  test('AUTO-PRICING-020: quantity không hợp lệ / unit sai bị từ chối', () => {
     throwsCode(() => calcAddonTotal([{ unit: 'PER_ITEM', unitPrice: 1000, quantity: 0 }]), 'INVALID_QUANTITY');
     throwsCode(() => calcAddonTotal([{ unit: 'PER_ITEM', unitPrice: 1000, quantity: 1.5 }]), 'INVALID_QUANTITY');
     throwsCode(() => calcAddonTotal([{ unit: 'PER_DAY', unitPrice: 1000, quantity: 1 }]), 'INVALID_ADDON_UNIT');
   });
 });
 
-describe('AUTO-PRICE-VCH: Voucher (trừ trước, không âm)', () => {
-  test('AUTO-PRICE-VCH-01: không có Voucher -> 0', () => {
+describe('Voucher (trừ trước, không âm)', () => {
+  test('AUTO-PRICING-021: không có Voucher -> 0', () => {
     assert.equal(calcVoucherDiscount(null, 100000), 0);
   });
-  test('AUTO-PRICE-VCH-02: FIXED_AMOUNT nhỏ hơn Tạm tính', () => {
+  test('AUTO-PRICING-022: FIXED_AMOUNT nhỏ hơn Tạm tính', () => {
     assert.equal(calcVoucherDiscount({ discountType: 'FIXED_AMOUNT', discountValue: 30000 }, 100000), 30000);
   });
-  test('AUTO-PRICE-VCH-03: FIXED_AMOUNT lớn hơn Tạm tính -> bị chặn bằng Tạm tính (không âm)', () => {
+  test('AUTO-PRICING-023: FIXED_AMOUNT lớn hơn Tạm tính -> bị chặn bằng Tạm tính (không âm)', () => {
     assert.equal(calcVoucherDiscount({ discountType: 'FIXED_AMOUNT', discountValue: 500000 }, 100000), 100000);
   });
-  test('AUTO-PRICE-VCH-04: biên: FIXED_AMOUNT bằng đúng Tạm tính', () => {
+  test('AUTO-PRICING-024: biên: FIXED_AMOUNT bằng đúng Tạm tính', () => {
     assert.equal(calcVoucherDiscount({ discountType: 'FIXED_AMOUNT', discountValue: 100000 }, 100000), 100000);
   });
-  test('AUTO-PRICE-VCH-05: PERCENT làm tròn xuống', () => {
+  test('AUTO-PRICING-025: PERCENT làm tròn xuống', () => {
     assert.equal(calcVoucherDiscount({ discountType: 'PERCENT', discountValue: 10 }, 99999), 9999); // 9999,9
     assert.equal(calcVoucherDiscount({ discountType: 'PERCENT', discountValue: 20 }, 101), 20); // 20,2
   });
-  test('AUTO-PRICE-VCH-06: PERCENT 100% = toàn bộ Tạm tính', () => {
+  test('AUTO-PRICING-026: PERCENT 100% = toàn bộ Tạm tính', () => {
     assert.equal(calcVoucherDiscount({ discountType: 'PERCENT', discountValue: 100 }, 123456), 123456);
   });
-  test('AUTO-PRICE-VCH-07: Tạm tính 0 -> giảm 0', () => {
+  test('AUTO-PRICING-027: Tạm tính 0 -> giảm 0', () => {
     assert.equal(calcVoucherDiscount({ discountType: 'FIXED_AMOUNT', discountValue: 30000 }, 0), 0);
   });
-  test('AUTO-PRICE-VCH-08: Voucher cấu hình sai bị từ chối', () => {
+  test('AUTO-PRICING-028: Voucher cấu hình sai bị từ chối', () => {
     throwsCode(() => calcVoucherDiscount({ discountType: 'PERCENT', discountValue: 101 }, 1000), 'INVALID_DISCOUNT_VALUE');
     throwsCode(() => calcVoucherDiscount({ discountType: 'PERCENT', discountValue: 0 }, 1000), 'INVALID_DISCOUNT_VALUE');
     throwsCode(() => calcVoucherDiscount({ discountType: 'GIFT', discountValue: 10 }, 1000), 'INVALID_DISCOUNT_TYPE');
   });
 });
 
-describe('AUTO-PRICE-TIER: giảm theo hạng (tính sau Voucher, làm tròn xuống)', () => {
-  test('AUTO-PRICE-TIER-01: tính trên (Tạm tính − Voucher), không phải trên Tạm tính', () => {
+describe('giảm theo hạng (tính sau Voucher, làm tròn xuống)', () => {
+  test('AUTO-PRICING-029: tính trên (Tạm tính − Voucher), không phải trên Tạm tính', () => {
     // (200.000 − 50.000) × 10% = 15.000  (nếu tính trên 200.000 sẽ là 20.000)
     assert.equal(calcTierDiscount(200000, 50000, 0.1), 15000);
   });
-  test('AUTO-PRICE-TIER-02: làm tròn xuống đến đồng', () => {
+  test('AUTO-PRICING-030: làm tròn xuống đến đồng', () => {
     assert.equal(calcTierDiscount(100001, 0, 0.05), 5000); // 5000,05
     assert.equal(calcTierDiscount(19, 0, 0.15), 2); // 2,85
   });
-  test('AUTO-PRICE-TIER-03: không sai số số thực: 0.05 / 0.1 / 0.15 với số lớn', () => {
+  test('AUTO-PRICING-031: không sai số số thực: 0.05 / 0.1 / 0.15 với số lớn', () => {
     // 0.1 × 300000 trong float có thể ra 29999.999...; phải ra đúng 30000
     assert.equal(calcTierDiscount(300000, 0, 0.1), 30000);
     assert.equal(calcTierDiscount(1000000, 0, 0.15), 150000);
     assert.equal(calcTierDiscount(580000, 0, 0.05), 29000);
   });
-  test('AUTO-PRICE-TIER-04: hạng BASIC (0) hoặc không truyền -> 0', () => {
+  test('AUTO-PRICING-032: hạng BASIC (0) hoặc không truyền -> 0', () => {
     assert.equal(calcTierDiscount(100000, 0, 0), 0);
     assert.equal(calcTierDiscount(100000, 0, undefined), 0);
   });
-  test('AUTO-PRICE-TIER-05: Voucher đã trừ hết -> không còn gì để giảm theo hạng', () => {
+  test('AUTO-PRICING-033: Voucher đã trừ hết -> không còn gì để giảm theo hạng', () => {
     assert.equal(calcTierDiscount(100000, 100000, 0.15), 0);
   });
-  test('AUTO-PRICE-TIER-06: đầu vào không hợp lệ', () => {
+  test('AUTO-PRICING-034: đầu vào không hợp lệ', () => {
     throwsCode(() => calcTierDiscount(100000, 0, 1.2), 'INVALID_RATE');
     throwsCode(() => calcTierDiscount(100000, 0, -0.1), 'INVALID_RATE');
     throwsCode(() => calcTierDiscount(100000, 200000, 0.1), 'INVALID_AMOUNT');
   });
 });
 
-describe('AUTO-PRICE-ALL: calculatePricing – công thức tổng hợp', () => {
-  test('AUTO-PRICE-ALL-01: ví dụ đầy đủ: Package + phụ phí + Add-on − Voucher − hạng Vàng 10%', () => {
+describe('calculatePricing – công thức tổng hợp', () => {
+  test('AUTO-PRICING-035: ví dụ đầy đủ: Package + phụ phí + Add-on − Voucher − hạng Vàng 10%', () => {
     const r = calculatePricing({
       package: { packageType: 'FIXED', pricingUnit: 'PER_SPACE', price: 140000 },
       inclusions: [{ unitPrice: 55000, quantity: 1, subsidyLimit: 50000 }], // +5.000
@@ -201,7 +201,7 @@ describe('AUTO-PRICE-ALL: calculatePricing – công thức tổng hợp', () =>
     assert.equal(r.finalAmount, 184500);
   });
 
-  test('AUTO-PRICE-ALL-02: thứ tự áp dụng: Voucher trước, hạng sau (khác thứ tự ngược lại)', () => {
+  test('AUTO-PRICING-036: thứ tự áp dụng: Voucher trước, hạng sau (khác thứ tự ngược lại)', () => {
     const input = {
       package: { packageType: 'FIXED', pricingUnit: 'PER_SPACE', price: 200000 },
       voucher: { discountType: 'FIXED_AMOUNT', discountValue: 50000 },
@@ -212,7 +212,7 @@ describe('AUTO-PRICE-ALL: calculatePricing – công thức tổng hợp', () =>
     assert.equal(r.finalAmount, 135000);
   });
 
-  test('AUTO-PRICE-ALL-03: Voucher lớn hơn Tạm tính -> final_amount = 0, không âm, hạng không giảm thêm', () => {
+  test('AUTO-PRICING-037: Voucher lớn hơn Tạm tính -> final_amount = 0, không âm, hạng không giảm thêm', () => {
     const r = calculatePricing({
       package: { packageType: 'FIXED', pricingUnit: 'PER_SPACE', price: 70000 },
       voucher: { discountType: 'FIXED_AMOUNT', discountValue: 500000 },
@@ -223,14 +223,14 @@ describe('AUTO-PRICE-ALL: calculatePricing – công thức tổng hợp', () =>
     assert.equal(r.finalAmount, 0);
   });
 
-  test('AUTO-PRICE-ALL-04: không Voucher, không Add-on, hạng BASIC -> final = Package', () => {
+  test('AUTO-PRICING-038: không Voucher, không Add-on, hạng BASIC -> final = Package', () => {
     const r = calculatePricing({ package: { packageType: 'FIXED', pricingUnit: 'PER_SPACE', price: 70000 } });
     assert.equal(r.subtotal, 70000);
     assert.equal(r.discountAmount, 0);
     assert.equal(r.finalAmount, 70000);
   });
 
-  test('AUTO-PRICE-ALL-05: bất biến: mọi số tiền là số nguyên không âm; final = subtotal − discount; discount ≤ subtotal', () => {
+  test('AUTO-PRICING-039: bất biến: mọi số tiền là số nguyên không âm; final = subtotal − discount; discount ≤ subtotal', () => {
     const rates = [0, 0.05, 0.1, 0.15];
     const vouchers = [
       null,
@@ -260,12 +260,12 @@ describe('AUTO-PRICE-ALL: calculatePricing – công thức tổng hợp', () =>
     }
   });
 
-  test('AUTO-PRICE-ALL-06: thiếu package bị từ chối', () => {
+  test('AUTO-PRICING-040: thiếu package bị từ chối', () => {
     throwsCode(() => calculatePricing({}), 'INVALID_INPUT');
     throwsCode(() => calculatePricing(), 'INVALID_INPUT');
   });
 
-  test('AUTO-PRICE-ALL-07: toPriceSnapshot: đóng băng sâu, có chi tiết dòng, khớp trường phẳng', () => {
+  test('AUTO-PRICING-041: toPriceSnapshot: đóng băng sâu, có chi tiết dòng, khớp trường phẳng', () => {
     const r = calculatePricing({
       package: { packageType: 'FIXED', pricingUnit: 'PER_SPACE', price: 100000 },
       inclusions: [{ unitPrice: 55000, quantity: 2, subsidyLimit: 50000 }],
@@ -290,7 +290,7 @@ describe('AUTO-PRICE-ALL: calculatePricing – công thức tổng hợp', () =>
     assert.equal(snap.final_amount, 162450);
   });
 
-  test('AUTO-PRICE-ALL-08: toBookingSnapshot map đúng tên trường của collection bookings', () => {
+  test('AUTO-PRICING-042: toBookingSnapshot map đúng tên trường của collection bookings', () => {
     const r = calculatePricing({
       package: { packageType: 'FIXED', pricingUnit: 'PER_SPACE', price: 100000 },
       tierRate: 0.05,
@@ -309,11 +309,11 @@ describe('AUTO-PRICE-ALL: calculatePricing – công thức tổng hợp', () =>
   });
 });
 
-describe('AUTO-PRICE-COMPAT: computePrice (giao diện cũ) – kết quả & lỗi phải giữ nguyên', () => {
+describe('computePrice (giao diện cũ) – kết quả & lỗi phải giữ nguyên', () => {
   const throwsRange = (fn, re) =>
     assert.throws(fn, (e) => e instanceof RangeError && re.test(e.message));
 
-  test('AUTO-PRICE-COMPAT-01: đủ thành phần: Package + phụ phí + Add-on − Voucher − hạng 10%', () => {
+  test('AUTO-PRICING-043: đủ thành phần: Package + phụ phí + Add-on − Voucher − hạng 10%', () => {
     assert.deepEqual(
       computePrice({
         packagePrice: 200000,
@@ -332,21 +332,21 @@ describe('AUTO-PRICE-COMPAT: computePrice (giao diện cũ) – kết quả & l�
       }
     );
   });
-  test('AUTO-PRICE-COMPAT-02: chỉ truyền packagePrice -> final = package', () => {
+  test('AUTO-PRICING-044: chỉ truyền packagePrice -> final = package', () => {
     assert.deepEqual(computePrice({ packagePrice: 90000 }), {
       subtotal: 90000, addonTotal: 0, voucherDiscount: 0, tierDiscount: 0, discountAmount: 0, finalAmount: 90000,
     });
   });
-  test('AUTO-PRICE-COMPAT-03: Voucher lớn hơn Tạm tính bị chặn: final = 0, hạng không giảm thêm', () => {
+  test('AUTO-PRICING-045: Voucher lớn hơn Tạm tính bị chặn: final = 0, hạng không giảm thêm', () => {
     const r = computePrice({ packagePrice: 100000, voucherDiscount: 999999, tierPercent: 20 });
     assert.equal(r.voucherDiscount, 100000);
     assert.equal(r.tierDiscount, 0);
     assert.equal(r.finalAmount, 0);
   });
-  test('AUTO-PRICE-COMPAT-04: giảm hạng làm tròn xuống trên (Tạm tính − Voucher)', () => {
+  test('AUTO-PRICING-046: giảm hạng làm tròn xuống trên (Tạm tính − Voucher)', () => {
     assert.equal(computePrice({ packagePrice: 100001, tierPercent: 15 }).tierDiscount, 15000);
   });
-  test('AUTO-PRICE-COMPAT-05: trả cùng kết quả với calculatePricing cho cùng dữ liệu', () => {
+  test('AUTO-PRICING-047: trả cùng kết quả với calculatePricing cho cùng dữ liệu', () => {
     const legacy = computePrice({ packagePrice: 250000, addons: [{ unitPrice: 15000, qty: 3 }], voucherDiscount: 30000, tierPercent: 5 });
     const modern = calculatePricing({
       package: { packageType: 'FIXED', pricingUnit: 'PER_SPACE', price: 250000 },
@@ -358,7 +358,7 @@ describe('AUTO-PRICE-COMPAT: computePrice (giao diện cũ) – kết quả & l�
     assert.equal(legacy.discountAmount, modern.discountAmount);
     assert.equal(legacy.finalAmount, modern.finalAmount);
   });
-  test('AUTO-PRICE-COMPAT-06: đầu vào sai vẫn ném RangeError với thông điệp cũ', () => {
+  test('AUTO-PRICING-048: đầu vào sai vẫn ném RangeError với thông điệp cũ', () => {
     throwsRange(() => computePrice({ packagePrice: -1 }), /^packagePrice must be a non-negative integer VND$/);
     throwsRange(() => computePrice({ packagePrice: 1.5 }), /packagePrice/);
     throwsRange(() => computePrice({ packagePrice: 1, inclusionSurcharge: -5 }), /^inclusionSurcharge/);
