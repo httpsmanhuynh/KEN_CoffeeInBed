@@ -1,0 +1,46 @@
+$kind: http-request
+name: '[TC-SZ-028] Cập nhật tên + sức chứa hợp lệ'
+description: '**Mã TC:** TC-SZ-028
+
+  **Nhóm:** Admin cập nhật Space
+
+  **API / Thành phần:** PATCH /api/spaces/:id
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed zones/spaces/packages.
+  Space SPC-T01 (cap 6, max 6).
+
+  **Dữ liệu vào:** {"capacity": 8, "max_guests": 8, "name": "Phòng test 2"}
+
+  **Các bước thực hiện:**
+
+  1) PATCH /api/spaces/<id>
+
+  2) Kiểm tra updated_at
+
+  **Kết quả mong đợi:** 200; giá trị mới được lưu; updated_at mới hơn created_at (HTTP:
+  200)
+
+  **Nhánh code bao phủ:** SPC-B20
+
+  '
+url: '{{baseUrl}}/api/spaces/{{spaceId}}'
+method: PATCH
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 28000
+body:
+  type: json
+  raw: "{\n  \"capacity\": 8,\n  \"max_guests\": 8,\n  \"name\": \"Phòng test 2\"\n\
+    }"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-SZ-028] Cập nhật tên + sức chứa hợp lệ\npm.test(\"[TC-SZ-028] Status\
+    \ code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-SZ-028] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

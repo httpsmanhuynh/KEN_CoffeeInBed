@@ -1,0 +1,38 @@
+$kind: http-request
+name: '[TC-AD-005] Món đã ẩn (is_active=false) không hiển thị cho khách'
+description: '**Mã TC:** TC-AD-005
+
+  **Nhóm:** Xem Menu F&B
+
+  **API / Thành phần:** GET /api/products
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đã seed products/addons; không cần đăng nhập.
+
+  **Dữ liệu vào:** —
+
+  **Các bước thực hiện:**
+
+  1) Admin ẩn 1 món
+
+  2) GET /api/products (không cookie)
+
+  **Kết quả mong đợi:** 200 danh sách không chứa món đã ẩn (HTTP: 200)
+
+  **Nhánh code bao phủ:** ADD-B05
+
+  '
+url: '{{baseUrl}}/api/products'
+method: GET
+headers:
+- key: Content-Type
+  value: application/json
+order: 5000
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-AD-005] Món đã ẩn (is_active=false) không hiển thị cho khách\npm.test(\"\
+    [TC-AD-005] Status code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-AD-005] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

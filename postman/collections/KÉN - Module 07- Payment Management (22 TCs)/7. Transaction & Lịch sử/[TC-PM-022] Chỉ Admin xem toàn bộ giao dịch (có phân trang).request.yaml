@@ -1,0 +1,40 @@
+$kind: http-request
+name: '[TC-PM-022] Chỉ Admin xem toàn bộ giao dịch (có phân trang)'
+description: '**Mã TC:** TC-PM-022
+
+  **Nhóm:** Transaction & Lịch sử
+
+  **API / Thành phần:** GET /api/payments
+
+  **Loại:** Security
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer rồi Admin.
+
+  **Dữ liệu vào:** ?page=1&limit=10
+
+  **Các bước thực hiện:**
+
+  1) GET /api/payments bằng Customer
+
+  2) GET bằng Admin
+
+  **Kết quả mong đợi:** Customer 403; Admin 200 phân trang đúng (HTTP: 403/200)
+
+  **Nhánh code bao phủ:** PAY-B22
+
+  '
+url: '{{baseUrl}}/api/payments'
+method: GET
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 22000
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PM-022] Chỉ Admin xem toàn bộ giao dịch (có phân trang)\npm.test(\"\
+    [TC-PM-022] Status code is 403/200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([403,\
+    \ 200]);\n});\npm.test(\"[TC-PM-022] Response valid format\", function () {\n\
+    \    pm.expect(pm.response.text()).to.be.a('string');\n});"

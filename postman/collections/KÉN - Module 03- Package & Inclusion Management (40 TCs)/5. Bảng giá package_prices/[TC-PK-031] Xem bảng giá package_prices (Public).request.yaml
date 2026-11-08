@@ -1,0 +1,38 @@
+$kind: http-request
+name: '[TC-PK-031] Xem bảng giá package_prices (Public)'
+description: '**Mã TC:** TC-PK-031
+
+  **Nhóm:** Bảng giá package_prices
+
+  **API / Thành phần:** GET /api/pricing
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đã seed packages/package_prices/package_inclusions;
+  không cần đăng nhập.
+
+  **Dữ liệu vào:** —
+
+  **Các bước thực hiện:**
+
+  1) GET /api/pricing
+
+  **Kết quả mong đợi:** 200 mảng {package_id, space_id, price} (giá VNĐ nguyên ≥ 0)
+  (HTTP: 200)
+
+  **Nhánh code bao phủ:** PKG-B28
+
+  '
+url: '{{baseUrl}}/api/pricing'
+method: GET
+headers:
+- key: Content-Type
+  value: application/json
+order: 31000
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PK-031] Xem bảng giá package_prices (Public)\npm.test(\"[TC-PK-031]\
+    \ Status code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-PK-031] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

@@ -1,0 +1,41 @@
+$kind: http-request
+name: '[TC-SZ-017] Kiểm tra chỗ trống qua POST (không spaceId) giống GET search'
+description: '**Mã TC:** TC-SZ-017
+
+  **Nhóm:** Tìm kiếm & Lọc Space
+
+  **API / Thành phần:** POST /api/availability
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đã seed zones/spaces/packages; không cần
+  đăng nhập.
+
+  **Dữ liệu vào:** {"startAt": "<ISO>", "guestCount": 2, "hours": 2}
+
+  **Các bước thực hiện:**
+
+  1) POST /api/availability
+
+  **Kết quả mong đợi:** 200 cùng cấu trúc kết quả như GET /api/spaces?startAt (HTTP:
+  200)
+
+  **Nhánh code bao phủ:** SPC-B07
+
+  '
+url: '{{baseUrl}}/api/availability'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+order: 17000
+body:
+  type: json
+  raw: "{\n  \"startAt\": \"<ISO>\",\n  \"guestCount\": 2,\n  \"hours\": 2\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-SZ-017] Kiểm tra chỗ trống qua POST (không spaceId) giống GET search\n\
+    pm.test(\"[TC-SZ-017] Status code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-SZ-017] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

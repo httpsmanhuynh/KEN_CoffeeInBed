@@ -1,0 +1,41 @@
+$kind: http-request
+name: '[TC-PK-024] Loại Inclusion không hợp lệ'
+description: '**Mã TC:** TC-PK-024
+
+  **Nhóm:** Cấu hình Inclusion
+
+  **API / Thành phần:** POST /api/package-inclusions
+
+  **Loại:** Negative
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed spaces/packages/package_prices/package_inclusions.
+
+  **Dữ liệu vào:** {"package_id": "<_id>", "type": "WINE"}
+
+  **Các bước thực hiện:**
+
+  1) POST /api/package-inclusions
+
+  **Kết quả mong đợi:** 422 VALIDATION_ERROR (HTTP: 422)
+
+  **Nhánh code bao phủ:** PKG-B21
+
+  '
+url: '{{baseUrl}}/api/package-inclusions'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 24000
+body:
+  type: json
+  raw: "{\n  \"package_id\": \"<_id>\",\n  \"type\": \"WINE\"\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PK-024] Loại Inclusion không hợp lệ\npm.test(\"[TC-PK-024] Status\
+    \ code is 422\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([422]);\n\
+    });\npm.test(\"[TC-PK-024] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

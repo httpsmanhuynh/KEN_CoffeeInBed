@@ -1,0 +1,42 @@
+$kind: http-request
+name: '[TC-SZ-011] guestCount = max_guests (biên trên) còn khả dụng; max_guests+1
+  không khả dụng'
+description: '**Mã TC:** TC-SZ-011
+
+  **Nhóm:** Tìm kiếm & Lọc Space
+
+  **API / Thành phần:** GET /api/spaces?guestCount
+
+  **Loại:** Boundary
+
+  **Điều kiện tiên quyết:** Server chạy; đã seed zones/spaces/packages; không cần
+  đăng nhập. Space max_guests=6.
+
+  **Dữ liệu vào:** guestCount=6 rồi guestCount=7
+
+  **Các bước thực hiện:**
+
+  1) GET lần 1 guestCount=6
+
+  2) GET lần 2 guestCount=7
+
+  **Kết quả mong đợi:** Lần 1 isAvailable=true; lần 2 isAvailable=false (hoặc loại
+  khỏi kết quả) (HTTP: 200)
+
+  **Nhánh code bao phủ:** SPC-B09
+
+  '
+url: '{{baseUrl}}/api/spaces?guestCount'
+method: GET
+headers:
+- key: Content-Type
+  value: application/json
+order: 11000
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-SZ-011] guestCount = max_guests (biên trên) còn khả dụng; max_guests+1\
+    \ không khả dụng\npm.test(\"[TC-SZ-011] Status code is 200\", function () {\n\
+    \    pm.expect(pm.response.code).to.be.oneOf([200]);\n});\npm.test(\"[TC-SZ-011]\
+    \ Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

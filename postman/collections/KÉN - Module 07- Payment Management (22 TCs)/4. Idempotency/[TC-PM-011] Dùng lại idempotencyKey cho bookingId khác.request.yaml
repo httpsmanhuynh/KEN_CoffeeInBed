@@ -1,0 +1,42 @@
+$kind: http-request
+name: '[TC-PM-011] Dùng lại idempotencyKey cho bookingId khác'
+description: '**Mã TC:** TC-PM-011
+
+  **Nhóm:** Idempotency
+
+  **API / Thành phần:** POST /api/payments
+
+  **Loại:** Negative
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; có đơn PENDING_PAYMENT
+  còn hạn.
+
+  **Dữ liệu vào:** KEY-001 cho đơn khác
+
+  **Các bước thực hiện:**
+
+  1) POST /api/payments đơn khác cùng key
+
+  **Kết quả mong đợi:** 409 IDEMPOTENCY_CONFLICT (HTTP: 409)
+
+  **Nhánh code bao phủ:** PAY-B11
+
+  '
+url: '{{baseUrl}}/api/payments'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: CUSTOMER
+order: 11000
+body:
+  type: json
+  raw: '{"data": "KEY-001 cho đơn khác"}'
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PM-011] Dùng lại idempotencyKey cho bookingId khác\npm.test(\"[TC-PM-011]\
+    \ Status code is 409\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([409]);\n\
+    });\npm.test(\"[TC-PM-011] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

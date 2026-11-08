@@ -1,0 +1,42 @@
+$kind: http-request
+name: '[TC-PK-025] package_id không tồn tại'
+description: '**Mã TC:** TC-PK-025
+
+  **Nhóm:** Cấu hình Inclusion
+
+  **API / Thành phần:** POST /api/package-inclusions
+
+  **Loại:** Negative
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed spaces/packages/package_prices/package_inclusions.
+
+  **Dữ liệu vào:** {"package_id": "000000000000000000000000", "type": "PASTRY"}
+
+  **Các bước thực hiện:**
+
+  1) POST /api/package-inclusions
+
+  **Kết quả mong đợi:** Bị từ chối (422 hoặc 404) (HTTP: 422)
+
+  **Nhánh code bao phủ:** PKG-B22
+
+  '
+url: '{{baseUrl}}/api/package-inclusions'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 25000
+body:
+  type: json
+  raw: "{\n  \"package_id\": \"000000000000000000000000\",\n  \"type\": \"PASTRY\"\
+    \n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PK-025] package_id không tồn tại\npm.test(\"[TC-PK-025] Status code\
+    \ is 422\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([422]);\n\
+    });\npm.test(\"[TC-PK-025] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

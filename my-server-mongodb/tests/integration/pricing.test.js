@@ -21,60 +21,114 @@ const throwsCode = (fn, code) =>
 
 describe('giá Package (Bảng A.4.2)', () => {
   test('AUTO-PRICING-001: FIXED + PER_SPACE = giá trọn gói', () => {
-    assert.equal(calcPackagePrice({ packageType: 'FIXED', pricingUnit: 'PER_SPACE', price: 250000 }), 250000);
+    assert.equal(
+      calcPackagePrice({ packageType: 'FIXED', pricingUnit: 'PER_SPACE', price: 250000 }),
+      250000,
+    );
   });
   test('AUTO-PRICING-002: FIXED + PER_PERSON = giá × số khách', () => {
     assert.equal(
-      calcPackagePrice({ packageType: 'FIXED', pricingUnit: 'PER_PERSON', price: 90000, guestCount: 3 }),
-      270000
+      calcPackagePrice({
+        packageType: 'FIXED',
+        pricingUnit: 'PER_PERSON',
+        price: 90000,
+        guestCount: 3,
+      }),
+      270000,
     );
   });
   test('AUTO-PRICING-003: HOURLY + PER_SPACE = đơn giá giờ × số giờ', () => {
     assert.equal(
       calcPackagePrice({ packageType: 'HOURLY', pricingUnit: 'PER_SPACE', price: 45000, hours: 3 }),
-      135000
+      135000,
     );
   });
   test('AUTO-PRICING-004: HOURLY + PER_PERSON = đơn giá × khách × giờ', () => {
     assert.equal(
-      calcPackagePrice({ packageType: 'HOURLY', pricingUnit: 'PER_PERSON', price: 30000, guestCount: 4, hours: 2 }),
-      240000
+      calcPackagePrice({
+        packageType: 'HOURLY',
+        pricingUnit: 'PER_PERSON',
+        price: 30000,
+        guestCount: 4,
+        hours: 2,
+      }),
+      240000,
     );
   });
   test('AUTO-PRICING-005: biên: HOURLY đúng 1 giờ (tối thiểu) hợp lệ', () => {
-    assert.equal(calcPackagePrice({ packageType: 'HOURLY', pricingUnit: 'PER_SPACE', price: 45000, hours: 1 }), 45000);
+    assert.equal(
+      calcPackagePrice({ packageType: 'HOURLY', pricingUnit: 'PER_SPACE', price: 45000, hours: 1 }),
+      45000,
+    );
   });
   test('AUTO-PRICING-006: HOURLY dưới minHours bị từ chối', () => {
     throwsCode(
-      () => calcPackagePrice({ packageType: 'HOURLY', pricingUnit: 'PER_SPACE', price: 45000, hours: 1, minHours: 2 }),
-      'HOURS_BELOW_MIN'
+      () =>
+        calcPackagePrice({
+          packageType: 'HOURLY',
+          pricingUnit: 'PER_SPACE',
+          price: 45000,
+          hours: 1,
+          minHours: 2,
+        }),
+      'HOURS_BELOW_MIN',
     );
   });
   test('AUTO-PRICING-007: thiếu hours / guestCount bị từ chối', () => {
-    throwsCode(() => calcPackagePrice({ packageType: 'HOURLY', pricingUnit: 'PER_SPACE', price: 1000 }), 'INVALID_QUANTITY');
-    throwsCode(() => calcPackagePrice({ packageType: 'FIXED', pricingUnit: 'PER_PERSON', price: 1000 }), 'INVALID_QUANTITY');
+    throwsCode(
+      () => calcPackagePrice({ packageType: 'HOURLY', pricingUnit: 'PER_SPACE', price: 1000 }),
+      'INVALID_QUANTITY',
+    );
+    throwsCode(
+      () => calcPackagePrice({ packageType: 'FIXED', pricingUnit: 'PER_PERSON', price: 1000 }),
+      'INVALID_QUANTITY',
+    );
   });
   test('AUTO-PRICING-008: đầu vào không hợp lệ: giá âm, số thực, loại sai', () => {
-    throwsCode(() => calcPackagePrice({ packageType: 'FIXED', pricingUnit: 'PER_SPACE', price: -1 }), 'INVALID_AMOUNT');
-    throwsCode(() => calcPackagePrice({ packageType: 'FIXED', pricingUnit: 'PER_SPACE', price: 100.5 }), 'INVALID_AMOUNT');
-    throwsCode(() => calcPackagePrice({ packageType: 'DAILY', pricingUnit: 'PER_SPACE', price: 1 }), 'INVALID_PACKAGE_TYPE');
-    throwsCode(() => calcPackagePrice({ packageType: 'FIXED', pricingUnit: 'PER_ROOM', price: 1 }), 'INVALID_PRICING_UNIT');
+    throwsCode(
+      () => calcPackagePrice({ packageType: 'FIXED', pricingUnit: 'PER_SPACE', price: -1 }),
+      'INVALID_AMOUNT',
+    );
+    throwsCode(
+      () => calcPackagePrice({ packageType: 'FIXED', pricingUnit: 'PER_SPACE', price: 100.5 }),
+      'INVALID_AMOUNT',
+    );
+    throwsCode(
+      () => calcPackagePrice({ packageType: 'DAILY', pricingUnit: 'PER_SPACE', price: 1 }),
+      'INVALID_PACKAGE_TYPE',
+    );
+    throwsCode(
+      () => calcPackagePrice({ packageType: 'FIXED', pricingUnit: 'PER_ROOM', price: 1 }),
+      'INVALID_PRICING_UNIT',
+    );
   });
 });
 
 describe('phụ phí Inclusion (chỉ cộng phần chênh lệch)', () => {
   const LIMIT = 50000;
   test('AUTO-PRICING-009: giá thấp hơn định mức -> phụ phí 0', () => {
-    assert.equal(calcInclusionSurcharge([{ unitPrice: 40000, quantity: 1, subsidyLimit: LIMIT }]).total, 0);
+    assert.equal(
+      calcInclusionSurcharge([{ unitPrice: 40000, quantity: 1, subsidyLimit: LIMIT }]).total,
+      0,
+    );
   });
   test('AUTO-PRICING-010: biên: giá đúng bằng định mức -> phụ phí 0', () => {
-    assert.equal(calcInclusionSurcharge([{ unitPrice: 50000, quantity: 1, subsidyLimit: LIMIT }]).total, 0);
+    assert.equal(
+      calcInclusionSurcharge([{ unitPrice: 50000, quantity: 1, subsidyLimit: LIMIT }]).total,
+      0,
+    );
   });
   test('AUTO-PRICING-011: biên: vượt định mức 1đ -> phụ phí 1đ', () => {
-    assert.equal(calcInclusionSurcharge([{ unitPrice: 50001, quantity: 1, subsidyLimit: LIMIT }]).total, 1);
+    assert.equal(
+      calcInclusionSurcharge([{ unitPrice: 50001, quantity: 1, subsidyLimit: LIMIT }]).total,
+      1,
+    );
   });
   test('AUTO-PRICING-012: Matcha Latte 55.000 / định mức 50.000 -> chỉ cộng 5.000, không cộng 55.000', () => {
-    assert.equal(calcInclusionSurcharge([{ unitPrice: 55000, quantity: 1, subsidyLimit: LIMIT }]).total, 5000);
+    assert.equal(
+      calcInclusionSurcharge([{ unitPrice: 55000, quantity: 1, subsidyLimit: LIMIT }]).total,
+      5000,
+    );
   });
   test('AUTO-PRICING-013: nhiều suất: chênh lệch × số lượng, cộng dồn nhiều dòng', () => {
     const r = calcInclusionSurcharge([
@@ -83,14 +137,23 @@ describe('phụ phí Inclusion (chỉ cộng phần chênh lệch)', () => {
       { unitPrice: 60000, quantity: 3, subsidyLimit: LIMIT }, // 10.000 × 3
     ]);
     assert.equal(r.total, 40000);
-    assert.deepEqual(r.lines.map((l) => l.surchargeAmount), [10000, 0, 30000]);
+    assert.deepEqual(
+      r.lines.map((l) => l.surchargeAmount),
+      [10000, 0, 30000],
+    );
   });
   test('AUTO-PRICING-014: quyền lợi không có định mức (null) -> không phát sinh phụ phí', () => {
-    assert.equal(calcInclusionSurcharge([{ unitPrice: 35000, quantity: 2, subsidyLimit: null }]).total, 0);
+    assert.equal(
+      calcInclusionSurcharge([{ unitPrice: 35000, quantity: 2, subsidyLimit: null }]).total,
+      0,
+    );
   });
   test('AUTO-PRICING-015: rỗng -> 0; quantity < 1 bị từ chối', () => {
     assert.equal(calcInclusionSurcharge([]).total, 0);
-    throwsCode(() => calcInclusionSurcharge([{ unitPrice: 1000, quantity: 0, subsidyLimit: 0 }]), 'INVALID_QUANTITY');
+    throwsCode(
+      () => calcInclusionSurcharge([{ unitPrice: 1000, quantity: 0, subsidyLimit: 0 }]),
+      'INVALID_QUANTITY',
+    );
   });
 });
 
@@ -103,20 +166,35 @@ describe('Add-on', () => {
     assert.equal(r.total, 125000);
   });
   test('AUTO-PRICING-017: mọi Add-on = đơn giá × số lượng (kể cả unit PER_BOOKING cũ, không còn ép = 1)', () => {
-    assert.equal(calcAddonTotal([{ unit: 'PER_BOOKING', unitPrice: 50000, quantity: 5 }]).total, 250000);
+    assert.equal(
+      calcAddonTotal([{ unit: 'PER_BOOKING', unitPrice: 50000, quantity: 5 }]).total,
+      250000,
+    );
     assert.equal(calcAddonTotal([{ unitPrice: 20000, quantity: 3 }]).total, 60000); // không truyền unit
   });
   test('AUTO-PRICING-018: thiếu quantity bị từ chối (Backend không đoán số lượng)', () => {
-    throwsCode(() => calcAddonTotal([{ unit: 'PER_BOOKING', unitPrice: 50000 }]), 'INVALID_QUANTITY');
+    throwsCode(
+      () => calcAddonTotal([{ unit: 'PER_BOOKING', unitPrice: 50000 }]),
+      'INVALID_QUANTITY',
+    );
   });
   test('AUTO-PRICING-019: không có Add-on -> 0', () => {
     assert.equal(calcAddonTotal([]).total, 0);
     assert.equal(calcAddonTotal().total, 0);
   });
   test('AUTO-PRICING-020: quantity không hợp lệ / unit sai bị từ chối', () => {
-    throwsCode(() => calcAddonTotal([{ unit: 'PER_ITEM', unitPrice: 1000, quantity: 0 }]), 'INVALID_QUANTITY');
-    throwsCode(() => calcAddonTotal([{ unit: 'PER_ITEM', unitPrice: 1000, quantity: 1.5 }]), 'INVALID_QUANTITY');
-    throwsCode(() => calcAddonTotal([{ unit: 'PER_DAY', unitPrice: 1000, quantity: 1 }]), 'INVALID_ADDON_UNIT');
+    throwsCode(
+      () => calcAddonTotal([{ unit: 'PER_ITEM', unitPrice: 1000, quantity: 0 }]),
+      'INVALID_QUANTITY',
+    );
+    throwsCode(
+      () => calcAddonTotal([{ unit: 'PER_ITEM', unitPrice: 1000, quantity: 1.5 }]),
+      'INVALID_QUANTITY',
+    );
+    throwsCode(
+      () => calcAddonTotal([{ unit: 'PER_DAY', unitPrice: 1000, quantity: 1 }]),
+      'INVALID_ADDON_UNIT',
+    );
   });
 });
 
@@ -125,28 +203,49 @@ describe('Voucher (trừ trước, không âm)', () => {
     assert.equal(calcVoucherDiscount(null, 100000), 0);
   });
   test('AUTO-PRICING-022: FIXED_AMOUNT nhỏ hơn Tạm tính', () => {
-    assert.equal(calcVoucherDiscount({ discountType: 'FIXED_AMOUNT', discountValue: 30000 }, 100000), 30000);
+    assert.equal(
+      calcVoucherDiscount({ discountType: 'FIXED_AMOUNT', discountValue: 30000 }, 100000),
+      30000,
+    );
   });
   test('AUTO-PRICING-023: FIXED_AMOUNT lớn hơn Tạm tính -> bị chặn bằng Tạm tính (không âm)', () => {
-    assert.equal(calcVoucherDiscount({ discountType: 'FIXED_AMOUNT', discountValue: 500000 }, 100000), 100000);
+    assert.equal(
+      calcVoucherDiscount({ discountType: 'FIXED_AMOUNT', discountValue: 500000 }, 100000),
+      100000,
+    );
   });
   test('AUTO-PRICING-024: biên: FIXED_AMOUNT bằng đúng Tạm tính', () => {
-    assert.equal(calcVoucherDiscount({ discountType: 'FIXED_AMOUNT', discountValue: 100000 }, 100000), 100000);
+    assert.equal(
+      calcVoucherDiscount({ discountType: 'FIXED_AMOUNT', discountValue: 100000 }, 100000),
+      100000,
+    );
   });
   test('AUTO-PRICING-025: PERCENT làm tròn xuống', () => {
     assert.equal(calcVoucherDiscount({ discountType: 'PERCENT', discountValue: 10 }, 99999), 9999); // 9999,9
     assert.equal(calcVoucherDiscount({ discountType: 'PERCENT', discountValue: 20 }, 101), 20); // 20,2
   });
   test('AUTO-PRICING-026: PERCENT 100% = toàn bộ Tạm tính', () => {
-    assert.equal(calcVoucherDiscount({ discountType: 'PERCENT', discountValue: 100 }, 123456), 123456);
+    assert.equal(
+      calcVoucherDiscount({ discountType: 'PERCENT', discountValue: 100 }, 123456),
+      123456,
+    );
   });
   test('AUTO-PRICING-027: Tạm tính 0 -> giảm 0', () => {
     assert.equal(calcVoucherDiscount({ discountType: 'FIXED_AMOUNT', discountValue: 30000 }, 0), 0);
   });
   test('AUTO-PRICING-028: Voucher cấu hình sai bị từ chối', () => {
-    throwsCode(() => calcVoucherDiscount({ discountType: 'PERCENT', discountValue: 101 }, 1000), 'INVALID_DISCOUNT_VALUE');
-    throwsCode(() => calcVoucherDiscount({ discountType: 'PERCENT', discountValue: 0 }, 1000), 'INVALID_DISCOUNT_VALUE');
-    throwsCode(() => calcVoucherDiscount({ discountType: 'GIFT', discountValue: 10 }, 1000), 'INVALID_DISCOUNT_TYPE');
+    throwsCode(
+      () => calcVoucherDiscount({ discountType: 'PERCENT', discountValue: 101 }, 1000),
+      'INVALID_DISCOUNT_VALUE',
+    );
+    throwsCode(
+      () => calcVoucherDiscount({ discountType: 'PERCENT', discountValue: 0 }, 1000),
+      'INVALID_DISCOUNT_VALUE',
+    );
+    throwsCode(
+      () => calcVoucherDiscount({ discountType: 'GIFT', discountValue: 10 }, 1000),
+      'INVALID_DISCOUNT_TYPE',
+    );
   });
 });
 
@@ -224,7 +323,9 @@ describe('calculatePricing – công thức tổng hợp', () => {
   });
 
   test('AUTO-PRICING-038: không Voucher, không Add-on, hạng BASIC -> final = Package', () => {
-    const r = calculatePricing({ package: { packageType: 'FIXED', pricingUnit: 'PER_SPACE', price: 70000 } });
+    const r = calculatePricing({
+      package: { packageType: 'FIXED', pricingUnit: 'PER_SPACE', price: 70000 },
+    });
     assert.equal(r.subtotal, 70000);
     assert.equal(r.discountAmount, 0);
     assert.equal(r.finalAmount, 70000);
@@ -243,13 +344,25 @@ describe('calculatePricing – công thức tổng hợp', () => {
       for (const rate of rates) {
         for (const v of vouchers) {
           const r = calculatePricing({
-            package: { packageType: 'HOURLY', pricingUnit: 'PER_PERSON', price, guestCount: 3, hours: 2 },
+            package: {
+              packageType: 'HOURLY',
+              pricingUnit: 'PER_PERSON',
+              price,
+              guestCount: 3,
+              hours: 2,
+            },
             inclusions: [{ unitPrice: 61234, quantity: 2, subsidyLimit: 50000 }],
             addons: [{ unit: 'PER_ITEM', unitPrice: 33333, quantity: 3 }],
             voucher: v,
             tierRate: rate,
           });
-          for (const k of ['subtotal', 'voucherDiscount', 'tierDiscount', 'discountAmount', 'finalAmount']) {
+          for (const k of [
+            'subtotal',
+            'voucherDiscount',
+            'tierDiscount',
+            'discountAmount',
+            'finalAmount',
+          ]) {
             assert.ok(Number.isSafeInteger(r[k]) && r[k] >= 0, `${k} phải là số nguyên không âm`);
           }
           assert.equal(r.finalAmount, r.subtotal - r.discountAmount);
@@ -279,14 +392,23 @@ describe('calculatePricing – công thức tổng hợp', () => {
     assert.equal(snap.voucher_discount, 19000);
     assert.equal(snap.tier_discount, 8550);
     assert.equal(snap.final_amount, 162450);
-    assert.deepEqual({ ...snap, inclusion_lines: undefined, addon_lines: undefined },
-      { ...toBookingSnapshot(r), inclusion_lines: undefined, addon_lines: undefined });
+    assert.deepEqual(
+      { ...snap, inclusion_lines: undefined, addon_lines: undefined },
+      { ...toBookingSnapshot(r), inclusion_lines: undefined, addon_lines: undefined },
+    );
     assert.deepEqual(snap.addon_lines, [{ unit_price: 40000, quantity: 2, line_total: 80000 }]);
     assert.deepEqual(snap.inclusion_lines, [
       { unit_price: 55000, quantity: 2, subsidy_limit: 50000, surcharge_amount: 10000 },
     ]);
-    assert.ok(Object.isFrozen(snap) && Object.isFrozen(snap.addon_lines) && Object.isFrozen(snap.addon_lines[0]));
-    assert.throws(() => { 'use strict'; snap.final_amount = 0; }, TypeError);
+    assert.ok(
+      Object.isFrozen(snap) &&
+        Object.isFrozen(snap.addon_lines) &&
+        Object.isFrozen(snap.addon_lines[0]),
+    );
+    assert.throws(() => {
+      'use strict';
+      snap.final_amount = 0;
+    }, TypeError);
     assert.equal(snap.final_amount, 162450);
   });
 
@@ -329,12 +451,17 @@ describe('computePrice (giao diện cũ) – kết quả & lỗi phải giữ ng
         tierDiscount: 19500,
         discountAmount: 69500,
         finalAmount: 175500,
-      }
+      },
     );
   });
   test('AUTO-PRICING-044: chỉ truyền packagePrice -> final = package', () => {
     assert.deepEqual(computePrice({ packagePrice: 90000 }), {
-      subtotal: 90000, addonTotal: 0, voucherDiscount: 0, tierDiscount: 0, discountAmount: 0, finalAmount: 90000,
+      subtotal: 90000,
+      addonTotal: 0,
+      voucherDiscount: 0,
+      tierDiscount: 0,
+      discountAmount: 0,
+      finalAmount: 90000,
     });
   });
   test('AUTO-PRICING-045: Voucher lớn hơn Tạm tính bị chặn: final = 0, hạng không giảm thêm', () => {
@@ -347,7 +474,12 @@ describe('computePrice (giao diện cũ) – kết quả & lỗi phải giữ ng
     assert.equal(computePrice({ packagePrice: 100001, tierPercent: 15 }).tierDiscount, 15000);
   });
   test('AUTO-PRICING-047: trả cùng kết quả với calculatePricing cho cùng dữ liệu', () => {
-    const legacy = computePrice({ packagePrice: 250000, addons: [{ unitPrice: 15000, qty: 3 }], voucherDiscount: 30000, tierPercent: 5 });
+    const legacy = computePrice({
+      packagePrice: 250000,
+      addons: [{ unitPrice: 15000, qty: 3 }],
+      voucherDiscount: 30000,
+      tierPercent: 5,
+    });
     const modern = calculatePricing({
       package: { packageType: 'FIXED', pricingUnit: 'PER_SPACE', price: 250000 },
       addons: [{ unitPrice: 15000, quantity: 3 }],
@@ -359,13 +491,28 @@ describe('computePrice (giao diện cũ) – kết quả & lỗi phải giữ ng
     assert.equal(legacy.finalAmount, modern.finalAmount);
   });
   test('AUTO-PRICING-048: đầu vào sai vẫn ném RangeError với thông điệp cũ', () => {
-    throwsRange(() => computePrice({ packagePrice: -1 }), /^packagePrice must be a non-negative integer VND$/);
+    throwsRange(
+      () => computePrice({ packagePrice: -1 }),
+      /^packagePrice must be a non-negative integer VND$/,
+    );
     throwsRange(() => computePrice({ packagePrice: 1.5 }), /packagePrice/);
-    throwsRange(() => computePrice({ packagePrice: 1, inclusionSurcharge: -5 }), /^inclusionSurcharge/);
+    throwsRange(
+      () => computePrice({ packagePrice: 1, inclusionSurcharge: -5 }),
+      /^inclusionSurcharge/,
+    );
     throwsRange(() => computePrice({ packagePrice: 1, voucherDiscount: -5 }), /^voucherDiscount/);
-    throwsRange(() => computePrice({ packagePrice: 1, tierPercent: 101 }), /^tierPercent must be 0\.\.100$/);
+    throwsRange(
+      () => computePrice({ packagePrice: 1, tierPercent: 101 }),
+      /^tierPercent must be 0\.\.100$/,
+    );
     throwsRange(() => computePrice({ packagePrice: 1, tierPercent: 2.5 }), /^tierPercent/);
-    throwsRange(() => computePrice({ packagePrice: 1, addons: [{ unitPrice: -1, qty: 1 }] }), /^addon\.unitPrice/);
-    throwsRange(() => computePrice({ packagePrice: 1, addons: [{ unitPrice: 1, qty: 0 }] }), /^addon\.qty must be integer >= 1$/);
+    throwsRange(
+      () => computePrice({ packagePrice: 1, addons: [{ unitPrice: -1, qty: 1 }] }),
+      /^addon\.unitPrice/,
+    );
+    throwsRange(
+      () => computePrice({ packagePrice: 1, addons: [{ unitPrice: 1, qty: 0 }] }),
+      /^addon\.qty must be integer >= 1$/,
+    );
   });
 });

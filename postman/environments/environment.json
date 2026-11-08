@@ -33,6 +33,18 @@
       "enabled": true
     },
     {
+      "key": "customerPhone",
+      "value": "0909123456",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "customerPassword",
+      "value": "password123",
+      "type": "secret",
+      "enabled": true
+    },
+    {
       "key": "otpCode",
       "value": "123456",
       "type": "default",

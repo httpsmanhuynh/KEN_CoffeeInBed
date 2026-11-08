@@ -1,0 +1,3 @@
+$kind: collection
+name: "KÉN - Module 03: Package & Inclusion Management (40 TCs)"
+description: "Bộ kiểm thử 40 test cases của Phân hệ 03: Quản lý Gói dịch vụ & Quyền lợi đi kèm (Package & Inclusion). Bao gồm gói cố định/theo giờ, định mức phụ phí đồ uống, gán gói cho không gian và bảng giá. Đồng bộ với KEN_TestCase_5_Modules.xlsx."

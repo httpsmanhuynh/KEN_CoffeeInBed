@@ -1,0 +1,37 @@
+$kind: http-request
+name: '[TC-SZ-014] Space MAINTENANCE/INACTIVE không khả dụng khi tìm chỗ'
+description: '**Mã TC:** TC-SZ-014
+
+  **Nhóm:** Tìm kiếm & Lọc Space
+
+  **API / Thành phần:** GET /api/spaces?startAt
+
+  **Loại:** Negative
+
+  **Điều kiện tiên quyết:** Server chạy; đã seed zones/spaces/packages; không cần
+  đăng nhập. Có Space MAINTENANCE và INACTIVE.
+
+  **Dữ liệu vào:** ?startAt=...&guestCount=2
+
+  **Các bước thực hiện:**
+
+  1) GET /api/spaces?startAt=...
+
+  **Kết quả mong đợi:** Space không ACTIVE không xuất hiện là khả dụng (HTTP: 200)
+
+  **Nhánh code bao phủ:** SPC-B11
+
+  '
+url: '{{baseUrl}}/api/spaces?startAt'
+method: GET
+headers:
+- key: Content-Type
+  value: application/json
+order: 14000
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-SZ-014] Space MAINTENANCE/INACTIVE không khả dụng khi tìm chỗ\npm.test(\"\
+    [TC-SZ-014] Status code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-SZ-014] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

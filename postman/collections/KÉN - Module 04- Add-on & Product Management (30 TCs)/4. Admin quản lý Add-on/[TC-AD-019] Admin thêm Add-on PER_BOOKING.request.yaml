@@ -1,0 +1,43 @@
+$kind: http-request
+name: '[TC-AD-019] Admin thêm Add-on PER_BOOKING'
+description: '**Mã TC:** TC-AD-019
+
+  **Nhóm:** Admin quản lý Add-on
+
+  **API / Thành phần:** POST /api/addons
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed products/addons.
+
+  **Dữ liệu vào:** {"name": "Trang trí sinh nhật", "unit": "PER_BOOKING", "price":
+  200000}
+
+  **Các bước thực hiện:**
+
+  1) POST /api/addons
+
+  **Kết quả mong đợi:** 201; unit=PER_BOOKING (HTTP: 201)
+
+  **Nhánh code bao phủ:** ADD-B16
+
+  '
+url: '{{baseUrl}}/api/addons'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 19000
+body:
+  type: json
+  raw: "{\n  \"name\": \"Trang trí sinh nhật\",\n  \"unit\": \"PER_BOOKING\",\n  \"\
+    price\": 200000\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-AD-019] Admin thêm Add-on PER_BOOKING\npm.test(\"[TC-AD-019] Status\
+    \ code is 201\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([201]);\n\
+    });\npm.test(\"[TC-AD-019] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

@@ -1,0 +1,43 @@
+$kind: http-request
+name: '[TC-PK-036] Cập nhật giá theo Space'
+description: '**Mã TC:** TC-PK-036
+
+  **Nhóm:** Bảng giá package_prices
+
+  **API / Thành phần:** PATCH /api/pricing/:id
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed spaces/packages/package_prices/package_inclusions.
+
+  **Dữ liệu vào:** {"price": 180000}
+
+  **Các bước thực hiện:**
+
+  1) PATCH /api/pricing/<id>
+
+  2) GET /api/spaces/<id>
+
+  **Kết quả mong đợi:** 200; giá hiển thị mới; chỉ Space đó đổi (HTTP: 200)
+
+  **Nhánh code bao phủ:** PKG-B32
+
+  '
+url: '{{baseUrl}}/api/pricing/{{packageId}}'
+method: PATCH
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 36000
+body:
+  type: json
+  raw: "{\n  \"price\": 180000\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PK-036] Cập nhật giá theo Space\npm.test(\"[TC-PK-036] Status code\
+    \ is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-PK-036] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

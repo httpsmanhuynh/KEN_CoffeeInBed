@@ -1,0 +1,25 @@
+$kind: http-request
+name: "TC-BKG-31- [BKG-31] Check-out đơn chưa CHECKED_IN (CONFIRMED) (Branch- BKG-B31)"
+description: |-
+  **Mã TC:** BKG-31 (TC-BKG-31)
+  **Nhóm:** Check-out
+  **API / Thành phần:** POST /api/bookings/:id/check-out
+  **Loại:** Negative
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đơn CONFIRMED.
+  **Dữ liệu vào:** bookingId CONFIRMED
+  **Các bước thực hiện:**
+  1) POST check-out
+  **Kết quả mong đợi:** 409 trạng thái không hợp lệ (HTTP: 409)
+  **Nhánh code bao phủ:** BKG-B31
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/bookings/{{confirmedBookingId}}/check-out"
+method: POST
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-BKG-31] Check-out đơn chưa CHECKED_IN (CONFIRMED)
+      pm.test("[TC-BKG-31] Status code is 409", function () {
+          pm.expect(pm.response.code).to.be.oneOf([409]);
+      });
+    language: text/javascript
+order: 31000
