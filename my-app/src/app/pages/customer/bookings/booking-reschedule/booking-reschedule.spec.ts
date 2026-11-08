@@ -33,17 +33,17 @@ describe('BookingReschedule', () => {
   });
 
   it('requires the acknowledgement before submitting', () => {
-    expect(component.canSubmit).toBeFalse();
+    expect(component.canSubmit).toBe(false);
     component.acknowledged = true;
-    expect(component.canSubmit).toBeTrue();
+    expect(component.canSubmit).toBe(true);
     component.confirm();
-    expect(component.submitted).toBeTrue();
+    expect(component.submitted).toBe(true);
   });
 
   it('selecting another order resets the form to that order', () => {
     component.select('o3');
     expect(component.hours).toBe(3);
     expect(component.newDate).toBe('2026-10-26');
-    expect(component.acknowledged).toBeFalse();
+    expect(component.acknowledged).toBe(false);
   });
 });

@@ -6,29 +6,31 @@
 }
 .hd__inner {
   width: min(100% - 80px, 1280px);
-  min-height: 78px;
+  min-height: 77px; /* + viền dưới 1px = 78px như Figma */
   margin: 0 auto;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: clamp(24px, 4vw, 64px);
+  justify-content: space-between; /* Figma: thương hiệu / nav / tài khoản cách đều nhau */
+  gap: 24px;
 }
-.brand { display: inline-flex; align-items: center; gap: 11px; color: #4A3123; text-decoration: none; flex: 0 0 auto; }
+.brand { display: inline-flex; align-items: center; gap: 12px; color: #4A3123; text-decoration: none; flex: 0 0 auto; }
 .brand__logo { width: 42px; height: 42px; display: block; object-fit: contain; border-radius: 50%; }
-.brand__text { display: flex; flex-direction: column; line-height: 1.05; }
-.brand__text b { font-size: 22px; letter-spacing: .04em; font-weight: 700; }
-.brand__text i { margin-top: 3px; color: #4A3123; font-family: var(--ken-script); font-size: 16px; font-style: normal; white-space: nowrap; }
-.panel { display: flex; align-items: center; justify-content: space-between; gap: 28px; flex: 1; min-width: 0; }
-.nav ul { display: flex; align-items: center; gap: clamp(18px, 2.8vw, 42px); list-style: none; padding: 0; margin: 0; }
+.brand__text { display: flex; flex-direction: column; }
+.brand__text b { font-size: 22px; line-height: 23.1px; letter-spacing: .8px; font-weight: 700; }
+.brand__text i { color: #4A3123; font-family: var(--ken-script); font-size: 18px; line-height: 18px; font-style: normal; white-space: nowrap; }
+/* Desktop: panel "biến mất" để nav và tài khoản trở thành phần tử trực tiếp của .hd__inner (cách đều 3 nhóm). */
+.panel { display: contents; }
+.nav ul { display: flex; align-items: center; gap: 32px; list-style: none; padding: 0; margin: 0; }
 .nav__item { position: relative; }
 .nav__link {
-  display: inline-flex; align-items: center; gap: 7px; padding: 10px 0;
+  display: inline-flex; align-items: center; gap: 4px; padding: 10px 0;
   border: 0; background: transparent; color: #4A3123; text-decoration: none;
   font-size: 14px; font-weight: 500; line-height: 21px; white-space: nowrap; cursor: pointer;
   transition: color .18s ease;
 }
-.nav__link:hover, .nav__link.is-active { color: #A9763F; }
-.caret { width: 7px; height: 7px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg) translateY(-2px); }
+.nav__link:hover { color: #A9763F; }
+.nav__link.is-active { color: #4A3123; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 5px; } /* Figma: mục đang xem (Menu) gạch chân */
+.caret { font-size: 14px; line-height: 21px; } /* Figma dùng ký tự ▾ ngay sau chữ */
 .sub {
   position: absolute; top: calc(100% + 4px); left: -14px; z-index: 20;
   display: flex !important; flex-direction: column; align-items: stretch !important; gap: 2px !important;
@@ -44,14 +46,22 @@
 .hbtn--gold { border-color: #E3A52F; background: #E3A52F; color: #4A3123; }
 .hbtn--gold:hover { background: #edb64b; border-color: #edb64b; }
 .burger { display: none; width: 42px; height: 42px; border: 1px solid rgba(216,199,178,.8); border-radius: 10px; background: #FFFCF7; color: #4A3123; cursor: pointer; }
+/* Menu tài khoản (đã đăng nhập) – Figma: 223px, gap 10 */
+.account { position: relative; display: flex; align-items: center; gap: 10px; width: 223px; flex: 0 0 auto; }
+.account__avatar { display: grid; place-items: center; width: 32px; height: 32px; flex: 0 0 32px; border-radius: 999px; background: #E6D3B5; border: 1px solid rgba(216,199,178,.62); }
+.account__avatar img { width: 14.72px; height: 14.72px; display: block; }
+.account__name { flex: 1 1 0; min-width: 1px; color: #4A3123; font-size: 14px; font-weight: 600; line-height: 21px; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.account__toggle { display: grid; place-items: center; width: 16px; height: 16px; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.account__toggle img { width: 16px; height: 16px; display: block; }
+.account .sub--account { left: auto; right: 0; top: calc(100% + 10px); }
+.sub li { list-style: none; }
 @media (max-width: 1100px) {
   .hd__inner { width: min(100% - 48px, 1280px); gap: 22px; }
-  .panel { gap: 20px; }
   .nav ul { gap: 18px; }
   .actions { gap: 10px; }
   .hbtn { padding-inline: 16px; }
 }
-@media (max-width: 820px) {
+@media (max-width: 1000px) {
   .hd__inner { width: calc(100% - 36px); min-height: 70px; }
   .brand__logo { width: 40px; height: 40px; }
   .brand__text b { font-size: 21px; }
@@ -63,6 +73,6 @@
   .nav__item { width: 100%; }
   .nav__link { display: flex; justify-content: space-between; width: 100%; padding: 11px 4px; font-size: 14px; }
   .sub { position: static; min-width: 0; margin: 0 0 8px 10px; box-shadow: none; }
-  .actions { width: 100%; }
+  .actions, .account { width: 100%; }
   .hbtn { flex: 1; }
 }

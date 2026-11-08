@@ -23,23 +23,23 @@
       </div>
 
       <form class="filters" (submit)="$event.preventDefault(); applyFilter()">
-        <label class="field field--grow">
+        <label class="field">
           <span class="field__label">Trạng thái</span>
           <span class="box">
-            <select name="status" [(ngModel)]="status" aria-label="Trạng thái">
+            <select name="status" [ngModel]="status" (ngModelChange)="setStatus($event)" aria-label="Trạng thái">
               @for (t of tabs; track t.key) { <option [value]="t.key">{{ t.label }}</option> }
             </select>
             <img class="box__icon" src="/images/figma/selectarrow.svg" alt="" width="16" height="16" />
           </span>
         </label>
-        <label class="field field--date">
+        <label class="field">
           <span class="field__label">Từ ngày</span>
           <span class="box">
             <img class="box__icon" src="/images/figma/calendar-date.svg" alt="" width="16" height="16" />
             <input type="date" name="from" [(ngModel)]="fromDate" aria-label="Từ ngày" />
           </span>
         </label>
-        <label class="field field--date">
+        <label class="field">
           <span class="field__label">Đến ngày</span>
           <span class="box">
             <img class="box__icon" src="/images/figma/calendar-date.svg" alt="" width="16" height="16" />
@@ -47,48 +47,55 @@
           </span>
         </label>
         <button type="submit" class="btn-filter">
-          <img src="/images/figma/filter.svg" alt="" width="16" height="16" />
+          <img src="/images/figma/icon-filter-light.svg" alt="" width="16" height="16" />
           <span>Lọc</span>
         </button>
       </form>
 
-      @if (status === 'pending' && rows.length) {
-        <div class="note" role="status">
+      @if (status === 'pending' && filtered.length) {
+        <div class="note note--top" role="status">
           <img src="/images/figma/info.svg" alt="" width="20" height="20" />
           <div class="note__body">
-            <p class="note__title">{{ rows.length }} đơn đang chờ xác nhận</p>
+            <p class="note__title">{{ filtered.length }} đơn đang chờ xác nhận</p>
             <p class="note__text">KÉN sẽ cập nhật tại đây khi kiểm tra xong thông tin và thanh toán liên quan. Trạng thái chờ không đồng nghĩa với đặt chỗ đã được xác nhận.</p>
           </div>
         </div>
       }
 
+      <div class="summary">
+        <p>{{ summary }}</p>
+        <button type="button" class="sort" (click)="toggleSort()" [attr.aria-label]="'Đổi thứ tự sắp xếp, hiện tại: ' + sortLabel">
+          <img src="/images/figma/icon-sort-clock.svg" alt="" width="16" height="16" /><span>{{ sortLabel }}</span>
+        </button>
+      </div>
+
       <div class="table" role="table" aria-label="Danh sách đặt chỗ">
         <div class="tr tr--head" role="row">
-          <div class="th th--icon" role="columnheader"><img src="/images/figma/table.svg" alt="" width="14" height="14" />MÃ BOOKING</div>
-          <div class="th" role="columnheader">KHÔNG GIAN</div>
-          <div class="th th--icon" role="columnheader"><img src="/images/figma/clock-history.svg" alt="" width="14" height="14" />NGÀY GIỜ</div>
-          <div class="th" role="columnheader">PACKAGE</div>
-          <div class="th th--right" role="columnheader">TỔNG TIỀN</div>
-          <div class="th th--status" role="columnheader">TRẠNG THÁI</div>
-          <div class="th th--center" role="columnheader">XEM</div>
+          <div class="th" role="columnheader">Mã Booking</div>
+          <div class="th" role="columnheader">Không gian</div>
+          <div class="th" role="columnheader">Ngày · Giờ</div>
+          <div class="th" role="columnheader">Package</div>
+          <div class="th th--right" role="columnheader">Tổng tiền</div>
+          <div class="th" role="columnheader">Trạng thái</div>
+          <div class="th th--center" role="columnheader">Xem</div>
         </div>
 
-        @for (b of rows; track b.id) {
-          <div class="entry">
+        @for (b of rows; track b.id; let i = $index) {
+          <div class="entry" [class.entry--alt]="i % 2 === 1">
             <div class="tr" role="row">
               <div class="td td--id" role="cell">{{ b.id }}</div>
               <div class="td td--stack" role="cell"><strong>{{ b.space }}</strong><small>{{ b.zone }}</small></div>
-              <div class="td td--stack" role="cell"><span>{{ fmtDate(b.date) }}</span><small>{{ b.time }}</small></div>
-              <div class="td" role="cell"><span class="pkg">{{ b.pkg }}</span></div>
-              <div class="td td--right" role="cell"><b class="price" [class.price--strike]="b.status === 'cancelled'">{{ fmtMoney(b.total) }}</b></div>
-              <div class="td td--status" role="cell"><span class="badge badge--{{ b.status }}">{{ statusLabel[b.status] }}</span></div>
+              <div class="td td--stack td--date" role="cell"><span>{{ fmtDate(b.date) }}</span><small>{{ b.time }}</small></div>
+              <div class="td td--pkg" role="cell">{{ b.pkg }}</div>
+              <div class="td td--right" role="cell"><b class="price" [class.price--strike]="b.status === 'cancelled' || b.status === 'noshow'">{{ fmtMoney(b.total) }}</b></div>
+              <div class="td" role="cell"><span class="badge badge--{{ b.status }}">{{ statusLabel[b.status] }}</span></div>
               <div class="td td--center" role="cell">
-                <button type="button" class="eye" [disabled]="b.status === 'cancelled'" [attr.aria-label]="'Xem chi tiết ' + b.id">
-                  <img src="/images/figma/eye.svg" alt="" width="18" height="18" />
+                <button type="button" class="eye" [disabled]="b.status === 'cancelled' || b.status === 'noshow'" [attr.aria-label]="'Xem chi tiết ' + b.id">
+                  <img [src]="'/images/figma/' + eyeIcon(b) + '.svg'" alt="" width="18" height="18" />
                 </button>
               </div>
             </div>
-            @if (b.status === 'pending') {
+            @if (b.status === 'pending' && status === 'pending') {
               <div class="next">
                 <p class="next__title">KÉN đang đối chiếu thông tin đặt chỗ</p>
                 <p class="next__text">Chưa xác nhận chỗ. Giữ lại biên lai nếu đã thanh toán để KÉN hỗ trợ.</p>
@@ -104,16 +111,34 @@
         }
       </div>
 
-      <div class="help">
-        <img src="/images/figma/message-circle.svg" alt="" width="26" height="26" />
-        <div class="help__body">
-          <p class="help__title">Cần KÉN kiểm tra giúp?</p>
-          <p class="help__text">Chuẩn bị mã đặt chỗ và biên lai nếu bạn đã thanh toán.</p>
+      @if (status === 'pending') {
+        <div class="help">
+          <img src="/images/figma/message-circle.svg" alt="" width="26" height="26" />
+          <div class="help__body">
+            <p class="help__title">Cần KÉN kiểm tra giúp?</p>
+            <p class="help__text">Chuẩn bị mã đặt chỗ và biên lai nếu bạn đã thanh toán.</p>
+          </div>
+          <a class="btn-outline" href="#">Nhắn KÉN ↗</a>
         </div>
-        <a class="btn-outline" href="#">Nhắn KÉN ↗</a>
+      }
+
+      <div class="end">
+        <p>{{ footnote }}</p>
+        <nav class="pager" aria-label="Phân trang">
+          <button type="button" class="pager__arrow" (click)="goTo(page - 1)" [disabled]="page <= 1" aria-label="Trang trước">‹</button>
+          @for (p of pageNumbers; track p) {
+            <button type="button" class="pager__page" [class.is-active]="p === page" [attr.aria-current]="p === page ? 'page' : null" (click)="goTo(p)">{{ p }}</button>
+          }
+          <button type="button" class="pager__arrow" (click)="goTo(page + 1)" [disabled]="page >= pages" aria-label="Trang sau">›</button>
+        </nav>
       </div>
 
-      <p class="foot">{{ footnote }}</p>
+      <div class="note">
+        <img src="/images/figma/info.svg" alt="" width="20" height="20" />
+        <div class="note__body">
+          <p class="note__text">Chỉ đơn hoàn thành có hoá đơn. Để gửi yêu cầu đổi hoặc huỷ cho đơn tương lai, vào mục Đổi / Huỷ lịch; đơn hoàn thành không thể điều chỉnh.</p>
+        </div>
+      </div>
     </section>
   </div>
 </div>

@@ -1,5 +1,6 @@
 import { Component, ElementRef, HostListener, Input } from '@angular/core';
-import { MAIN_NAV } from '../../../core/nav-links';
+import { Router } from '@angular/router';
+import { MAIN_NAV, NavItem } from '../../../core/nav-links';
 
 @Component({
   selector: 'app-header',
@@ -19,7 +20,14 @@ export class Header {
   // TODO: lấy từ AuthService khi có API hồ sơ
   @Input() userName = 'Thầy Thanh đẹp trai';
 
-  constructor(private host: ElementRef<HTMLElement>) {}
+  constructor(private host: ElementRef<HTMLElement>, private router: Router) {}
+
+  /** Mục nav đang xem (gạch chân như Figma). */
+  isActive(item: NavItem): boolean {
+    const url = this.router.url.split(/[?#]/)[0].replace(/\/+$/, '') || '/';
+    const paths = item.match ?? (item.path ? [item.path] : []);
+    return paths.includes(url);
+  }
 
   // Chuột: hover mở/đóng. Cảm ứng: bỏ qua hover, chỉ dùng click (tránh mở rồi đóng ngay).
   enter(e: PointerEvent, key: string): void { if (e.pointerType === 'mouse') this.open = key; }

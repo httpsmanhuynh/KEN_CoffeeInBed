@@ -1,12 +1,16 @@
 /** Điều hướng dùng chung – nhãn lấy đúng theo Figma (header + footer). */
 export interface NavChild { label: string; path: string; }
-export interface NavItem { label: string; path?: string; children?: NavChild[]; }
+export interface NavItem {
+  label: string; path?: string; children?: NavChild[];
+  /** Các đường dẫn làm mục này sáng/gạch chân (mặc định chỉ `path`). */
+  match?: string[];
+}
 
 // TODO: các route /spaces, /menu, /support, /policy, /terms, /about, /blog, /reviews chưa có trang.
 export const MAIN_NAV: NavItem[] = [
   { label: 'Trang chủ', path: '/' },
   { label: 'Không gian', path: '/spaces' },
-  { label: 'Menu', path: '/menu' },
+  { label: 'Menu', path: '/menu', match: ['/menu', '/top-trending'] }, // Figma: Top Trending vẫn gạch chân "Menu"
   { label: 'Hỗ trợ', children: [
     { label: 'Trung tâm hỗ trợ', path: '/support' },
   ] },
