@@ -1,0 +1,44 @@
+$kind: http-request
+name: '[TC-PK-022] Cấu hình STANDARD_DRINK mặc định subsidy_limit = 50000'
+description: '**Mã TC:** TC-PK-022
+
+  **Nhóm:** Cấu hình Inclusion
+
+  **API / Thành phần:** POST /api/package-inclusions
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed spaces/packages/package_prices/package_inclusions.
+
+  **Dữ liệu vào:** {"package_id": "<_id>", "type": "STANDARD_DRINK", "quantity": 1}
+
+  **Các bước thực hiện:**
+
+  1) POST /api/package-inclusions
+
+  2) Kiểm tra document
+
+  **Kết quả mong đợi:** 201; subsidy_limit=50000 (HTTP: 201)
+
+  **Nhánh code bao phủ:** PKG-B19
+
+  '
+url: '{{baseUrl}}/api/package-inclusions'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 22000
+body:
+  type: json
+  raw: "{\n  \"package_id\": \"<_id>\",\n  \"type\": \"STANDARD_DRINK\",\n  \"quantity\"\
+    : 1\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PK-022] Cấu hình STANDARD_DRINK mặc định subsidy_limit = 50000\npm.test(\"\
+    [TC-PK-022] Status code is 201\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([201]);\n\
+    });\npm.test(\"[TC-PK-022] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

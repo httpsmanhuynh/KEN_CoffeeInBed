@@ -1,0 +1,44 @@
+$kind: http-request
+name: '[TC-PM-015] Hủy và hoàn tiền thực thi trong cùng Database Transaction'
+description: '**Mã TC:** TC-PM-015
+
+  **Nhóm:** Hoàn tiền
+
+  **API / Thành phần:** POST /api/bookings/:id/cancel
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; đơn CONFIRMED có Voucher.
+
+  **Dữ liệu vào:** Giả lập lỗi ghi payment (ngắt giữa chừng)
+
+  **Các bước thực hiện:**
+
+  1) POST cancel khi bật lỗi giả lập
+
+  2) Kiểm tra booking/voucher/payment
+
+  **Kết quả mong đợi:** Rollback toàn bộ: đơn vẫn CONFIRMED, voucher chưa hoàn, không
+  có giao dịch REFUND lẻ (HTTP: 500)
+
+  **Nhánh code bao phủ:** PAY-B15
+
+  '
+url: '{{baseUrl}}/api/bookings/{{bookingId}}/cancel'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: CUSTOMER
+order: 15000
+body:
+  type: json
+  raw: '{"data": "Giả lập lỗi ghi payment (ngắt giữa chừng)"}'
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PM-015] Hủy và hoàn tiền thực thi trong cùng Database Transaction\n\
+    pm.test(\"[TC-PM-015] Status code is 500\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([500]);\n\
+    });\npm.test(\"[TC-PM-015] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

@@ -1,8 +1,8 @@
 {
   "info": {
     "_postman_id": "a4c852d6-b3b7-4f22-ad27-2b3aa3b6eac2",
-    "name": "KÉN Coffee In Bed - Automated Test Suite (Postman Runner)",
-    "description": "Tập hợp test case tự động cho Postman Runner theo đặc tả 5 Module: Space & Zone, Package & Inclusion, Add-on & Product, Payment, Loyalty. Tự động liên kết dữ liệu giữa các bước và kiểm tra Pass/Fail.",
+    "name": "KÉN Coffee In Bed - Automated Test Suite (5 Core Modules Runner)",
+    "description": "Tập hợp test case tự động cho Postman Runner theo đặc tả 5 Module cốt lõi: Module 02 (Space & Zone), Module 03 (Package & Inclusion), Module 04 (Add-on & Product), Module 07 (Payment), Module 09 (Loyalty). Tự động liên kết dữ liệu động giữa các bước và trả về bảng thống kê Pass/Fail.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -227,7 +227,7 @@
       ]
     },
     {
-      "name": "01. Quản lý Zone & Space (Space & Zone Management)",
+      "name": "01. Module 02 - Quản lý Zone & Space (Space & Zone Management)",
       "item": [
         {
           "name": "03. TC-SZ-038: Admin thêm Zone mới (Positive)",
@@ -866,7 +866,7 @@
       ]
     },
     {
-      "name": "02. Quản lý Gói & Quyền lợi (Package & Inclusion Management)",
+      "name": "02. Module 03 - Quản lý Gói & Quyền lợi (Package & Inclusion Management)",
       "item": [
         {
           "name": "15. TC-PK-006: Admin tạo Gói Dịch Vụ HOURLY mới (Positive)",
@@ -1526,7 +1526,7 @@
       ]
     },
     {
-      "name": "03. Quản lý Thực đơn & Tiện ích (Add-on & Product Management)",
+      "name": "03. Module 04 - Quản lý Thực đơn & Tiện ích (Add-on & Product Management)",
       "item": [
         {
           "name": "28. TC-AD-009: Admin thêm Product F&B DRINK có variants (Positive)",
@@ -2080,7 +2080,7 @@
       ]
     },
     {
-      "name": "04. Khuyến mãi & Tạo đơn Đặt chỗ (Voucher & Booking)",
+      "name": "04. Tạo đơn Đặt chỗ liên kết (Booking & Voucher Flow)",
       "item": [
         {
           "name": "39. TC-VC-001: Admin tạo Voucher công khai KEN10K (Positive)",
@@ -2466,7 +2466,7 @@
       ]
     },
     {
-      "name": "05. Quản lý Thanh toán (Payment Management)",
+      "name": "05. Module 07 - Quản lý Thanh toán (Payment Management)",
       "item": [
         {
           "name": "46. TC-PM-009: Khách tạo giao dịch thanh toán Idempotent (Positive 201)",
@@ -2811,7 +2811,7 @@
       ]
     },
     {
-      "name": "06. Quản lý Hạng & Tích điểm (Loyalty Management)",
+      "name": "06. Module 09 - Quản lý Hạng & Tích điểm (Loyalty Management)",
       "item": [
         {
           "name": "52. TC-LY-001: Xem 4 Hạng Thành Viên (Public Read-Only)",
@@ -3205,7 +3205,7 @@
       ]
     },
     {
-      "name": "07. Dọn dẹp & Xóa mềm (Teardown & Soft Delete)",
+      "name": "07. Dọn dẹp & Xóa mềm (Teardown & Cleanup)",
       "item": [
         {
           "name": "60. TC-PK-038: Admin Xóa mềm Gói dịch vụ (Soft Delete)",

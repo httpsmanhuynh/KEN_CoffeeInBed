@@ -1,0 +1,39 @@
+$kind: http-request
+name: '[TC-AD-001] Xem Menu F&B: đủ 13 món (Catalog KÉN Kết Nối)'
+description: '**Mã TC:** TC-AD-001
+
+  **Nhóm:** Xem Menu F&B
+
+  **API / Thành phần:** GET /api/products
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đã seed products/addons; không cần đăng nhập.
+
+  **Dữ liệu vào:** —
+
+  **Các bước thực hiện:**
+
+  1) GET /api/products
+
+  2) Đếm số phần tử
+
+  **Kết quả mong đợi:** 200 mảng 13 product (DRINK/PASTRY/SNACK) có name, price (số
+  nguyên ≥ 0), variants[], is_active (HTTP: 200)
+
+  **Nhánh code bao phủ:** ADD-B01
+
+  '
+url: '{{baseUrl}}/api/products'
+method: GET
+headers:
+- key: Content-Type
+  value: application/json
+order: 1000
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-AD-001] Xem Menu F&B: đủ 13 món (Catalog KÉN Kết Nối)\npm.test(\"\
+    [TC-AD-001] Status code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-AD-001] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

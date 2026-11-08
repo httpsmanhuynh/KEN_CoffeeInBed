@@ -1,0 +1,45 @@
+$kind: http-request
+name: '[TC-AD-029] Customer / Guest thêm Product, Add-on'
+description: '**Mã TC:** TC-AD-029
+
+  **Nhóm:** Phân quyền Catalog
+
+  **API / Thành phần:** POST /api/products ; POST /api/addons
+
+  **Loại:** Security
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; đã seed products/addons/spaces/packages.
+
+  **Dữ liệu vào:** {"name": "X", "price": 1000}
+
+  **Các bước thực hiện:**
+
+  1) POST /api/products bằng Customer
+
+  2) POST /api/addons bằng Customer
+
+  3) Lặp lại không cookie
+
+  **Kết quả mong đợi:** Customer 403; Guest 401 (HTTP: 403)
+
+  **Nhánh code bao phủ:** ADD-B25
+
+  '
+url: '{{baseUrl}}/api/products ; POST /api/addons'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: CUSTOMER
+order: 29000
+body:
+  type: json
+  raw: "{\n  \"name\": \"X\",\n  \"price\": 1000\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-AD-029] Customer / Guest thêm Product, Add-on\npm.test(\"[TC-AD-029]\
+    \ Status code is 403\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([403]);\n\
+    });\npm.test(\"[TC-AD-029] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

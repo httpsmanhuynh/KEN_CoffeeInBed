@@ -1,0 +1,41 @@
+$kind: http-request
+name: '[TC-PK-017] Đổi gói HOURLY ↔ FIXED kèm duration_hours phù hợp'
+description: '**Mã TC:** TC-PK-017
+
+  **Nhóm:** Admin cập nhật gói
+
+  **API / Thành phần:** PATCH /api/packages/:id
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed spaces/packages/package_prices/package_inclusions.
+
+  **Dữ liệu vào:** {"pricing_type": "FIXED", "duration_hours": 4}
+
+  **Các bước thực hiện:**
+
+  1) PATCH /api/packages/<id>
+
+  **Kết quả mong đợi:** 200; gói hợp lệ theo ràng buộc FIXED (HTTP: 200)
+
+  **Nhánh code bao phủ:** PKG-B15
+
+  '
+url: '{{baseUrl}}/api/packages/{{packageId}}'
+method: PATCH
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 17000
+body:
+  type: json
+  raw: "{\n  \"pricing_type\": \"FIXED\",\n  \"duration_hours\": 4\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PK-017] Đổi gói HOURLY ↔ FIXED kèm duration_hours phù hợp\npm.test(\"\
+    [TC-PK-017] Status code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-PK-017] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

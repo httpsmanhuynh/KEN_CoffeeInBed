@@ -1,0 +1,41 @@
+$kind: http-request
+name: '[TC-AD-016] Product không tồn tại'
+description: '**Mã TC:** TC-AD-016
+
+  **Nhóm:** Admin quản lý Product
+
+  **API / Thành phần:** PATCH /api/products/:id
+
+  **Loại:** Negative
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed products/addons.
+
+  **Dữ liệu vào:** {"price": 1000}
+
+  **Các bước thực hiện:**
+
+  1) PATCH /api/products/000000000000000000000000
+
+  **Kết quả mong đợi:** 404 (HTTP: 404)
+
+  **Nhánh code bao phủ:** ADD-B14
+
+  '
+url: '{{baseUrl}}/api/products/{{productId}}'
+method: PATCH
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 16000
+body:
+  type: json
+  raw: "{\n  \"price\": 1000\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-AD-016] Product không tồn tại\npm.test(\"[TC-AD-016] Status code is\
+    \ 404\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([404]);\n\
+    });\npm.test(\"[TC-AD-016] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

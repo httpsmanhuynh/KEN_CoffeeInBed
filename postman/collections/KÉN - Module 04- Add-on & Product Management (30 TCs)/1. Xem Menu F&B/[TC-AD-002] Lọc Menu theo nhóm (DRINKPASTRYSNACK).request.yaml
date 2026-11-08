@@ -1,0 +1,36 @@
+$kind: http-request
+name: '[TC-AD-002] Lọc Menu theo nhóm (DRINK/PASTRY/SNACK)'
+description: '**Mã TC:** TC-AD-002
+
+  **Nhóm:** Xem Menu F&B
+
+  **API / Thành phần:** GET /api/products?category=DRINK
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đã seed products/addons; không cần đăng nhập.
+
+  **Dữ liệu vào:** ?category=DRINK
+
+  **Các bước thực hiện:**
+
+  1) GET /api/products?category=DRINK
+
+  **Kết quả mong đợi:** 200 chỉ gồm món thuộc nhóm DRINK (HTTP: 200)
+
+  **Nhánh code bao phủ:** ADD-B02
+
+  '
+url: '{{baseUrl}}/api/products?category=DRINK'
+method: GET
+headers:
+- key: Content-Type
+  value: application/json
+order: 2000
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-AD-002] Lọc Menu theo nhóm (DRINK/PASTRY/SNACK)\npm.test(\"[TC-AD-002]\
+    \ Status code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-AD-002] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

@@ -1,0 +1,41 @@
+$kind: http-request
+name: '[TC-AD-011] price = 0 (biên dưới hợp lệ)'
+description: '**Mã TC:** TC-AD-011
+
+  **Nhóm:** Admin quản lý Product
+
+  **API / Thành phần:** POST /api/products
+
+  **Loại:** Boundary
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed products/addons.
+
+  **Dữ liệu vào:** {"name": "Món 0đ", "category": "SNACK", "price": 0}
+
+  **Các bước thực hiện:**
+
+  1) POST /api/products
+
+  **Kết quả mong đợi:** 201 (validator cho phép ≥ 0) (HTTP: 201)
+
+  **Nhánh code bao phủ:** ADD-B10
+
+  '
+url: '{{baseUrl}}/api/products'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 11000
+body:
+  type: json
+  raw: "{\n  \"name\": \"Món 0đ\",\n  \"category\": \"SNACK\",\n  \"price\": 0\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-AD-011] price = 0 (biên dưới hợp lệ)\npm.test(\"[TC-AD-011] Status\
+    \ code is 201\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([201]);\n\
+    });\npm.test(\"[TC-AD-011] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

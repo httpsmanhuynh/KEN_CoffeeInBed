@@ -1,3 +1,0 @@
-$kind: collection
-name: "KÉN - Module 08: Voucher Management (28 TCs)"
-description: "Bộ kiểm thử 28 test cases của Phân hệ 08: Quản lý Voucher (Admin tạo mới, cập nhật điều kiện, bật/tắt ACTIVE ↔ INACTIVE, áp dụng tại Checkout, đổi KÉN Coins lấy Voucher vào ví user_vouchers). Đồng bộ với Test_Module08_Voucher_Management.xlsx."

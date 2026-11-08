@@ -1,0 +1,42 @@
+$kind: http-request
+name: '[TC-AD-018] Admin thêm Add-on PER_ITEM'
+description: '**Mã TC:** TC-AD-018
+
+  **Nhóm:** Admin quản lý Add-on
+
+  **API / Thành phần:** POST /api/addons
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed products/addons.
+
+  **Dữ liệu vào:** {"name": "Thuê loa test", "unit": "PER_ITEM", "price": 30000}
+
+  **Các bước thực hiện:**
+
+  1) POST /api/addons
+
+  **Kết quả mong đợi:** 201; unit=PER_ITEM đúng validator addons (HTTP: 201)
+
+  **Nhánh code bao phủ:** ADD-B16
+
+  '
+url: '{{baseUrl}}/api/addons'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 18000
+body:
+  type: json
+  raw: "{\n  \"name\": \"Thuê loa test\",\n  \"unit\": \"PER_ITEM\",\n  \"price\"\
+    : 30000\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-AD-018] Admin thêm Add-on PER_ITEM\npm.test(\"[TC-AD-018] Status code\
+    \ is 201\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([201]);\n\
+    });\npm.test(\"[TC-AD-018] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

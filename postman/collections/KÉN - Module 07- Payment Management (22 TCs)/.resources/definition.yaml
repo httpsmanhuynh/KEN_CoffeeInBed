@@ -1,0 +1,3 @@
+$kind: collection
+name: "KÉN - Module 07: Payment Management (22 TCs)"
+description: "Bộ kiểm thử 22 test cases của Phân hệ 07: Quản lý Thanh toán (Payment Management). Bao gồm thanh toán thành công, hoàn tiền/hủy đơn, chống thanh toán lặp (Idempotency), đối soát giao dịch và tích hợp cổng thanh toán. Đồng bộ với KEN_TestCase_5_Modules.xlsx."

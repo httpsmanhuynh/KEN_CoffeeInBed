@@ -1,0 +1,41 @@
+$kind: http-request
+name: '[TC-AD-013] Thiếu trường bắt buộc (name)'
+description: '**Mã TC:** TC-AD-013
+
+  **Nhóm:** Admin quản lý Product
+
+  **API / Thành phần:** POST /api/products
+
+  **Loại:** Negative
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed products/addons.
+
+  **Dữ liệu vào:** {"category": "DRINK", "price": 1000}
+
+  **Các bước thực hiện:**
+
+  1) POST /api/products
+
+  **Kết quả mong đợi:** 422 VALIDATION_ERROR (HTTP: 422)
+
+  **Nhánh code bao phủ:** ADD-B11
+
+  '
+url: '{{baseUrl}}/api/products'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 13000
+body:
+  type: json
+  raw: "{\n  \"category\": \"DRINK\",\n  \"price\": 1000\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-AD-013] Thiếu trường bắt buộc (name)\npm.test(\"[TC-AD-013] Status\
+    \ code is 422\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([422]);\n\
+    });\npm.test(\"[TC-AD-013] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

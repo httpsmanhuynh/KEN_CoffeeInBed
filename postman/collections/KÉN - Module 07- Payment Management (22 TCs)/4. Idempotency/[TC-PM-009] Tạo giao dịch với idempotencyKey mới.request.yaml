@@ -1,0 +1,44 @@
+$kind: http-request
+name: '[TC-PM-009] Tạo giao dịch với idempotencyKey mới'
+description: '**Mã TC:** TC-PM-009
+
+  **Nhóm:** Idempotency
+
+  **API / Thành phần:** POST /api/payments
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; có đơn PENDING_PAYMENT
+  còn hạn.
+
+  **Dữ liệu vào:** {"bookingId": "<id>", "amount": <final_amount>, "idempotencyKey":
+  "KEY-001"}
+
+  **Các bước thực hiện:**
+
+  1) POST /api/payments
+
+  **Kết quả mong đợi:** 201; gateway_ref=KEY-001; đúng validator payment_transactions
+  (HTTP: 201)
+
+  **Nhánh code bao phủ:** PAY-B09
+
+  '
+url: '{{baseUrl}}/api/payments'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: CUSTOMER
+order: 9000
+body:
+  type: json
+  raw: '{"bookingId": "<id>", "amount": <final_amount>, "idempotencyKey": "KEY-001"}'
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PM-009] Tạo giao dịch với idempotencyKey mới\npm.test(\"[TC-PM-009]\
+    \ Status code is 201\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([201]);\n\
+    });\npm.test(\"[TC-PM-009] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

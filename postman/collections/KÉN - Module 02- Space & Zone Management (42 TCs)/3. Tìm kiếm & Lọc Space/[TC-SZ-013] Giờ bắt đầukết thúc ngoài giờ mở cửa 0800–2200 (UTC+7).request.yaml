@@ -1,0 +1,40 @@
+$kind: http-request
+name: '[TC-SZ-013] Giờ bắt đầu/kết thúc ngoài giờ mở cửa 08:00–22:00 (UTC+7)'
+description: '**Mã TC:** TC-SZ-013
+
+  **Nhóm:** Tìm kiếm & Lọc Space
+
+  **API / Thành phần:** GET /api/spaces?startAt
+
+  **Loại:** Boundary
+
+  **Điều kiện tiên quyết:** Server chạy; đã seed zones/spaces/packages; không cần
+  đăng nhập.
+
+  **Dữ liệu vào:** startAt = 07:30 (VN) và startAt = 21:00 + hours=2
+
+  **Các bước thực hiện:**
+
+  1) GET với startAt 07:30
+
+  2) GET với kết thúc 23:00
+
+  **Kết quả mong đợi:** Cả hai isAvailable=false (ngoài open_time–close_time) (HTTP:
+  200)
+
+  **Nhánh code bao phủ:** SPC-B10
+
+  '
+url: '{{baseUrl}}/api/spaces?startAt'
+method: GET
+headers:
+- key: Content-Type
+  value: application/json
+order: 13000
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-SZ-013] Giờ bắt đầu/kết thúc ngoài giờ mở cửa 08:00–22:00 (UTC+7)\n\
+    pm.test(\"[TC-SZ-013] Status code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-SZ-013] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

@@ -1,0 +1,51 @@
+$kind: http-request
+name: '[TC-SZ-018] Thêm Space EXCLUSIVE hợp lệ: mặc định buffer 15, status ACTIVE,
+  lock_version 0'
+description: '**Mã TC:** TC-SZ-018
+
+  **Nhóm:** Admin thêm Space
+
+  **API / Thành phần:** POST /api/spaces
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed zones/spaces/packages.
+
+  **Dữ liệu vào:** {"zone_id": "<_id Zone>", "space_code": "SPC-T01", "name": "Phòng
+  test", "space_type": "ROOM", "booking_mode": "EXCLUSIVE", "capacity": 6, "min_guests":
+  1, "max_guests": 6, "open_time": "08:00", "close_time": "22:00", "image_url": "/img/t.png"}
+
+  **Các bước thực hiện:**
+
+  1) POST /api/spaces
+
+  2) Kiểm tra document trên Atlas
+
+  **Kết quả mong đợi:** 201; buffer_minutes=15, status=ACTIVE, lock_version=0, có
+  created_at/updated_at (HTTP: 201)
+
+  **Nhánh code bao phủ:** SPC-B14
+
+  '
+url: '{{baseUrl}}/api/spaces'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 18000
+body:
+  type: json
+  raw: "{\n  \"zone_id\": \"<_id Zone>\",\n  \"space_code\": \"SPC-T01\",\n  \"name\"\
+    : \"Phòng test\",\n  \"space_type\": \"ROOM\",\n  \"booking_mode\": \"EXCLUSIVE\"\
+    ,\n  \"capacity\": 6,\n  \"min_guests\": 1,\n  \"max_guests\": 6,\n  \"open_time\"\
+    : \"08:00\",\n  \"close_time\": \"22:00\",\n  \"image_url\": \"/img/t.png\"\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-SZ-018] Thêm Space EXCLUSIVE hợp lệ: mặc định buffer 15, status ACTIVE,\
+    \ lock_version 0\npm.test(\"[TC-SZ-018] Status code is 201\", function () {\n\
+    \    pm.expect(pm.response.code).to.be.oneOf([201]);\n});\npm.test(\"[TC-SZ-018]\
+    \ Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

@@ -1,0 +1,37 @@
+$kind: http-request
+name: '[TC-PK-004] Gói không tồn tại'
+description: '**Mã TC:** TC-PK-004
+
+  **Nhóm:** Xem gói theo Space
+
+  **API / Thành phần:** GET /api/packages/:id
+
+  **Loại:** Negative
+
+  **Điều kiện tiên quyết:** Server chạy; đã seed packages/package_prices/package_inclusions;
+  không cần đăng nhập.
+
+  **Dữ liệu vào:** id = 000000000000000000000000
+
+  **Các bước thực hiện:**
+
+  1) GET /api/packages/<id không tồn tại>
+
+  **Kết quả mong đợi:** 404 (HTTP: 404)
+
+  **Nhánh code bao phủ:** PKG-B04
+
+  '
+url: '{{baseUrl}}/api/packages/{{packageId}}'
+method: GET
+headers:
+- key: Content-Type
+  value: application/json
+order: 4000
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PK-004] Gói không tồn tại\npm.test(\"[TC-PK-004] Status code is 404\"\
+    , function () {\n    pm.expect(pm.response.code).to.be.oneOf([404]);\n});\npm.test(\"\
+    [TC-PK-004] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

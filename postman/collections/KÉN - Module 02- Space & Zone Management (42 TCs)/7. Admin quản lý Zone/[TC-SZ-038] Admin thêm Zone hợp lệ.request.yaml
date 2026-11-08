@@ -1,0 +1,43 @@
+$kind: http-request
+name: '[TC-SZ-038] Admin thêm Zone hợp lệ'
+description: '**Mã TC:** TC-SZ-038
+
+  **Nhóm:** Admin quản lý Zone
+
+  **API / Thành phần:** POST /api/zones
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed zones/spaces/packages.
+
+  **Dữ liệu vào:** {"zone_code": "ZN-T1", "name": "Zone test", "is_bookable": true,
+  "is_active": true, "image_url": "/img/z.png"}
+
+  **Các bước thực hiện:**
+
+  1) POST /api/zones
+
+  **Kết quả mong đợi:** 201 zone mới đúng validator (HTTP: 201)
+
+  **Nhánh code bao phủ:** SPC-B27
+
+  '
+url: '{{baseUrl}}/api/zones'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 38000
+body:
+  type: json
+  raw: "{\n  \"zone_code\": \"ZN-T1\",\n  \"name\": \"Zone test\",\n  \"is_bookable\"\
+    : true,\n  \"is_active\": true,\n  \"image_url\": \"/img/z.png\"\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-SZ-038] Admin thêm Zone hợp lệ\npm.test(\"[TC-SZ-038] Status code\
+    \ is 201\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([201]);\n\
+    });\npm.test(\"[TC-SZ-038] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

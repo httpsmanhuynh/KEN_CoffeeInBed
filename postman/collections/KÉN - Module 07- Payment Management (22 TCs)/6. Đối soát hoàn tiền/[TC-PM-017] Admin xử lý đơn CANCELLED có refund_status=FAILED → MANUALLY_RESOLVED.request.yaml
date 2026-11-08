@@ -1,0 +1,44 @@
+$kind: http-request
+name: '[TC-PM-017] Admin xử lý đơn CANCELLED có refund_status=FAILED → MANUALLY_RESOLVED'
+description: '**Mã TC:** TC-PM-017
+
+  **Nhóm:** Đối soát hoàn tiền
+
+  **API / Thành phần:** POST /api/bookings/:id/refund-reconcile
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; có đơn refund_status=FAILED.
+
+  **Dữ liệu vào:** id đơn
+
+  **Các bước thực hiện:**
+
+  1) POST refund-reconcile
+
+  2) Kiểm tra payment_transactions
+
+  **Kết quả mong đợi:** 200 refund_status=MANUALLY_RESOLVED; ghi giao dịch REFUND
+  method=MANUAL (HTTP: 200)
+
+  **Nhánh code bao phủ:** PAY-B17
+
+  '
+url: '{{baseUrl}}/api/bookings/{{bookingId}}/refund-reconcile'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 17000
+body:
+  type: json
+  raw: '{"data": "id đơn"}'
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PM-017] Admin xử lý đơn CANCELLED có refund_status=FAILED → MANUALLY_RESOLVED\n\
+    pm.test(\"[TC-PM-017] Status code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-PM-017] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

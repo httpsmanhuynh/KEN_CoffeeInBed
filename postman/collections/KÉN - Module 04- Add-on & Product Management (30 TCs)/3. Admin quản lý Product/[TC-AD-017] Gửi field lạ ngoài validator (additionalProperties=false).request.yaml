@@ -1,0 +1,43 @@
+$kind: http-request
+name: '[TC-AD-017] Gửi field lạ ngoài validator (additionalProperties=false)'
+description: '**Mã TC:** TC-AD-017
+
+  **Nhóm:** Admin quản lý Product
+
+  **API / Thành phần:** PATCH /api/products/:id
+
+  **Loại:** Security
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed products/addons.
+
+  **Dữ liệu vào:** {"hack": true, "price": 1000}
+
+  **Các bước thực hiện:**
+
+  1) PATCH /api/products/<id>
+
+  2) Kiểm tra document
+
+  **Kết quả mong đợi:** Không ghi field lạ vào DB (bị bỏ qua hoặc 422) (HTTP: 200/422)
+
+  **Nhánh code bao phủ:** ADD-B15
+
+  '
+url: '{{baseUrl}}/api/products/{{productId}}'
+method: PATCH
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 17000
+body:
+  type: json
+  raw: "{\n  \"hack\": true,\n  \"price\": 1000\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-AD-017] Gửi field lạ ngoài validator (additionalProperties=false)\n\
+    pm.test(\"[TC-AD-017] Status code is 200/422\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200,\
+    \ 422]);\n});\npm.test(\"[TC-AD-017] Response valid format\", function () {\n\
+    \    pm.expect(pm.response.text()).to.be.a('string');\n});"

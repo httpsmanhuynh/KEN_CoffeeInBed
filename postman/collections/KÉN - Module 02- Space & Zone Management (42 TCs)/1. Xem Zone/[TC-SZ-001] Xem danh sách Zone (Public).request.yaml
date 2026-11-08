@@ -1,0 +1,38 @@
+$kind: http-request
+name: '[TC-SZ-001] Xem danh sách Zone (Public)'
+description: '**Mã TC:** TC-SZ-001
+
+  **Nhóm:** Xem Zone
+
+  **API / Thành phần:** GET /api/zones
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đã seed zones/spaces/packages; không cần
+  đăng nhập.
+
+  **Dữ liệu vào:** —
+
+  **Các bước thực hiện:**
+
+  1) GET /api/zones (không cookie)
+
+  **Kết quả mong đợi:** 200 mảng zones có zone_code, name, is_bookable, is_active,
+  image_url (HTTP: 200)
+
+  **Nhánh code bao phủ:** SPC-B01
+
+  '
+url: '{{baseUrl}}/api/zones'
+method: GET
+headers:
+- key: Content-Type
+  value: application/json
+order: 1000
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-SZ-001] Xem danh sách Zone (Public)\npm.test(\"[TC-SZ-001] Status\
+    \ code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-SZ-001] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

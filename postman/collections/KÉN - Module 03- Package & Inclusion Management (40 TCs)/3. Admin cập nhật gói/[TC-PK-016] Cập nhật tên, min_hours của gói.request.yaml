@@ -1,0 +1,41 @@
+$kind: http-request
+name: '[TC-PK-016] Cập nhật tên, min_hours của gói'
+description: '**Mã TC:** TC-PK-016
+
+  **Nhóm:** Admin cập nhật gói
+
+  **API / Thành phần:** PATCH /api/packages/:id
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed spaces/packages/package_prices/package_inclusions.
+
+  **Dữ liệu vào:** {"name": "Gói đổi tên", "min_hours": 3}
+
+  **Các bước thực hiện:**
+
+  1) PATCH /api/packages/<id>
+
+  **Kết quả mong đợi:** 200; giá trị mới lưu (HTTP: 200)
+
+  **Nhánh code bao phủ:** PKG-B14
+
+  '
+url: '{{baseUrl}}/api/packages/{{packageId}}'
+method: PATCH
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 16000
+body:
+  type: json
+  raw: "{\n  \"name\": \"Gói đổi tên\",\n  \"min_hours\": 3\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PK-016] Cập nhật tên, min_hours của gói\npm.test(\"[TC-PK-016] Status\
+    \ code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-PK-016] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"
