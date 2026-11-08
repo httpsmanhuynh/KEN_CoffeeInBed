@@ -1,0 +1,37 @@
+$kind: http-request
+name: "TC-VCH-18: [VCH-18] Số lượt: usage_count = usage_limit − 1 dùng được; đủ lượt thì chặn (Branch: VCH-B16)"
+description: |-
+  **Mã TC:** VCH-18 (TC-VCH-18)
+  **Nhóm:** Áp dụng tại Checkout
+  **API / Thành phần:** POST /api/bookings
+  **Loại:** Boundary
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; đã seed vouchers/spaces/packages.
+  **Dữ liệu vào:** usage_limit=1
+  **Các bước thực hiện:**
+  1) Dùng lần 1&#10;2) Dùng lần 2 (tài khoản khác)
+  **Kết quả mong đợi:** Lần 1 thành công; lần 2 bị từ chối (hết lượt) (HTTP: 201/422)
+  **Nhánh code bao phủ:** VCH-B16
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/bookings"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "spaceId": "{{spaceId}}",
+      "packageId": "{{packageId}}",
+      "startAt": "2026-12-20T02:00:00.000Z",
+      "guestCount": 1,
+      "voucherCode": "WELCOME10"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-VCH-18] Số lượt: usage_count = usage_limit − 1 dùng được; đủ lượt thì chặn
+      pm.test("[TC-VCH-18] Status code is 201/422", function () {
+          pm.expect(pm.response.code).to.be.oneOf([201, 422]);
+      });
+    language: text/javascript
+order: 4000

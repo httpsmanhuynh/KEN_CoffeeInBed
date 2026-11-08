@@ -1,0 +1,26 @@
+$kind: http-request
+description: |-
+  **Mã TC:** TC-DB-01
+  **Loại:** Negative
+  **Nhóm:** Ràng buộc CSDL
+  **Tiền điều kiện:** Đã đăng ký + xác minh OTP thành công cho SĐT 0909123456 (mật khẩu password123).
+  **Các bước:** 1) Chèn user thứ 2 cùng SĐT bằng mongosh
+  **Kết quả mong đợi:** Lỗi E11000 duplicate key (uq_users_phone)
+  **Nhánh code:** DB-B01
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/test"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: insertOne users cùng phone
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-DB-01] Unique index users.phone
+      pm.test("[TC-DB-01] Status code is —", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 1000

@@ -1,0 +1,27 @@
+$kind: http-request
+description: |-
+  **Mã TC:** TC-ME-03
+  **Loại:** Negative
+  **Nhóm:** Hồ sơ
+  **Tiền điều kiện:** Server chạy; đã chạy npm run setup (có membership_tiers, otp_codes, users trên Atlas). Cookie sạch.
+  **Các bước:** 1) GET /api/profile
+  **Kết quả mong đợi:** 401 {code:'UNAUTHENTICATED', message:'Vui lòng đăng nhập'}
+  **Nhánh code:** ME-B01; MW-B01
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/me"
+method: GET
+headers:
+  Content-Type: application/json
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ME-03] Chưa đăng nhập
+      pm.test("[TC-ME-03] Status code is 401", function () {
+          pm.expect(pm.response.code).to.be.oneOf([401]);
+      });
+      pm.test("[TC-ME-03] Response contains expected code or keyword: UNAUTHENTICATED", function () {
+          var resText = pm.response.text();
+          pm.expect(resText).to.include("UNAUTHENTICATED");
+      });
+    language: text/javascript
+order: 3000

@@ -1,0 +1,33 @@
+$kind: http-request
+name: "[TC-PW-02] Mật khẩu đúng 72 byte ASCII (biên trên hợp lệ) được chấp nhận"
+description: |-
+  **Mã TC:** TC-PW-02
+  **Loại:** Boundary
+  **Nhóm:** Mật khẩu
+  **Tiền điều kiện:** SĐT mới chưa đăng ký.
+  **Các bước:** 1) Gửi POST /api/auth/register với password đúng 72 ký tự ASCII
+  **Kết quả mong đợi:** Qua bước validate thành công, trả 201 Đã gửi OTP xác minh.
+  **Nhánh code:** PWD-B02
+  **Ghi chú:** Tham chiếu PW-02 (BR-A04)
+url: "{{baseUrl}}/api/auth/register"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "fullName": "Test User",
+      "phone": "0906666666",
+      "dateOfBirth": "2004-01-15",
+      "password": "<chuỗi 72 ký tự a>"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-PW-02] Mật khẩu đúng 72 byte ASCII (biên trên hợp lệ) được chấp nhận
+      pm.test("[TC-PW-02] Status code is 201", function () {
+          pm.expect(pm.response.code).to.be.oneOf([201]);
+      });
+    language: text/javascript
+order: 2000

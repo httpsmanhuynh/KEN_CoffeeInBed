@@ -1,0 +1,36 @@
+$kind: http-request
+description: |-
+  **Mã TC:** TC-RST-10
+  **Loại:** Negative
+  **Nhóm:** Đặt lại mật khẩu
+  **Tiền điều kiện:** Đã đăng ký + xác minh OTP thành công cho SĐT 0909123456 (mật khẩu password123). Đã gọi forgot-password và có OTP.
+  **Các bước:** 1) Gọi reset-password sai OTP 5 lần
+  **Kết quả mong đợi:** Lần 5: 429 OTP_TOO_MANY_ATTEMPTS
+  **Nhánh code:** RST-B03; OTP-B12
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/reset-password"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "phone": "0909123456",
+      "code": "000000",
+      "newPassword": "matkhaumoi123",
+      "confirmPassword": "matkhaumoi123"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-RST-10] Sai OTP quá số lần
+      pm.test("[TC-RST-10] Status code is 429", function () {
+          pm.expect(pm.response.code).to.be.oneOf([429]);
+      });
+      pm.test("[TC-RST-10] Response contains expected code or keyword: OTP_TOO_MANY_ATTEMPTS", function () {
+          var resText = pm.response.text();
+          pm.expect(resText).to.include("OTP_TOO_MANY_ATTEMPTS");
+      });
+    language: text/javascript
+order: 10000

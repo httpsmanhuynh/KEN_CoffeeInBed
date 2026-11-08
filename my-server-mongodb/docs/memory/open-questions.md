@@ -1,7 +1,7 @@
-# Câu hỏi mở / còn tồn
+# Hạng mục còn mở (2 Module tiếp theo)
 
-Ba câu nghiệp vụ trước đây (BR-F01, BR-C04, hủy `PENDING_PAYMENT` quá hạn) đã chốt, xem `decisions.md`.
-
-- Session store chạy nhiều instance: `connect-mongo` đã dùng chung được, nhưng rate limit vẫn nằm trong RAM của từng instance (dùng Redis hoặc `express-rate-limit` khi deploy nhiều instance).
-- Cron chuyển `PENDING_PAYMENT` quá hạn sang `EXPIRED` đã được hiện thực trong `src/services/bookingService.js` (`expirePendingBookings`) và chạy định kỳ mỗi 60 giây trong `index.js` (kèm endpoint `POST /api/bookings/expire-holds` cho Admin).
-- Giá trị tạm trong báo cáo: Cut-off hủy (BR-G01, 2 giờ), đặt trước tối thiểu (BR-C06, 30 phút). Xem `src/config/constants.js`.
+1. **Module 11 — Admin Management & Dashboard:**
+   - Đã có `GET /api/bookings` cho Admin lọc đơn.
+   - Cần bổ sung API Admin xem danh sách/chi tiết khách hàng, khóa/mở khóa tài khoản (`ACTIVE ↔ LOCKED`) và API thống kê Dashboard (số đơn theo 7 trạng thái, Occupancy Rate, Top Add-on, doanh thu thực tế từ Price Snapshot & F&B).
+2. **Module 12 — Recommendation & Forecast API:**
+   - Cần bổ sung API gợi ý món/Add-on cho khách trong luồng đặt chỗ và API Admin truy xuất dữ liệu dự báo 52 nguyên vật liệu (`demand_forecasts`, `inventory_alerts`, `ingredients`, `ingredient_stock_movements`, `sales_history_daily`, `sales_transactions`).

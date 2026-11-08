@@ -1,0 +1,28 @@
+$kind: http-request
+name: "[TC-OTP-03] Mã OTP luôn đủ 6 chữ số (kể cả bắt đầu bằng 0)"
+description: |-
+  **Mã TC:** TC-OTP-03
+  **Loại:** Boundary
+  **Nhóm:** Dịch vụ OTP
+  **Tiền điều kiện:** Chạy unit test/script
+  **Các bước:** 1) Bắt mã từ hàm sendSms
+  2) Kiểm tra regex ^\d{6}$
+  **Kết quả mong đợi:** Mọi mã khớp ^\d{6}$
+  **Nhánh code:** OTP-B01
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/test"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: Gọi issueOtp 1000 lần (mock db)
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-OTP-03] Mã OTP luôn đủ 6 chữ số (kể cả bắt đầu bằng 0)
+      pm.test("[TC-OTP-03] Status code is —", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 3000

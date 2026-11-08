@@ -1,0 +1,41 @@
+$kind: http-request
+name: "TC-VCH-07: [VCH-07] Customer / Guest tạo Voucher (Branch: VCH-B06)"
+description: |-
+  **Mã TC:** VCH-07 (TC-VCH-07)
+  **Nhóm:** Admin tạo Voucher
+  **API / Thành phần:** POST /api/vouchers
+  **Loại:** Security
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; đã seed vouchers/spaces/packages.
+  **Dữ liệu vào:** payload hợp lệ
+  **Các bước thực hiện:**
+  1) POST bằng Customer&#10;2) Lặp lại không cookie
+  **Kết quả mong đợi:** Customer 403; Guest 401 (HTTP: 403)
+  **Nhánh code bao phủ:** VCH-B06
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/vouchers"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "code": "VCH_VCH07",
+      "discount_type": "FIXED_AMOUNT",
+      "discount_value": 10000,
+      "min_order_value": 100000,
+      "usage_limit": 50,
+      "redeem_limit": 0,
+      "coins_cost": 0,
+      "valid_from": "2026-05-01T00:00:00.000Z",
+      "valid_to": "2026-12-31T23:59:59.000Z"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-VCH-07] Customer / Guest tạo Voucher
+      pm.test("[TC-VCH-07] Status code is 403", function () {
+          pm.expect(pm.response.code).to.be.oneOf([403]);
+      });
+    language: text/javascript
+order: 7000

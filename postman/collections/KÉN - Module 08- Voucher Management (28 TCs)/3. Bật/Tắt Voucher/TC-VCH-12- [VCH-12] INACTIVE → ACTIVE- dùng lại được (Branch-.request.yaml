@@ -1,0 +1,33 @@
+$kind: http-request
+name: "TC-VCH-12: [VCH-12] INACTIVE → ACTIVE: dùng lại được (Branch: VCH-B10)"
+description: |-
+  **Mã TC:** VCH-12 (TC-VCH-12)
+  **Nhóm:** Bật/Tắt Voucher
+  **API / Thành phần:** PATCH /api/vouchers/:id
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed vouchers.
+  **Dữ liệu vào:** {"status": "ACTIVE"}
+  **Các bước thực hiện:**
+  1) PATCH status&#10;2) Quote dùng Voucher
+  **Kết quả mong đợi:** 200; áp dụng được lại (HTTP: 200)
+  **Nhánh code bao phủ:** VCH-B10
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/vouchers/{{voucherId}}"
+method: PATCH
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "status": "ACTIVE"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-VCH-12] INACTIVE → ACTIVE: dùng lại được
+      pm.test("[TC-VCH-12] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 2000

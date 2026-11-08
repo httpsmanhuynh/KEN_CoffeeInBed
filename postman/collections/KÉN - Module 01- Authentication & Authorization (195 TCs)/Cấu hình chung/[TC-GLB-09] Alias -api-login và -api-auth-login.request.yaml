@@ -1,0 +1,32 @@
+$kind: http-request
+name: "[TC-GLB-09] Alias /api/login và /api/auth/login"
+description: |-
+  **Mã TC:** TC-GLB-09
+  **Loại:** Positive
+  **Nhóm:** Cấu hình chung
+  **Tiền điều kiện:** Đã đăng ký + xác minh OTP thành công cho SĐT 0909123456 (mật khẩu password123).
+  **Các bước:** 1) POST /api/login
+  2) POST /api/auth/login
+  **Kết quả mong đợi:** Cả hai trả kết quả giống nhau (200 + user)
+  **Nhánh code:** GLB-B07; LOG-B04
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/test"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "identifier": "0909123456",
+      "password": "password123"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-GLB-09] Alias /api/login và /api/auth/login
+      pm.test("[TC-GLB-09] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 9000

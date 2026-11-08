@@ -1,0 +1,33 @@
+$kind: http-request
+name: "TC-LOY-14: [LOY-14] Rollover 01/01: hạ 1 bậc, đặt Điểm về mốc hạng mới, Coins về 0 (Branch: LOY-B14)"
+description: |-
+  **Mã TC:** LOY-14 (TC-LOY-14)
+  **Nhóm:** Reset đầu năm
+  **API / Thành phần:** POST /api/loyalty/year-rollover
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed membership_tiers.
+  **Dữ liệu vào:** Khách DIAMOND, GOLD, SILVER, BASIC
+  **Các bước thực hiện:**
+  1) POST /api/loyalty/year-rollover&#10;2) Kiểm tra users và loyalty_transactions
+  **Kết quả mong đợi:** DIAMOND→GOLD (điểm 5.000), GOLD→SILVER (1.000), SILVER→BASIC, BASIC giữ nguyên điểm; coin_balance=0; có bản ghi YEAR_RESET (HTTP: 200)
+  **Nhánh code bao phủ:** LOY-B14
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/loyalty/year-rollover"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "year": 2027
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-LOY-14] Rollover 01/01: hạ 1 bậc, đặt Điểm về mốc hạng mới, Coins về 0
+      pm.test("[TC-LOY-14] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 1000

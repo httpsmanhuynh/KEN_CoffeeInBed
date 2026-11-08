@@ -1,0 +1,38 @@
+$kind: http-request
+description: |-
+  **Mã TC:** TC-RST-07
+  **Loại:** Negative
+  **Nhóm:** Đặt lại mật khẩu
+  **Tiền điều kiện:** Đã đăng ký + xác minh OTP thành công cho SĐT 0909123456 (mật khẩu password123). Đã gọi forgot-password và có OTP. Sau đó đặt status='LOCKED'.
+  **Các bước:** 1) POST /api/auth/reset-password (Body: phone, code, newPassword, confirmPassword)
+  2) Quan sát phản hồi
+  3) Đăng nhập thử bằng mật khẩu mới/cũ
+  **Kết quả mong đợi:** 422 OTP_INVALID
+  **Nhánh code:** RST-B02
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/reset-password"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "phone": "0909123456",
+      "code": "<OTP>",
+      "newPassword": "matkhaumoi123",
+      "confirmPassword": "matkhaumoi123"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-RST-07] SĐT thuộc tài khoản LOCKED
+      pm.test("[TC-RST-07] Status code is 422", function () {
+          pm.expect(pm.response.code).to.be.oneOf([422]);
+      });
+      pm.test("[TC-RST-07] Response contains expected code or keyword: OTP_INVALID", function () {
+          var resText = pm.response.text();
+          pm.expect(resText).to.include("OTP_INVALID");
+      });
+    language: text/javascript
+order: 7000

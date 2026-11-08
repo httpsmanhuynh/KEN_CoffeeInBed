@@ -1,0 +1,35 @@
+$kind: http-request
+name: "[TC-RL-06] Alias /api/login và /api/auth/login dùng chung bộ đếm IP, không đếm đôi"
+description: |-
+  **Mã TC:** TC-RL-06
+  **Loại:** Negative
+  **Nhóm:** Rate limit
+  **Tiền điều kiện:** Server mới khởi động.
+  **Các bước:** 1) Gửi 31 request luân phiên giữa POST /api/login và POST /api/auth/login (identifier khác nhau mỗi lần)
+  **Kết quả mong đợi:** 30 request đầu trả 401; đúng ở request thứ 31 mới trả 429 TOO_MANY_REQUESTS (tính chung 1 bộ đếm IP, không bị chặn sớm ở lần 16).
+  **Nhánh code:** RL2-B04
+  **Ghi chú:** Tham chiếu RL-06 (BR-A08)
+url: "{{baseUrl}}/api/login & POST /api/auth/login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "identifier": "user_i",
+      "password": "sai"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-RL-06] Alias /api/login và /api/auth/login dùng chung bộ đếm IP, không đếm đôi
+      pm.test("[TC-RL-06] Status code is 429", function () {
+          pm.expect(pm.response.code).to.be.oneOf([429]);
+      });
+      pm.test("[TC-RL-06] Response contains expected code or keyword: TOO_MANY_REQUESTS", function () {
+          var resText = pm.response.text();
+          pm.expect(resText).to.include("TOO_MANY_REQUESTS");
+      });
+    language: text/javascript
+order: 9000
