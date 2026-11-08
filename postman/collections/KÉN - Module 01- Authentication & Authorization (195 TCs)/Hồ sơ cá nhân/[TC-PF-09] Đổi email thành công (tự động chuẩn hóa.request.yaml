@@ -1,0 +1,31 @@
+$kind: http-request
+name: "[TC-PF-09] Đổi email thành công (tự động chuẩn hóa chữ thường)"
+description: |-
+  **Mã TC:** TC-PF-09
+  **Loại:** Positive
+  **Nhóm:** Hồ sơ cá nhân
+  **Tiền điều kiện:** User đã đăng nhập.
+  **Các bước:** 1) Gửi PATCH /api/profile/me với email='New@Ken.com' và currentPassword đúng
+  **Kết quả mong đợi:** Trả 200 OK; publicUser.email = 'new@ken.com' (được lưu chữ thường trong DB).
+  **Nhánh code:** PRF-B12
+  **Ghi chú:** Tham chiếu PF-09 (BR-A06)
+url: "{{baseUrl}}/api/profile/me"
+method: PATCH
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "New@Ken.com",
+      "currentPassword": "password123"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-PF-09] Đổi email thành công (tự động chuẩn hóa chữ thường)
+      pm.test("[TC-PF-09] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 9000

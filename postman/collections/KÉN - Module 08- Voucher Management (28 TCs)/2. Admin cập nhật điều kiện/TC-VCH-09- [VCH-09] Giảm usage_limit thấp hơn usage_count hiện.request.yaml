@@ -1,0 +1,33 @@
+$kind: http-request
+name: "TC-VCH-09: [VCH-09] Giảm usage_limit thấp hơn usage_count hiện tại (Branch: VCH-B08)"
+description: |-
+  **Mã TC:** VCH-09 (TC-VCH-09)
+  **Nhóm:** Admin cập nhật điều kiện
+  **API / Thành phần:** PATCH /api/vouchers/:id
+  **Loại:** Negative
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed vouchers.
+  **Dữ liệu vào:** usage_count=10, usage_limit=5
+  **Các bước thực hiện:**
+  1) PATCH /api/vouchers/<id>
+  **Kết quả mong đợi:** Bị từ chối (422) hoặc ghi nhận rõ hành vi (HTTP: 422)
+  **Nhánh code bao phủ:** VCH-B08
+  **Ghi chú:** Xác nhận hành vi thực tế khi chạy
+url: "{{baseUrl}}/api/vouchers/{{voucherId}}"
+method: PATCH
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "usage_limit": 1
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-VCH-09] Giảm usage_limit thấp hơn usage_count hiện tại
+      pm.test("[TC-VCH-09] Status code is 422", function () {
+          pm.expect(pm.response.code).to.be.oneOf([422]);
+      });
+    language: text/javascript
+order: 2000

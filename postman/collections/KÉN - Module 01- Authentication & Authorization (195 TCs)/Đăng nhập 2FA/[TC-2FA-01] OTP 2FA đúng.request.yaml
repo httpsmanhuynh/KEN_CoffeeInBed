@@ -1,0 +1,31 @@
+$kind: http-request
+description: |-
+  **Mã TC:** TC-2FA-01
+  **Loại:** Positive
+  **Nhóm:** Đăng nhập 2FA
+  **Tiền điều kiện:** Đã đăng ký + xác minh OTP thành công cho SĐT 0909123456 (mật khẩu password123). two_factor_enabled=true; đã gọi login (bước 1) và có OTP 2FA_LOGIN.
+  **Các bước:** 1) POST /api/auth/login/2fa (Body: code) cùng cookie của bước 1
+  2) Quan sát phản hồi
+  3) GET /api/profile
+  **Kết quả mong đợi:** 200 {user:{...}}; /profile → 200; OTP is_used=true
+  **Nhánh code:** TFA-B05; OTP-B10
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/login/2fa"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "code": "<OTP>"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-2FA-01] OTP 2FA đúng
+      pm.test("[TC-2FA-01] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 1000

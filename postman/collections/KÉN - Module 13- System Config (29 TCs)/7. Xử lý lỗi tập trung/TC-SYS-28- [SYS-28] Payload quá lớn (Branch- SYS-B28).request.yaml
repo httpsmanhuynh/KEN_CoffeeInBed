@@ -1,0 +1,37 @@
+$kind: http-request
+name: "TC-SYS-28: [SYS-28] Payload quá lớn (Branch: SYS-B28)"
+description: |-
+  **Mã TC:** SYS-28 (TC-SYS-28)
+  **Nhóm:** Xử lý lỗi tập trung
+  **API / Thành phần:** Mọi API
+  **Loại:** Boundary
+  **Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.
+  **Dữ liệu vào:** Body JSON &gt; giới hạn
+  **Các bước thực hiện:**
+  1) POST body rất lớn
+  **Kết quả mong đợi:** 413 từ chối; server không treo (HTTP: 413)
+  **Nhánh code bao phủ:** SYS-B28
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: "{{largePayload}}"
+scripts:
+  - type: beforeRequest
+    code: |-
+      // Tạo payload lớn hơn 1MB
+      const largeData = 'a'.repeat(1024 * 1024 + 100);
+      pm.variables.set("largePayload", JSON.stringify({ data: largeData }));
+    language: text/javascript
+  - type: afterResponse
+    code: |-
+      pm.test("Payload vượt 1MB trả về 413 PAYLOAD_TOO_LARGE", function () {
+          pm.response.to.have.status(413);
+          const json = pm.response.json();
+          pm.expect(json.code).to.eql("PAYLOAD_TOO_LARGE");
+      });
+    language: text/javascript
+order: 4000

@@ -1,0 +1,3 @@
+$kind: collection
+name: "KÉN - Module 13: System Config (29 TCs)"
+description: "Bộ kiểm thử 29 test cases của Phân hệ 13: Cấu hình hệ thống dùng chung (CORS, Session Cookie connect-mongo, Database Transaction MongoDB Atlas, Rate Limiting, Hash bcrypt, Server Time & Central Error Handler). Đồng bộ với Test_Module13_System_Config.xlsx."

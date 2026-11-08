@@ -1,0 +1,27 @@
+$kind: http-request
+name: "[TC-GLB-03] MONGODB_URI sai/không kết nối được"
+description: |-
+  **Mã TC:** TC-GLB-03
+  **Loại:** Negative
+  **Nhóm:** Cấu hình chung
+  **Tiền điều kiện:** Đổi MONGODB_URI sai mật khẩu hoặc host
+  **Các bước:** 1) npm start
+  **Kết quả mong đợi:** Terminal in 'Lỗi kết nối cơ sở dữ liệu MongoDB' và server thoát (exit code 1), không lắng nghe cổng 3002
+  **Nhánh code:** GLB-B03
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/test"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: "{}"
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-GLB-03] MONGODB_URI sai/không kết nối được
+      pm.test("[TC-GLB-03] Status code is —", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 3000

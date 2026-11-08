@@ -1,0 +1,35 @@
+$kind: http-request
+name: "[TC-DP-01] Race condition: 2 người đăng ký trùng email, người thứ 2 verify-otp sau"
+description: |-
+  **Mã TC:** TC-DP-01
+  **Loại:** Negative
+  **Nhóm:** Đăng ký
+  **Tiền điều kiện:** SĐT A và SĐT B cùng gọi POST /api/auth/register với cùng email 'race@uel.edu.vn' khi email này chưa ai dùng. SĐT A gọi verify-otp thành công trước.
+  **Các bước:** 1) Sau khi SĐT A đã kích hoạt xong, gửi POST /api/auth/verify-otp cho SĐT B với OTP đúng của B
+  **Kết quả mong đợi:** Trả 409 EMAIL_EXISTS (bắt lỗi E11000 duplicate key trên index uq_users_email khi insertOne).
+  **Nhánh code:** VER-B06; DB-B02
+  **Ghi chú:** Tham chiếu DP-01 (BR-A02)
+url: "{{baseUrl}}/api/auth/verify-otp"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "phone": "<SĐT B>",
+      "code": "<OTP của B>"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-DP-01] Race condition: 2 người đăng ký trùng email, người thứ 2 verify-otp sau
+      pm.test("[TC-DP-01] Status code is 409", function () {
+          pm.expect(pm.response.code).to.be.oneOf([409]);
+      });
+      pm.test("[TC-DP-01] Response contains expected code or keyword: EMAIL_EXISTS", function () {
+          var resText = pm.response.text();
+          pm.expect(resText).to.include("EMAIL_EXISTS");
+      });
+    language: text/javascript
+order: 24000

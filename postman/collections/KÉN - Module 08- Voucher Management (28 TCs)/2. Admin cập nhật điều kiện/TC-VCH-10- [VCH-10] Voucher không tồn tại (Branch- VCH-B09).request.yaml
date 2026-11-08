@@ -1,0 +1,33 @@
+$kind: http-request
+name: "TC-VCH-10: [VCH-10] Voucher không tồn tại (Branch: VCH-B09)"
+description: |-
+  **Mã TC:** VCH-10 (TC-VCH-10)
+  **Nhóm:** Admin cập nhật điều kiện
+  **API / Thành phần:** PATCH /api/vouchers/:id
+  **Loại:** Negative
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed vouchers.
+  **Dữ liệu vào:** {"usage_limit": 10}
+  **Các bước thực hiện:**
+  1) PATCH /api/vouchers/000000000000000000000000
+  **Kết quả mong đợi:** 404 (HTTP: 404)
+  **Nhánh code bao phủ:** VCH-B09
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/vouchers/{{voucherId}}"
+method: PATCH
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "usage_limit": 10
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-VCH-10] Voucher không tồn tại
+      pm.test("[TC-VCH-10] Status code is 404", function () {
+          pm.expect(pm.response.code).to.be.oneOf([404]);
+      });
+    language: text/javascript
+order: 3000

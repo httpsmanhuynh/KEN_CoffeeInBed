@@ -1,0 +1,28 @@
+$kind: http-request
+description: |-
+  **Mã TC:** TC-FGT-04
+  **Loại:** Negative
+  **Nhóm:** Quên mật khẩu
+  **Tiền điều kiện:** Server chạy; đã chạy npm run setup (có membership_tiers, otp_codes, users trên Atlas).
+  **Các bước:** 1) POST /api/auth/forgot-password (Body: phone)
+  2) Quan sát phản hồi và terminal
+  3) Kiểm tra otp_codes
+  **Kết quả mong đợi:** 200 {message:'Nếu số điện thoại đã đăng ký, OTP đã được gửi'}; KHÔNG tạo OTP
+  **Nhánh code:** FGT-B02
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/forgot-password"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: "{}"
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-FGT-04] Thiếu phone
+      pm.test("[TC-FGT-04] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 4000

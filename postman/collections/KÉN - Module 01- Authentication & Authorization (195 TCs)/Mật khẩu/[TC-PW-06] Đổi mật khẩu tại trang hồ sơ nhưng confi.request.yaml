@@ -1,0 +1,37 @@
+$kind: http-request
+name: "[TC-PW-06] Đổi mật khẩu tại trang hồ sơ nhưng confirmPassword không khớp newPassword"
+description: |-
+  **Mã TC:** TC-PW-06
+  **Loại:** Negative
+  **Nhóm:** Mật khẩu
+  **Tiền điều kiện:** Đã đăng nhập; có OTP CHANGE_PASSWORD.
+  **Các bước:** 1) Gửi POST /api/profile/me/password với confirmPassword khác newPassword
+  **Kết quả mong đợi:** Trả 422 VALIDATION_ERROR ('Mật khẩu mới không hợp lệ hoặc không khớp'); chưa kiểm tra tới OTP nên OTP không bị tăng attempt_count.
+  **Nhánh code:** PRF-B04
+  **Ghi chú:** Tham chiếu PW-06 (BR-A04, mở rộng cho /me/password)
+url: "{{baseUrl}}/api/profile/me/password"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "currentPassword": "password123",
+      "newPassword": "matkhaumoi123",
+      "confirmPassword": "khacnhau123",
+      "code": "<OTP>"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-PW-06] Đổi mật khẩu tại trang hồ sơ nhưng confirmPassword không khớp newPassword
+      pm.test("[TC-PW-06] Status code is 422", function () {
+          pm.expect(pm.response.code).to.be.oneOf([422]);
+      });
+      pm.test("[TC-PW-06] Response contains expected code or keyword: VALIDATION_ERROR", function () {
+          var resText = pm.response.text();
+          pm.expect(resText).to.include("VALIDATION_ERROR");
+      });
+    language: text/javascript
+order: 5000
