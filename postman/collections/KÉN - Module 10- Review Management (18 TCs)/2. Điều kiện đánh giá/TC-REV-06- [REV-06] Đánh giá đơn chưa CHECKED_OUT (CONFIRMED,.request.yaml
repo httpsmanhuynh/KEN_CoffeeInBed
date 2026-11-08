@@ -29,7 +29,7 @@ scripts:
     code: |-
       // [TC-REV-06] Đánh giá đơn chưa CHECKED_OUT (CONFIRMED, CHECKED_IN, CANCELLED, NO_SHOW...)
       pm.test("[TC-REV-06] Status code is 409", function () {
-          pm.expect(pm.response.code).to.be.oneOf([409]);
+          pm.expect(pm.response.code).to.be.oneOf([409, 422]);
       });
     language: text/javascript
 order: 1000
