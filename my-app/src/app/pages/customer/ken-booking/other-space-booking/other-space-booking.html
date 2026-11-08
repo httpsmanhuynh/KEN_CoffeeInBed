@@ -1,0 +1,80 @@
+<main class="kf kb-page" *ngIf="space as item; else unavailable">
+  <section class="kf-container kb-container">
+    <a routerLink="/booking/spaces" class="kb-back">← Quay lại chọn không gian</a>
+
+    <div class="kb-heading">
+      <div>
+        <p>ĐẶT CHỖ TẠI KÉN</p>
+        <h1>{{ item.name }}</h1>
+        <span>{{ item.capacity }} · 08:00–22:00</span>
+      </div>
+    </div>
+
+    <div class="kb-layout">
+      <div class="kb-picture">
+        <img [src]="'/images/ken-flow/' + item.image" [alt]="item.name">
+      </div>
+
+      <section class="kb-panel">
+        <h2>Chọn gói sử dụng</h2>
+
+        <div class="kb-rates">
+          <button type="button"
+            *ngFor="let rate of item.rates"
+            [class.active]="duration === rate.hours"
+            (click)="chooseDuration(rate.hours)">
+            <strong>{{ rate.hours }} giờ</strong>
+            <span>{{ money(rate.price) }}{{ item.perPerson ? ' / khách' : ' / không gian' }}</span>
+          </button>
+        </div>
+
+        <div class="kb-fields">
+          <label>Ngày đến
+            <input type="date" [min]="minDate" [value]="date"
+              (change)="date = $any($event.target).value; message = ''">
+          </label>
+
+          <label>Giờ bắt đầu
+            <select [value]="startHour"
+              (change)="startHour = +$any($event.target).value; message = ''">
+              <option *ngFor="let hour of allowedHours" [value]="hour">
+                {{ ('0' + hour).slice(-2) }}:00
+              </option>
+            </select>
+          </label>
+
+          <label>Số khách
+            <select [value]="guests"
+              (change)="guests = +$any($event.target).value; message = ''">
+              <option *ngFor="let count of guestOptions" [value]="count">
+                {{ count }} khách
+              </option>
+            </select>
+          </label>
+        </div>
+
+        <div class="kb-total">
+          <span>Tổng dự tính</span>
+          <strong>{{ money(total) }}</strong>
+        </div>
+
+        <button type="button" class="kb-confirm" (click)="confirm()">
+          Xác nhận lựa chọn
+        </button>
+
+        <p class="kb-message" *ngIf="message" role="status">{{ message }}</p>
+        <small class="kb-disclaimer">
+          Đây là trang đặt chỗ mô phỏng. Lịch trống và thanh toán
+          chưa kết nối máy chủ.
+        </small>
+      </section>
+    </div>
+  </section>
+</main>
+
+<ng-template #unavailable>
+  <main class="kf-container kb-container">
+    <h1>Không tìm thấy không gian</h1>
+    <a routerLink="/booking/spaces">Quay lại chọn không gian</a>
+  </main>
+</ng-template>

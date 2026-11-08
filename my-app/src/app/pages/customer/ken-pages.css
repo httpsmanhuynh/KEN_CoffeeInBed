@@ -1,0 +1,88 @@
+
+/* KÉN customer pages — starter layout based on Figma page frames (not a pixel-perfect export). */
+:host { display:block; font-family:Inter,Arial,sans-serif; color:#4a3123; background:#f7efe2; }
+.ken-page{--brown:#4a3123;--cream:#f7efe2;--sand:#e6d3b5;--gold:#e3a52f;--line:#ddc7a7;background:#f7efe2;color:#4a3123;min-height:65vh;padding-bottom:66px}
+.ken-container{width:min(1200px,calc(100% - 48px));margin:auto}
+.ken-hero{padding:62px 0 55px;background:#f7efe2}
+.ken-hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:54px;align-items:center}
+.ken-eyebrow{display:inline-flex;align-items:center;gap:10px;color:#99610b;font-size:13px;font-weight:750;letter-spacing:1.3px;text-transform:uppercase;margin-bottom:16px}
+.ken-page h1{font-family:Georgia,'Times New Roman',serif;font-size:clamp(35px,4.5vw,62px);line-height:1.13;margin:0 0 22px;font-weight:700;letter-spacing:-1.1px}
+.ken-page h2{font-family:Georgia,'Times New Roman',serif;font-size:clamp(25px,2.9vw,38px);line-height:1.2;margin:0 0 12px}
+.ken-page h3{font-size:21px;line-height:1.34;margin:0 0 12px}
+.ken-page p{line-height:1.8;margin:0 0 13px}
+.ken-lead{font-size:16px;color:#765b48;max-width:750px}
+.ken-muted{color:#8e745e;font-size:14px}
+.ken-center{text-align:center}
+.ken-center .ken-lead{margin-left:auto;margin-right:auto}
+.ken-section{padding:65px 0;border-top:3px solid #e8d8be}
+.ken-section:nth-of-type(even){background:#fff9ef}
+.ken-section-head{margin-bottom:30px}
+.ken-section-head p{max-width:800px}
+.ken-section-head.ken-center p{margin:auto}
+.ken-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.ken-grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.ken-grid.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+.ken-card{background:#f2e4ce;border:1px solid #d8c1a0;border-radius:14px;overflow:hidden;box-shadow:0 4px 14px #4a312312;display:flex;flex-direction:column}
+.ken-card-body{padding:23px;flex:1}
+.ken-card img.ken-photo{display:block;width:100%;height:214px;object-fit:cover;background:linear-gradient(135deg,#ead0a6,#aa7750)}
+.ken-card h3{margin-bottom:10px}
+.ken-card p{font-size:14px}
+.ken-label{display:inline-block;padding:6px 12px;border-radius:24px;background:#f9dc8f;font-weight:700;font-size:12px;margin-bottom:13px}
+.ken-price{color:#8e5312;font-size:22px;font-weight:800;margin:13px 0}
+.ken-button{display:inline-flex;justify-content:center;align-items:center;gap:8px;padding:12px 21px;border:0;border-radius:24px;background:#e3a52f;color:#4a3123;font-weight:750;font-family:inherit;font-size:14px;cursor:pointer;text-decoration:none;line-height:1.2}
+.ken-button:hover{filter:brightness(.96)}
+.ken-button.alt{background:white;border:1px solid #c6ab87}
+.ken-button.dark{background:#4a3123;color:white}
+.ken-actions{display:flex;gap:11px;flex-wrap:wrap;margin-top:22px}
+.ken-hero-image{width:100%;aspect-ratio:1.13;object-fit:cover;border-radius:12px;box-shadow:0 15px 28px #4a312326;background:linear-gradient(135deg,#e5bd83,#966a45)}
+.ken-banner{background:#e6d3b5;padding:32px;border-radius:15px;text-align:center}
+.ken-banner p{margin:12px auto;max-width:720px}
+.ken-list{list-style:none;padding:0;margin:12px 0 0}
+.ken-list li{padding:8px 0 8px 25px;position:relative;font-size:14px;line-height:1.65}
+.ken-list li:before{content:'✓';position:absolute;left:0;color:#986315;font-weight:800}
+.ken-note{background:#ead8ba;border-radius:12px;padding:17px 19px;font-size:14px;border:1px solid #d9c49e;margin:18px 0}
+.ken-notice{background:#fff5da;border:1px solid #dca847;color:#67441e;border-radius:10px;padding:13px 17px;margin:15px 0}
+.ken-breadcrumb{font-size:13px;padding:20px 0;color:#866b53}
+.ken-breadcrumb a{color:#775233;text-decoration:none}
+.ken-figure{margin:0}
+.ken-figure img{display:block;width:100%;height:250px;object-fit:cover;background:#d0ab7e;border-radius:10px}
+.ken-figure figcaption{color:#80664e;font-size:12px;margin-top:7px}
+.ken-gallery{display:grid;grid-template-columns:1.8fr 1fr 1fr;gap:12px;margin:24px 0 38px}
+.ken-gallery .ken-figure:first-child img{height:290px}
+.ken-gallery .ken-figure:not(:first-child) img{height:290px}
+.ken-pills{display:flex;gap:9px;flex-wrap:wrap;margin:16px 0}
+.ken-pill{padding:8px 13px;border-radius:20px;border:1px solid #ceb28b;background:#f3e6d3;font-size:13px}
+.ken-detail-split{display:grid;grid-template-columns:1.2fr 1fr;gap:38px;align-items:start}
+.ken-package{background:#fffaf3;border:1px solid #dbc29c;border-radius:12px;padding:22px;margin-bottom:14px}
+.ken-package strong{font-size:18px}
+.ken-package .ken-price{margin:6px 0}
+.ken-policy-grid{display:grid;grid-template-columns:255px 1fr;gap:32px}
+.ken-toc{position:sticky;top:25px;align-self:start;background:#eee0c9;padding:22px;border-radius:13px;max-height:75vh;overflow-y:auto}
+.ken-toc a{display:block;color:#4a3123;padding:8px 0;border-bottom:1px solid #d8c4a5;text-decoration:none;font-size:13px}
+.ken-policy-section{background:#fffaf2;border:1px solid #e6d1b3;border-radius:13px;padding:24px;margin-bottom:16px;scroll-margin-top:18px}
+.ken-policy-section h3{border-bottom:1px solid #eadac6;padding-bottom:12px}
+.ken-input,.ken-select,.ken-textarea{font-family:inherit;border:1px solid #cbb18d;border-radius:9px;padding:13px 14px;background:#fffbf5;color:#4a3123;width:100%;font-size:14px}
+.ken-textarea{min-height:126px;resize:vertical}
+.ken-form-row{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.ken-field{margin-bottom:16px}
+.ken-field label{font-weight:700;display:block;font-size:14px;margin-bottom:8px}
+.ken-stars{display:flex;gap:7px;margin:10px 0}
+.ken-stars button{font-size:28px;background:transparent;border:0;color:#b7a58c;cursor:pointer}
+.ken-stars button.selected{color:#e3a52f}
+.ken-booking{display:block;width:100%;text-align:left;padding:18px;border:1px solid #ddc7a7;border-radius:10px;background:#fff9f0;color:#4a3123;margin-bottom:10px;cursor:pointer}
+.ken-booking.active{border-color:#ba8325;background:#f5e2bb;box-shadow:inset 4px 0 #e3a52f}
+.ken-mini-icon{display:inline-block;vertical-align:middle;margin-right:9px;max-height:24px;width:auto}
+.ken-faq{border:1px solid #dcc8a7;border-radius:9px;margin:10px 0;overflow:hidden}
+.ken-faq button{width:100%;text-align:left;border:0;background:#f2e4cf;color:#4a3123;font:700 15px inherit;cursor:pointer;padding:17px}
+.ken-faq p{padding:14px 17px;margin:0}
+.ken-timeline{display:grid;gap:15px}
+.ken-timeline-row{display:grid;grid-template-columns:135px 1fr;gap:20px;background:#ead7b7;border-radius:10px;overflow:hidden}
+.ken-timeline-num{background:#e3a52f;padding:20px;text-align:center;font-weight:800}
+.ken-timeline-row p{padding:15px 20px;margin:0}
+.ken-story-card{background:#f4e6d3;border:1px solid #dbc5a4;border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.ken-story-card img{width:100%;height:190px;object-fit:cover;background:#b69c74}
+.ken-story-card .ken-card-body{padding:20px}
+.ken-story-card a{color:#9c671f;font-weight:800;text-decoration:none}
+.ken-calc{font-size:15px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+@media(max-width:880px){.ken-hero-grid,.ken-detail-split,.ken-policy-grid{grid-template-columns:1fr}.ken-grid.four{grid-template-columns:repeat(2,minmax(0,1fr))}.ken-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ken-toc{position:static;max-height:none}.ken-gallery{grid-template-columns:1fr 1fr}.ken-gallery .ken-figure:first-child{grid-column:1/-1}}
+@media(max-width:600px){.ken-container{width:min(100% - 28px,1200px)}.ken-hero{padding:35px 0}.ken-section{padding:40px 0}.ken-grid,.ken-grid.two,.ken-grid.four,.ken-form-row{grid-template-columns:1fr}.ken-gallery{grid-template-columns:1fr}.ken-gallery .ken-figure:first-child{grid-column:auto}.ken-gallery .ken-figure img,.ken-gallery .ken-figure:first-child img,.ken-gallery .ken-figure:not(:first-child) img{height:210px}.ken-timeline-row{grid-template-columns:105px 1fr}.ken-hero-image{aspect-ratio:1.5}}
