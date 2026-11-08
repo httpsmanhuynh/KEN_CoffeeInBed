@@ -1,0 +1,40 @@
+name: KÉN Local Environment
+values:
+  - key: baseUrl
+    value: 'http://localhost:3002'
+  - key: adminPhone
+    value: 0900000001
+  - key: adminPassword
+    value: Admin@123
+  - key: testPhone
+    value: 0909123456
+  - key: testPassword
+    value: password123
+  - key: otpCode
+    value: '123456'
+  - key: connectSid
+    value: ''
+  - key: voucherId
+    value: 9ebd4b06b483e0bf0cd57715
+  - key: voucherCoinId
+    value: 59228bb33ddcdbaf15612d7c
+  - key: bookingId
+    value: 6af09f9bb2d5fdf57dd7f516
+  - key: bookingCheckedIn10kId
+    value: 6af09f9bb2d5fdf57dd7f516
+  - key: bookingCheckedIn9kId
+    value: 6af09f9bb2d5fdf57dd7f517
+  - key: bookingCheckedInDiscountId
+    value: 6af09f9bb2d5fdf57dd7f518
+  - key: bookingCheckedOutId
+    value: 6af09f9bb2d5fdf57dd7f519
+  - key: bookingConfirmedId
+    value: 6af09f9bb2d5fdf57dd7f51a
+  - key: spaceId
+    value: c7185699b9a4ff8d7d94214d
+  - key: packageId
+    value: ee70f0a3e502ddc3b760a715
+  - key: spaceWorkLoungeId
+    value: ab6af5c9b01fa33f757de661
+  - key: pkgFixedPerson70kId
+    value: ac64f28f5bfd0e11f87bd5f2
