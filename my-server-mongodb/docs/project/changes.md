@@ -29,3 +29,11 @@
 - `src/domain/payment.js` & `src/routes/payments.js`: kiểm tra thanh toán & API giao dịch thanh toán Idempotent (`gateway_ref`) gộp từ `mhung`.
 - `src/routes/loyalty.js`: API bảng hạng (`/tiers`), cộng điểm idempotent (`/earn`), đổi Coins lấy Voucher vào `user_vouchers` (`/redeem`, `/my-vouchers`), lịch sử (`/history`) và rollover đầu năm (`/year-rollover`) gộp từ `mhung`.
 - `test/`: 8 file kiểm thử (`auth.mw.test.js`, `booking.test.js`, `domain.test.js`, `logout.test.js`, `loyalty.test.js`, `otp.test.js`, `payment_catalog.test.js`, `review.test.js`) với tổng cộng **94 test cases pass 100%**.
+
+## 6. Module 11 — Admin Management & Dashboard
+- **File mới:** `src/domain/adminError.js`, `src/domain/adminUser.js`, `src/domain/dashboard.js`, `src/services/adminService.js`, `src/routes/admin.js`; test `tests/unit/dashboard.test.js` (19), `tests/unit/adminUser.test.js` (6), `tests/integration/admin.api.test.js` (7).
+- **Việc cần làm khi tích hợp:** thêm vào `index.js` dòng `app.use('/api/admin', require('./src/routes/admin'));`.
+- **Phụ thuộc:** dùng `mongodb` (`ObjectId`) và `express` đã có; không thêm thư viện mới. Route đọc `requireRole` từ `src/middleware/auth.js`, `adminLimit` từ `src/middleware/rateLimit.js` nếu có.
+- **Index gợi ý (không bắt buộc):** `bookings { start_at: 1, space_id: 1, status: 1 }`, `bookings { user_id: 1, created_at: -1 }`, `booking_addons { booking_id: 1 }`; thêm index trên trường ngày của `sales_transactions`.
+- **Schema/validator:** không đổi.
+- **Chạy test riêng:** `node --test tests/unit/dashboard.test.js tests/unit/adminUser.test.js tests/integration/admin.api.test.js`.

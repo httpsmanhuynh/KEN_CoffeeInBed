@@ -28,3 +28,12 @@
 - **Chặn đánh giá trùng (`BR-H01`, `EX-5.6`):** Trong Transaction lưu đánh giá, hệ thống lấy khóa ghi trên bản ghi `bookings` và kết hợp với unique index `uq_reviews_booking` (`{ booking_id: 1 }`) để đảm bảo tối đa 01 đánh giá/Booking ngay cả khi gửi trùng đồng thời. Nếu đơn đã có đánh giá, trả `409 REVIEW_ALREADY_EXISTS` kèm bản ghi `review` đã gửi để hiển thị ở chế độ chỉ xem (`AF2`).
 - **Tuân thủ `reviews.validator.json`:** Chỉ lưu đúng 6 trường (`_id`, `booking_id`, `user_id`, `rating` nguyên từ `1..5`, `comment` tối đa `500` ký tự hoặc `null`, `created_at >= booking.checked_out_at`). Không lưu `space_id` dư thừa vào `reviews` (đạt 3NF Chương 6; khi xem đánh giá theo Space thì truy vết qua `bookings`).
 - **Lời nhắc đánh giá trong Lịch sử đặt chỗ (`GET /api/bookings/me`, `GET /api/bookings/:id`):** Dùng `attachReviewsToBookings` để gắn động các trường `has_review`, `can_review`, `review_reminder` (`true` khi `status === 'CHECKED_OUT' && !has_review`) và `review` vào JSON trả về mà không làm bẩn schema `bookings` trong DB.
+
+## 5. Admin Management & Dashboard (Module 11)
+- **Khóa/Mở khóa:** `POST /api/admin/users/:id/lock|unlock`. Cập nhật nguyên tử `updateOne({_id, status: from})` thay vì đọc-rồi-ghi; không tự khóa mình, không khóa Admin. Chỉ ghi `status`, không thêm field `locked_at/reason` vì validator `users` là `additionalProperties:false`.
+- **Doanh thu thực tế:** tổng `final_amount` (Price Snapshot) của `CONFIRMED`, `CHECKED_IN`, `CHECKED_OUT`, `NO_SHOW`; không tính `PENDING_PAYMENT`, `CANCELLED`, `EXPIRED`.
+- **Mốc thời gian Dashboard:** `bookings.start_at`, theo ngày giờ VN (UTC+7), khoảng `[from, to+1 ngày)`.
+- **Occupancy Rate:** giờ-không-gian đã dùng ÷ giờ-không-gian khả dụng; `SHARED` quy đổi bằng giờ-khách ÷ `capacity` để cùng đơn vị với `EXCLUSIVE`. Tập trạng thái chiếm chỗ = tập trạng thái doanh thu (`OCCUPANCY_STATUSES`).
+- **F&B trực tiếp:** lấy từ `sales_transactions`, tổng toàn hệ thống (không chia Zone).
+- **Tách lớp:** tính toán ở `src/domain/dashboard.js` (thuần, test không cần Mongo); `adminService.js` chỉ truy vấn rồi gọi domain.
+- **Mã lỗi Admin:** `{ error, message }` qua `AdminError`.
