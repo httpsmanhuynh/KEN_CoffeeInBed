@@ -1,0 +1,39 @@
+$kind: http-request
+name: "TC-PRICING-071: [PRICING-071] Thành tiền 0đ: không cộng Điểm/Coin (Branch: VCH-B07)"
+description: |-
+  **Mã TC:** PRICING-071 (TC-PRICING-071)
+  **Nhóm:** Điểm & Coin từ số thực trả
+  **API / Thành phần:** POST /api/loyalty/earn (UI Dashboard Loyalty (Customer) + Compass)
+  **Loại:** Boundary
+  **Điều kiện tiên quyết:** Server chạy (http://localhost:3002) và ứng dụng giao diện chạy; đã chạy npm run setup (có hạng thành viên); dữ liệu giá/Inclusion/Add-on/Voucher theo cột 'Dữ liệu vào' đã có trong MongoDB (tạo bằng Compass nếu chưa có).
+  **Dữ liệu vào:** Tài khoản: Customer hạng BASIC; Package 70.000đ; Voucher cố định 500.000đ → Thành tiền 0đ
+  **Các bước thực hiện:**
+  1) Ghi lại Điểm và Coin hiện có.&#10;2) Đặt Package 70.000đ với Voucher 500.000đ (Thành tiền 0đ) và hoàn tất.&#10;3) Đợi tới thời điểm hệ thống cộng điểm (TBD) rồi xem Dashboard Loyalty.
+  **Kết quả mong đợi:** Điểm và Coin không tăng (0đ thực trả → 0 Điểm, 0 Coin). (HTTP: 200)
+  **Nhánh code bao phủ:** VCH-B07
+  **Ghi chú:** Không có Automated Test tương ứng – chỉ kiểm tra thủ công.
+url: "{{baseUrl}}/api/loyalty/earn"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "bookingId": "{{bookingId}}"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-PRICING-071] Thành tiền 0đ: không cộng Điểm/Coin
+      pm.test("[TC-PRICING-071] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+      const json = pm.response.json();
+            pm.test("[TC-PRICING-071] Đơn Thành tiền 0đ: không cộng Điểm và không cộng Coin (0 Điểm, 0 Coin)", function () {
+                pm.expect(json).to.have.property("earned");
+                pm.expect(json.earned.points).to.eql(0);
+                pm.expect(json.earned.coins).to.eql(0);
+            });
+    language: text/javascript
+order: 2000

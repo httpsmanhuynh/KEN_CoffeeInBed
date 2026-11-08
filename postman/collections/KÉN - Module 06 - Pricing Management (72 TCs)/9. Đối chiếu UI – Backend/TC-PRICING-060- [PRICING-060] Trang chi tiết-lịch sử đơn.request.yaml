@@ -1,0 +1,39 @@
+$kind: http-request
+name: "TC-PRICING-060: [PRICING-060] Trang chi tiết/lịch sử đơn hiển thị đúng số đã đóng băng (bộ số 2) (Branch: SNP-B02)"
+description: |-
+  **Mã TC:** PRICING-060 (TC-PRICING-060)
+  **Nhóm:** Đối chiếu UI – Backend
+  **API / Thành phần:** GET /api/bookings/{{bookingId}} (UI Chi tiết / Lịch sử đơn (Customer))
+  **Loại:** Business Rule
+  **Điều kiện tiên quyết:** Server chạy (http://localhost:3002) và ứng dụng giao diện chạy; đã chạy npm run setup (có hạng thành viên); dữ liệu giá/Inclusion/Add-on/Voucher theo cột 'Dữ liệu vào' đã có trong MongoDB (tạo bằng Compass nếu chưa có).
+  **Dữ liệu vào:** Tài khoản: Customer hạng Vàng (giảm 10%)&#10;Package: trọn gói, tính theo không gian, đơn giá 200.000đ&#10;Inclusion: không có phụ phí&#10;Add-on: không chọn&#10;Voucher: giảm cố định 50.000đ
+  **Các bước thực hiện:**
+  1) Đăng nhập Customer hạng Vàng và đặt Package 200.000đ với Voucher cố định 50.000đ.&#10;2) Mở trang Chi tiết/Lịch sử đơn của Booking vừa tạo.&#10;3) Ghi lại Tạm tính, Giảm Voucher, Giảm hạng, Thành tiền.&#10;4) Compass: so với bookings.price_snapshot.
+  **Kết quả mong đợi:** Chi tiết đơn hiển thị: Tạm tính 200.000đ; Giảm Voucher 50.000đ; Giảm hạng 15.000đ; Thành tiền 135.000đ; khớp price_snapshot. (HTTP: 200)
+  **Nhánh code bao phủ:** SNP-B02
+  **Ghi chú:** CẦN XEM XÉT – ánh xạ không 1-1 (AUTO-PRICING-042 dùng chung cho 2 Manual TC). Automated TC ứng viên (chưa xác nhận, chỉ để truy vết, KHÔNG phải kết quả Manual): AUTO-PRICING-042: toBookingSnapshot map đúng tên trường của collection bookings
+url: "{{baseUrl}}/api/bookings/{{bookingId}}"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-PRICING-060] Trang chi tiết/lịch sử đơn hiển thị đúng số đã đóng băng (bộ số 2)
+      pm.test("[TC-PRICING-060] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+      pm.test("[TC-PRICING-060] Snapshot giá trên Booking khớp đúng dữ liệu đóng băng từ DB", function () {
+          const json = pm.response.json();
+          pm.expect(json.package_price).to.eql(200000);
+          pm.expect(json.inclusion_surcharge).to.eql(0);
+          pm.expect(json.addon_total).to.eql(0);
+          pm.expect(json.subtotal).to.eql(200000);
+          pm.expect(json.voucher_discount).to.eql(50000);
+          pm.expect(json.tier_rate).to.eql(0.1);
+          pm.expect(json.tier_discount).to.eql(15000);
+          pm.expect(json.discount_amount).to.eql(65000);
+          pm.expect(json.final_amount).to.eql(135000);
+          pm.expect(Number.isInteger(json.final_amount) && json.final_amount >= 0).to.be.true;
+          if (json._id) { pm.collectionVariables.set("lastCreatedBookingId", String(json._id)); }
+      });
+    language: text/javascript
+order: 2000
