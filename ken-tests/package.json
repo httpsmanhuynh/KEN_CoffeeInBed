@@ -1,0 +1,17 @@
+{
+  "name": "ken-catalog-tests",
+  "version": "1.0.0",
+  "private": true,
+  "description": "B\u1ed9 test Catalog (Zone / Space / Package / Product) cho K\u00c9N K\u1ebft N\u1ed1i - node:test",
+  "scripts": {
+    "test": "node --test \"tests/**/*.test.js\"",
+    "test:unit": "node --test \"tests/unit/*.test.js\"",
+    "test:api": "node --test \"tests/integration/*.test.js\"",
+    "test:coverage": "node --test --experimental-test-coverage \"tests/**/*.test.js\"",
+    "test:admin": "node --test \"tests/integration/admin.api.test.js\"",
+    "test:payment": "node --test \"tests/integration/payment.api.test.js\""
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
