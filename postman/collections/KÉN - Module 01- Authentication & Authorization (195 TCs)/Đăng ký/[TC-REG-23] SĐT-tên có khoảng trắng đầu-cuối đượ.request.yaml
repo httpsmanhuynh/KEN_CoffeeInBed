@@ -1,0 +1,35 @@
+$kind: http-request
+name: "[TC-REG-23] SĐT/tên có khoảng trắng đầu-cuối được trim"
+description: |-
+  **Mã TC:** TC-REG-23
+  **Loại:** Positive
+  **Nhóm:** Đăng ký
+  **Tiền điều kiện:** Server chạy; đã chạy npm run setup (có membership_tiers, otp_codes, users trên Atlas).
+  **Các bước:** 1) POST /api/auth/register (Body: raw JSON)
+  2) Quan sát phản hồi
+  3) Kiểm tra otp_codes/users trên Atlas
+  **Kết quả mong đợi:** 201; otp_codes.phone = '0909123456' (đã trim)
+  **Nhánh code:** REG-B09
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/register"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "fullName": "  Ngô Thị Phương Thảo  ",
+      "phone": " 0909123456 ",
+      "dateOfBirth": "2004-01-15",
+      "password": "password123"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-REG-23] SĐT/tên có khoảng trắng đầu-cuối được trim
+      pm.test("[TC-REG-23] Status code is 201", function () {
+          pm.expect(pm.response.code).to.be.oneOf([201]);
+      });
+    language: text/javascript
+order: 23000

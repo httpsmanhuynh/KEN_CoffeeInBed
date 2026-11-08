@@ -1,0 +1,31 @@
+$kind: http-request
+name: "TC-LOY-02: [LOY-02] Check-out: 10.000đ thực trả = 1 Điểm + 1 Coin (Branch: LOY-B02)"
+description: |-
+  **Mã TC:** LOY-02 (TC-LOY-02)
+  **Nhóm:** Cộng Điểm & Coins
+  **API / Thành phần:** POST /api/bookings/:id/check-out
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed membership_tiers.
+  **Dữ liệu vào:** Đơn CHECKED_IN final_amount = 255.000đ
+  **Các bước thực hiện:**
+  1) POST check-out&#10;2) Kiểm tra users và loyalty_transactions
+  **Kết quả mong đợi:** +25 Điểm, +25 Coins (floor(255.000/10.000)); EARN points_delta = coins_delta = 25 (HTTP: 200)
+  **Nhánh code bao phủ:** LOY-B02
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/bookings/{{bookingId}}/check-out"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {}
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-LOY-02] Check-out: 10.000đ thực trả = 1 Điểm + 1 Coin
+      pm.test("[TC-LOY-02] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 1000

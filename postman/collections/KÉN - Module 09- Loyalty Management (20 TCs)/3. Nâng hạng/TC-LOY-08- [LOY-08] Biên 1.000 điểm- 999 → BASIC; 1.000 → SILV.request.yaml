@@ -1,0 +1,31 @@
+$kind: http-request
+name: "TC-LOY-08: [LOY-08] Biên 1.000 điểm: 999 → BASIC; 1.000 → SILVER (Branch: LOY-B08)"
+description: |-
+  **Mã TC:** LOY-08 (TC-LOY-08)
+  **Nhóm:** Nâng hạng
+  **API / Thành phần:** POST /api/bookings/:id/check-out
+  **Loại:** Boundary
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed membership_tiers.
+  **Dữ liệu vào:** tier_points hiện tại 990, đơn +10 điểm; tiếp đơn +1
+  **Các bước thực hiện:**
+  1) Check-out lên 1.000&#10;2) Kiểm tra membership_tier
+  **Kết quả mong đợi:** Đạt 1.000 điểm → SILVER ngay (giảm 5%) (HTTP: 200)
+  **Nhánh code bao phủ:** LOY-B08
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/bookings/{{bookingId}}/check-out"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {}
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-LOY-08] Biên 1.000 điểm: 999 → BASIC; 1.000 → SILVER
+      pm.test("[TC-LOY-08] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 1000

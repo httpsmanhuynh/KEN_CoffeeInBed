@@ -1,0 +1,28 @@
+$kind: http-request
+description: |-
+  **Mã TC:** TC-ME-06
+  **Loại:** Security
+  **Nhóm:** Hồ sơ
+  **Tiền điều kiện:** Đã đăng nhập thành công (Postman giữ cookie connect.sid). Sau đó đặt status='LOCKED' trên Atlas.
+  **Các bước:** 1) GET /api/profile
+  2) Gọi lại lần nữa
+  **Kết quả mong đợi:** 401 UNAUTHENTICATED, phiên bị hủy (lần sau vẫn 401 dù mở lại khóa)
+  **Nhánh code:** ME-B02
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/me"
+method: GET
+headers:
+  Content-Type: application/json
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ME-06] Admin khóa tài khoản khi user đang đăng nhập
+      pm.test("[TC-ME-06] Status code is 401", function () {
+          pm.expect(pm.response.code).to.be.oneOf([401]);
+      });
+      pm.test("[TC-ME-06] Response contains expected code or keyword: UNAUTHENTICATED", function () {
+          var resText = pm.response.text();
+          pm.expect(resText).to.include("UNAUTHENTICATED");
+      });
+    language: text/javascript
+order: 6000

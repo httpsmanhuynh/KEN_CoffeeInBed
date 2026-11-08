@@ -1,0 +1,37 @@
+$kind: http-request
+name: "TC-PRC-05- [PRC-05] Phụ phí nhân số lượng- Kombucha × 2 (Branch- PRC-B05)"
+description: |-
+  **Mã TC:** PRC-05 (TC-PRC-05)
+  **Nhóm:** Phụ phí Inclusion
+  **API / Thành phần:** POST /api/bookings/quote
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; Kombucha giá > định mức.
+  **Dữ liệu vào:** quantity=2
+  **Các bước thực hiện:**
+  1) POST quote inclusions qty=2
+  **Kết quả mong đợi:** 200 phụ phí = chênh lệch × 2 (HTTP: 200)
+  **Nhánh code bao phủ:** PRC-B05
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/bookings/quote"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "spaceId": "{{spaceId}}",
+      "packageId": "{{packageId}}",
+      "startAt": "{{bookingStartAt}}",
+      "guestCount": 1,
+      "inclusions": [{"productId": "{{kombuchaId}}", "quantity": 2}]
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-PRC-05] Phụ phí nhân số lượng- Kombucha × 2
+      pm.test("[TC-PRC-05] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 5000

@@ -1,0 +1,3 @@
+$kind: collection
+name: "KÉN - Module 06: Pricing Engine (18 TCs)"
+description: "Bộ kiểm thử 18 test cases Phân hệ 06: Tính giá & Báo giá (Package price, Inclusion surcharge, Add-on, Voucher discount, Tier discount, Price Snapshot, Never Trust the Client)."

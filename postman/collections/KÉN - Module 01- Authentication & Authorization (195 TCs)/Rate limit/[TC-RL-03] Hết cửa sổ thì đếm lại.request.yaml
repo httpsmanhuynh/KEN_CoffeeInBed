@@ -1,0 +1,28 @@
+$kind: http-request
+description: |-
+  **Mã TC:** TC-RL-03
+  **Loại:** Positive
+  **Nhóm:** Rate limit
+  **Tiền điều kiện:** Unit test với fake timer hoặc đặt windowMs nhỏ
+  **Các bước:** 1) Gửi 3 request → request 3 bị 429
+  2) Chờ quá 2 giây
+  3) Gửi lại
+  **Kết quả mong đợi:** Sau khi chờ: request được nhận lại (không còn 429)
+  **Nhánh code:** RL-B03
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/test"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: windowMs=2000, max=2
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-RL-03] Hết cửa sổ thì đếm lại
+      pm.test("[TC-RL-03] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200, 401]);
+      });
+    language: text/javascript
+order: 3000

@@ -1,0 +1,25 @@
+$kind: http-request
+name: "TC-BKG-17- [BKG-17] Hủy đơn PENDING_PAYMENT đã quá hạn giữ chỗ (Branch- BKG-B17)"
+description: |-
+  **Mã TC:** BKG-17 (TC-BKG-17)
+  **Nhóm:** Hủy đơn chờ
+  **API / Thành phần:** POST /api/bookings/:id/cancel
+  **Loại:** Negative
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; đơn PENDING_PAYMENT quá 15 phút.
+  **Dữ liệu vào:** đơn quá hạn
+  **Các bước thực hiện:**
+  1) POST cancel
+  **Kết quả mong đợi:** 409 đơn đã quá hạn (HTTP: 409)
+  **Nhánh code bao phủ:** BKG-B17
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/bookings/{{expiredBookingId}}/cancel"
+method: POST
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-BKG-17] Hủy đơn PENDING_PAYMENT đã quá hạn giữ chỗ
+      pm.test("[TC-BKG-17] Status code is 409", function () {
+          pm.expect(pm.response.code).to.be.oneOf([409]);
+      });
+    language: text/javascript
+order: 17000

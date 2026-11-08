@@ -1,0 +1,31 @@
+$kind: http-request
+name: "TC-LOY-20: [LOY-20] Cô lập tích điểm nhiều đơn lẻ: không cộng dồn tiền dư (Branch: LOY-B20)"
+description: |-
+  **Mã TC:** LOY-20 (TC-LOY-20)
+  **Nhóm:** Cộng Điểm & Coins
+  **API / Thành phần:** POST /api/bookings/:id/check-out
+  **Loại:** Boundary
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; 2 đơn CHECKED_IN của cùng khách, mỗi đơn final_amount = 15.000đ.
+  **Dữ liệu vào:** Đơn A 15.000đ; Đơn B 15.000đ
+  **Các bước thực hiện:**
+  1) Check-out đơn A&#10;2) Check-out đơn B&#10;3) Kiểm tra users và loyalty_transactions
+  **Kết quả mong đợi:** Mỗi đơn +1 Điểm +1 Coin (floor(15.000/10.000)); tổng +2 Điểm +2 Coins; không cộng dồn 5k+5k thành 3 điểm (HTTP: 200)
+  **Nhánh code bao phủ:** LOY-B20
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/bookings/{{bookingId}}/check-out"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {}
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-LOY-20] Cô lập tích điểm nhiều đơn lẻ: không cộng dồn tiền dư
+      pm.test("[TC-LOY-20] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 7000

@@ -1,0 +1,61 @@
+{
+  "id": "ken-environment-local",
+  "name": "KÉN Local Environment",
+  "values": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3002",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "testPhone",
+      "value": "0909123456",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "testPassword",
+      "value": "password123",
+      "type": "secret",
+      "enabled": true
+    },
+    {
+      "key": "otpCode",
+      "value": "123456",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "connectSid",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "voucherId",
+      "value": "9ebd4b06b483e0bf0cd57715",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "bookingId",
+      "value": "aaaa00000000000000000001",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "spaceId",
+      "value": "c7185699b9a4ff8d7d94214d",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "packageId",
+      "value": "ee70f0a3e502ddc3b760a715",
+      "type": "default",
+      "enabled": true
+    }
+  ],
+  "_postman_variable_scope": "environment"
+}

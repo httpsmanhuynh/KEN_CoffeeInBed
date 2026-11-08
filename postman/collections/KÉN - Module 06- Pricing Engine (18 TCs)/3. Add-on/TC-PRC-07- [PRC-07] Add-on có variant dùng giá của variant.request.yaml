@@ -1,0 +1,37 @@
+$kind: http-request
+name: "TC-PRC-07- [PRC-07] Add-on có variant dùng giá của variant (Branch- PRC-B07)"
+description: |-
+  **Mã TC:** PRC-07 (TC-PRC-07)
+  **Nhóm:** Add-on
+  **API / Thành phần:** POST /api/bookings/quote
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; addon có variant.
+  **Dữ liệu vào:** addon có variant L
+  **Các bước thực hiện:**
+  1) POST quote addon variant
+  **Kết quả mong đợi:** 200 dùng giá variant L (HTTP: 200)
+  **Nhánh code bao phủ:** PRC-B07
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/bookings/quote"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "spaceId": "{{spaceId}}",
+      "packageId": "{{packageId}}",
+      "startAt": "{{bookingStartAt}}",
+      "guestCount": 1,
+      "addons": [{"addonId": "{{variantAddonId}}", "quantity": 1, "variantName": "L"}]
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-PRC-07] Add-on có variant dùng giá của variant
+      pm.test("[TC-PRC-07] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 7000

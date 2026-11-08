@@ -1,0 +1,28 @@
+$kind: http-request
+name: "[TC-CF-02] Bật trust proxy = 1 khi chạy NODE_ENV=production sau Reverse Proxy HTTPS"
+description: |-
+  **Mã TC:** TC-CF-02
+  **Loại:** Security
+  **Nhóm:** Cấu hình / deploy
+  **Tiền điều kiện:** Chạy server với NODE_ENV=production, SESSION_SECRET hợp lệ.
+  **Các bước:** 1) Gửi request đăng nhập kèm header X-Forwarded-Proto: https và X-Forwarded-For
+  2) Kiểm tra Set-Cookie và IP trong rate limiter
+  **Kết quả mong đợi:** Cookie connect.sid được gắn cờ Secure; bộ đếm rate limit nhận diện đúng IP client thật từ X-Forwarded-For.
+  **Nhánh code:** GLB-B09; CFG-B01
+  **Ghi chú:** Tham chiếu CF-02
+url: "{{baseUrl}}/api/auth/test"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: "Headers: X-Forwarded-Proto: https, X-Forwarded-For: 203.0.113.5"
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-CF-02] Bật trust proxy = 1 khi chạy NODE_ENV=production sau Reverse Proxy HTTPS
+      pm.test("[TC-CF-02] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 2000

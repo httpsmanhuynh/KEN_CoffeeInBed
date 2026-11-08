@@ -1,0 +1,36 @@
+$kind: http-request
+name: "TC-PRC-01- [PRC-01] Quote chỉ có Package- subtotal = package_price (Branch- PRC-"
+description: |-
+  **Mã TC:** PRC-01 (TC-PRC-01)
+  **Nhóm:** Tính giá cơ bản
+  **API / Thành phần:** POST /api/bookings/quote
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đã seed packages, pricing.
+  **Dữ liệu vào:** payload hợp lệ
+  **Các bước thực hiện:**
+  1) POST /api/bookings/quote
+  **Kết quả mong đợi:** 200 subtotal = package_price (HTTP: 200)
+  **Nhánh code bao phủ:** PRC-B01
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/bookings/quote"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "spaceId": "{{spaceId}}",
+      "packageId": "{{packageId}}",
+      "startAt": "{{bookingStartAt}}",
+      "guestCount": 1
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-PRC-01] Quote chỉ có Package- subtotal = package_price
+      pm.test("[TC-PRC-01] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 1000

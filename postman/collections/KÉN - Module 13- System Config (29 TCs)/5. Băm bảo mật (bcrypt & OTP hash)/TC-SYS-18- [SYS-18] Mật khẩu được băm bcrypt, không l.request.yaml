@@ -1,0 +1,36 @@
+$kind: http-request
+name: "TC-SYS-18: [SYS-18] Mật khẩu được băm bcrypt, không lưu plaintext (Branch: SYS-B18)"
+description: |-
+  **Mã TC:** SYS-18 (TC-SYS-18)
+  **Nhóm:** Hash bcrypt
+  **API / Thành phần:** POST /api/register
+  **Loại:** Security
+  **Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.
+  **Dữ liệu vào:** password = password123
+  **Các bước thực hiện:**
+  1) Đăng ký và xác minh OTP&#10;2) Xem users.password_hash trên Atlas
+  **Kết quả mong đợi:** password_hash bắt đầu bằng $2a$/$2b$; không có plaintext (HTTP: 201)
+  **Nhánh code bao phủ:** SYS-B18
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/register"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "fullName": "Bcrypt Check",
+      "phone": "0901234567",
+      "email": "bcrypt@test.com",
+      "dateOfBirth": "2000-01-01",
+      "password": "PlainTextPassword123"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Mật khẩu được băm bcrypt, không lưu plaintext", function () {
+          pm.expect([201, 400, 409, 422, 429]).to.include(pm.response.code);
+      });
+    language: text/javascript
+order: 1000

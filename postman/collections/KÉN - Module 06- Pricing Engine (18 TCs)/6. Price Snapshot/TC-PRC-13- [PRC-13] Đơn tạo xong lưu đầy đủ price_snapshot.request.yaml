@@ -1,0 +1,37 @@
+$kind: http-request
+name: "TC-PRC-13- [PRC-13] Đơn tạo xong lưu đầy đủ price_snapshot (Branch- PRC-B13)"
+description: |-
+          **Mã TC:** PRC-13 (TC-PRC-13)
+          **Nhóm:** Price Snapshot
+          **API / Thành phần:** POST /api/bookings
+          **Loại:** Positive
+          **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer.
+          **Dữ liệu vào:** payload hợp lệ
+          **Các bước thực hiện:**
+          1) POST /api/bookings
+  2) GET đơn kiểm tra price_snapshot
+          **Kết quả mong đợi:** 201 có price_snapshot đầy đủ (HTTP: 201)
+          **Nhánh code bao phủ:** PRC-B13
+          **Ghi chú:** 
+url: "{{baseUrl}}/api/bookings"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "spaceId": "{{spaceId}}",
+      "packageId": "{{packageId}}",
+      "startAt": "{{bookingStartAt}}",
+      "guestCount": 1
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-PRC-13] Đơn tạo xong lưu đầy đủ price_snapshot
+      pm.test("[TC-PRC-13] Status code is 201", function () {
+          pm.expect(pm.response.code).to.be.oneOf([201]);
+      });
+    language: text/javascript
+order: 13000

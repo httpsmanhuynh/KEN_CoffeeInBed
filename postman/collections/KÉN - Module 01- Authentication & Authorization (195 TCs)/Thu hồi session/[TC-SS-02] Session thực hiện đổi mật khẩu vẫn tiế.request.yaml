@@ -1,0 +1,24 @@
+$kind: http-request
+name: "[TC-SS-02] Session thực hiện đổi mật khẩu vẫn tiếp tục sử dụng được"
+description: |-
+  **Mã TC:** TC-SS-02
+  **Loại:** Positive
+  **Nhóm:** Thu hồi session
+  **Tiền điều kiện:** Ngay sau khi thực hiện TC-SS-01 tại phiên A.
+  **Các bước:** 1) Tại phiên A (sau khi đổi mật khẩu): gọi GET /api/me và GET /api/profile/me
+  **Kết quả mong đợi:** Trả 200 OK kèm thông tin publicUser (phiên A đã được startSession cấp lại mốc pwdAt mới khớp với password_changed_at).
+  **Nhánh code:** SES-B02; PRF-B07
+  **Ghi chú:** Tham chiếu SS-02 (BR-A05)
+url: "{{baseUrl}}/api/me"
+method: GET
+headers:
+  Content-Type: application/json
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-SS-02] Session thực hiện đổi mật khẩu vẫn tiếp tục sử dụng được
+      pm.test("[TC-SS-02] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 2000

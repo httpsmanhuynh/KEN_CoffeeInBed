@@ -1,0 +1,37 @@
+$kind: http-request
+name: "TC-BKG-08- [BKG-08] final_amount = 0 (Voucher giảm hết)- CONFIRMED ngay (Branch-"
+description: |-
+  **Mã TC:** BKG-08 (TC-BKG-08)
+  **Nhóm:** Tạo đơn giữ chỗ
+  **API / Thành phần:** POST /api/bookings
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; Voucher giảm 100%.
+  **Dữ liệu vào:** voucher giảm toàn bộ
+  **Các bước thực hiện:**
+  1) POST /api/bookings
+  **Kết quả mong đợi:** 201 status=CONFIRMED (HTTP: 201)
+  **Nhánh code bao phủ:** BKG-B08
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/bookings"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "spaceId": "{{spaceId}}",
+      "packageId": "{{packageId}}",
+      "startAt": "{{bookingStartAt}}",
+      "guestCount": 1,
+      "voucherCode": "FREEVOUCHER"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-BKG-08] final_amount = 0 (Voucher giảm hết)- CONFIRMED ngay
+      pm.test("[TC-BKG-08] Status code is 201", function () {
+          pm.expect(pm.response.code).to.be.oneOf([201]);
+      });
+    language: text/javascript
+order: 8000

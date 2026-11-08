@@ -1,0 +1,33 @@
+$kind: http-request
+name: "TC-LOY-06: [LOY-06] Cộng điểm cho đơn chưa CHECKED_OUT / đơn của người khác (Branch: LOY-B06)"
+description: |-
+  **Mã TC:** LOY-06 (TC-LOY-06)
+  **Nhóm:** Cộng Điểm & Coins
+  **API / Thành phần:** POST /api/loyalty/earn
+  **Loại:** Negative
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer.
+  **Dữ liệu vào:** Đơn CONFIRMED; đơn của người khác
+  **Các bước thực hiện:**
+  1) POST earn 2 trường hợp
+  **Kết quả mong đợi:** Cả 2 bị từ chối; không đổi Điểm/Coins (HTTP: 409/403)
+  **Nhánh code bao phủ:** LOY-B06
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/loyalty/earn"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "bookingId": "{{bookingId}}"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-LOY-06] Cộng điểm cho đơn chưa CHECKED_OUT / đơn của người khác
+      pm.test("[TC-LOY-06] Status code is 409/403", function () {
+          pm.expect(pm.response.code).to.be.oneOf([409, 403]);
+      });
+    language: text/javascript
+order: 5000

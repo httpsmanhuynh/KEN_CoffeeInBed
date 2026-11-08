@@ -1,0 +1,35 @@
+$kind: http-request
+name: "TC-REV-02: [REV-02] rating biên 1 và 5 hợp lệ (Branch: REV-B02)"
+description: |-
+  **Mã TC:** REV-02 (TC-REV-02)
+  **Nhóm:** Tạo đánh giá
+  **API / Thành phần:** POST /api/reviews
+  **Loại:** Boundary
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; có đơn CHECKED_OUT của Customer.
+  **Dữ liệu vào:** rating=1 ; rating=5 (2 đơn khác nhau)
+  **Các bước thực hiện:**
+  1) POST rating 1&#10;2) POST rating 5
+  **Kết quả mong đợi:** Cả hai 201 (HTTP: 201)
+  **Nhánh code bao phủ:** REV-B02
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/reviews"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "bookingId": "{{bookingId}}",
+      "rating": 5,
+      "comment": "Không gian rất ổn"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-REV-02] rating biên 1 và 5 hợp lệ
+      pm.test("[TC-REV-02] Status code is 201", function () {
+          pm.expect(pm.response.code).to.be.oneOf([201]);
+      });
+    language: text/javascript
+order: 2000

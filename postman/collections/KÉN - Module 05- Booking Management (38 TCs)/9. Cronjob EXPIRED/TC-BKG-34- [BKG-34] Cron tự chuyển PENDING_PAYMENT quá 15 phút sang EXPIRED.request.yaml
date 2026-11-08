@@ -1,0 +1,25 @@
+$kind: http-request
+name: "TC-BKG-34- [BKG-34] Cron tự chuyển PENDING_PAYMENT quá 15 phút sang EXPIRED (Bra"
+description: |-
+  **Mã TC:** BKG-34 (TC-BKG-34)
+  **Nhóm:** Cronjob EXPIRED
+  **API / Thành phần:** POST /api/bookings/expire-holds
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; có đơn PENDING quá 15p.
+  **Dữ liệu vào:** —
+  **Các bước thực hiện:**
+  1) POST expire-holds
+  **Kết quả mong đợi:** 200 đơn chuyển EXPIRED (HTTP: 200)
+  **Nhánh code bao phủ:** BKG-B34
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/bookings/expire-holds"
+method: POST
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-BKG-34] Cron tự chuyển PENDING_PAYMENT quá 15 phút sang EXPIRED
+      pm.test("[TC-BKG-34] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 34000

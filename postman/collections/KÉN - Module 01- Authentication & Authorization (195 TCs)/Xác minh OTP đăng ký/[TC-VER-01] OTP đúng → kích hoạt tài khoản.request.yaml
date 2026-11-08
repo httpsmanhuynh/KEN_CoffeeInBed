@@ -1,0 +1,32 @@
+$kind: http-request
+description: |-
+  **Mã TC:** TC-VER-01
+  **Loại:** Positive
+  **Nhóm:** Xác minh OTP đăng ký
+  **Tiền điều kiện:** Đã gọi register với SĐT 0909123456 và lấy OTP từ terminal ([SMS mock]).
+  **Các bước:** 1) POST /api/auth/verify-otp (Body: phone + code)
+  2) Quan sát phản hồi
+  3) Kiểm tra users/otp_codes trên Atlas
+  **Kết quả mong đợi:** 200 {message:'Kích hoạt tài khoản thành công'}. users có bản ghi mới: role=CUSTOMER, status=ACTIVE, two_factor_enabled=false, tier_id = _id hạng BASIC, tier_points=0, coin_balance=0, created_at=updated_at, password_hash bắt đầu '$2'. OTP is_used=true
+  **Nhánh code:** VER-B01; OTP-B10
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/verify-otp"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "phone": "0909123456",
+      "code": "<OTP trong terminal>"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-VER-01] OTP đúng → kích hoạt tài khoản
+      pm.test("[TC-VER-01] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 1000

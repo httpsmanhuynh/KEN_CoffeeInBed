@@ -1,0 +1,34 @@
+$kind: http-request
+name: "TC-REV-07: [REV-07] Đánh giá đơn của người khác (không chính chủ) (Branch: REV-B07)"
+description: |-
+  **Mã TC:** REV-07 (TC-REV-07)
+  **Nhóm:** Điều kiện đánh giá
+  **API / Thành phần:** POST /api/reviews
+  **Loại:** Security
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer B; đơn CHECKED_OUT thuộc A.
+  **Dữ liệu vào:** {"bookingId": "<đơn của A>", "rating": 5}
+  **Các bước thực hiện:**
+  1) POST /api/reviews bằng B
+  **Kết quả mong đợi:** 403/404; không tạo đánh giá (HTTP: 403)
+  **Nhánh code bao phủ:** REV-B07
+  **Ghi chú:** Xác nhận 403 hay 404
+url: "{{baseUrl}}/api/reviews"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "bookingId": "<đơn của A>",
+      "rating": 5
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-REV-07] Đánh giá đơn của người khác (không chính chủ)
+      pm.test("[TC-REV-07] Status code is 403", function () {
+          pm.expect(pm.response.code).to.be.oneOf([403]);
+      });
+    language: text/javascript
+order: 2000

@@ -1,0 +1,3357 @@
+{
+  "info": {
+    "_postman_id": "a4c852d6-b3b7-4f22-ad27-2b3aa3b6eac2",
+    "name": "KÉN Coffee In Bed - Automated Test Suite (Postman Runner)",
+    "description": "Tập hợp test case tự động cho Postman Runner theo đặc tả 5 Module: Space & Zone, Package & Inclusion, Add-on & Product, Payment, Loyalty. Tự động liên kết dữ liệu giữa các bước và kiểm tra Pass/Fail.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3002",
+      "type": "string"
+    },
+    {
+      "key": "adminPhone",
+      "value": "0909000001",
+      "type": "string"
+    },
+    {
+      "key": "adminPassword",
+      "value": "password123",
+      "type": "string"
+    },
+    {
+      "key": "customerPhone",
+      "value": "0909123456",
+      "type": "string"
+    },
+    {
+      "key": "customerPassword",
+      "value": "password123",
+      "type": "string"
+    },
+    {
+      "key": "zoneId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "spaceId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "packageId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "pricingId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "inclusionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "productId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "addonId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "voucherId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "voucherCode",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "coinVoucherId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "bookingId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "bookingCode",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "finalAmount",
+      "value": "150000",
+      "type": "string"
+    },
+    {
+      "key": "paymentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "idempotencyKey",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "bookingStartAt",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "00. Khởi tạo & Đăng nhập (Auth Setup)",
+      "item": [
+        {
+          "name": "01. TC-AU-001: Admin Đăng nhập (Lấy phiên Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK (Admin login)\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401]);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    var res = pm.response.json();",
+                  "    pm.test(\"Logged in as ADMIN\", function () {",
+                  "        pm.expect(res.user.role).to.eql(\"ADMIN\");",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Đăng nhập tài khoản Admin để cấp session cookie connect.sid cho các thao tác quản trị CRUD.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"identifier\": \"{{adminPhone}}\",\n    \"password\": \"{{adminPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "02. TC-AU-002: Customer Đăng nhập (Lấy phiên Khách hàng)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK (Customer login)\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401]);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    var res = pm.response.json();",
+                  "    pm.test(\"Logged in as CUSTOMER\", function () {",
+                  "        pm.expect(res.user.role).to.eql(\"CUSTOMER\");",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Đăng nhập tài khoản Khách hàng để kiểm tra luồng đặt chỗ, thanh toán và ví loyalty.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"identifier\": \"{{customerPhone}}\",\n    \"password\": \"{{customerPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "01. Quản lý Zone & Space (Space & Zone Management)",
+      "item": [
+        {
+          "name": "03. TC-SZ-038: Admin thêm Zone mới (Positive)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('zoneCode', 'ZN_R' + Date.now().toString(36).toUpperCase());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Zone id returned and saved to variable\", function () {",
+                  "    var res = pm.response.json();",
+                  "    pm.expect(res.id || (res.zone && res.zone._id)).to.be.ok;",
+                  "    pm.collectionVariables.set(\"zoneId\", res.id || String(res.zone._id));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/zones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "zones"
+              ]
+            },
+            "description": "Tạo Zone mới và tự động lưu `zoneId` vào collection variable để truyền vào bước tạo Space tiếp theo.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"zone_code\": \"{{zoneCode}}\",\n    \"name\": \"K\\u00c9N S\\u00e1ng T\\u1ea1o Runner\",\n    \"description\": \"Khu v\\u1ef1c kh\\u00f4ng gian l\\u00e0m vi\\u1ec7c n\\u0103ng \\u0111\\u1ed9ng v\\u00e0 k\\u1ebft n\\u1ed1i\",\n    \"is_bookable\": true,\n    \"is_active\": true,\n    \"image_url\": \"/images/zones/runner_zone.jpg\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "04. TC-SZ-001: Xem danh sách Zone (Public Read-Only)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response is an array of zones\", function () {",
+                  "    var res = pm.response.json();",
+                  "    pm.expect(Array.isArray(res)).to.be.true;",
+                  "    pm.expect(res.length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/zones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "zones"
+              ]
+            },
+            "description": "Khách vãng lai xem danh sách Zone mà không cần đăng nhập."
+          },
+          "response": []
+        },
+        {
+          "name": "05. TC-SZ-041: Admin cập nhật Zone vừa tạo (Positive)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Zone updated confirmed\", function () {",
+                  "    var res = pm.response.json();",
+                  "    pm.expect(res.updated).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/zones/{{zoneId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "zones",
+                "{{zoneId}}"
+              ]
+            },
+            "description": "Admin cập nhật tên Zone dựa trên `zoneId` đã lưu ở bước trước.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"K\\u00c9N S\\u00e1ng T\\u1ea1o Runner (Updated)\",\n    \"isBookable\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "06. TC-SZ-018: Admin tạo Space EXCLUSIVE mới (Positive)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('spaceCode', 'SPC_R' + Date.now().toString(36).toUpperCase());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Space id saved to variable\", function () {",
+                  "    var res = pm.response.json();",
+                  "    pm.expect(res.id || (res.space && res.space._id)).to.be.ok;",
+                  "    pm.collectionVariables.set(\"spaceId\", res.id || String(res.space._id));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/spaces",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "spaces"
+              ]
+            },
+            "description": "Tạo phòng họp EXCLUSIVE thuộc Zone vừa tạo và tự động lưu `spaceId`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"zoneId\": \"{{zoneId}}\",\n    \"spaceCode\": \"{{spaceCode}}\",\n    \"name\": \"Ph\\u00f2ng H\\u1ecdp Runner VIP\",\n    \"spaceType\": \"MEETING_ROOM\",\n    \"bookingMode\": \"EXCLUSIVE\",\n    \"capacity\": 8,\n    \"minGuests\": 1,\n    \"maxGuests\": 8,\n    \"openTime\": \"08:00\",\n    \"closeTime\": \"22:00\",\n    \"bufferMinutes\": 15,\n    \"status\": \"ACTIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "07. TC-SZ-020: Admin tạo Space với min_guests > max_guests (Negative 422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 422 Validation Error\", function () {",
+                  "    pm.response.to.have.status(422);",
+                  "});",
+                  "pm.test(\"Error code is VALIDATION_ERROR\", function () {",
+                  "    var res = pm.response.json();",
+                  "    pm.expect(res.code).to.eql(\"VALIDATION_ERROR\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/spaces",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "spaces"
+              ]
+            },
+            "description": "Kiểm tra hệ thống chặn dữ liệu bất hợp lệ minGuests > maxGuests.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"zoneId\": \"{{zoneId}}\",\n    \"name\": \"Space L\\u1ed7i Validation\",\n    \"bookingMode\": \"EXCLUSIVE\",\n    \"capacity\": 8,\n    \"minGuests\": 10,\n    \"maxGuests\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "08. TC-SZ-004: Xem danh sách Space (Public Read-Only)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"List spaces returned\", function () {",
+                  "    var res = pm.response.json();",
+                  "    pm.expect(Array.isArray(res)).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/spaces",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "spaces"
+              ]
+            },
+            "description": "Khám phá danh sách không gian công khai."
+          },
+          "response": []
+        },
+        {
+          "name": "09. TC-SZ-005: Xem chi tiết Space kèm Zone (Dynamic SpaceId)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Space details match created spaceId\", function () {",
+                  "    var res = pm.response.json();",
+                  "    pm.expect(String(res._id)).to.eql(pm.collectionVariables.get(\"spaceId\"));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/spaces/{{spaceId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "spaces",
+                "{{spaceId}}"
+              ]
+            },
+            "description": "Lấy chi tiết phòng họp vừa tạo qua `spaceId` động."
+          },
+          "response": []
+        },
+        {
+          "name": "10. TC-SZ-028: Admin cập nhật Space (Positive)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Space updated confirmed\", function () {",
+                  "    var res = pm.response.json();",
+                  "    pm.expect(res.updated).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/spaces/{{spaceId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "spaces",
+                "{{spaceId}}"
+              ]
+            },
+            "description": "Admin cập nhật thông tin phòng.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Ph\\u00f2ng H\\u1ecdp Runner VIP (\\u0110\\u00e3 \\u0111\\u1ed5i t\\u00ean)\",\n    \"maxGuests\": 8\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "11. TC-SZ-033: Chuyển Space sang MAINTENANCE (Bảo trì)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/spaces/{{spaceId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "spaces",
+                "{{spaceId}}"
+              ]
+            },
+            "description": "Chuyển trạng thái phòng sang MAINTENANCE.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"status\": \"MAINTENANCE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "12. TC-SZ-034: Mở lại Space sang ACTIVE (Hoạt động)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/spaces/{{spaceId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "spaces",
+                "{{spaceId}}"
+              ]
+            },
+            "description": "Mở lại phòng sang ACTIVE để chuẩn bị đặt chỗ.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"status\": \"ACTIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "13. TC-SZ-009: Khám phá chỗ trống (UC-04: startAt + guestCount)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Availability list returned\", function () {",
+                  "    var res = pm.response.json();",
+                  "    pm.expect(Array.isArray(res)).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/spaces?startAt=2026-11-20T10:00:00Z&guestCount=2&hours=2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "spaces?startAt=2026-11-20T10:00:00Z&guestCount=2&hours=2"
+              ]
+            },
+            "description": "Tìm kiếm chỗ trống theo ngày giờ và số lượng khách."
+          },
+          "response": []
+        },
+        {
+          "name": "14. TC-SZ-017: POST /api/catalog/availability (Read-only Availability)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Result contains spaces list\", function () {",
+                  "    var res = pm.response.json();",
+                  "    pm.expect(res.spaces).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/availability",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "availability"
+              ]
+            },
+            "description": "Kiểm tra chỗ trống qua phương thức POST.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"startAt\": \"2026-11-20T10:00:00Z\",\n    \"guestCount\": 2,\n    \"hours\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02. Quản lý Gói & Quyền lợi (Package & Inclusion Management)",
+      "item": [
+        {
+          "name": "15. TC-PK-006: Admin tạo Gói Dịch Vụ HOURLY mới (Positive)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('packageCode', 'PKG_R' + Date.now().toString(36).toUpperCase());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Package id saved to variable\", function () {",
+                  "    var res = pm.response.json();",
+                  "    pm.expect(res.id || (res.package && res.package._id)).to.be.ok;",
+                  "    pm.collectionVariables.set(\"packageId\", res.id || String(res.package._id));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/packages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "packages"
+              ]
+            },
+            "description": "Tạo gói HOURLY và tự động lưu `packageId`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"zoneId\": \"{{zoneId}}\",\n    \"packageCode\": \"{{packageCode}}\",\n    \"name\": \"G\\u00f3i L\\u00e0m Vi\\u1ec7c Theo Gi\\u1edd Runner\",\n    \"packageType\": \"HOURLY\",\n    \"pricingUnit\": \"PER_SPACE\",\n    \"minHours\": 1,\n    \"isActive\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "16. TC-PK-007: Admin tạo Gói FIXED 4 Giờ (Positive)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/packages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "packages"
+              ]
+            },
+            "description": "Tạo thêm gói FIXED 4 giờ.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"zoneId\": \"{{zoneId}}\",\n    \"name\": \"G\\u00f3i N\\u1eeda Ng\\u00e0y 4 Gi\\u1edd Runner\",\n    \"packageType\": \"FIXED\",\n    \"pricingUnit\": \"PER_SPACE\",\n    \"durationHours\": 4,\n    \"minHours\": 1,\n    \"isFullDay\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "17. TC-PK-010: Admin tạo Gói sai pricingType (Negative 422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 422 Validation Error\", function () {",
+                  "    pm.response.to.have.status(422);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/packages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "packages"
+              ]
+            },
+            "description": "Kiểm tra hệ thống chặn packageType không hợp lệ.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"zoneId\": \"{{zoneId}}\",\n    \"name\": \"G\\u00f3i L\\u1ed7i\",\n    \"packageType\": \"DAILY\",\n    \"pricingUnit\": \"PER_SPACE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "18. TC-PK-001: Xem danh sách Gói (Public Read-Only)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/packages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "packages"
+              ]
+            },
+            "description": "Khách xem danh sách gói cước."
+          },
+          "response": []
+        },
+        {
+          "name": "19. TC-PK-002: Xem chi tiết Gói theo packageId (Dynamic PackageId)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Package id matches\", function () {",
+                  "    var res = pm.response.json();",
+                  "    pm.expect(String(res._id)).to.eql(pm.collectionVariables.get(\"packageId\"));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/packages/{{packageId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "packages",
+                "{{packageId}}"
+              ]
+            },
+            "description": "Xem chi tiết gói cước vừa tạo."
+          },
+          "response": []
+        },
+        {
+          "name": "20. TC-PK-016: Admin cập nhật Gói (Positive)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/packages/{{packageId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "packages",
+                "{{packageId}}"
+              ]
+            },
+            "description": "Admin cập nhật minHours của gói cước.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"G\\u00f3i L\\u00e0m Vi\\u1ec7c Theo Gi\\u1edd Runner (\\u0110\\u00e3 C\\u1eadp Nh\\u1eadt)\",\n    \"minHours\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "21. TC-PK-032: Admin gán bảng giá Package cho Space (Positive)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Pricing id saved\", function () {",
+                  "    var res = pm.response.json();",
+                  "    pm.expect(res.id || (res.packagePrice && res.packagePrice._id)).to.be.ok;",
+                  "    pm.collectionVariables.set(\"pricingId\", res.id || String(res.packagePrice._id));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/pricing",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "pricing"
+              ]
+            },
+            "description": "Gán mức giá 150.000đ cho cặp Space và Package vừa tạo, lưu `pricingId`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"spaceId\": \"{{spaceId}}\",\n    \"packageId\": \"{{packageId}}\",\n    \"price\": 150000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "22. TC-PK-033: Admin gán giá âm vào bảng giá (Negative 422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 422 Validation Error\", function () {",
+                  "    pm.response.to.have.status(422);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/pricing",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "pricing"
+              ]
+            },
+            "description": "Kiểm tra assertMoney chặn giá tiền âm.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"spaceId\": \"{{spaceId}}\",\n    \"packageId\": \"{{packageId}}\",\n    \"price\": -50000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "23. TC-PK-031: Xem bảng giá theo spaceId (Public Read-Only)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/pricing?spaceId={{spaceId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "pricing?spaceId={{spaceId}}"
+              ]
+            },
+            "description": "Truy vấn bảng giá dịch vụ của phòng họp."
+          },
+          "response": []
+        },
+        {
+          "name": "24. TC-PK-036: Admin cập nhật mức giá trong bảng giá (Positive)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/pricing/{{pricingId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "pricing",
+                "{{pricingId}}"
+              ]
+            },
+            "description": "Admin điều chỉnh giá thành 180.000đ.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"price\": 180000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "25. TC-PK-022: Admin cấu hình Inclusion STANDARD_DRINK (Positive)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Inclusion id saved\", function () {",
+                  "    var res = pm.response.json();",
+                  "    pm.expect(res.id || (res.inclusion && res.inclusion._id)).to.be.ok;",
+                  "    pm.collectionVariables.set(\"inclusionId\", res.id || String(res.inclusion._id));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/package-inclusions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "package-inclusions"
+              ]
+            },
+            "description": "Thêm quyền lợi 1 phần đồ uống tiêu chuẩn (hạn mức hỗ trợ 50.000đ).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"packageId\": \"{{packageId}}\",\n    \"itemType\": \"STANDARD_DRINK\",\n    \"quantity\": 1,\n    \"quantityBasis\": \"PER_GUEST\",\n    \"subsidyLimit\": 50000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "26. TC-PK-024: Admin cấu hình Inclusion với itemType sai (Negative 422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 422 Validation Error\", function () {",
+                  "    pm.response.to.have.status(422);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/package-inclusions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "package-inclusions"
+              ]
+            },
+            "description": "Kiểm tra hệ thống chặn loại quyền lợi không nằm trong danh mục quy chuẩn.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"packageId\": \"{{packageId}}\",\n    \"itemType\": \"ALCOHOL_BEER\",\n    \"quantity\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "27. TC-PK-021: Xem danh sách quyền lợi theo packageId",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/package-inclusions?packageId={{packageId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "package-inclusions?packageId={{packageId}}"
+              ]
+            },
+            "description": "Xem danh sách quyền lợi đính kèm gói."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03. Quản lý Thực đơn & Tiện ích (Add-on & Product Management)",
+      "item": [
+        {
+          "name": "28. TC-AD-009: Admin thêm Product F&B DRINK có variants (Positive)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Product id saved\", function () {",
+                  "    var res = pm.response.json();",
+                  "    pm.expect(res.id || (res.product && res.product._id)).to.be.ok;",
+                  "    pm.collectionVariables.set(\"productId\", res.id || String(res.product._id));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "products"
+              ]
+            },
+            "description": "Tạo món đồ uống mới kèm variants và lưu `productId`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"C\\u00e0 Ph\\u00ea Mu\\u1ed1i K\\u00c9N Runner\",\n    \"category\": \"DRINK\",\n    \"price\": 40000,\n    \"variants\": [\n        {\n            \"name\": \"Size M\",\n            \"price\": 40000\n        },\n        {\n            \"name\": \"Size L\",\n            \"price\": 49000\n        }\n    ],\n    \"isActive\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "29. TC-AD-010: Admin thêm Product giá âm (Negative 422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 422 Validation Error\", function () {",
+                  "    pm.response.to.have.status(422);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "products"
+              ]
+            },
+            "description": "Chặn giá âm qua assertMoney.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"M\\u00f3n Gi\\u00e1 \\u00c2m\",\n    \"category\": \"DRINK\",\n    \"price\": -20000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "30. TC-AD-012: Admin thêm Product category sai enum (Negative 422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 422 Validation Error\", function () {",
+                  "    pm.response.to.have.status(422);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "products"
+              ]
+            },
+            "description": "Chặn category không thuộc DRINK, PASTRY, SNACK.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"M\\u00f3n L\\u1ea1\",\n    \"category\": \"BUFFET\",\n    \"price\": 99000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "31. TC-AD-001: Xem toàn bộ Menu F&B (Public Read-Only)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Menu list returned\", function () {",
+                  "    var res = pm.response.json();",
+                  "    pm.expect(Array.isArray(res)).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "products"
+              ]
+            },
+            "description": "Khách xem menu 13 món F&B."
+          },
+          "response": []
+        },
+        {
+          "name": "32. TC-AD-003: Xem chi tiết Product theo productId (Dynamic ProductId)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/products?category=DRINK",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "products?category=DRINK"
+              ]
+            },
+            "description": "Lọc menu theo nhóm DRINK."
+          },
+          "response": []
+        },
+        {
+          "name": "33. TC-AD-014: Admin cập nhật giá Product (Positive)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/products/{{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "products",
+                "{{productId}}"
+              ]
+            },
+            "description": "Admin cập nhật giá sản phẩm.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"unitPrice\": 45000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "34. TC-AD-018: Admin thêm Add-on PER_ITEM (Positive)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Addon id saved\", function () {",
+                  "    var res = pm.response.json();",
+                  "    pm.expect(res.id || (res.addon && res.addon._id)).to.be.ok;",
+                  "    pm.collectionVariables.set(\"addonId\", res.id || String(res.addon._id));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/addons",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "addons"
+              ]
+            },
+            "description": "Tạo tiện ích tính theo lượt và lưu `addonId`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"B\\u00fat Tr\\u00ecnh Chi\\u1ebfu Laser Runner\",\n    \"unit\": \"PER_ITEM\",\n    \"price\": 20000,\n    \"isActive\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "35. TC-AD-019: Admin thêm Add-on PER_BOOKING (Positive)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/addons",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "addons"
+              ]
+            },
+            "description": "Tạo tiện ích trọn gói mỗi lượt đặt.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"B\\u1ed9 Setup H\\u1ed9i Th\\u1ea3o Chuy\\u00ean Nghi\\u1ec7p\",\n    \"unit\": \"PER_BOOKING\",\n    \"price\": 100000,\n    \"isActive\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "36. TC-AD-020: Admin thêm Add-on với unit không hợp lệ (Negative 422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 422 Validation Error\", function () {",
+                  "    pm.response.to.have.status(422);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/addons",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "addons"
+              ]
+            },
+            "description": "Chặn unit không thuộc PER_ITEM hoặc PER_BOOKING.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Ti\\u1ec7n \\u00edch l\\u1ed7i\",\n    \"unit\": \"PER_HOUR\",\n    \"price\": 50000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "37. TC-AD-006: Xem danh sách Add-on (Public Read-Only)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/addons",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "addons"
+              ]
+            },
+            "description": "Khách xem danh sách tiện ích mở rộng."
+          },
+          "response": []
+        },
+        {
+          "name": "38. TC-AD-022: Admin cập nhật Add-on (Positive)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/addons/{{addonId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "addons",
+                "{{addonId}}"
+              ]
+            },
+            "description": "Admin cập nhật giá thuê tiện ích.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"price\": 25000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "04. Khuyến mãi & Tạo đơn Đặt chỗ (Voucher & Booking)",
+      "item": [
+        {
+          "name": "39. TC-VC-001: Admin tạo Voucher công khai KEN10K (Positive)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('voucherCode', 'KEN10K_' + Date.now().toString(36).toUpperCase());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Voucher id saved\", function () {",
+                  "    var res = pm.response.json();",
+                  "    pm.expect(res.id || (res.voucher && res.voucher._id)).to.be.ok;",
+                  "    pm.collectionVariables.set(\"voucherId\", res.id || String(res.voucher._id));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/vouchers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "vouchers"
+              ]
+            },
+            "description": "Tạo voucher công khai giảm tiền trực tiếp, lưu `voucherCode` và `voucherId`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"code\": \"{{voucherCode}}\",\n    \"description\": \"Gi\\u1ea3m 10.000\\u0111 cho \\u0111\\u01a1n t\\u1eeb 100k\",\n    \"discountType\": \"FIXED_AMOUNT\",\n    \"discountValue\": 10000,\n    \"minOrderValue\": 50000,\n    \"usageLimit\": 100,\n    \"coinsCost\": 0,\n    \"status\": \"ACTIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "40. TC-VC-002: Admin tạo Voucher đổi bằng Coins (Positive)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Coin Voucher id saved\", function () {",
+                  "    var res = pm.response.json();",
+                  "    pm.expect(res.id || (res.voucher && res.voucher._id)).to.be.ok;",
+                  "    pm.collectionVariables.set(\"coinVoucherId\", res.id || String(res.voucher._id));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/vouchers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "vouchers"
+              ]
+            },
+            "description": "Tạo voucher hỗ trợ đổi bằng Coins và lưu `coinVoucherId` cho Module Loyalty.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"code\": \"COIN_VOUCHER_20K\",\n    \"description\": \"\\u0110\\u1ed5i 50 K\\u00c9N Coins l\\u1ea5y Voucher 20.000\\u0111\",\n    \"discountType\": \"FIXED_AMOUNT\",\n    \"discountValue\": 20000,\n    \"minOrderValue\": 50000,\n    \"usageLimit\": 50,\n    \"redeemLimit\": 50,\n    \"coinsCost\": 50,\n    \"status\": \"ACTIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "41. TC-VC-004: Admin tạo Voucher với validTo trước validFrom (Negative 422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 422 Validation Error\", function () {",
+                  "    pm.response.to.have.status(422);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/vouchers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "vouchers"
+              ]
+            },
+            "description": "Kiểm tra chặn ngày hết hạn trước ngày bắt đầu.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"code\": \"BAD_DATES\",\n    \"discountType\": \"PERCENT\",\n    \"discountValue\": 10,\n    \"validFrom\": \"2026-12-31T00:00:00Z\",\n    \"validTo\": \"2026-01-01T00:00:00Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "42. TC-VC-014: Khách xem danh sách Voucher ACTIVE (Public Read-Only)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/vouchers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "vouchers"
+              ]
+            },
+            "description": "Khách hàng xem các mã giảm giá đang hoạt động."
+          },
+          "response": []
+        },
+        {
+          "name": "43. TC-VC-008: Admin cập nhật điều kiện Voucher (Positive)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/vouchers/{{voucherId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "vouchers",
+                "{{voucherId}}"
+              ]
+            },
+            "description": "Cập nhật số lượt dùng tối đa của voucher.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"usage_limit\": 200\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "44. TC-BK-007: Khách hàng tạo Đơn Đặt Chỗ Checkout PENDING_PAYMENT (Dynamic Data Link)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var tmr = new Date(Date.now() + 24 * 3600 * 1000);",
+                  "tmr.setHours(9, 0, 0, 0);",
+                  "pm.collectionVariables.set(\"bookingStartAt\", tmr.toISOString());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201 Created (Booking initiated)\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Capture bookingId, bookingCode, finalAmount for Payment\", function () {",
+                  "    var res = pm.response.json();",
+                  "    var bId = res._id || res.id;",
+                  "    pm.expect(bId).to.be.ok;",
+                  "    pm.collectionVariables.set(\"bookingId\", String(bId));",
+                  "    pm.collectionVariables.set(\"bookingCode\", res.booking_code || res.bookingCode || \"BK_DEFAULT\");",
+                  "    pm.collectionVariables.set(\"finalAmount\", String(res.final_amount !== undefined ? res.final_amount : (res.finalAmount || 180000)));",
+                  "    pm.collectionVariables.set(\"idempotencyKey\", \"KEY_PAY_\" + Date.now());",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "CUSTOMER"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "bookings"
+              ]
+            },
+            "description": "Bước mấu chốt: Tạo đơn đặt chỗ PENDING_PAYMENT, tự động trích xuất `bookingId`, `bookingCode`, `finalAmount` để điền tự động vào Module Payment!",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"spaceId\": \"{{spaceId}}\",\n    \"packageId\": \"{{packageId}}\",\n    \"startAt\": \"{{bookingStartAt}}\",\n    \"hours\": 4,\n    \"guestCount\": 2,\n    \"inclusions\": [],\n    \"addons\": [],\n    \"voucherCode\": \"{{voucherCode}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "45. TC-BK-037: Khách xem đơn vừa tạo trong lịch sử cá nhân",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "CUSTOMER"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "bookings",
+                "me"
+              ]
+            },
+            "description": "Xem lịch sử đặt chỗ cá nhân."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "05. Quản lý Thanh toán (Payment Management)",
+      "item": [
+        {
+          "name": "46. TC-PM-009: Khách tạo giao dịch thanh toán Idempotent (Positive 201)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Đảm bảo amount là số nguyên trong body JSON",
+                  "var amt = parseInt(pm.collectionVariables.get(\"finalAmount\") || \"170000\", 10);",
+                  "pm.request.body.raw = JSON.stringify({",
+                  "    bookingId: pm.collectionVariables.get(\"bookingId\"),",
+                  "    amount: amt,",
+                  "    idempotencyKey: pm.collectionVariables.get(\"idempotencyKey\"),",
+                  "    method: \"SIMULATION\",",
+                  "    status: \"SUCCESS\"",
+                  "});"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Payment transaction SUCCESS\", function () {",
+                  "    var res = pm.response.json();",
+                  "    pm.expect(res.transaction.status).to.eql(\"SUCCESS\");",
+                  "    pm.collectionVariables.set(\"paymentId\", res.transaction.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "CUSTOMER"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "payments"
+              ]
+            },
+            "description": "Tạo giao dịch thanh toán thành công bằng `bookingId` và `finalAmount` vừa trích xuất từ đơn đặt chỗ.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"bookingId\": \"{{bookingId}}\",\n    \"amount\": \"{{finalAmount}}\",\n    \"idempotencyKey\": \"{{idempotencyKey}}\",\n    \"method\": \"SIMULATION\",\n    \"status\": \"SUCCESS\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "47. TC-PM-010: Gửi lại cùng idempotencyKey -> Trả giao dịch cũ (Idempotent 200)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var amt = parseInt(pm.collectionVariables.get(\"finalAmount\") || \"170000\", 10);",
+                  "pm.request.body.raw = JSON.stringify({",
+                  "    bookingId: pm.collectionVariables.get(\"bookingId\"),",
+                  "    amount: amt,",
+                  "    idempotencyKey: pm.collectionVariables.get(\"idempotencyKey\"),",
+                  "    method: \"SIMULATION\",",
+                  "    status: \"SUCCESS\"",
+                  "});"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK (Idempotent response)\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Idempotent flag is true\", function () {",
+                  "    var res = pm.response.json();",
+                  "    pm.expect(res.idempotent).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "CUSTOMER"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "payments"
+              ]
+            },
+            "description": "Kiểm tra cơ chế chống thanh toán 2 lần: cùng key trả lại giao dịch cũ."
+          },
+          "response": []
+        },
+        {
+          "name": "48. TC-PM-012: Thanh toán số tiền không khớp finalAmount (Negative 422)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.request.body.raw = JSON.stringify({",
+                  "    bookingId: pm.collectionVariables.get(\"bookingId\"),",
+                  "    amount: 1000,",
+                  "    idempotencyKey: \"DIFF_KEY_\" + Date.now(),",
+                  "    method: \"SIMULATION\",",
+                  "    status: \"SUCCESS\"",
+                  "});"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 422 (Amount mismatch or payable error)\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([422, 409]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "CUSTOMER"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "payments"
+              ]
+            },
+            "description": "Chặn thanh toán khi số tiền không khớp với đơn đặt."
+          },
+          "response": []
+        },
+        {
+          "name": "49. TC-PM-020: Xem lịch sử giao dịch của Đơn đặt chỗ (Positive)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Transactions list returned\", function () {",
+                  "    var res = pm.response.json();",
+                  "    pm.expect(Array.isArray(res.transactions)).to.be.true;",
+                  "    pm.expect(res.transactions.length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "CUSTOMER"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/booking/{{bookingId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "payments",
+                "booking",
+                "{{bookingId}}"
+              ]
+            },
+            "description": "Tra cứu các giao dịch đã thực hiện cho đơn đặt chỗ."
+          },
+          "response": []
+        },
+        {
+          "name": "50. TC-PM-022: Admin tra cứu toàn bộ danh sách giao dịch (Admin only)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Admin payments list contains total\", function () {",
+                  "    var res = pm.response.json();",
+                  "    pm.expect(res.total).to.be.a('number');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments?page=1&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "payments?page=1&limit=10"
+              ]
+            },
+            "description": "Admin xem báo cáo lịch sử thanh toán toàn hệ thống."
+          },
+          "response": []
+        },
+        {
+          "name": "51. TC-PM-001: Xác nhận đơn CONFIRMED sau thanh toán",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 409]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "CUSTOMER"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings/{{bookingId}}/pay",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "bookings",
+                "{{bookingId}}",
+                "pay"
+              ]
+            },
+            "description": "Chuyển trạng thái đơn sang CONFIRMED sẵn sàng cho Check-in.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"result\": \"SUCCESS\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "06. Quản lý Hạng & Tích điểm (Loyalty Management)",
+      "item": [
+        {
+          "name": "52. TC-LY-001: Xem 4 Hạng Thành Viên (Public Read-Only)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Contains 4 membership tiers\", function () {",
+                  "    var res = pm.response.json();",
+                  "    pm.expect(res.length).to.eql(4);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/loyalty/tiers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "loyalty",
+                "tiers"
+              ]
+            },
+            "description": "Xem bảng 4 hạng: BASIC, SILVER, GOLD, DIAMOND."
+          },
+          "response": []
+        },
+        {
+          "name": "53. TC-BK-027: Admin Check-in đơn đặt chỗ tại quầy",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 409]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings/{{bookingId}}/check-in",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "bookings",
+                "{{bookingId}}",
+                "check-in"
+              ]
+            },
+            "description": "Admin check-in đơn khách đến quầy (chuyển CHECKED_IN)."
+          },
+          "response": []
+        },
+        {
+          "name": "54. TC-BK-030 / TC-LY-002: Admin Check-out & Tự động tích Điểm/Coins",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 409]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings/{{bookingId}}/check-out",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "bookings",
+                "{{bookingId}}",
+                "check-out"
+              ]
+            },
+            "description": "Admin hoàn tất phiên sử dụng, kích hoạt tự động tích lũy KÉN Coins."
+          },
+          "response": []
+        },
+        {
+          "name": "55. TC-LY-005: Chống cộng điểm 2 lần cho cùng một đơn (Idempotency 409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 409 Conflict (Already earned)\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([409, 200]);",
+                  "});",
+                  "if (pm.response.code === 409) {",
+                  "    var res = pm.response.json();",
+                  "    pm.expect(res.code).to.eql(\"ALREADY_EARNED\");",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/loyalty/earn",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "loyalty",
+                "earn"
+              ]
+            },
+            "description": "Thử cộng điểm lần 2 cho cùng bookingId -> Chặn thành công với 409 ALREADY_EARNED.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"bookingId\": \"{{bookingId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "56. TC-LY-018: Khách xem lịch sử biến động Điểm & Coins cá nhân",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Transactions array returned\", function () {",
+                  "    var res = pm.response.json();",
+                  "    pm.expect(res.transactions).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "CUSTOMER"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/loyalty/history?page=1&limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "loyalty",
+                "history?page=1&limit=20"
+              ]
+            },
+            "description": "Khách xem lịch sử cộng/trừ điểm và Coins."
+          },
+          "response": []
+        },
+        {
+          "name": "57. TC-VC-021: Khách đổi KÉN Coins lấy Voucher (Dynamic coinVoucherId)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK or 422 if coins balance is 0\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 422]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "CUSTOMER"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/loyalty/redeem",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "loyalty",
+                "redeem"
+              ]
+            },
+            "description": "Khách đổi Coins lấy Voucher ưu đãi từ `coinVoucherId` đã lưu.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"voucherId\": \"{{coinVoucherId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "58. TC-VC-026: Khách kiểm tra Ví Voucher cá nhân (my-vouchers)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Vouchers list returned\", function () {",
+                  "    var res = pm.response.json();",
+                  "    pm.expect(res.vouchers).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "CUSTOMER"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/loyalty/my-vouchers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "loyalty",
+                "my-vouchers"
+              ]
+            },
+            "description": "Kiểm tra ví voucher sau khi đổi Coins."
+          },
+          "response": []
+        },
+        {
+          "name": "59. TC-LY-014: Admin chạy Rollover cuối năm (Hạ 1 bậc, reset Coins)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Processed users count returned\", function () {",
+                  "    var res = pm.response.json();",
+                  "    pm.expect(res.processed).to.be.a('number');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/loyalty/year-rollover",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "loyalty",
+                "year-rollover"
+              ]
+            },
+            "description": "Thực hiện cơ chế hạ 1 bậc hạng thành viên và reset Coins đầu năm mới.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"year\": 2026\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "07. Dọn dẹp & Xóa mềm (Teardown & Soft Delete)",
+      "item": [
+        {
+          "name": "60. TC-PK-038: Admin Xóa mềm Gói dịch vụ (Soft Delete)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Package soft deleted\", function () {",
+                  "    var res = pm.response.json();",
+                  "    pm.expect(res.deleted).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/packages/{{packageId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "packages",
+                "{{packageId}}"
+              ]
+            },
+            "description": "Xóa mềm gói cước sau khi test xong."
+          },
+          "response": []
+        },
+        {
+          "name": "61. TC-SZ-036: Admin Xóa mềm Space (Soft Delete status INACTIVE)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Space soft deleted\", function () {",
+                  "    var res = pm.response.json();",
+                  "    pm.expect(res.deleted).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/spaces/{{spaceId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "spaces",
+                "{{spaceId}}"
+              ]
+            },
+            "description": "Xóa mềm phòng họp chuyển status về INACTIVE."
+          },
+          "response": []
+        },
+        {
+          "name": "62. TC-SZ-042: Admin Xóa mềm Zone (Soft Delete is_active false)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Zone soft deleted\", function () {",
+                  "    var res = pm.response.json();",
+                  "    pm.expect(res.deleted).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-test-role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/zones/{{zoneId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "zones",
+                "{{zoneId}}"
+              ]
+            },
+            "description": "Xóa mềm Zone chuyển is_active về false."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
