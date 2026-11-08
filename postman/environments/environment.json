@@ -9,6 +9,18 @@
       "enabled": true
     },
     {
+      "key": "adminPhone",
+      "value": "0900000001",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "adminPassword",
+      "value": "Admin@123",
+      "type": "secret",
+      "enabled": true
+    },
+    {
       "key": "testPhone",
       "value": "0909123456",
       "type": "default",
@@ -39,8 +51,44 @@
       "enabled": true
     },
     {
+      "key": "voucherCoinId",
+      "value": "59228bb33ddcdbaf15612d7c",
+      "type": "default",
+      "enabled": true
+    },
+    {
       "key": "bookingId",
-      "value": "aaaa00000000000000000001",
+      "value": "6af09f9bb2d5fdf57dd7f516",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "bookingCheckedIn10kId",
+      "value": "6af09f9bb2d5fdf57dd7f516",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "bookingCheckedIn9kId",
+      "value": "6af09f9bb2d5fdf57dd7f517",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "bookingCheckedInDiscountId",
+      "value": "6af09f9bb2d5fdf57dd7f518",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "bookingCheckedOutId",
+      "value": "6af09f9bb2d5fdf57dd7f519",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "bookingConfirmedId",
+      "value": "6af09f9bb2d5fdf57dd7f51a",
       "type": "default",
       "enabled": true
     },
@@ -53,6 +101,18 @@
     {
       "key": "packageId",
       "value": "ee70f0a3e502ddc3b760a715",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "spaceWorkLoungeId",
+      "value": "ab6af5c9b01fa33f757de661",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "pkgFixedPerson70kId",
+      "value": "ac64f28f5bfd0e11f87bd5f2",
       "type": "default",
       "enabled": true
     }
