@@ -6,28 +6,80 @@ const { ObjectId } = require('mongodb');
 const otp = require('../../src/services/otp');
 const { startSession, destroySession } = require('../../src/middleware/auth');
 
-test('issueOtp luôn sinh mã đủ 6 chữ số', async () => {
-  const db = {
-    collection: () => ({
-      updateMany: async () => ({}),
-      insertOne: async () => ({ insertedId: 'x' }),
-    }),
-  };
+process.env.SESSION_SECRET = 'test-secret';
 
-  const codes = [];
-  const origLog = console.log;
-  console.log = (...args) => {
-    const m = String(args.join(' ')).match(/cua ban:\s*(\d+)/);
-    if (m) codes.push(m[1]);
-  };
+const PHONE = '0909123456';
 
-  try {
-    for (let i = 0; i < 1000; i++) {
-      await otp.issueOtp(db, { phone: '0909123456', purpose: 'REGISTER', pendingData: {} });
-    }
-  } finally {
-    console.log = origLog;
+// ---------- DB giả: đủ để chạy issueOtp / verifyOtp, giữ dữ liệu trong mảng ----------
+function makeDb() {
+  const docs = [];
+  let nextId = 1;
+  const calls = { findOne: 0 };
+  const matches = (doc, filter) =>
+    Object.entries(filter).every(([k, v]) =>
+      v !== null && typeof v === 'object' && '$lt' in v ? doc[k] < v.$lt : doc[k] === v,
+    );
+  const apply = (doc, update) => {
+    for (const [k, v] of Object.entries(update.$inc || {})) doc[k] += v;
+    Object.assign(doc, update.$set || {});
+  };
+  const col = {
+    async findOne(filter) {
+      calls.findOne++;
+      const found = docs
+        .filter((d) => matches(d, filter))
+        .sort((a, b) => b.created_at - a.created_at)[0];
+      return found ? { ...found } : null; // trả bản sao như driver thật
+    },
+    async updateOne(filter, update) {
+      const doc = docs.find((d) => matches(d, filter));
+      if (!doc) return { matchedCount: 0 };
+      apply(doc, update);
+      return { matchedCount: 1 };
+    },
+    async updateMany(filter, update) {
+      const hit = docs.filter((d) => matches(d, filter));
+      hit.forEach((d) => apply(d, update));
+      return { matchedCount: hit.length };
+    },
+    async insertOne(doc) {
+      const stored = { _id: nextId++, ...doc };
+      docs.push(stored);
+      return { insertedId: stored._id };
+    },
+  };
+  return { db: { collection: () => col }, docs, calls };
+}
+
+// ---------- tiện ích ----------
+async function withEnv(vars, fn) {
+  const saved = {};
+  for (const k of Object.keys(vars)) {
+    saved[k] = process.env[k];
+    if (vars[k] === undefined) delete process.env[k];
+    else process.env[k] = vars[k];
   }
+  try {
+    return await fn();
+  } finally {
+    for (const k of Object.keys(saved)) {
+      if (saved[k] === undefined) delete process.env[k];
+      else process.env[k] = saved[k];
+    }
+  }
+}
+
+async function captureLogs(fn) {
+  const lines = [];
+  const orig = console.log;
+  console.log = (...args) => lines.push(args.join(' '));
+  try {
+    await fn();
+  } finally {
+    console.log = orig;
+  }
+  return lines;
+}
 
 // Phát hành OTP và lấy mã từ log SMS mock.
 async function issue(db, extra = {}) {
@@ -285,5 +337,4 @@ test('TC-MW-09\tAUTO-MW-09: destroySession: destroy lỗi → reject', async () 
       ),
     /destroy error/,
   );
-});}
-)
+});
