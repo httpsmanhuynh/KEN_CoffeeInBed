@@ -1,0 +1,320 @@
+
+
+/* POLICY PAGE - FIGMA LAYOUT */
+
+.policy-only .ken-container {
+  width: min(1280px, calc(100% - 48px));
+}
+
+.policy-only .ken-hero {
+  background: #ead7b7;
+  padding: 22px 0 38px;
+}
+
+.policy-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  margin-bottom: 18px;
+}
+
+.policy-breadcrumb a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.policy-only .ken-hero h1 {
+  font-family: Inter, Arial, sans-serif;
+  font-size: clamp(30px, 4vw, 44px);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+  margin: 0 0 20px;
+}
+
+.policy-meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 12px;
+}
+
+.policy-draft {
+  background: #fff7e9;
+  border: 1px solid #dec8a6;
+  border-radius: 6px;
+  padding: 7px 13px;
+  font-weight: 600;
+}
+
+.policy-only .ken-section {
+  padding: 50px 0 65px;
+  border-top: 0;
+  background: #f7efe2;
+}
+
+.policy-only .ken-policy-grid {
+  display: grid;
+  grid-template-columns: 330px minmax(0, 1fr);
+  gap: 50px;
+  align-items: start;
+}
+
+.policy-only .ken-toc {
+  position: sticky;
+  top: 20px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  background: #ead7b7;
+  padding: 24px;
+  border-radius: 12px;
+}
+
+.policy-only .ken-toc > a:not(.ken-button) {
+  font-size: 13px;
+  padding: 9px 10px;
+  border-bottom: 0;
+  border-radius: 6px;
+  line-height: 1.4;
+}
+
+.policy-only .ken-toc > a:not(.ken-button):hover {
+  background: #f7ebd8;
+}
+
+.policy-paper {
+  min-width: 0;
+  background: #faf3e7;
+  border: 1px solid #e3d3ba;
+  border-radius: 14px;
+  padding: 36px;
+}
+
+.policy-warning {
+  background: #fff6e5;
+  border: 1px solid #ead8b9;
+  border-radius: 8px;
+  padding: 17px;
+  font-size: 14px;
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.policy-only .ken-policy-section {
+  background: transparent;
+  border: 0;
+  border-top: 1px solid #e5d5bd;
+  border-radius: 0;
+  padding: 34px 0;
+  margin: 0;
+}
+
+.policy-only .ken-policy-section:first-of-type {
+  border-top: 0;
+  padding-top: 12px;
+}
+
+.policy-only .ken-policy-section h3 {
+  font-family: Inter, Arial, sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  border: 0;
+  padding: 0;
+  margin: 0 0 15px;
+}
+
+.policy-only .ken-policy-section p {
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+@media (max-width: 900px) {
+  .policy-only .ken-policy-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .policy-only .ken-toc {
+    position: static;
+    max-height: none;
+  }
+
+  .policy-paper {
+    padding: 24px;
+  }
+}
+
+
+/* FIGMA - POLICY CONTENT AND CONTACT */
+
+.policy-only .ken-policy-section {
+  scroll-margin-top: 24px;
+}
+
+.policy-only .ken-policy-section h3 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: Inter, Arial, sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.5;
+  margin: 0 0 20px;
+  padding: 0;
+  border: none;
+  color: #4a3123;
+}
+
+.policy-num {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 23px;
+  height: 23px;
+  border-radius: 50%;
+  background: #e3a52f;
+  color: #4a3123;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.policy-only .ken-policy-section h4 {
+  font-family: Inter, Arial, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  margin: 22px 0 8px;
+  color: #4a3123;
+}
+
+.policy-only .ken-policy-section p {
+  font-size: 16px;
+  line-height: 1.7;
+  margin-bottom: 16px;
+}
+
+.policy-feature {
+  background: #ead7b7;
+  padding: 18px;
+  margin: 13px 0;
+  border-radius: 9px;
+}
+
+.policy-feature strong {
+  display: block;
+  font-size: 15px;
+  margin-bottom: 9px;
+}
+
+.policy-feature p {
+  font-size: 15px !important;
+  margin: 0 !important;
+  line-height: 1.65;
+}
+
+.policy-numbered {
+  list-style: none;
+  counter-reset: policy-counter;
+  padding: 16px 18px;
+  margin: 12px 0;
+  background: #ead7b7;
+  border-radius: 9px;
+}
+
+.policy-numbered li {
+  counter-increment: policy-counter;
+  display: flex;
+  gap: 13px;
+  align-items: flex-start;
+  font-size: 15px;
+  line-height: 1.65;
+  margin-bottom: 14px;
+}
+
+.policy-numbered li:last-child {
+  margin-bottom: 0;
+}
+
+.policy-numbered li::before {
+  content: counter(policy-counter);
+  display: inline-flex;
+  flex: 0 0 20px;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  flex-shrink: 0;
+  background: #f7efe2;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 11px;
+}
+
+.policy-callout {
+  background: #fff4e1;
+  border: 1px solid #e9d6b6;
+  padding: 17px 19px;
+  border-radius: 9px;
+  font-size: 15px;
+  line-height: 1.7;
+  margin: 15px 0;
+}
+
+.policy-contact {
+  background: #ead7b7;
+  border-radius: 9px;
+  padding: 19px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 15px;
+}
+
+.policy-contact a {
+  text-decoration: none;
+  color: #4a3123;
+}
+
+.policy-contact a:hover {
+  text-decoration: underline;
+}
+
+.policy-contact p {
+  margin: 0 !important;
+  font-size: 15px !important;
+}
+
+.policy-sidebar-help {
+  background: #fffaf2;
+  border-radius: 9px;
+  padding: 15px;
+  margin-top: 17px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.policy-sidebar-help strong {
+  font-size: 13px;
+}
+
+.policy-sidebar-help a {
+  background: none !important;
+  border: none !important;
+  padding: 0 !important;
+  font-weight: 600;
+  font-size: 13px;
+  text-decoration: none;
+  color: #4a3123;
+}
+
+@media (max-width: 900px) {
+  .policy-only .ken-policy-section h3 {
+    font-size: 19px;
+  }
+
+  .policy-contact {
+    padding: 16px;
+  }
+}

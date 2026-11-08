@@ -17,7 +17,15 @@ export class Header {
 
   /** true = giao diện đã đăng nhập (avatar + tên thay cho nút Đăng nhập/Đăng ký). */
   @Input() member = false;
-  // TODO: lấy từ AuthService khi có API hồ sơ
+
+  @Input()
+  set isLoggedIn(value: boolean) {
+    this.member = value;
+  }
+  get isLoggedIn(): boolean {
+    return this.member;
+  }
+
   @Input() userName = 'Thầy Thanh đẹp trai';
 
   constructor(private host: ElementRef<HTMLElement>, private router: Router) {}
@@ -42,3 +50,5 @@ export class Header {
   @HostListener('document:keydown.escape')
   onEsc(): void { this.closeAll(); }
 }
+
+export { Header as HeaderComponent };
