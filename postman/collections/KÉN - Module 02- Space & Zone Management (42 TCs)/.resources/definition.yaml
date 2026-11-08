@@ -1,0 +1,3 @@
+$kind: collection
+name: "KÉN - Module 02: Space & Zone Management (42 TCs)"
+description: "Bộ kiểm thử 42 test cases của Phân hệ 02: Quản lý Khu vực & Không gian (Zone & Space). Bao gồm CRUD Zone, CRUD Space, quản lý trạng thái, sức chứa, giá và ràng buộc nghiệp vụ. Đồng bộ với KEN_TestCase_5_Modules.xlsx."

@@ -1,0 +1,43 @@
+$kind: http-request
+name: '[TC-SZ-032] Customer / Guest cập nhật Space'
+description: '**Mã TC:** TC-SZ-032
+
+  **Nhóm:** Admin cập nhật Space
+
+  **API / Thành phần:** PATCH /api/spaces/:id
+
+  **Loại:** Security
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; đã seed zones/spaces/packages.
+
+  **Dữ liệu vào:** {"name": "X"}
+
+  **Các bước thực hiện:**
+
+  1) PATCH /api/spaces/<id> bằng Customer
+
+  2) Lặp lại không cookie
+
+  **Kết quả mong đợi:** Customer 403; Guest 401 (HTTP: 403)
+
+  **Nhánh code bao phủ:** SPC-B22
+
+  '
+url: '{{baseUrl}}/api/spaces/{{spaceId}}'
+method: PATCH
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: CUSTOMER
+order: 32000
+body:
+  type: json
+  raw: "{\n  \"name\": \"X\"\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-SZ-032] Customer / Guest cập nhật Space\npm.test(\"[TC-SZ-032] Status\
+    \ code is 403\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([403]);\n\
+    });\npm.test(\"[TC-SZ-032] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

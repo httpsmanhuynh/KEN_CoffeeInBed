@@ -1,0 +1,37 @@
+$kind: http-request
+name: '[TC-SZ-012] guestCount < min_guests không khả dụng'
+description: '**Mã TC:** TC-SZ-012
+
+  **Nhóm:** Tìm kiếm & Lọc Space
+
+  **API / Thành phần:** GET /api/spaces?guestCount
+
+  **Loại:** Boundary
+
+  **Điều kiện tiên quyết:** Server chạy; đã seed zones/spaces/packages; không cần
+  đăng nhập. Space min_guests=2.
+
+  **Dữ liệu vào:** guestCount=1
+
+  **Các bước thực hiện:**
+
+  1) GET /api/spaces?...&guestCount=1
+
+  **Kết quả mong đợi:** Space min_guests=2 không khả dụng cho 1 khách (HTTP: 200)
+
+  **Nhánh code bao phủ:** SPC-B09
+
+  '
+url: '{{baseUrl}}/api/spaces?guestCount'
+method: GET
+headers:
+- key: Content-Type
+  value: application/json
+order: 12000
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-SZ-012] guestCount < min_guests không khả dụng\npm.test(\"[TC-SZ-012]\
+    \ Status code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-SZ-012] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

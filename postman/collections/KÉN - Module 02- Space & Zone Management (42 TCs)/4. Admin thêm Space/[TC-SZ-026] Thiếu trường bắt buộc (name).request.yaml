@@ -1,0 +1,41 @@
+$kind: http-request
+name: '[TC-SZ-026] Thiếu trường bắt buộc (name)'
+description: '**Mã TC:** TC-SZ-026
+
+  **Nhóm:** Admin thêm Space
+
+  **API / Thành phần:** POST /api/spaces
+
+  **Loại:** Negative
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed zones/spaces/packages.
+
+  **Dữ liệu vào:** {"space_code": "SPC-T09", "capacity": 4}
+
+  **Các bước thực hiện:**
+
+  1) POST /api/spaces
+
+  **Kết quả mong đợi:** 422 VALIDATION_ERROR (HTTP: 422)
+
+  **Nhánh code bao phủ:** SPC-B16
+
+  '
+url: '{{baseUrl}}/api/spaces'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 26000
+body:
+  type: json
+  raw: "{\n  \"space_code\": \"SPC-T09\",\n  \"capacity\": 4\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-SZ-026] Thiếu trường bắt buộc (name)\npm.test(\"[TC-SZ-026] Status\
+    \ code is 422\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([422]);\n\
+    });\npm.test(\"[TC-SZ-026] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

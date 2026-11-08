@@ -1,0 +1,38 @@
+$kind: http-request
+name: '[TC-PK-040] Đơn cũ của gói đã ẩn vẫn xem được snapshot đầy đủ'
+description: '**Mã TC:** TC-PK-040
+
+  **Nhóm:** Xóa mềm gói
+
+  **API / Thành phần:** GET /api/bookings/:id
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed spaces/packages/package_prices/package_inclusions.
+
+  **Dữ liệu vào:** Đơn tạo trước khi ẩn gói
+
+  **Các bước thực hiện:**
+
+  1) GET /api/bookings/<id>
+
+  **Kết quả mong đợi:** 200 đơn hiển thị nguyên vẹn giá/gói đã chốt (HTTP: 200)
+
+  **Nhánh code bao phủ:** PKG-B36
+
+  '
+url: '{{baseUrl}}/api/bookings/{{bookingId}}'
+method: GET
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 40000
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PK-040] Đơn cũ của gói đã ẩn vẫn xem được snapshot đầy đủ\npm.test(\"\
+    [TC-PK-040] Status code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-PK-040] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

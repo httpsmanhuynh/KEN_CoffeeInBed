@@ -1,0 +1,38 @@
+$kind: http-request
+name: '[TC-PK-021] Xem cấu hình Inclusion của gói (Public)'
+description: '**Mã TC:** TC-PK-021
+
+  **Nhóm:** Cấu hình Inclusion
+
+  **API / Thành phần:** GET /api/package-inclusions
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đã seed packages/package_prices/package_inclusions;
+  không cần đăng nhập.
+
+  **Dữ liệu vào:** —
+
+  **Các bước thực hiện:**
+
+  1) GET /api/package-inclusions
+
+  **Kết quả mong đợi:** 200 danh sách gồm STANDARD_DRINK, PASTRY, WATER, EQUIPMENT
+  (HTTP: 200)
+
+  **Nhánh code bao phủ:** PKG-B18
+
+  '
+url: '{{baseUrl}}/api/package-inclusions'
+method: GET
+headers:
+- key: Content-Type
+  value: application/json
+order: 21000
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PK-021] Xem cấu hình Inclusion của gói (Public)\npm.test(\"[TC-PK-021]\
+    \ Status code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-PK-021] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

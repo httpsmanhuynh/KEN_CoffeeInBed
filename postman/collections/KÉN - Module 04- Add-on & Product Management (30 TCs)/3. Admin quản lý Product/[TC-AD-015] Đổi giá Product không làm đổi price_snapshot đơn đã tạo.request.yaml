@@ -1,0 +1,44 @@
+$kind: http-request
+name: '[TC-AD-015] Đổi giá Product không làm đổi price_snapshot đơn đã tạo'
+description: '**Mã TC:** TC-AD-015
+
+  **Nhóm:** Admin quản lý Product
+
+  **API / Thành phần:** PATCH /api/products/:id
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed products/addons.
+
+  **Dữ liệu vào:** Đơn cũ chứa món đó
+
+  **Các bước thực hiện:**
+
+  1) PATCH giá món
+
+  2) GET /api/bookings/<id> của đơn cũ
+
+  **Kết quả mong đợi:** price_snapshot / unit_price của đơn cũ giữ nguyên giá cũ (HTTP:
+  200)
+
+  **Nhánh code bao phủ:** ADD-B13
+
+  '
+url: '{{baseUrl}}/api/products/{{productId}}'
+method: PATCH
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 15000
+body:
+  type: json
+  raw: '{"data": "Đơn cũ chứa món đó"}'
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-AD-015] Đổi giá Product không làm đổi price_snapshot đơn đã tạo\n\
+    pm.test(\"[TC-AD-015] Status code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-AD-015] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

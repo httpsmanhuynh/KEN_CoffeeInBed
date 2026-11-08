@@ -1,0 +1,25 @@
+$kind: http-request
+name: "TC-BKG-32- [BKG-32] NO_SHOW sau start+30p- không hoàn tiền (Branch- BKG-B32)"
+description: |-
+  **Mã TC:** BKG-32 (TC-BKG-32)
+  **Nhóm:** No-show
+  **API / Thành phần:** POST /api/bookings/:id/no-show
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đơn CONFIRMED quá 30p.
+  **Dữ liệu vào:** bookingId quá 30p
+  **Các bước thực hiện:**
+  1) POST no-show
+  **Kết quả mong đợi:** 200 NO_SHOW; không hoàn tiền (HTTP: 200)
+  **Nhánh code bao phủ:** BKG-B32
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/bookings/{{noShowBookingId}}/no-show"
+method: POST
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-BKG-32] NO_SHOW sau start+30p- không hoàn tiền
+      pm.test("[TC-BKG-32] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 32000

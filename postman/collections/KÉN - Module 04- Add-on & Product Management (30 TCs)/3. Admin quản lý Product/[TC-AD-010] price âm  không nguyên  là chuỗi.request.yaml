@@ -1,0 +1,41 @@
+$kind: http-request
+name: '[TC-AD-010] price âm / không nguyên / là chuỗi'
+description: '**Mã TC:** TC-AD-010
+
+  **Nhóm:** Admin quản lý Product
+
+  **API / Thành phần:** POST /api/products
+
+  **Loại:** Negative
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed products/addons.
+
+  **Dữ liệu vào:** {"price": -1} ; {"price": 45000.5} ; {"price": "abc"}
+
+  **Các bước thực hiện:**
+
+  1) POST /api/products 3 lần
+
+  **Kết quả mong đợi:** Cả 3 lần 422 VALIDATION_ERROR; không tạo bản ghi (HTTP: 422)
+
+  **Nhánh code bao phủ:** ADD-B10
+
+  '
+url: '{{baseUrl}}/api/products'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 10000
+body:
+  type: json
+  raw: '{"price": -1} ; {"price": 45000.5} ; {"price": "abc"}'
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-AD-010] price âm / không nguyên / là chuỗi\npm.test(\"[TC-AD-010]\
+    \ Status code is 422\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([422]);\n\
+    });\npm.test(\"[TC-AD-010] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

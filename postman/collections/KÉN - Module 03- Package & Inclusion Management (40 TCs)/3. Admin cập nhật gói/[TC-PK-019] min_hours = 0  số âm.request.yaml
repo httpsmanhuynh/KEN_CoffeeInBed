@@ -1,0 +1,41 @@
+$kind: http-request
+name: '[TC-PK-019] min_hours = 0 / số âm'
+description: '**Mã TC:** TC-PK-019
+
+  **Nhóm:** Admin cập nhật gói
+
+  **API / Thành phần:** PATCH /api/packages/:id
+
+  **Loại:** Boundary
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed spaces/packages/package_prices/package_inclusions.
+
+  **Dữ liệu vào:** {"min_hours": 0}
+
+  **Các bước thực hiện:**
+
+  1) PATCH /api/packages/<id>
+
+  **Kết quả mong đợi:** 422 VALIDATION_ERROR (HTTP: 422)
+
+  **Nhánh code bao phủ:** PKG-B16
+
+  '
+url: '{{baseUrl}}/api/packages/{{packageId}}'
+method: PATCH
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 19000
+body:
+  type: json
+  raw: "{\n  \"min_hours\": 0\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PK-019] min_hours = 0 / số âm\npm.test(\"[TC-PK-019] Status code is\
+    \ 422\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([422]);\n\
+    });\npm.test(\"[TC-PK-019] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

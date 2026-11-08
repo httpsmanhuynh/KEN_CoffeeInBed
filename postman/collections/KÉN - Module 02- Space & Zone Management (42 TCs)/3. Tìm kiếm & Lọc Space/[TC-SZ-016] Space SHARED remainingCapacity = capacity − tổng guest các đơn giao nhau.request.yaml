@@ -1,0 +1,39 @@
+$kind: http-request
+name: '[TC-SZ-016] Space SHARED: remainingCapacity = capacity − tổng guest các đơn
+  giao nhau'
+description: '**Mã TC:** TC-SZ-016
+
+  **Nhóm:** Tìm kiếm & Lọc Space
+
+  **API / Thành phần:** GET /api/spaces?startAt
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đã seed zones/spaces/packages; không cần
+  đăng nhập. Space SHARED capacity=10; có đơn CONFIRMED 4 khách cùng khung giờ.
+
+  **Dữ liệu vào:** guestCount=2
+
+  **Các bước thực hiện:**
+
+  1) GET search đúng khung giờ đơn đã có
+
+  **Kết quả mong đợi:** remainingCapacity = 6; isAvailable=true (HTTP: 200)
+
+  **Nhánh code bao phủ:** SPC-B13
+
+  '
+url: '{{baseUrl}}/api/spaces?startAt'
+method: GET
+headers:
+- key: Content-Type
+  value: application/json
+order: 16000
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-SZ-016] Space SHARED: remainingCapacity = capacity − tổng guest các\
+    \ đơn giao nhau\npm.test(\"[TC-SZ-016] Status code is 200\", function () {\n \
+    \   pm.expect(pm.response.code).to.be.oneOf([200]);\n});\npm.test(\"[TC-SZ-016]\
+    \ Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

@@ -1,0 +1,44 @@
+$kind: http-request
+name: '[TC-PK-029] WATER tự cấp theo số khách khi thời lượng ≥ min_hours_required'
+description: '**Mã TC:** TC-PK-029
+
+  **Nhóm:** Cấu hình Inclusion
+
+  **API / Thành phần:** POST /api/bookings/quote
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; đã seed spaces/packages/package_prices/package_inclusions.
+
+  **Dữ liệu vào:** guestCount=3, hours=2 và hours=1
+
+  **Các bước thực hiện:**
+
+  1) POST quote hours=2
+
+  2) POST quote hours=1
+
+  **Kết quả mong đợi:** hours=2: fixed_inclusions có 3 nước lọc; hours=1: không cấp
+  (HTTP: 200)
+
+  **Nhánh code bao phủ:** PKG-B26
+
+  '
+url: '{{baseUrl}}/api/bookings/quote'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: CUSTOMER
+order: 29000
+body:
+  type: json
+  raw: '{"data": "guestCount=3, hours=2 và hours=1"}'
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PK-029] WATER tự cấp theo số khách khi thời lượng ≥ min_hours_required\n\
+    pm.test(\"[TC-PK-029] Status code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-PK-029] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

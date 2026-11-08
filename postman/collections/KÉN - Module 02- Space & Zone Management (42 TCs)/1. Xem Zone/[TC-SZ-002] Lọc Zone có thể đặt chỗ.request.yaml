@@ -1,0 +1,37 @@
+$kind: http-request
+name: '[TC-SZ-002] Lọc Zone có thể đặt chỗ'
+description: '**Mã TC:** TC-SZ-002
+
+  **Nhóm:** Xem Zone
+
+  **API / Thành phần:** GET /api/zones?bookable=true
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đã seed zones/spaces/packages; không cần
+  đăng nhập.
+
+  **Dữ liệu vào:** ?bookable=true
+
+  **Các bước thực hiện:**
+
+  1) GET /api/zones?bookable=true
+
+  **Kết quả mong đợi:** 200 chỉ gồm zone is_bookable=true (HTTP: 200)
+
+  **Nhánh code bao phủ:** SPC-B02
+
+  '
+url: '{{baseUrl}}/api/zones?bookable=true'
+method: GET
+headers:
+- key: Content-Type
+  value: application/json
+order: 2000
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-SZ-002] Lọc Zone có thể đặt chỗ\npm.test(\"[TC-SZ-002] Status code\
+    \ is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-SZ-002] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

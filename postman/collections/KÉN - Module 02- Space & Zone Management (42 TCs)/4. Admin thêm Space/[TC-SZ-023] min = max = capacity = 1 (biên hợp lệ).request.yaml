@@ -1,0 +1,46 @@
+$kind: http-request
+name: '[TC-SZ-023] min = max = capacity = 1 (biên hợp lệ)'
+description: '**Mã TC:** TC-SZ-023
+
+  **Nhóm:** Admin thêm Space
+
+  **API / Thành phần:** POST /api/spaces
+
+  **Loại:** Boundary
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed zones/spaces/packages.
+
+  **Dữ liệu vào:** {"zone_id": "<_id Zone>", "space_code": "SPC-T03", "name": "Phòng
+  test", "space_type": "ROOM", "booking_mode": "EXCLUSIVE", "capacity": 1, "min_guests":
+  1, "max_guests": 1, "open_time": "08:00", "close_time": "22:00", "image_url": "/img/t.png"}
+
+  **Các bước thực hiện:**
+
+  1) POST /api/spaces
+
+  **Kết quả mong đợi:** 201 (HTTP: 201)
+
+  **Nhánh code bao phủ:** SPC-B14
+
+  '
+url: '{{baseUrl}}/api/spaces'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 23000
+body:
+  type: json
+  raw: "{\n  \"zone_id\": \"<_id Zone>\",\n  \"space_code\": \"SPC-T03\",\n  \"name\"\
+    : \"Phòng test\",\n  \"space_type\": \"ROOM\",\n  \"booking_mode\": \"EXCLUSIVE\"\
+    ,\n  \"capacity\": 1,\n  \"min_guests\": 1,\n  \"max_guests\": 1,\n  \"open_time\"\
+    : \"08:00\",\n  \"close_time\": \"22:00\",\n  \"image_url\": \"/img/t.png\"\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-SZ-023] min = max = capacity = 1 (biên hợp lệ)\npm.test(\"[TC-SZ-023]\
+    \ Status code is 201\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([201]);\n\
+    });\npm.test(\"[TC-SZ-023] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

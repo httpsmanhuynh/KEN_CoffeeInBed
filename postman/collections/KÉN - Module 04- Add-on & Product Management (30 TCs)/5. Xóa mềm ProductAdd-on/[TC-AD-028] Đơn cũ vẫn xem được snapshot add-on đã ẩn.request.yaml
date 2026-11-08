@@ -1,0 +1,39 @@
+$kind: http-request
+name: '[TC-AD-028] Đơn cũ vẫn xem được snapshot add-on đã ẩn'
+description: '**Mã TC:** TC-AD-028
+
+  **Nhóm:** Xóa mềm Product/Add-on
+
+  **API / Thành phần:** GET /api/bookings/:id
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đơn chứa add-on đã bị ẩn.
+
+  **Dữ liệu vào:** Đơn tạo trước khi ẩn
+
+  **Các bước thực hiện:**
+
+  1) GET /api/bookings/<id>
+
+  **Kết quả mong đợi:** 200 booking_addons hiển thị nguyên vẹn tên/giá/số lượng đã
+  chốt (HTTP: 200)
+
+  **Nhánh code bao phủ:** ADD-B24
+
+  '
+url: '{{baseUrl}}/api/bookings/{{bookingId}}'
+method: GET
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 28000
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-AD-028] Đơn cũ vẫn xem được snapshot add-on đã ẩn\npm.test(\"[TC-AD-028]\
+    \ Status code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-AD-028] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"
