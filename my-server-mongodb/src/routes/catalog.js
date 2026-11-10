@@ -19,6 +19,9 @@ const {
   searchAvailableSpaces,
 } = require('../services/bookingService');
 const { listSpaceReviews } = require('../services/reviewService');
+const { AdminError } = require('../domain/adminError');
+const { getBookingMenuRecommendations } = require('../services/forecastService');
+const { resolveOptionalUser } = require('./forecast');
 
 const router = express.Router();
 const adminLimit = rateLimit({ windowMs: 15 * 60 * 1000, max: 60 });
@@ -50,7 +53,7 @@ function badId(res) {
 }
 
 const handleErr = (res, err) => {
-  if (err instanceof BookingError) {
+  if (err instanceof BookingError || err instanceof AdminError) {
     return res.status(err.status).json({
       code: err.code,
       message: err.message,
@@ -670,8 +673,18 @@ router.get(
   '/products',
   wrap(async (req, res) => {
     const db = req.app.locals.db;
-    const filter = req.session?.user?.role === 'ADMIN' && req.query.all === 'true' ? {} : { is_active: true };
     const category = str(req.query.category).toUpperCase();
+    if (req.query.recommend === 'true') {
+      try {
+        const user = await resolveOptionalUser(req);
+        const rec = await getBookingMenuRecommendations(db, req.query, user);
+        const list = category ? rec.inclusions.filter((p) => p.category === category) : rec.inclusions;
+        return res.json(list);
+      } catch (err) {
+        return handleErr(res, err);
+      }
+    }
+    const filter = req.session?.user?.role === 'ADMIN' && req.query.all === 'true' ? {} : { is_active: true };
     if (category) filter.category = category;
     const products = await db.collection('products').find(filter).toArray();
     res.json(products);
@@ -776,6 +789,15 @@ router.get(
   '/addons',
   wrap(async (req, res) => {
     const db = req.app.locals.db;
+    if (req.query.recommend === 'true') {
+      try {
+        const user = await resolveOptionalUser(req);
+        const rec = await getBookingMenuRecommendations(db, req.query, user);
+        return res.json(rec.addons);
+      } catch (err) {
+        return handleErr(res, err);
+      }
+    }
     const filter = req.session?.user?.role === 'ADMIN' && req.query.all === 'true' ? {} : { is_active: true };
     const addons = await db.collection('addons').find(filter).toArray();
     res.json(addons);

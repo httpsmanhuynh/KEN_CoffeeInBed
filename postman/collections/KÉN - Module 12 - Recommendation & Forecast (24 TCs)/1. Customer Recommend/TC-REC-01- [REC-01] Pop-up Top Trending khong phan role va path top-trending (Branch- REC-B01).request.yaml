@@ -1,0 +1,33 @@
+$kind: http-request
+name: "TC-REC-01: [REC-01] Top Trending Pop-up không phân role (Guest/Customer/Admin như nhau) & path /top-trending (Branch: REC-B01)"
+description: |-
+  **Mã TC:** REC-01 (TC-REC-01)
+  **Nhóm:** Customer Recommend
+  **API / Thành phần:** GET /api/recommendations (Pop-up Top Trending)
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; có dữ liệu sales_history_daily.
+  **Dữ liệu vào:** ?limit=6 (Guest hoặc Customer đều nhận cùng kết quả)
+  **Các bước thực hiện:**
+  1) GET /api/recommendations?limit=6&#10;2) Kiểm tra roleScoped = false, topTrendingPath = '/top-trending' và danh sách items[] kèm listedPrice
+  **Kết quả mong đợi:** 200 trả danh sách Top Trending không phân role (roleScoped=false, topTrendingPath='/top-trending'), các món is_active=true kèm giá niêm yết listedPrice (HTTP: 200)
+  **Nhánh code bao phủ:** REC-B01
+url: "{{baseUrl}}/api/recommendations?limit=6"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("[TC-REC-01] Status code is 200", function () {
+          pm.expect(pm.response.code).to.eql(200);
+      });
+      pm.test("[TC-REC-01] Trả về Top Trending không phân role kèm topTrendingPath=/top-trending", function () {
+          const json = pm.response.json();
+          pm.expect(json.roleScoped).to.eql(false);
+          pm.expect(json.topTrendingPath).to.eql("/top-trending");
+          pm.expect(json.items).to.be.an("array");
+          json.items.forEach(function (item) {
+              pm.expect(item).to.include.all.keys("name", "price", "listedPrice", "rank", "reason");
+              pm.expect(item.is_active).to.eql(true);
+          });
+      });
+    language: text/javascript
+order: 1000

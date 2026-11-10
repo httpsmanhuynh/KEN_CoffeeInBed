@@ -37,7 +37,67 @@ values:
   - key: spaceWorkLoungeId
     value: ab6af5c9b01fa33f757de661
   - key: pkgFixedPerson70kId
+    value: 6f0600000000000000000101
+  - key: pkgWlFlexId
     value: ac64f28f5bfd0e11f87bd5f2
+  - key: pkgHourlySpace100kId
+    value: 6f0600000000000000000102
+  - key: pkgHourlyPerson50kId
+    value: 6f0600000000000000000103
+  - key: pkgHourlyMin2hId
+    value: 6f0600000000000000000104
+  - key: pkgFixedSpace200kId
+    value: 6f0600000000000000000105
+  - key: pkgFixedSpace70kId
+    value: 6f0600000000000000000106
+  - key: pkgFixedSpace123457Id
+    value: 6f0600000000000000000107
+  - key: pkgFixedSpace99999Id
+    value: 6f0600000000000000000108
+  - key: pkgFixedSpace3333333Id
+    value: 6f0600000000000000000109
+  - key: pkgFixedSpace0Id
+    value: 6f060000000000000000010a
+  - key: incFpDrinkId
+    value: 789c8cb8ac3b2b88b0d32e5e
+  - key: incFpDrinkQuota2Id
+    value: 6f0600000000000000000201
+  - key: incNoLimitId
+    value: 6f0600000000000000000202
+  - key: incWlDrinkId
+    value: 6f0600000000000000000203
+  - key: prodMatchaId
+    value: 6bf253898080b443d05ccd37
+  - key: prodAmericanoId
+    value: 72e8fee2e96c48aa51f97b90
+  - key: prodDrink50kId
+    value: bc5de21debe41541dd6dd77f
+  - key: prodDrink50001Id
+    value: 6f0600000000000000000301
+  - key: prodDrink62kId
+    value: 6f0600000000000000000302
+  - key: prodDrink70kId
+    value: 6f0600000000000000000303
+  - key: prodDrink90kId
+    value: 6f0600000000000000000304
+  - key: addonMonitorId
+    value: 4937c361d6efe7b2437044c3
+  - key: addon40kId
+    value: 4781b8610bc1ac73f7afe67d
+  - key: addon15kId
+    value: 02ea32d64bb213f7d49a1f53
+  - key: addon25kId
+    value: 6f0600000000000000000401
+  - key: addon33333Id
+    value: 6f0600000000000000000402
+  - key: addon47500Id
+    value: 6f0600000000000000000403
+  - key: silverPhone
+    value: 0909123401
+  - key: goldPhone
+    value: 0909123402
+  - key: diamondPhone
+    value: 0909123403
   - key: customerPhone
     value: 0909123456
   - key: customerPassword
@@ -60,3 +120,7 @@ values:
     value: '2026-11-01'
   - key: toDate
     value: '2026-11-30'
+  - key: ingredientId
+    value: 8ef89de69e384466f8f6c236
+  - key: alertId
+    value: 99f89de69e384466f8f6c001
