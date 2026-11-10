@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 const { ObjectId } = require('mongodb');
 const { computePrice } = require('../../src/domain/pricing');
 
-test('AUTO-PRICING-049: pricing: voucher trước, hạng sau, làm tròn xuống (BR-B03)', () => {
+test('TC-PRICING-049\tAUTO-PRICING-049: pricing: voucher trước, hạng sau, làm tròn xuống (BR-B03)', () => {
   const r = computePrice({
     packagePrice: 100000,
     inclusionSurcharge: 5000,
@@ -17,7 +17,7 @@ test('AUTO-PRICING-049: pricing: voucher trước, hạng sau, làm tròn xuốn
   assert.equal(r.finalAmount, 145000 - 15000 - 6500);
 });
 
-test('AUTO-PRICING-050: pricing: voucher không vượt tạm tính; tiền phải là số nguyên', () => {
+test('TC-PRICING-050\tAUTO-PRICING-050: pricing: voucher không vượt tạm tính; tiền phải là số nguyên', () => {
   assert.equal(
     computePrice({ packagePrice: 50000, voucherDiscount: 99999, tierPercent: 15 }).finalAmount,
     0,
@@ -25,7 +25,7 @@ test('AUTO-PRICING-050: pricing: voucher không vượt tạm tính; tiền ph�
   assert.throws(() => computePrice({ packagePrice: 100.5 }), RangeError);
 });
 
-test('AUTO-PRICING-051: catalog: assertMoney reject float và số âm', () => {
+test('TC-PRICING-051\tAUTO-PRICING-051: catalog: assertMoney reject float và số âm', () => {
   function assertMoney(v, name) {
     if (!Number.isInteger(v) || v < 0)
       throw Object.assign(new Error(`${name} phải là số nguyên VNĐ >= 0`), { status: 422 });
@@ -37,7 +37,7 @@ test('AUTO-PRICING-051: catalog: assertMoney reject float và số âm', () => {
   assert.doesNotThrow(() => assertMoney(100000, 'unitPrice'));
 });
 
-test('AUTO-PRICING-052: catalog: pick() chỉ lấy key có trong whitelist', () => {
+test('TC-PRICING-052\tAUTO-PRICING-052: catalog: pick() chỉ lấy key có trong whitelist', () => {
   function pick(body, keys) {
     const set = {};
     for (const k of keys) if (k in body && body[k] !== undefined) set[k] = body[k];
@@ -48,7 +48,7 @@ test('AUTO-PRICING-052: catalog: pick() chỉ lấy key có trong whitelist', ()
   assert.deepEqual(result, { name: 'Test', status: 'ACTIVE' });
 });
 
-test('AUTO-PRICING-053: catalog: ObjectId.isValid chặn injection', () => {
+test('TC-PRICING-053\tAUTO-PRICING-053: catalog: ObjectId.isValid chặn injection', () => {
   assert.equal(ObjectId.isValid(''), false);
   assert.equal(ObjectId.isValid('invalid'), false);
   assert.equal(ObjectId.isValid('{ $ne: null }'), false);

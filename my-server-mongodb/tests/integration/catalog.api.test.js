@@ -25,14 +25,14 @@ describe('1. RBAC - BR-A04, BR-A05', () => {
       assert.equal(r.status, 403);
     });
   }
-  test('TC-CAT-A-003: Admin POST /spaces => 201 và trả về bản ghi ACTIVE', async () => {
+  test('TC-SZ-017\tTC-CAT-A-003: Admin POST /spaces => 201 và trả về bản ghi ACTIVE', async () => {
     const r = await call('POST', '/api/catalog/spaces', { as: 'admin', body: validSpace({ name: 'Phòng họp A' }) });
     assert.equal(r.status, 201);
     assert.equal(r.data.name, 'Phòng họp A');
     assert.equal(r.data.status, 'ACTIVE');
     assert.ok(r.data.id);
   });
-  test('TC-CAT-A-004: Guest/Customer không được PUT hoặc DELETE', async () => {
+  test('TC-SZ-030\tTC-CAT-A-004: Guest/Customer không được PUT hoặc DELETE', async () => {
     const s = await createAdmin('spaces', validSpace());
     assert.equal((await call('PUT', `/api/catalog/spaces/${s.id}`, { as: 'guest', body: { name: 'x' } })).status, 401);
     assert.equal((await call('PUT', `/api/catalog/spaces/${s.id}`, { as: 'customer', body: { name: 'x' } })).status, 403);
