@@ -19,7 +19,7 @@ const {
 } = require('../../src/services/bookingService');
 const { cloneDoc, matchFilter, createMockDb, IDS, buildSeedDb } = require('../helpers/mockDb');
 
-test('TC-BK-01\tAUTO-BK-01: Quy trình chuẩn BR-D01: Khám phá & Kiểm tra chỗ trống -> Chọn Space & Package -> Chọn Inclusion & Add-on -> Checkout -> Payment -> Confirmation -> Check-in -> Sử dụng -> Check-out', async () => {
+test('TC-BKG-07..17\tTC-BK-01\tAUTO-BK-01: Quy trình chuẩn BR-D01: Khám phá & Kiểm tra chỗ trống -> Chọn Space & Package -> Chọn Inclusion & Add-on -> Checkout -> Payment -> Confirmation -> Check-in -> Sử dụng -> Check-out', async () => {
   const db = buildSeedDb();
   const user1 = await db.collection('users').findOne({ _id: IDS.user1 });
   const now = new Date('2026-05-10T01:00:00Z'); // 08:00 VN

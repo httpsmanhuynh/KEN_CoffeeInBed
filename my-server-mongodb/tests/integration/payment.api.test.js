@@ -17,7 +17,7 @@ const { requireAuth, requireRole } = require('../../src/middleware/auth');
 // 1. Domain: payment
 // ═══════════════════════════════════════════════════
 
-test('TC-PAY-01\tAUTO-PAY-01: payment: constants đúng (BR-E01)', () => {
+test('TC-PM-001\tTC-PAY-01\tAUTO-PAY-01: payment: constants đúng (BR-E01)', () => {
   assert.ok(PAYMENT_METHODS.includes('SIMULATION'));
   assert.ok(PAYMENT_METHODS.includes('MANUAL'));
   assert.ok(PAYMENT_METHODS.includes('CASH'));
@@ -29,13 +29,13 @@ test('TC-PAY-01\tAUTO-PAY-01: payment: constants đúng (BR-E01)', () => {
   assert.ok(Object.values(PAYMENT_STATUSES).includes('REFUNDED'));
 });
 
-test('TC-PAY-02\tAUTO-PAY-02: validatePayment: booking không tồn tại → BOOKING_NOT_FOUND', () => {
+test('TC-PM-002\tTC-PAY-02\tAUTO-PAY-02: validatePayment: booking không tồn tại → BOOKING_NOT_FOUND', () => {
   const r = validatePayment({ booking: null, amount: 100000, now: Date.now() });
   assert.equal(r.ok, false);
   assert.equal(r.reason, 'BOOKING_NOT_FOUND');
 });
 
-test('TC-PAY-03\tAUTO-PAY-03: validatePayment: booking không phải PENDING_PAYMENT → BOOKING_NOT_PAYABLE', () => {
+test('TC-PM-003\tTC-PAY-03\tAUTO-PAY-03: validatePayment: booking không phải PENDING_PAYMENT → BOOKING_NOT_PAYABLE', () => {
   const booking = { status: 'CONFIRMED', final_amount: 100000, paymentExpiresAt: Date.now() + 60000 };
   const r = validatePayment({ booking, amount: 100000, now: Date.now() });
   assert.equal(r.ok, false);
@@ -47,7 +47,7 @@ test('TC-PAY-03\tAUTO-PAY-03: validatePayment: booking không phải PENDING_PAY
   }
 });
 
-test('TC-PAY-04\tAUTO-PAY-04: validatePayment: hết hạn hold → HOLD_EXPIRED (BR-E03)', () => {
+test('TC-PM-007,008\tTC-PAY-04\tAUTO-PAY-04: validatePayment: hết hạn hold → HOLD_EXPIRED (BR-E03)', () => {
   const now = Date.now();
   const booking = {
     status: 'PENDING_PAYMENT',
@@ -59,7 +59,7 @@ test('TC-PAY-04\tAUTO-PAY-04: validatePayment: hết hạn hold → HOLD_EXPIRED
   assert.equal(r.reason, 'HOLD_EXPIRED');
 });
 
-test('TC-PAY-05\tAUTO-PAY-05: validatePayment: hợp lệ → ok = true', () => {
+test('TC-PM-001\tTC-PAY-05\tAUTO-PAY-05: validatePayment: hợp lệ → ok = true', () => {
   const now = Date.now();
   const booking = {
     status: 'PENDING_PAYMENT',
@@ -70,7 +70,7 @@ test('TC-PAY-05\tAUTO-PAY-05: validatePayment: hợp lệ → ok = true', () => 
   assert.equal(r.ok, true);
 });
 
-test('TC-PAY-06\tAUTO-PAY-06: validatePayment: amount không khớp → AMOUNT_MISMATCH (BR-E02)', () => {
+test('TC-PM-012\tTC-PAY-06\tAUTO-PAY-06: validatePayment: amount không khớp → AMOUNT_MISMATCH (BR-E02)', () => {
   const now = Date.now();
   const booking = {
     status: 'PENDING_PAYMENT',
@@ -84,7 +84,7 @@ test('TC-PAY-06\tAUTO-PAY-06: validatePayment: amount không khớp → AMOUNT_M
   assert.equal(validatePayment({ booking, amount: 100.5, now }).reason, 'INVALID_AMOUNT');
 });
 
-test('TC-PAY-07\tAUTO-PAY-07: validatePayment: nhận cả paymentExpiresAt (Date/number) và payment_expires_at (snake_case)', () => {
+test('TC-PM-001\tTC-PAY-07\tAUTO-PAY-07: validatePayment: nhận cả paymentExpiresAt (Date/number) và payment_expires_at (snake_case)', () => {
   const now = Date.now();
   const b1 = {
     status: 'PENDING_PAYMENT',
@@ -100,13 +100,13 @@ test('TC-PAY-07\tAUTO-PAY-07: validatePayment: nhận cả paymentExpiresAt (Dat
   assert.equal(validatePayment({ booking: b2, amount: 50000, now }).ok, true);
 });
 
-test('TC-PAY-08\tAUTO-PAY-08: bookingStatusAfterPayment: SUCCESS → CONFIRMED, khác → PENDING_PAYMENT', () => {
+test('TC-PM-001,005\tTC-PAY-08\tAUTO-PAY-08: bookingStatusAfterPayment: SUCCESS → CONFIRMED, khác → PENDING_PAYMENT', () => {
   assert.equal(bookingStatusAfterPayment('SUCCESS'), 'CONFIRMED');
   assert.equal(bookingStatusAfterPayment('FAILED'), 'PENDING_PAYMENT');
   assert.equal(bookingStatusAfterPayment('CANCELLED'), 'PENDING_PAYMENT');
 });
 
-test('TC-PAY-09\tAUTO-PAY-09: payment: idempotency — cùng key trả lại giao dịch cũ', async () => {
+test('TC-PM-009..011\tTC-PAY-09\tAUTO-PAY-09: payment: idempotency — cùng key trả lại giao dịch cũ', async () => {
   const txStore = new Map();
 
   async function mockPay({ bookingId, iKey, amount }) {
@@ -137,7 +137,7 @@ test('TC-PAY-09\tAUTO-PAY-09: payment: idempotency — cùng key trả lại gia
   assert.equal(r3.error, 'IDEMPOTENCY_CONFLICT');
 });
 
-test('TC-PAY-10\tAUTO-PAY-10: payment: có thể thử lại với key mới khi FAILED', async () => {
+test('TC-PM-006\tTC-PAY-10\tAUTO-PAY-10: payment: có thể thử lại với key mới khi FAILED', async () => {
   const now = Date.now();
   const booking = { status: 'PENDING_PAYMENT', final_amount: 80000, paymentExpiresAt: now + 60000 };
   assert.equal(bookingStatusAfterPayment('FAILED'), 'PENDING_PAYMENT');
@@ -181,7 +181,7 @@ const runMw = (mw, req) =>
     mw(req, r, () => resolve({ res: r, passed: true }));
   });
 
-test('TC-PAY-11\tAUTO-PAY-11: requireRole ADMIN: cho phép ADMIN, chặn CUSTOMER và chưa đăng nhập', async () => {
+test('TC-PM-017,022\tTC-PAY-11\tAUTO-PAY-11: requireRole ADMIN: cho phép ADMIN, chặn CUSTOMER và chưa đăng nhập', async () => {
   const okAdmin = await runMw(requireRole('ADMIN'), mkReq('ADMIN'));
   assert.equal(okAdmin.passed, true, 'ADMIN phải được phép');
 
@@ -194,7 +194,7 @@ test('TC-PAY-11\tAUTO-PAY-11: requireRole ADMIN: cho phép ADMIN, chặn CUSTOME
   assert.equal(resGuest.passed, false);
 });
 
-test('TC-PAY-12\tAUTO-PAY-12: requireAuth: 401 khi không có session.user, cho phép khi có session.user', async () => {
+test('TC-PM-004\tTC-PAY-12\tAUTO-PAY-12: requireAuth: 401 khi không có session.user, cho phép khi có session.user', async () => {
   const guest = await runMw(requireAuth, mkReq(null));
   assert.equal(guest.res._code, 401);
 
@@ -206,7 +206,7 @@ test('TC-PAY-12\tAUTO-PAY-12: requireAuth: 401 khi không có session.user, cho 
 // 3. Catalog: validate logic (pure, không cần DB)
 // ═══════════════════════════════════════════════════
 
-test('TC-PAY-13\tAUTO-PAY-13: catalog: assertMoney reject float và số âm', () => {
+test('TC-PM-020,021\tTC-PAY-13\tAUTO-PAY-13: catalog: assertMoney reject float và số âm', () => {
   function assertMoney(v, name) {
     if (!Number.isInteger(v) || v < 0)
       throw Object.assign(new Error(`${name} phải là số nguyên VNĐ >= 0`), { status: 422 });
@@ -218,7 +218,7 @@ test('TC-PAY-13\tAUTO-PAY-13: catalog: assertMoney reject float và số âm', (
   assert.doesNotThrow(() => assertMoney(100000, 'unitPrice'));
 });
 
-test('TC-PAY-14\tAUTO-PAY-14: catalog: pick() chỉ lấy key có trong whitelist', () => {
+test('TC-PM-022\tTC-PAY-14\tAUTO-PAY-14: catalog: pick() chỉ lấy key có trong whitelist', () => {
   function pick(body, keys) {
     const set = {};
     for (const k of keys) if (k in body && body[k] !== undefined) set[k] = body[k];
@@ -229,7 +229,7 @@ test('TC-PAY-14\tAUTO-PAY-14: catalog: pick() chỉ lấy key có trong whitelis
   assert.deepEqual(result, { name: 'Test', status: 'ACTIVE' });
 });
 
-test('TC-PAY-15\tAUTO-PAY-15: catalog: ObjectId.isValid chặn injection', () => {
+test('TC-PM-014..016\tTC-PAY-15\tAUTO-PAY-15: catalog: ObjectId.isValid chặn injection', () => {
   assert.equal(ObjectId.isValid(''), false);
   assert.equal(ObjectId.isValid('invalid'), false);
   assert.equal(ObjectId.isValid('{ $ne: null }'), false);
