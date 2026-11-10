@@ -30,3 +30,8 @@
 
 ## Trả dữ liệu user cho Admin
 - Luôn qua `sanitizeUser` (loại key chứa `pass|hash|secret|otp|token`), không trả nguyên document `users`.
+
+## Doanh thu Dashboard
+- **Vấn đề:** cộng `final_amount` theo trạng thái đơn và `start_at` ra số khác tiền thực thu: đơn hủy hoàn tiền thất bại bị loại sai, hoàn một phần bị trừ cả đơn.
+- **Quy tắc:** doanh thu = Σ `PAYMENT` thành công − Σ `REFUND` thành công theo thời điểm giao dịch (Report UC-29, UC-31). Phân rã (Package, Inclusion, Add-on, Giảm giá) phải cộng lại đúng bằng doanh thu: để Package là phần còn lại khi làm tròn.
+- **Ví dụ:** `buildRevenue`, `allocateAmount` trong `src/domain/dashboard.js`.

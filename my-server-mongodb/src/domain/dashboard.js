@@ -12,11 +12,18 @@ const BOOKING_STATUSES = Object.freeze([
   'PENDING_PAYMENT', 'CONFIRMED', 'CHECKED_IN', 'CHECKED_OUT', 'NO_SHOW', 'CANCELLED', 'EXPIRED',
 ]);
 
-/** Trạng thái được tính là doanh thu thực tế (đọc từ Price Snapshot `final_amount`). */
-const REVENUE_STATUSES = Object.freeze(['CONFIRMED', 'CHECKED_IN', 'CHECKED_OUT', 'NO_SHOW']);
+/**
+ * Booking "đã thanh toán và chưa hủy" (NO_SHOW vẫn tính vì khách đã thanh toán).
+ * Dùng cho Occupancy Rate và Top Add-on. KHÔNG dùng cho doanh thu: doanh thu tính theo
+ * giao dịch PAYMENT/REFUND thành công (Report B.3.30, UC-29, UC-31), không theo trạng thái đơn.
+ */
+const PAID_STATUSES = Object.freeze(['CONFIRMED', 'CHECKED_IN', 'CHECKED_OUT', 'NO_SHOW']);
 
-/** Trạng thái được tính là đã chiếm chỗ khi tính Occupancy Rate (cùng tập với doanh thu). */
-const OCCUPANCY_STATUSES = REVENUE_STATUSES;
+/** Trạng thái được tính là đã chiếm chỗ khi tính Occupancy Rate. */
+const OCCUPANCY_STATUSES = PAID_STATUSES;
+
+/** Loại giao dịch tham gia doanh thu: PAYMENT cộng, REFUND trừ (chỉ khi status = SUCCESS). */
+const REVENUE_TX_TYPES = Object.freeze({ PAYMENT: 1, REFUND: -1 });
 
 const VN_OFFSET_MS = 7 * 60 * 60 * 1000; // UTC+7
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -110,17 +117,103 @@ function openHoursOf(space) {
   return close - open;
 }
 
+/* ---------------------------------------------------------------- doanh thu thực thu */
+
+const zoneKeyOf = (zoneId) => String(zoneId == null ? null : zoneId);
+
+function zeroBreakdown() {
+  return { package: 0, inclusionSurcharge: 0, addon: 0, discount: 0 };
+}
+
+/** Doanh thu = Package + Phụ phí Inclusion + Add-on − Giảm giá. */
+function breakdownTotal(b) {
+  return b.package + b.inclusionSurcharge + b.addon - b.discount;
+}
+
+function addBreakdown(into, part, sign = 1) {
+  into.package += sign * part.package;
+  into.inclusionSurcharge += sign * part.inclusionSurcharge;
+  into.addon += sign * part.addon;
+  into.discount += sign * part.discount;
+}
+
+/**
+ * Chia một khoản tiền của giao dịch theo cơ cấu Price Snapshot của Booking (tỷ lệ `amount / final_amount`).
+ * Inclusion, Add-on, Giảm giá làm tròn VND; Package là phần còn lại nên
+ * package + inclusion + addon − discount luôn bằng đúng `amount` (tổng phân rã khớp doanh thu).
+ * Thanh toán đủ: chia đúng theo snapshot. Hoàn một phần: chia theo tỷ lệ số tiền hoàn.
+ */
+function allocateAmount(amount, snap = {}) {
+  const final = Number(snap.final) || 0;
+  const scale = final > 0 ? amount / final : 0;
+  const inclusionSurcharge = Math.round((Number(snap.inclusion) || 0) * scale);
+  const addon = Math.round((Number(snap.addon) || 0) * scale);
+  const discount = Math.round(((Number(snap.voucherDiscount) || 0) + (Number(snap.tierDiscount) || 0)) * scale);
+  return { package: amount - inclusionSurcharge - addon + discount, inclusionSurcharge, addon, discount };
+}
+
+/**
+ * Doanh thu thực thu (Report B.3.30, UC-29, UC-31):
+ *   doanh thu = Σ PAYMENT thành công − Σ REFUND thành công, tính theo thời điểm giao dịch.
+ * Hoàn tiền đang xử lý (PENDING) hoặc thất bại (FAILED) chưa được trừ cho đến khi Admin đối soát
+ * (đối soát ghi thêm một REFUND thành công). Đơn CANCELLED đã hoàn đủ tự bù trừ về 0.
+ * Kết quả có thể âm khi một kỳ chỉ có hoàn tiền của đơn đã thu ở kỳ trước — không bị chặn ở 0.
+ *
+ * @param {object}   p
+ * @param {object[]} p.transactions  giao dịch SUCCESS đã lọc theo kỳ: { type, amount, at, spaceId, final, inclusion, addon, voucherDiscount, tierDiscount }
+ * @param {Map}      p.spaceById     space theo _id (đã lọc theo Zone nếu có)
+ * @param {boolean}  p.zoneFiltered  true: bỏ giao dịch của Booking ngoài phạm vi Zone đang lọc
+ */
+function buildRevenue({ transactions = [], spaceById = new Map(), zoneFiltered = false }) {
+  const breakdown = zeroBreakdown();
+  const byZone = new Map();
+  const dailyMap = new Map();
+  const collected = { amount: 0, count: 0 };
+  const refunded = { amount: 0, count: 0 };
+
+  for (const t of transactions) {
+    const sign = REVENUE_TX_TYPES[t.type];
+    if (!sign) continue;
+    const amount = Math.abs(Number(t.amount) || 0);
+    if (amount <= 0) continue;
+    const space = t.spaceId != null ? spaceById.get(String(t.spaceId)) : null;
+    if (zoneFiltered && !space) continue;
+
+    const part = allocateAmount(amount, t);
+    addBreakdown(breakdown, part, sign);
+
+    const key = zoneKeyOf(space ? space.zone_id : null);
+    if (!byZone.has(key)) byZone.set(key, zeroBreakdown());
+    addBreakdown(byZone.get(key), part, sign);
+
+    const date = ymdString(new Date(t.at));
+    if (!dailyMap.has(date)) dailyMap.set(date, { date, payment: 0, refund: 0 });
+    dailyMap.get(date)[sign > 0 ? 'payment' : 'refund'] += amount;
+
+    const bucket = sign > 0 ? collected : refunded;
+    bucket.amount += amount;
+    bucket.count += 1;
+  }
+
+  const daily = [...dailyMap.values()]
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .map((d) => ({ date: d.date, revenue: d.payment - d.refund, payment: d.payment, refund: d.refund }));
+
+  return {
+    total: breakdownTotal(breakdown),
+    breakdown,
+    collected,
+    refunded,
+    daily,
+    byZone: new Map([...byZone].map(([k, b]) => [k, { total: breakdownTotal(b), breakdown: b }])),
+  };
+}
+
 /* ---------------------------------------------------------------- tổng hợp theo Zone */
 
 function zeroStatuses() {
   const o = {};
   for (const s of BOOKING_STATUSES) o[s] = 0;
-  return o;
-}
-
-function zeroRevenue() {
-  const o = {};
-  for (const s of REVENUE_STATUSES) o[s] = 0;
   return o;
 }
 
@@ -131,9 +224,10 @@ const sum = (obj) => Object.values(obj).reduce((a, b) => a + b, 0);
  * @param {object}   p.range          kết quả parseDateRange
  * @param {object[]} p.spaces         spaces (đã lọc theo zone nếu có): _id, zone_id, space_code, name, booking_mode, capacity, open_time, close_time, status
  * @param {object[]} p.zones          zones: _id, zone_code, name
- * @param {object[]} p.bookingGroups  kết quả $group: { _id:{space,status}, count, revenue, hours, guestHours }
+ * @param {object[]} p.bookingGroups  kết quả $group: { _id:{space,status}, count, hours, guestHours } (lọc theo `start_at`)
+ * @param {object}   [p.revenue]      kết quả buildRevenue (doanh thu tính riêng theo thời điểm giao dịch)
  */
-function buildZoneStats({ range, spaces, zones, bookingGroups }) {
+function buildZoneStats({ range, spaces, zones, bookingGroups, revenue = buildRevenue({}) }) {
   const spaceById = new Map(spaces.map((s) => [String(s._id), s]));
   const zoneInfo = new Map(zones.map((z) => [String(z._id), z]));
 
@@ -152,7 +246,6 @@ function buildZoneStats({ range, spaces, zones, bookingGroups }) {
         name: z ? z.name : 'Không rõ khu vực',
         spaceCount: 0,
         byStatus: zeroStatuses(),
-        revenueByStatus: zeroRevenue(),
         occupiedSpaceHours: 0,
         availableSpaceHours: 0,
       });
@@ -169,7 +262,6 @@ function buildZoneStats({ range, spaces, zones, bookingGroups }) {
     const z = ensureZone(space.zone_id);
 
     z.byStatus[status] += g.count || 0;
-    if (REVENUE_STATUSES.includes(status)) z.revenueByStatus[status] += g.revenue || 0;
     if (OCCUPANCY_STATUSES.includes(status)) {
       const used = space.booking_mode === 'SHARED'
         ? (space.capacity > 0 ? (g.guestHours || 0) / space.capacity : 0)
@@ -188,30 +280,29 @@ function buildZoneStats({ range, spaces, zones, bookingGroups }) {
     z.occupiedSpaceHours += used;
   }
 
-  const zonesOut = [...zoneAgg.values()].map((z) => {
-    const revenue = sum(z.revenueByStatus);
-    return {
-      zoneId: z.zoneId,
-      zoneCode: z.zoneCode,
-      name: z.name,
-      spaceCount: z.spaceCount,
-      bookings: { total: sum(z.byStatus), byStatus: z.byStatus },
-      occupancy: {
-        rate: pct(z.occupiedSpaceHours, z.availableSpaceHours),
-        occupiedHours: round2(z.occupiedSpaceHours),
-        availableHours: round2(z.availableSpaceHours),
-      },
-      revenue: { total: revenue, byStatus: z.revenueByStatus },
-    };
-  }).sort((a, b) => String(a.zoneCode).localeCompare(String(b.zoneCode)));
+  // Zone chỉ có giao dịch (không có đơn bắt đầu trong kỳ) vẫn phải hiện doanh thu của nó.
+  for (const key of revenue.byZone.keys()) ensureZone(key === 'null' ? null : key);
+
+  const emptyRevenue = () => ({ total: 0, breakdown: zeroBreakdown() });
+  const zonesOut = [...zoneAgg.values()].map((z) => ({
+    zoneId: z.zoneId,
+    zoneCode: z.zoneCode,
+    name: z.name,
+    spaceCount: z.spaceCount,
+    bookings: { total: sum(z.byStatus), byStatus: z.byStatus },
+    occupancy: {
+      rate: pct(z.occupiedSpaceHours, z.availableSpaceHours),
+      occupiedHours: round2(z.occupiedSpaceHours),
+      availableHours: round2(z.availableSpaceHours),
+    },
+    revenue: revenue.byZone.get(zoneKeyOf(z.zoneId)) || emptyRevenue(),
+  })).sort((a, b) => String(a.zoneCode).localeCompare(String(b.zoneCode)));
 
   // Tổng toàn bộ
   const totalStatuses = zeroStatuses();
-  const totalRevenue = zeroRevenue();
   let occ = 0, avail = 0;
   for (const z of zoneAgg.values()) {
     for (const s of BOOKING_STATUSES) totalStatuses[s] += z.byStatus[s];
-    for (const s of REVENUE_STATUSES) totalRevenue[s] += z.revenueByStatus[s];
     occ += z.occupiedSpaceHours;
     avail += z.availableSpaceHours;
   }
@@ -221,7 +312,6 @@ function buildZoneStats({ range, spaces, zones, bookingGroups }) {
     totals: {
       bookings: { total: sum(totalStatuses), byStatus: totalStatuses },
       occupancy: { rate: pct(occ, avail), occupiedHours: round2(occ), availableHours: round2(avail) },
-      revenue: { total: sum(totalRevenue), byStatus: totalRevenue },
     },
   };
 }
@@ -271,9 +361,9 @@ function parseLimit(v, def = 5, max = 20) {
 }
 
 module.exports = {
-  BOOKING_STATUSES, REVENUE_STATUSES, OCCUPANCY_STATUSES,
+  BOOKING_STATUSES, PAID_STATUSES, OCCUPANCY_STATUSES, REVENUE_TX_TYPES,
   VN_OFFSET_MS, DEFAULT_RANGE_DAYS, MAX_RANGE_DAYS,
   parseDateRange, parseClock, openHoursOf, parseLimit,
-  buildZoneStats, normalizeAddonLine, rankTopAddons,
+  allocateAmount, buildRevenue, buildZoneStats, normalizeAddonLine, rankTopAddons,
   round2, pct,
 };
