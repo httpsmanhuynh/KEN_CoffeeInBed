@@ -27,4 +27,11 @@ function rateLimit({ windowMs, max, key = (req) => req.ip }) {
   middleware.hit = hit;
   return middleware;
 }
-module.exports = { rateLimit };
+
+const adminLimit = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 60,
+  key: (req) => `adm:${(req.session && req.session.user && req.session.user.id) || req.ip}`,
+});
+
+module.exports = { rateLimit, adminLimit };

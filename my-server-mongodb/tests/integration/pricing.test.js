@@ -278,7 +278,7 @@ describe('giảm theo hạng (tính sau Voucher, làm tròn xuống)', () => {
   });
 });
 
-describe('calculatePricing – công thức tổng hợp', () => {
+describe('calculatePricing - công thức tổng hợp', () => {
   test('TC-PRICING-035\tAUTO-PRICING-035: ví dụ đầy đủ: Package + phụ phí + Add-on − Voucher − hạng Vàng 10%', () => {
     const r = calculatePricing({
       package: { packageType: 'FIXED', pricingUnit: 'PER_SPACE', price: 140000 },

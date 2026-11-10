@@ -1,0 +1,29 @@
+$kind: http-request
+name: "TC-REC-16: [REC-16] Dữ liệu ML bị hỏng/thiếu trường không làm sập API (Branch: REC-B16)"
+description: |-
+  **Mã TC:** REC-16 (TC-REC-16)
+  **Nhóm:** Phân quyền & An toàn dữ liệu
+  **API / Thành phần:** GET /api/admin/forecast/ingredients
+  **Loại:** Security
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; có bản ghi dự báo thiếu trường.
+  **Dữ liệu vào:** —
+  **Các bước thực hiện:**
+  1) GET /api/admin/forecast/ingredients
+  **Kết quả mong đợi:** 200 bỏ qua bản ghi lỗi và đếm vào skippedMalformedCount; không lỗi 500 (HTTP: 200)
+  **Nhánh code bao phủ:** REC-B16
+url: "{{baseUrl}}/api/admin/forecast/ingredients"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-REC-16] Dữ liệu ML bị hỏng/thiếu trường không làm sập API
+      pm.test("[TC-REC-16] Status code is 200 (không sập 500)", function () {
+          pm.expect(pm.response.code).to.eql(200);
+      });
+      pm.test("[TC-REC-16] Phản hồi có trường skippedMalformedCount >= 0", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.have.property("skippedMalformedCount");
+          pm.expect(json.skippedMalformedCount).to.be.at.least(0);
+      });
+    language: text/javascript
+order: 2000
