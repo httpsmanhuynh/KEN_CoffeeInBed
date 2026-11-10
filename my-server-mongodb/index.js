@@ -10,27 +10,13 @@ const path = require('path');
 const { MongoClient } = require('mongodb');
 
 const app = express();
-const port = process.env.PORT || 3002; // Cổng 3002 theo slide của thầy
+const port = process.env.PORT || 3002; // Cổng 3002
 const isProd = process.env.NODE_ENV === 'production';
 
 // 1. Middleware cơ bản
 app.use(morgan('combined'));
 if (isProd) app.set('trust proxy', 1); // sau reverse proxy HTTPS: cookie secure + req.ip (rate limit) mới đúng
-const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:4200')
-  .split(',')
-  .map((o) => o.trim());
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(null, false);
-      }
-    },
-    credentials: true,
-  }),
-);
+app.use(cors({ origin: process.env.CORS_ORIGIN || 'http://localhost:4200', credentials: true }));
 app.use(express.json({ limit: '1mb' })); // 50mb quá lớn nếu không upload ảnh qua JSON
 app.use(express.urlencoded({ limit: '1mb', extended: true }));
 app.use((req, res, next) => {
@@ -52,7 +38,12 @@ app.use(
   session({
     secret: process.env.SESSION_SECRET || 'dev-only-secret',
     // Lưu session trong MongoDB (collection sessions): restart server không mất đăng nhập; TTL tự dọn session hết hạn.
-    store: MongoStore.create({ client, dbName: DB_NAME, collectionName: 'sessions', ttl: 24 * 60 * 60 }),
+    store: MongoStore.create({
+      client,
+      dbName: DB_NAME,
+      collectionName: 'sessions',
+      ttl: 24 * 60 * 60,
+    }),
     resave: false,
     saveUninitialized: false,
     cookie: { httpOnly: true, secure: isProd, sameSite: 'lax', maxAge: 24 * 60 * 60 * 1000 },
