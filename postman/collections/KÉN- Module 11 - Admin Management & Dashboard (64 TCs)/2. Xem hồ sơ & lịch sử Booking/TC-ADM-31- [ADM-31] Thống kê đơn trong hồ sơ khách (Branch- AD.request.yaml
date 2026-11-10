@@ -1,0 +1,31 @@
+$kind: http-request
+name: "TC-ADM-31: [ADM-31] Thống kê đơn trong hồ sơ khách (Branch: ADM-B31)"
+description: |-
+  **Mã TC:** ADM-31 (TC-ADM-31)
+  **Nhóm:** Xem hồ sơ & lịch sử Booking
+  **API / Thành phần:** GET /api/admin/users/:id
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; khách có đơn ở nhiều trạng thái.
+  **Dữ liệu vào:** id khách có đơn
+  **Các bước thực hiện:**
+  1) GET /api/admin/users/<id>&#10;2) Đối chiếu đếm và cộng final_amount trên Atlas
+  **Kết quả mong đợi:** 200 bookingStats.byStatus đủ 7 khóa (kể cả 0); total = tổng 7 trạng thái; totalSpent = tổng final_amount của CONFIRMED, CHECKED_IN, CHECKED_OUT, NO_SHOW (HTTP: 200)
+  **Nhánh code bao phủ:** ADM-B31
+  **Ghi chú:** Code: getUserProfile. totalSpent tính trên mọi thời gian, không theo kỳ.
+url: "{{baseUrl}}/api/admin/users/{{userId}}"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-31] Thống kê đơn trong hồ sơ khách
+      pm.test("[TC-ADM-31] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+      pm.test("[TC-ADM-31] bookingStats.byStatus đủ 7 trạng thái và totalSpent >= 0", function () {
+          const st = pm.response.json().bookingStats;
+          const keys = ["PENDING_PAYMENT", "CONFIRMED", "CHECKED_IN", "CHECKED_OUT", "NO_SHOW", "CANCELLED", "EXPIRED"];
+          pm.expect(st.byStatus).to.have.all.keys(keys);
+          pm.expect(st.totalSpent).to.be.at.least(0);
+      });
+    language: text/javascript
+order: 5000

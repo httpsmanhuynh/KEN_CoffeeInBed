@@ -1,0 +1,29 @@
+$kind: http-request
+name: "TC-ADM-10: [ADM-10] Mở khóa LOCKED → ACTIVE, đăng nhập lại bình thường (Branch: ADM-B10)"
+description: |-
+  **Mã TC:** ADM-10 (TC-ADM-10)
+  **Nhóm:** Khóa/Mở khóa tài khoản
+  **API / Thành phần:** POST /api/admin/users/:id/unlock
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed users/bookings.
+  **Dữ liệu vào:** Không cần body; id khách đang LOCKED
+  **Các bước thực hiện:**
+  1) POST /api/admin/users/<id>/unlock&#10;2) POST /api/login
+  **Kết quả mong đợi:** 200 { user.status = ACTIVE }; đăng nhập thành công (HTTP: 200)
+  **Nhánh code bao phủ:** ADM-B10
+  **Ghi chú:** Review: đổi từ PATCH …/status sang POST …/unlock.
+url: "{{baseUrl}}/api/admin/users/{{userId}}/unlock"
+method: POST
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-10] Mở khóa LOCKED → ACTIVE, đăng nhập lại bình thường
+      pm.test("[TC-ADM-10] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+      pm.test("[TC-ADM-10] user.status = ACTIVE sau khi mở khóa", function () {
+          const json = pm.response.json();
+          pm.expect(json.user.status).to.eql("ACTIVE");
+      });
+    language: text/javascript
+order: 4000

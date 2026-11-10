@@ -2,7 +2,7 @@
 
 /**
  * Module 11 — Admin Management & Dashboard (mount: app.use('/api/admin', require('./src/routes/admin'))).
- * Toàn bộ route yêu cầu ADMIN; requireRole('ADMIN') đã đọc lại DB (BR-A05).
+ * Toàn bộ route yêu cầu ADMIN; requireRole('ADMIN') đã đọc lại DB nên Admin bị khóa/hạ quyền mất quyền ngay ở request kế tiếp.
  */
 
 const express = require('express');
