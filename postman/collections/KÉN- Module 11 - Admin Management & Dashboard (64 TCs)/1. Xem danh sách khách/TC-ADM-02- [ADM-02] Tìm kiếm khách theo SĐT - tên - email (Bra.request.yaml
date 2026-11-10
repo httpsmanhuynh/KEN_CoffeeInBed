@@ -1,0 +1,33 @@
+$kind: http-request
+name: "TC-ADM-02: [ADM-02] Tìm kiếm khách theo SĐT / tên / email (Branch: ADM-B02)"
+description: |-
+  **Mã TC:** ADM-02 (TC-ADM-02)
+  **Nhóm:** Xem danh sách khách
+  **API / Thành phần:** GET /api/admin/users?q
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed users/bookings.
+  **Dữ liệu vào:** ?q=0909
+  **Các bước thực hiện:**
+  1) GET /api/admin/users?q=0909
+  **Kết quả mong đợi:** 200 chỉ gồm khách khớp; total khớp (HTTP: 200)
+  **Nhánh code bao phủ:** ADM-B02
+  **Ghi chú:** Review: q tìm không phân biệt hoa thường trên phone, email, full_name, name (không chỉ SĐT/tên).
+url: "{{baseUrl}}/api/admin/users?q=0909"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-02] Tìm kiếm khách theo SĐT / tên / email
+      pm.test("[TC-ADM-02] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+      pm.test("[TC-ADM-02] Danh sách chỉ gồm khách khớp từ khóa tìm kiếm", function () {
+          const json = pm.response.json();
+          pm.expect(json.items).to.be.an("array");
+          json.items.forEach(function (u) {
+              const hay = [u.phone, u.email, u.full_name, u.name].filter(Boolean).join(" ").toLowerCase();
+              pm.expect(hay).to.include("0909");
+          });
+      });
+    language: text/javascript
+order: 2000

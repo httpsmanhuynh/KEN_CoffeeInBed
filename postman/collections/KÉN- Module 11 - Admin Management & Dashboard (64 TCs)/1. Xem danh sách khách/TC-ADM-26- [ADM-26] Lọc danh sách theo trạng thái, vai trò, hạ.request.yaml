@@ -1,0 +1,25 @@
+$kind: http-request
+name: "TC-ADM-26: [ADM-26] Lọc danh sách theo trạng thái, vai trò, hạng (Branch: ADM-B26)"
+description: |-
+  **Mã TC:** ADM-26 (TC-ADM-26)
+  **Nhóm:** Xem danh sách khách
+  **API / Thành phần:** GET /api/admin/users?status&role&tier
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; có user ACTIVE và LOCKED, nhiều hạng.
+  **Dữ liệu vào:** ?status=LOCKED ; ?role=customer&tier=<hạng hợp lệ>
+  **Các bước thực hiện:**
+  1) GET ?status=LOCKED&#10;2) GET ?role=customer&tier=<hạng>
+  **Kết quả mong đợi:** 200 chỉ gồm user đúng bộ lọc; total khớp số user trên Atlas; role/tier không phân biệt hoa thường (HTTP: 200)
+  **Nhánh code bao phủ:** ADM-B26
+  **Ghi chú:** Code: listUsers + tierFilter. Lọc tier khớp users.tier, hoặc (khi chưa lưu tier) khoảng điểm tier_points của hạng đó nên vẫn đúng nếu hạng tính động. Bảng hạng trong adminUser.js phải khớp loyalty.js.
+url: "{{baseUrl}}/api/admin/users?role=customer&tier=silver"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-26] Lọc danh sách theo trạng thái, vai trò, hạng
+      pm.test("[TC-ADM-26] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 3000

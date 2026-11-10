@@ -1,0 +1,25 @@
+$kind: http-request
+name: "TC-ADM-32: [ADM-32] Lịch sử Booking của khách qua endpoint Admin (phân trang, kèm Space) (Branch: ADM-B32)"
+description: |-
+  **Mã TC:** ADM-32 (TC-ADM-32)
+  **Nhóm:** Xem hồ sơ & lịch sử Booking
+  **API / Thành phần:** GET /api/admin/users/:id/bookings
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; khách có ≥ 6 đơn.
+  **Dữ liệu vào:** ?page=1&limit=5 ; ?status=CONFIRMED
+  **Các bước thực hiện:**
+  1) GET /api/admin/users/<id>/bookings?page=1&limit=5&#10;2) GET ...?status=CONFIRMED
+  **Kết quả mong đợi:** 200 { items, page, limit, total, totalPages }; chỉ đơn của khách đó, mới nhất trước; mỗi đơn có space { _id, space_code, name, zone_id }; lọc status đúng (HTTP: 200)
+  **Nhánh code bao phủ:** ADM-B32
+  **Ghi chú:** Code: listUserBookings. Khác ADM-04 (GET /api/bookings?userId).
+url: "{{baseUrl}}/api/admin/users/{{userId}}/bookings?page=1&limit=5"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-32] Lịch sử Booking của khách qua endpoint Admin (phân trang, kèm Space)
+      pm.test("[TC-ADM-32] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 6000

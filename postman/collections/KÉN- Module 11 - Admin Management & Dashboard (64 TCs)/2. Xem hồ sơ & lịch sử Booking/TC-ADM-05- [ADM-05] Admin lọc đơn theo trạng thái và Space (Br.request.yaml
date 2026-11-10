@@ -1,0 +1,25 @@
+$kind: http-request
+name: "TC-ADM-05: [ADM-05] Admin lọc đơn theo trạng thái và Space (Branch: ADM-B05)"
+description: |-
+  **Mã TC:** ADM-05 (TC-ADM-05)
+  **Nhóm:** Xem hồ sơ & lịch sử Booking
+  **API / Thành phần:** GET /api/bookings?status&spaceId
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed users/bookings.
+  **Dữ liệu vào:** ?status=CONFIRMED&spaceId=<_id>
+  **Các bước thực hiện:**
+  1) GET /api/bookings với bộ lọc
+  **Kết quả mong đợi:** 200 chỉ gồm đơn đúng bộ lọc (HTTP: 200)
+  **Nhánh code bao phủ:** ADM-B05
+  **Ghi chú:** Endpoint đã có. Review: code /api/bookings không nằm trong gói đã nộp nên chưa đối chiếu.
+url: "{{baseUrl}}/api/bookings?status=CONFIRMED&spaceId={{spaceId}}"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-05] Admin lọc đơn theo trạng thái và Space
+      pm.test("[TC-ADM-05] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 3000

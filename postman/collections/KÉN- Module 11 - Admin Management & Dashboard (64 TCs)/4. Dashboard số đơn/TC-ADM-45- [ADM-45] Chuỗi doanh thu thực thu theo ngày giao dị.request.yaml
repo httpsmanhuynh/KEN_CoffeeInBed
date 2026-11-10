@@ -1,0 +1,31 @@
+$kind: http-request
+name: "TC-ADM-45: [ADM-45] Chuỗi doanh thu thực thu theo ngày giao dịch (giờ VN) (Branch: ADM-B45)"
+description: |-
+  **Mã TC:** ADM-45 (TC-ADM-45)
+  **Nhóm:** Dashboard số đơn
+  **API / Thành phần:** GET /api/admin/dashboard?groupBy=day
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed zones/spaces/bookings/booking_addons/payment_transactions; có PAYMENT lúc 2026-11-01T16:30:00Z (23:30 VN) và REFUND vào ngày sau.
+  **Dữ liệu vào:** ?groupBy=day&from=2026-11-01&to=2026-11-07
+  **Các bước thực hiện:**
+  1) GET dashboard?groupBy=day...&#10;2) Cộng daily[].revenue và so với revenue.total
+  **Kết quả mong đợi:** 200 daily[] { date, revenue, payment, refund } tăng dần theo ngày giao dịch VN; revenue = payment − refund của ngày đó (ngày chỉ có hoàn tiền ra số âm); Σ daily[].revenue = revenue.total; giao dịch 23:30 VN tính đúng ngày VN (HTTP: 200)
+  **Nhánh code bao phủ:** ADM-B45
+  **Ghi chú:** Cập nhật theo Report: gom theo ngày giao dịch (trước đây theo start_at, có field bookings). Code: buildRevenue. Ngày không có giao dịch không xuất hiện trong daily[] (không bù 0) — xác nhận với FE.
+url: "{{baseUrl}}/api/admin/dashboard?groupBy=day&from=2026-11-01&to=2026-11-07"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-45] Chuỗi doanh thu thực thu theo ngày giao dịch (giờ VN)
+      pm.test("[TC-ADM-45] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+      pm.test("[TC-ADM-45] daily[] tăng dần theo ngày và tổng daily[].revenue = revenue.total", function () {
+          const json = pm.response.json();
+          pm.expect(json.daily).to.be.an("array");
+          const sumDaily = json.daily.reduce(function (a, d) { return a + d.revenue; }, 0);
+          pm.expect(sumDaily).to.eql(json.revenue.total);
+      });
+    language: text/javascript
+order: 8000

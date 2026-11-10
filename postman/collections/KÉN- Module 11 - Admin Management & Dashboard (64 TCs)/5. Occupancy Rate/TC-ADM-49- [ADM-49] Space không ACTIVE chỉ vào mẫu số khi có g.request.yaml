@@ -1,0 +1,25 @@
+$kind: http-request
+name: "TC-ADM-49: [ADM-49] Space không ACTIVE chỉ vào mẫu số khi có giờ dùng trong kỳ (Branch: ADM-B49)"
+description: |-
+  **Mã TC:** ADM-49 (TC-ADM-49)
+  **Nhóm:** Occupancy Rate
+  **API / Thành phần:** GET /api/admin/dashboard
+  **Loại:** Boundary
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; Zone có 1 Space ACTIVE và 1 Space MAINTENANCE (mở 08–22h).
+  **Dữ liệu vào:** from=to=<ngày>&zoneId=<Zone>; lần 1 không có đơn ở Space MAINTENANCE; lần 2 có đơn 2h
+  **Các bước thực hiện:**
+  1) GET dashboard&#10;2) Thêm đơn 2h (CHECKED_OUT) vào Space MAINTENANCE rồi GET lại
+  **Kết quả mong đợi:** Lần 1: availableHours = 14 (chỉ Space ACTIVE). Lần 2: availableHours = 28 và occupiedHours tăng 2 (HTTP: 200)
+  **Nhánh code bao phủ:** ADM-B49
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/admin/dashboard?zoneId={{zoneId}}&from=2026-11-01&to=2026-11-01"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-49] Space không ACTIVE chỉ vào mẫu số khi có giờ dùng trong kỳ
+      pm.test("[TC-ADM-49] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 5000

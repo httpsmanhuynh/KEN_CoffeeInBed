@@ -1,0 +1,25 @@
+$kind: http-request
+name: "TC-ADM-52: [ADM-52] Doanh thu là số tiền thực thu sau giảm giá (Voucher/hạng), không phải giá gốc (Branch: ADM-B52)"
+description: |-
+  **Mã TC:** ADM-52 (TC-ADM-52)
+  **Nhóm:** Doanh thu
+  **API / Thành phần:** GET /api/admin/dashboard
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; có đơn dùng Voucher hoặc ưu đãi hạng, đã thanh toán thành công.
+  **Dữ liệu vào:** Ví dụ: giá gốc 500.000đ, thực thu PAYMENT SUCCESS 450.000đ (final_amount)
+  **Các bước thực hiện:**
+  1) GET dashboard trước/sau khi có giao dịch&#10;2) Đối chiếu amount của PAYMENT trong payment_transactions và final_amount của đơn
+  **Kết quả mong đợi:** revenue.total tăng 450.000 (số tiền thực thu), không phải 500.000; revenue.breakdown.discount tăng 50.000 và package + inclusionSurcharge + addon − discount vẫn = revenue.total (HTTP: 200)
+  **Nhánh code bao phủ:** ADM-B52
+  **Ghi chú:** Cập nhật theo Report: tiền lấy từ giao dịch PAYMENT thay vì final_amount của đơn (hai giá trị bằng nhau khi thanh toán đủ, BR-E02).
+url: "{{baseUrl}}/api/admin/dashboard"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-52] Doanh thu là số tiền thực thu sau giảm giá (Voucher/hạng), không phải giá gốc
+      pm.test("[TC-ADM-52] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 5000
