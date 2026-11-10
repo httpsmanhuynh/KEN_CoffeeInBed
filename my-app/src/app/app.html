@@ -1,6 +1,11 @@
-<app-header [member]="member()"></app-header>
-<main class="app-content" id="main-content">
-  <app-user-profile></app-user-profile>
-</main>
-<app-footer></app-footer>
-<app-suggestion-popup></app-suggestion-popup>
+<ng-container *ngIf="!isAdmin(); else adminView">
+  <app-header [member]="member()"></app-header>
+  <main class="app-content" id="main-content">
+    <app-dashboard></app-dashboard>
+  </main>
+  <app-footer></app-footer>
+</ng-container>
+
+<ng-template #adminView>
+  <app-dashboard></app-dashboard>
+</ng-template>

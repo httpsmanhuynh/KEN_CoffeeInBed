@@ -21,9 +21,18 @@ export class App {
    */
   protected readonly member = signal(!isGuestPath(this.location.path()));
 
+  /**
+   * true khi đang ở các trang quản trị admin (/admin, /admin/dashboard, /admin/bookings...)
+   * Khi đó sẽ ẩn header & footer khách của customer để hiển thị layout riêng của admin.
+   */
+  protected readonly isAdmin = signal(this.location.path().startsWith('/admin'));
+
   constructor() {
     this.router.events
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
-      .subscribe(e => this.member.set(!isGuestPath(e.urlAfterRedirects)));
+      .subscribe(e => {
+        this.member.set(!isGuestPath(e.urlAfterRedirects));
+        this.isAdmin.set(e.urlAfterRedirects.startsWith('/admin'));
+      });
   }
 }

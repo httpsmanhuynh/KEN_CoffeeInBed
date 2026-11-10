@@ -1,0 +1,90 @@
+<div class="admin-wrapper" data-name="KÉN Admin · Container">
+  <!-- Sidebar -->
+  <aside class="admin-sidebar" data-name="KÉN Admin · Sidebar">
+    <!-- Brand Logo -->
+    <a routerLink="/admin/dashboard" class="sidebar-brand" data-name="Logo">
+      <div class="brand-avatar">
+        <img src="images/Logo.png" alt="KÉN Logo" class="brand-avatar-img" />
+      </div>
+      <div class="brand-text">
+        <span class="brand-title">KÉN</span>
+        <span class="brand-slogan">Lười một chút, chill một góc</span>
+      </div>
+    </a>
+
+    <div class="sidebar-sep"></div>
+
+    <!-- Navigation List -->
+    <nav class="sidebar-nav" data-name="Navigation">
+      <a
+        *ngFor="let item of navItems"
+        [routerLink]="item.path"
+        class="nav-link"
+        [class.active]="isItemActive(item)"
+        [attr.data-name]="item.id"
+      >
+        <span class="nav-icon-wrap">
+          <img [src]="item.icon" [alt]="item.label" class="nav-icon" />
+        </span>
+        <span class="nav-label">{{ item.label }}</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-spacer"></div>
+
+    <!-- Bottom User Profile -->
+    <div class="sidebar-profile-wrap">
+      <div class="sidebar-profile" (click)="toggleUserMenu()" data-name="AdminProfile">
+        <div class="profile-avatar">
+          <img src="images/admin/user-avatar-icon.svg" alt="Avatar" class="avatar-icon" />
+        </div>
+        <span class="profile-name">Quản trị viên</span>
+        <img src="images/admin/chevron-down.svg" alt="Dropdown" class="profile-dropdown-icon" [class.rotated]="isUserMenuOpen" />
+      </div>
+
+      <!-- Quick User Menu Dropdown -->
+      <div class="profile-dropdown-menu" *ngIf="isUserMenuOpen">
+        <a routerLink="/" class="dropdown-item" (click)="isUserMenuOpen = false">
+          <span>Trang khách hàng</span>
+        </a>
+        <a routerLink="/login" class="dropdown-item text-danger" (click)="isUserMenuOpen = false">
+          <span>Đăng xuất</span>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <div class="admin-main" data-name="KÉN Admin · Main">
+    <!-- Topbar / Header -->
+    <header class="admin-topbar" data-name="Topbar">
+      <!-- Breadcrumb -->
+      <div class="breadcrumb" data-name="Breadcrumb">
+        <span class="crumb-link">KÉN</span>
+        <span class="crumb-sep">/</span>
+        <span class="crumb-link">Admin</span>
+        <span class="crumb-sep">/</span>
+        <span class="crumb-current">{{ getCurrentPageTitle() }}</span>
+      </div>
+
+      <!-- Topbar Right -->
+      <div class="topbar-right" data-name="TopbarRight">
+        <button
+          type="button"
+          class="btn-refresh"
+          (click)="onRefresh()"
+          title="Làm mới dữ liệu"
+          [class.spinning]="isRefreshing"
+        >
+          <img src="images/admin/refresh.svg" alt="Refresh" class="refresh-icon" />
+        </button>
+        <span class="topbar-info">Dữ liệu minh hoạ · 24/10/2026 · 10:00</span>
+      </div>
+    </header>
+
+    <!-- Page Content Container -->
+    <main class="admin-content-body">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

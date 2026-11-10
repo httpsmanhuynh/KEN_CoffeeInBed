@@ -15,8 +15,10 @@ import { UserProfile } from './pages/customer/account/user-profile/user-profile'
 import { Security } from './pages/customer/account/security/security';
 import { TopTrending } from './pages/customer/menu/top-trending/top-trending';
 import { MenuPage } from './pages/customer/menu/menu-page/menu-page';
+import { adminRoutes } from './pages/admin/admin.routes';
 
 const routes: Routes = [
+  ...adminRoutes,
   { path: '', redirectTo: 'register', pathMatch: 'full' },
   { path: 'register', component: RegisterPage },
   { path: 'otp-verify', component: OtpVerifyPage },
@@ -35,7 +37,6 @@ const routes: Routes = [
   { path: 'security', component: Security },
   { path: 'menu', component: MenuPage },
   { path: 'top-trending', component: TopTrending },
-
 
   // Giữ tương thích với các URL cũ đã được dùng trong giao diện.
   { path: 'customer/membership/coins-rewards', redirectTo: 'coins-rewards', pathMatch: 'full' },

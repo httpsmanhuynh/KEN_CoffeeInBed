@@ -27,6 +27,11 @@ import { AccountSidebar } from './shared/components/account-sidebar/account-side
 import { SuggestionPopup } from './shared/components/suggestion-popup/suggestion-popup';
 import { TopTrending } from './pages/customer/menu/top-trending/top-trending';
 import { MenuPage } from './pages/customer/menu/menu-page/menu-page';
+import { AdminLayout } from './pages/admin/admin-layout/admin-layout';
+import { Dashboard } from './pages/admin/dashboard/dashboard';
+import { Bookings } from './pages/admin/bookings/bookings';
+
+
 
 @NgModule({
   declarations: [
@@ -52,6 +57,11 @@ import { MenuPage } from './pages/customer/menu/menu-page/menu-page';
     SuggestionPopup,
     TopTrending,
     MenuPage,
+    AdminLayout,
+    Dashboard,
+    Bookings,
+
+
     // Remove ConfirmDialog from declarations
   ],
   imports: [
