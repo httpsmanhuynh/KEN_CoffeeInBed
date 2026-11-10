@@ -1,0 +1,25 @@
+$kind: http-request
+name: "TC-ADM-47: [ADM-47] Space SHARED: giờ-khách quy đổi theo sức chứa (Branch: ADM-B47)"
+description: |-
+  **Mã TC:** ADM-47 (TC-ADM-47)
+  **Nhóm:** Occupancy Rate
+  **API / Thành phần:** GET /api/admin/dashboard
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; Space SHARED ACTIVE, capacity 10, mở 08–22h, là Space duy nhất của Zone.
+  **Dữ liệu vào:** 1 đơn CONFIRMED 7h với 10 khách (70 giờ-khách); from=to=<ngày>&zoneId=<Zone>
+  **Các bước thực hiện:**
+  1) GET dashboard?zoneId=...&from=D&to=D&#10;2) Tính tay 70 ÷ 10 = 7 giờ-không-gian
+  **Kết quả mong đợi:** 200 occupancy.rate = 50 (occupiedHours = 7, availableHours = 14) (HTTP: 200)
+  **Nhánh code bao phủ:** ADM-B47
+  **Ghi chú:** Code: buildZoneStats (nhánh SHARED).
+url: "{{baseUrl}}/api/admin/dashboard?zoneId={{zoneId}}&from=2026-11-01&to=2026-11-01"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-47] Space SHARED: giờ-khách quy đổi theo sức chứa
+      pm.test("[TC-ADM-47] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 3000

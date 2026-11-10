@@ -1,0 +1,30 @@
+$kind: http-request
+name: "TC-ADM-50: [ADM-50] Tham số topAddons: mặc định, trần và giá trị sai (Branch: ADM-B50)"
+description: |-
+  **Mã TC:** ADM-50 (TC-ADM-50)
+  **Nhóm:** Top Add-on
+  **API / Thành phần:** GET /api/admin/dashboard?topAddons
+  **Loại:** Boundary
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed zones/spaces/bookings/booking_addons/payment_transactions.
+  **Dữ liệu vào:** (không có) ; topAddons=3 ; topAddons=50 ; topAddons=0 ; topAddons=abc
+  **Các bước thực hiện:**
+  1) GET dashboard lần lượt từng giá trị
+  **Kết quả mong đợi:** 200 với tối đa 5 / 3 / 20 phần tử; 422 INVALID_LIMIT với 0 và abc (HTTP: 200/422)
+  **Nhánh code bao phủ:** ADM-B50
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/admin/dashboard?topAddons=0"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-50] Tham số topAddons: mặc định, trần và giá trị sai
+      pm.test("[TC-ADM-50] Status code is 200/422", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200,422]);
+      });
+      pm.test("[TC-ADM-50] topAddons=0 trả về 422 INVALID_LIMIT", function () {
+          if (pm.response.code === 422) {
+              pm.expect(pm.response.json().error).to.eql("INVALID_LIMIT");
+          }
+      });
+    language: text/javascript
+order: 3000

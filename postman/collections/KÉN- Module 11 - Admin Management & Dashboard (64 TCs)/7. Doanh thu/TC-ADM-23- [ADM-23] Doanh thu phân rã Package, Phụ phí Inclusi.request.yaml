@@ -1,0 +1,30 @@
+$kind: http-request
+name: "TC-ADM-23: [ADM-23] Doanh thu phân rã Package, Phụ phí Inclusion, Add-on, trừ Giảm giá; tổng phân rã khớp doanh thu (Branch: ADM-B23)"
+description: |-
+  **Mã TC:** ADM-23 (TC-ADM-23)
+  **Nhóm:** Doanh thu
+  **API / Thành phần:** GET /api/admin/dashboard
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed users/bookings/payment_transactions; có đơn đã thanh toán dùng Inclusion vượt hạn mức, Add-on, Voucher và ưu đãi hạng.
+  **Dữ liệu vào:** Đơn đã thanh toán: Package 500.000 + Inclusion 59.000 + Add-on 100.000 − Voucher 50.000 − Hạng 9.000 = 600.000 (PAYMENT SUCCESS 600.000)
+  **Các bước thực hiện:**
+  1) GET /api/admin/dashboard cho kỳ chứa giao dịch&#10;2) Đối chiếu revenue.breakdown với Price Snapshot của đơn&#10;3) Tính package + inclusionSurcharge + addon − discount
+  **Kết quả mong đợi:** 200 revenue.breakdown { package: 500.000, inclusionSurcharge: 59.000, addon: 100.000, discount: 59.000 }; package + inclusionSurcharge + addon − discount = revenue.total = 600.000; mỗi zones[].revenue cũng khớp (HTTP: 200)
+  **Nhánh code bao phủ:** ADM-B23
+  **Ghi chú:** Thay case F&B trực tiếp (ngoài phạm vi theo Report; xem ADM-53). Cách chia giao dịch theo Price Snapshot là quy ước của nhóm (Report chỉ nêu tổng phân rã khớp doanh thu). Nếu Package sai lệch → kiểm tra tên field Price Snapshot trong BOOKING_SNAPSHOT (adminService.js).
+url: "{{baseUrl}}/api/admin/dashboard"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-23] Doanh thu phân rã Package, Phụ phí Inclusion, Add-on, trừ Giảm giá; tổng phân rã khớp doanh thu
+      pm.test("[TC-ADM-23] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+      pm.test("[TC-ADM-23] package + inclusionSurcharge + addon - discount = revenue.total", function () {
+          const rev = pm.response.json().revenue;
+          const b = rev.breakdown;
+          pm.expect(b.package + b.inclusionSurcharge + b.addon - b.discount).to.eql(rev.total);
+      });
+    language: text/javascript
+order: 4000

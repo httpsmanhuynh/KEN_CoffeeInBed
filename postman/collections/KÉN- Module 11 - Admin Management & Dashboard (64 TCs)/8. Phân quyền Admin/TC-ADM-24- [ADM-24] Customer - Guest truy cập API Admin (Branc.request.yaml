@@ -1,0 +1,25 @@
+$kind: http-request
+name: "TC-ADM-24: [ADM-24] Customer / Guest truy cập API Admin (Branch: ADM-B24)"
+description: |-
+  **Mã TC:** ADM-24 (TC-ADM-24)
+  **Nhóm:** Phân quyền Admin
+  **API / Thành phần:** GET /api/admin/*
+  **Loại:** Security
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer.
+  **Dữ liệu vào:** —
+  **Các bước thực hiện:**
+  1) Dùng Customer gọi GET /api/admin/users, /users/<id>, /users/<id>/bookings, /dashboard&#10;2) Lặp lại không cookie
+  **Kết quả mong đợi:** Customer 403; Guest 401; không trả dữ liệu (HTTP: 403)
+  **Nhánh code bao phủ:** ADM-B24
+  **Ghi chú:** Review: các API ghi (lock/unlock) xem ADM-55.
+url: "{{baseUrl}}/api/admin/users"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-24] Customer / Guest truy cập API Admin
+      pm.test("[TC-ADM-24] Status code is 403", function () {
+          pm.expect(pm.response.code).to.be.oneOf([401,403]);
+      });
+    language: text/javascript
+order: 1000

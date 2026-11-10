@@ -23,6 +23,51 @@ function sanitizeUser(user) {
 }
 
 /**
+ * Bảng hạng thành viên (BR-H04) — giữ đồng bộ với src/domain/loyalty.js.
+ * Sắp xếp tăng dần theo điểm tối thiểu.
+ */
+const TIER_LADDER = Object.freeze([
+  { code: 'BASIC', name: 'KÉN Mới', minPoints: 0 },
+  { code: 'SILVER', name: 'KÉN Bạc', minPoints: 1000 },
+  { code: 'GOLD', name: 'KÉN Vàng', minPoints: 5000 },
+  { code: 'DIAMOND', name: 'KÉN Kim Cương', minPoints: 10000 },
+]);
+
+function tierByPoints(points) {
+  const p = Number(points) || 0;
+  let found = TIER_LADDER[0];
+  for (const t of TIER_LADDER) if (p >= t.minPoints) found = t;
+  return found;
+}
+
+/**
+ * Hạng, KÉN Điểm và KÉN Coins hiển thị trong danh sách / hồ sơ khách (UC-29).
+ * Điểm = users.tier_points, Coins = users.coin_balance. Hạng lấy từ users.tier nếu có và hợp lệ,
+ * nếu không thì suy ra từ điểm theo bảng hạng.
+ */
+function loyaltyOf(user) {
+  const u = user || {};
+  const points = Number(u.tier_points) || 0;
+  const coins = Number(u.coin_balance) || 0;
+  const stored = String(u.tier || '').toUpperCase();
+  const tier = TIER_LADDER.find((t) => t.code === stored) || tierByPoints(points);
+  return { tier: tier.code, tierName: tier.name, points, coins };
+}
+
+/**
+ * Điều kiện Mongo lọc theo hạng: ưu tiên field `tier` nếu có, nếu không thì theo khoảng điểm.
+ * Mã hạng lạ -> chỉ khớp field `tier` (kết quả rỗng như trước đây).
+ */
+function tierFilter(code) {
+  const c = String(code).toUpperCase();
+  const i = TIER_LADDER.findIndex((t) => t.code === c);
+  if (i < 0) return { tier: c };
+  const range = { $gte: TIER_LADDER[i].minPoints };
+  if (i + 1 < TIER_LADDER.length) range.$lt = TIER_LADDER[i + 1].minPoints;
+  return { $or: [{ tier: c }, { tier: { $exists: false }, tier_points: range }] };
+}
+
+/**
  * Kiểm tra Admin có được phép đổi trạng thái tài khoản không.
  * Trả về { from, to } để service dùng làm điều kiện cập nhật nguyên tử.
  * - Không tự khóa chính mình.
@@ -56,4 +101,4 @@ function decideStatusChange({ actorId, target, action }) {
   return { from: t.from, to: t.to };
 }
 
-module.exports = { USER_STATUS, TRANSITIONS, sanitizeUser, decideStatusChange };
+module.exports = { USER_STATUS, TRANSITIONS, TIER_LADDER, sanitizeUser, loyaltyOf, tierFilter, decideStatusChange };

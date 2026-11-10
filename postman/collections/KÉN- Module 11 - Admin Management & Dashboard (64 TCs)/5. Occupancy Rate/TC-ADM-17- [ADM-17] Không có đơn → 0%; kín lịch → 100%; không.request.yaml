@@ -1,0 +1,30 @@
+$kind: http-request
+name: "TC-ADM-17: [ADM-17] Không có đơn → 0%; kín lịch → 100%; không chia cho 0 (Branch: ADM-B17)"
+description: |-
+  **Mã TC:** ADM-17 (TC-ADM-17)
+  **Nhóm:** Occupancy Rate
+  **API / Thành phần:** GET /api/admin/dashboard
+  **Loại:** Boundary
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed users/bookings.
+  **Dữ liệu vào:** Space không có đơn; Space kín lịch (14h/14h); from=to 1 ngày
+  **Các bước thực hiện:**
+  1) GET occupancy
+  **Kết quả mong đợi:** 200 rate = 0 và 100; không NaN/Infinity; kỳ/Zone không có Space → rate 0 (HTTP: 200)
+  **Nhánh code bao phủ:** ADM-B17
+  **Ghi chú:** Review: code chia an toàn (pct trả 0 khi mẫu số = 0) nhưng rate không bị chặn ở 100: dữ liệu có giờ đặt vượt giờ mở cửa sẽ ra >100% (thử nghiệm: 20h/14h = 142,86%).
+url: "{{baseUrl}}/api/admin/dashboard?from=2026-11-01&to=2026-11-01"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-17] Không có đơn → 0%; kín lịch → 100%; không chia cho 0
+      pm.test("[TC-ADM-17] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+      pm.test("[TC-ADM-17] occupancy.rate là số hữu hạn không âm", function () {
+          const occ = pm.response.json().occupancy;
+          pm.expect(Number.isFinite(occ.rate)).to.be.true;
+          pm.expect(occ.rate).to.be.at.least(0);
+      });
+    language: text/javascript
+order: 2000

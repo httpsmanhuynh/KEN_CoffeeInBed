@@ -1,0 +1,38 @@
+$kind: http-request
+name: "TC-ADM-01: [ADM-01] Admin xem danh sách khách hàng có phân trang (Branch: ADM-B01)"
+description: |-
+  **Mã TC:** ADM-01 (TC-ADM-01)
+  **Nhóm:** Xem danh sách khách
+  **API / Thành phần:** GET /api/admin/users
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed users/bookings.
+  **Dữ liệu vào:** ?page=1&limit=10
+  **Các bước thực hiện:**
+  1) GET /api/admin/users?page=1&limit=10&#10;2) Kiểm tra số phần tử ≤ 10 và total khớp số user trên Atlas
+  **Kết quả mong đợi:** 200 { items, page, limit, total, totalPages }; không có password_hash/OTP/token; mỗi item có loyalty { tier, tierName, points, coins }, bookingCount, lastBookingAt; user mới nhất trước (HTTP: 200)
+  **Nhánh code bao phủ:** ADM-B01
+  **Ghi chú:** Review: đã đối chiếu code (routes/admin.js, adminService.listUsers); thay ghi chú "endpoint theo dự kiến". Cập nhật theo Report (UC-29): danh sách khách có hạng, KÉN Điểm, KÉN Coins — kiểm tra chi tiết ở ADM-63.
+url: "{{baseUrl}}/api/admin/users?page=1&limit=10"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-01] Admin xem danh sách khách hàng có phân trang
+      pm.test("[TC-ADM-01] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+      pm.test("[TC-ADM-01] Cấu trúc phân trang hợp lệ, không lộ password_hash/OTP/token và có loyalty, bookingCount, lastBookingAt", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.include.all.keys("items", "page", "limit", "total", "totalPages");
+          pm.expect(json.items.length).to.be.at.most(10);
+          json.items.forEach(function (u) {
+              pm.expect(u).to.not.have.property("password_hash");
+              pm.expect(u).to.not.have.property("otp_secret");
+              pm.expect(u).to.have.property("loyalty");
+              pm.expect(u.loyalty).to.include.all.keys("tier", "tierName", "points", "coins");
+              pm.expect(u).to.have.property("bookingCount");
+              pm.expect(u).to.have.property("lastBookingAt");
+          });
+      });
+    language: text/javascript
+order: 1000

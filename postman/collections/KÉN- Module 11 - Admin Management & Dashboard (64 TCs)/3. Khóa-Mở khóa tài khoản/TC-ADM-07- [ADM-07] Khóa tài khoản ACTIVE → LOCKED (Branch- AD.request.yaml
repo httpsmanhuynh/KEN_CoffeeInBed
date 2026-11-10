@@ -1,0 +1,31 @@
+$kind: http-request
+name: "TC-ADM-07: [ADM-07] Khóa tài khoản ACTIVE → LOCKED (Branch: ADM-B07)"
+description: |-
+  **Mã TC:** ADM-07 (TC-ADM-07)
+  **Nhóm:** Khóa/Mở khóa tài khoản
+  **API / Thành phần:** POST /api/admin/users/:id/lock
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed users/bookings.
+  **Dữ liệu vào:** Không cần body (hành động nằm ở URL); id khách ACTIVE
+  **Các bước thực hiện:**
+  1) POST /api/admin/users/<id>/lock&#10;2) Kiểm tra users.status trên Atlas
+  **Kết quả mong đợi:** 200 { user } với user.status = LOCKED; không lộ password_hash; DB chỉ đổi field status (HTTP: 200)
+  **Nhánh code bao phủ:** ADM-B07
+  **Ghi chú:** Review: endpoint thực tế là POST …/lock và POST …/unlock, không có PATCH …/status.
+url: "{{baseUrl}}/api/admin/users/{{userId}}/lock"
+method: POST
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-07] Khóa tài khoản ACTIVE → LOCKED
+      pm.test("[TC-ADM-07] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+      pm.test("[TC-ADM-07] user.status = LOCKED và không lộ password_hash", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.have.property("user");
+          pm.expect(json.user.status).to.eql("LOCKED");
+          pm.expect(json.user).to.not.have.property("password_hash");
+      });
+    language: text/javascript
+order: 1000
