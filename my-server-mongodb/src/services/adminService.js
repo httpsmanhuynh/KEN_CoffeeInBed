@@ -7,22 +7,37 @@
 
 const { ObjectId } = require('mongodb');
 const { AdminError } = require('../domain/adminError');
-const { sanitizeUser, decideStatusChange } = require('../domain/adminUser');
+const { sanitizeUser, loyaltyOf, tierFilter, decideStatusChange } = require('../domain/adminUser');
 const {
-  BOOKING_STATUSES, REVENUE_STATUSES, OCCUPANCY_STATUSES,
-  parseDateRange, parseLimit, buildZoneStats, rankTopAddons,
+  BOOKING_STATUSES, PAID_STATUSES, REVENUE_TX_TYPES,
+  parseDateRange, parseLimit, buildRevenue, buildZoneStats, rankTopAddons,
 } = require('../domain/dashboard');
 
 /**
- * Collection bán F&B trực tiếp. Tên field chính xác nằm trong sales_transactions.validator.json —
- * XÁC NHẬN lại 3 mảng dưới đây khi tích hợp (chỉ cần sửa tại đây).
+ * Nguồn doanh thu: giao dịch `payment_transactions` (PAYMENT cộng, REFUND trừ, chỉ status SUCCESS),
+ * tính theo thời điểm giao dịch. Tên field chính xác nằm trong payment_transactions.validator.json —
+ * XÁC NHẬN lại khi tích hợp (chỉ cần sửa tại đây).
  */
-const FNB = Object.freeze({
-  collection: 'sales_transactions',
-  dateFields: ['sold_at', 'transaction_date', 'created_at'],
-  amountFields: ['total_amount', 'line_total', 'amount'],
-  qtyFields: ['quantity', 'transaction_qty'],
-  unitPriceFields: ['unit_price', 'price'],
+const PAYMENT_TX = Object.freeze({
+  collection: 'payment_transactions',
+  typeField: 'type',
+  statusField: 'status',
+  successStatus: 'SUCCESS',
+  bookingField: 'booking_id',
+  amountField: 'amount',
+  dateFields: ['processed_at', 'paid_at', 'created_at'],
+});
+
+/**
+ * Field Price Snapshot trên `bookings` dùng để phân rã doanh thu (Package, Phụ phí Inclusion, Add-on, Giảm giá).
+ * Package là phần còn lại nên không cần field riêng. XÁC NHẬN lại tên field khi tích hợp.
+ */
+const BOOKING_SNAPSHOT = Object.freeze({
+  final: ['final_amount'],
+  inclusion: ['inclusion_surcharge', 'inclusion_surcharge_total'],
+  addon: ['addon_total', 'addons_total'],
+  voucherDiscount: ['voucher_discount'],
+  tierDiscount: ['tier_discount'],
 });
 
 /* ---------------------------------------------------------------- helpers */
@@ -62,11 +77,13 @@ async function listUsers(db, query = {}) {
     filter.status = query.status;
   }
   if (query.role) filter.role = String(query.role).toUpperCase();
-  if (query.tier) filter.tier = String(query.tier).toUpperCase();
+  const and = [];
+  if (query.tier) and.push(tierFilter(query.tier));
   if (query.q && String(query.q).trim()) {
     const rx = new RegExp(escapeRegex(String(query.q).trim()), 'i');
-    filter.$or = ['phone', 'email', 'full_name', 'name'].map((f) => ({ [f]: rx }));
+    and.push({ $or: ['phone', 'email', 'full_name', 'name'].map((f) => ({ [f]: rx })) });
   }
+  if (and.length) filter.$and = and;
 
   const col = db.collection('users');
   const [items, total] = await Promise.all([
@@ -87,7 +104,12 @@ async function listUsers(db, query = {}) {
   return {
     items: items.map((u) => {
       const s = statById.get(String(u._id));
-      return { ...sanitizeUser(u), bookingCount: s ? s.bookingCount : 0, lastBookingAt: s ? s.lastBookingAt : null };
+      return {
+        ...sanitizeUser(u),
+        loyalty: loyaltyOf(u),
+        bookingCount: s ? s.bookingCount : 0,
+        lastBookingAt: s ? s.lastBookingAt : null,
+      };
     }),
     page, limit, total, totalPages: Math.ceil(total / limit),
   };
@@ -107,10 +129,10 @@ async function getUserProfile(db, id) {
   let totalSpent = 0;
   for (const g of groups) {
     if (g._id in byStatus) byStatus[g._id] = g.count;
-    if (REVENUE_STATUSES.includes(g._id)) totalSpent += g.amount;
+    if (PAID_STATUSES.includes(g._id)) totalSpent += g.amount;
   }
   return {
-    user: sanitizeUser(user),
+    user: { ...sanitizeUser(user), loyalty: loyaltyOf(user) },
     bookingStats: { total: Object.values(byStatus).reduce((a, b) => a + b, 0), byStatus, totalSpent },
   };
 }
@@ -152,7 +174,9 @@ async function listUserBookings(db, id, query = {}) {
  * Khóa / Mở khóa tài khoản (ACTIVE <-> LOCKED).
  * Cập nhật nguyên tử theo trạng thái nguồn để 2 Admin thao tác song song không ghi đè nhau.
  * Chỉ ghi field `status` (validator users dùng additionalProperties:false).
- * Session đang đăng nhập bị thu hồi ở request kế tiếp nhờ requireAuth đọc lại DB (BR-A05).
+ * BR-A05: tài khoản LOCKED không đăng nhập và không đặt chỗ mới. Cơ chế: requireAuth đọc lại DB nên session
+ * đang đăng nhập bị thu hồi ở request kế tiếp (mọi route cần đăng nhập, gồm đặt chỗ, trả 401).
+ * Khóa không đổi trạng thái các Booking đã có của khách.
  */
 async function setUserStatus(db, { actor, targetId, action }) {
   const _id = mustOid(targetId, 'userId');
@@ -181,39 +205,42 @@ async function resolveZone(db, zoneParam) {
   return zone;
 }
 
-async function fnbDirectRevenue(db, range) {
-  const dateExpr = coalesce(FNB.dateFields);
-  const amountExpr = coalesce(FNB.amountFields, {
-    $multiply: [{ $ifNull: [coalesce(FNB.qtyFields), 0] }, { $ifNull: [coalesce(FNB.unitPriceFields), 0] }],
-  });
-  const rows = await db.collection(FNB.collection).aggregate([
-    { $match: { $or: FNB.dateFields.map((f) => ({ [f]: { $gte: range.from, $lt: range.to } })) } },
-    { $addFields: { __d: dateExpr, __a: amountExpr } },
-    { $match: { __d: { $gte: range.from, $lt: range.to } } },
-    { $group: { _id: null, total: { $sum: '$__a' }, transactions: { $sum: 1 } } },
-  ]).toArray();
-  const r = rows[0] || { total: 0, transactions: 0 };
-  return { total: r.total, transactions: r.transactions, scope: 'ALL_ZONES' };
-}
-
-async function dailySeries(db, range, spaceIds) {
-  const match = { start_at: { $gte: range.from, $lt: range.to }, status: { $in: REVENUE_STATUSES } };
-  if (spaceIds) match.space_id = { $in: spaceIds };
-  const rows = await db.collection('bookings').aggregate([
-    { $match: match },
-    { $group: {
-      _id: { $dateToString: { format: '%Y-%m-%d', date: '$start_at', timezone: '+07:00' } },
-      bookings: { $sum: 1 },
-      revenue: { $sum: { $ifNull: ['$final_amount', 0] } },
+/**
+ * Giao dịch tham gia doanh thu trong kỳ (PAYMENT/REFUND, SUCCESS, theo thời điểm giao dịch),
+ * kèm Price Snapshot của Booking để phân rã. Việc cộng/trừ và chia Zone làm ở domain `buildRevenue`.
+ */
+async function revenueTransactions(db, range) {
+  const snap = (fields) => coalesce(fields.map((f) => `__b.${f}`), 0);
+  return db.collection(PAYMENT_TX.collection).aggregate([
+    { $match: {
+      [PAYMENT_TX.statusField]: PAYMENT_TX.successStatus,
+      [PAYMENT_TX.typeField]: { $in: Object.keys(REVENUE_TX_TYPES) },
+      $or: PAYMENT_TX.dateFields.map((f) => ({ [f]: { $gte: range.from, $lt: range.to } })),
     } },
-    { $sort: { _id: 1 } },
+    { $addFields: { __at: coalesce(PAYMENT_TX.dateFields) } },
+    { $match: { __at: { $gte: range.from, $lt: range.to } } },
+    { $lookup: { from: 'bookings', localField: PAYMENT_TX.bookingField, foreignField: '_id', as: '__b' } },
+    { $unwind: { path: '$__b', preserveNullAndEmptyArrays: true } },
+    { $project: {
+      _id: 0,
+      type: `$${PAYMENT_TX.typeField}`,
+      amount: `$${PAYMENT_TX.amountField}`,
+      at: '$__at',
+      spaceId: '$__b.space_id',
+      final: snap(BOOKING_SNAPSHOT.final),
+      inclusion: snap(BOOKING_SNAPSHOT.inclusion),
+      addon: snap(BOOKING_SNAPSHOT.addon),
+      voucherDiscount: snap(BOOKING_SNAPSHOT.voucherDiscount),
+      tierDiscount: snap(BOOKING_SNAPSHOT.tierDiscount),
+    } },
   ]).toArray();
-  return rows.map((r) => ({ date: r._id, bookings: r.bookings, revenue: r.revenue }));
 }
 
 /**
- * GET dashboard: số đơn theo 7 trạng thái, Occupancy Rate, doanh thu thực tế (Price Snapshot),
- * Top Add-on và doanh thu F&B trực tiếp — theo Zone & khoảng thời gian (lọc theo `start_at`).
+ * GET dashboard — 4 nhóm chỉ số theo Zone & khoảng thời gian (Report B.3.30, UC-29, UC-31):
+ *  - số đơn theo 7 trạng thái, Occupancy Rate, Top Add-on: lọc theo `bookings.start_at` (ngày sử dụng);
+ *  - doanh thu thực thu: Σ PAYMENT − Σ REFUND thành công, lọc theo thời điểm giao dịch, kèm phân rã.
+ * F&B bán trực tiếp tại quầy (POS) nằm ngoài phạm vi hệ thống nên không có trong Dashboard.
  */
 async function getDashboard(db, query = {}, now = new Date()) {
   const range = parseDateRange(query, now);
@@ -234,33 +261,36 @@ async function getDashboard(db, query = {}, now = new Date()) {
 
   // Thời lượng (giờ), cắt ở cuối kỳ để đơn vắt qua ranh giới không vượt 100%
   const hoursExpr = { $max: [0, { $divide: [{ $subtract: [{ $min: ['$end_at', range.to] }, '$start_at'] }, 3600000] }] };
-  const occupiedHours = { $cond: [{ $in: ['$status', OCCUPANCY_STATUSES] }, hoursExpr, 0] };
+  const occupiedHours = { $cond: [{ $in: ['$status', PAID_STATUSES] }, hoursExpr, 0] };
 
   const addonPipeline = [
-    { $match: { ...bookingMatch, status: { $in: REVENUE_STATUSES } } },
+    { $match: { ...bookingMatch, status: { $in: PAID_STATUSES } } },
     { $lookup: { from: 'booking_addons', localField: '_id', foreignField: 'booking_id', as: 'addons' } },
     { $unwind: '$addons' },
     { $replaceRoot: { newRoot: '$addons' } },
   ];
 
-  const [bookingGroups, addonLines, addonCatalog, fnb, daily] = await Promise.all([
+  const [bookingGroups, addonLines, addonCatalog, txRows] = await Promise.all([
     db.collection('bookings').aggregate([
       { $match: bookingMatch },
       { $group: {
         _id: { space: '$space_id', status: '$status' },
         count: { $sum: 1 },
-        revenue: { $sum: { $ifNull: ['$final_amount', 0] } },
         hours: { $sum: occupiedHours },
         guestHours: { $sum: { $multiply: [occupiedHours, { $ifNull: ['$guest_count', 0] }] } },
       } },
     ]).toArray(),
     db.collection('bookings').aggregate(addonPipeline).toArray(),
     db.collection('addons').find({}, { projection: { name: 1 } }).toArray(),
-    fnbDirectRevenue(db, range),
-    String(query.groupBy || '') === 'day' ? dailySeries(db, range, spaceIds) : Promise.resolve(null),
+    revenueTransactions(db, range),
   ]);
 
-  const stats = buildZoneStats({ range, spaces, zones, bookingGroups });
+  const revenue = buildRevenue({
+    transactions: txRows,
+    spaceById: new Map(spaces.map((sp) => [String(sp._id), sp])),
+    zoneFiltered: !!zone,
+  });
+  const stats = buildZoneStats({ range, spaces, zones, bookingGroups, revenue });
   const names = new Map(addonCatalog.map((a) => [String(a._id), a.name]));
 
   const result = {
@@ -269,18 +299,20 @@ async function getDashboard(db, query = {}, now = new Date()) {
     bookings: stats.totals.bookings,
     occupancy: stats.totals.occupancy,
     revenue: {
-      bookings: stats.totals.revenue,
-      fnbDirect: fnb,
-      grandTotal: stats.totals.revenue.total + fnb.total,
+      basis: 'TRANSACTION_TIME',
+      total: revenue.total,
+      breakdown: revenue.breakdown,
+      collected: revenue.collected,
+      refunded: revenue.refunded,
     },
     topAddons: rankTopAddons(addonLines, { names, limit: topLimit }),
     zones: stats.zones,
   };
-  if (daily) result.daily = daily;
+  if (String(query.groupBy || '') === 'day') result.daily = revenue.daily;
   return result;
 }
 
 module.exports = {
-  FNB,
+  PAYMENT_TX, BOOKING_SNAPSHOT,
   listUsers, getUserProfile, listUserBookings, setUserStatus, getDashboard,
 };

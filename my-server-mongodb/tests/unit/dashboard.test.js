@@ -2,8 +2,8 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const {
-  BOOKING_STATUSES, REVENUE_STATUSES, parseDateRange, parseClock, openHoursOf, parseLimit,
-  buildZoneStats, rankTopAddons, normalizeAddonLine,
+  BOOKING_STATUSES, PAID_STATUSES, parseDateRange, parseClock, openHoursOf, parseLimit,
+  allocateAmount, buildRevenue, buildZoneStats, rankTopAddons, normalizeAddonLine,
 } = require('../../src/domain/dashboard');
 
 const NOW = new Date('2026-11-08T05:00:00Z'); // 12:00 giờ VN, 08/11/2026
@@ -74,37 +74,38 @@ const spaces = [
   { _id: 's4', zone_id: 'z2', booking_mode: 'EXCLUSIVE', capacity: 2, open_time: '08:00', close_time: '22:00', status: 'INACTIVE' },
 ];
 const range = { days: 2 };
-const g = (space, status, count, revenue = 0, hours = 0, guestHours = 0) => ({ _id: { space, status }, count, revenue, hours, guestHours });
+const g = (space, status, count, hours = 0, guestHours = 0) => ({ _id: { space, status }, count, hours, guestHours });
 
 test('TC-DSH-09 luôn đủ 7 trạng thái (kể cả 0) và đúng thứ tự khóa', () => {
   const r = buildZoneStats({ range, spaces, zones, bookingGroups: [] });
   assert.deepEqual(Object.keys(r.totals.bookings.byStatus), BOOKING_STATUSES);
   assert.equal(r.totals.bookings.total, 0);
-  assert.equal(r.totals.revenue.total, 0);
+  assert.ok(r.zones.every((z) => z.revenue.total === 0 && z.revenue.breakdown.package === 0)); // chưa có giao dịch -> doanh thu 0
 });
 
-test('TC-DSH-10 doanh thu chỉ tính CONFIRMED/CHECKED_IN/CHECKED_OUT/NO_SHOW', () => {
+test('TC-DSH-10 số đơn đếm đủ 7 trạng thái; chỉ 4 trạng thái đã thanh toán & chưa hủy chiếm chỗ', () => {
   const r = buildZoneStats({
     range, spaces, zones,
     bookingGroups: [
-      g('s1', 'CHECKED_OUT', 2, 400000, 4),
-      g('s1', 'CONFIRMED', 1, 100000, 2),
-      g('s1', 'NO_SHOW', 1, 50000, 1),
-      g('s1', 'CHECKED_IN', 1, 70000, 1),
-      g('s1', 'CANCELLED', 3, 999999),
-      g('s1', 'EXPIRED', 2, 888888),
-      g('s1', 'PENDING_PAYMENT', 1, 777777),
+      g('s1', 'CHECKED_OUT', 2, 4),
+      g('s1', 'CONFIRMED', 1, 2),
+      g('s1', 'NO_SHOW', 1, 1),
+      g('s1', 'CHECKED_IN', 1, 1),
+      g('s1', 'CANCELLED', 3, 9),
+      g('s1', 'EXPIRED', 2, 9),
+      g('s1', 'PENDING_PAYMENT', 1, 9),
     ],
   });
-  assert.equal(r.totals.revenue.total, 400000 + 100000 + 50000 + 70000);
-  assert.deepEqual(Object.keys(r.totals.revenue.byStatus), REVENUE_STATUSES);
+  assert.deepEqual(PAID_STATUSES, ['CONFIRMED', 'CHECKED_IN', 'CHECKED_OUT', 'NO_SHOW']);
   assert.equal(r.totals.bookings.total, 11);
   assert.equal(r.totals.bookings.byStatus.CANCELLED, 3);
+  assert.equal(r.totals.occupancy.occupiedHours, 8); // 4 + 2 + 1 + 1; CANCELLED/EXPIRED/PENDING không tính
+  assert.equal('revenue' in r.totals, false); // doanh thu tính riêng bằng buildRevenue (theo giao dịch)
 });
 
 test('TC-DSH-11 occupancy EXCLUSIVE = giờ đặt / (ngày × giờ mở cửa)', () => {
   // s1: 14h × 2 ngày = 28h khả dụng; đã dùng 7h => 25%
-  const r = buildZoneStats({ range, spaces: [spaces[0]], zones, bookingGroups: [g('s1', 'CHECKED_OUT', 2, 0, 7)] });
+  const r = buildZoneStats({ range, spaces: [spaces[0]], zones, bookingGroups: [g('s1', 'CHECKED_OUT', 2, 7)] });
   assert.equal(r.totals.occupancy.rate, 25);
   assert.equal(r.totals.occupancy.availableHours, 28);
   assert.equal(r.totals.occupancy.occupiedHours, 7);
@@ -112,14 +113,14 @@ test('TC-DSH-11 occupancy EXCLUSIVE = giờ đặt / (ngày × giờ mở cửa)
 
 test('TC-DSH-12 occupancy SHARED quy đổi theo sức chứa (giờ-khách / capacity)', () => {
   // s3: capacity 10, 28h khả dụng; 70 giờ-khách = 7 giờ-không-gian => 25%
-  const r = buildZoneStats({ range, spaces: [spaces[2]], zones, bookingGroups: [g('s3', 'CONFIRMED', 5, 0, 20, 70)] });
+  const r = buildZoneStats({ range, spaces: [spaces[2]], zones, bookingGroups: [g('s3', 'CONFIRMED', 5, 20, 70)] });
   assert.equal(r.totals.occupancy.rate, 25);
 });
 
 test('TC-DSH-13 đơn hủy/hết hạn/chờ thanh toán không chiếm chỗ', () => {
   const r = buildZoneStats({
     range, spaces: [spaces[0]], zones,
-    bookingGroups: [g('s1', 'CANCELLED', 1, 0, 0), g('s1', 'EXPIRED', 1, 0, 0), g('s1', 'PENDING_PAYMENT', 1, 0, 0)],
+    bookingGroups: [g('s1', 'CANCELLED', 1, 3), g('s1', 'EXPIRED', 1, 3), g('s1', 'PENDING_PAYMENT', 1, 3)],
   });
   assert.equal(r.totals.occupancy.rate, 0);
 });
@@ -127,14 +128,22 @@ test('TC-DSH-13 đơn hủy/hết hạn/chờ thanh toán không chiếm chỗ',
 test('TC-DSH-14 space INACTIVE không vào mẫu số, trừ khi có giờ dùng trong kỳ', () => {
   const a = buildZoneStats({ range, spaces, zones, bookingGroups: [] });
   assert.equal(a.totals.occupancy.availableHours, 3 * 28); // s1,s2,s3
-  const b = buildZoneStats({ range, spaces, zones, bookingGroups: [g('s4', 'CHECKED_OUT', 1, 0, 2)] });
+  const b = buildZoneStats({ range, spaces, zones, bookingGroups: [g('s4', 'CHECKED_OUT', 1, 2)] });
   assert.equal(b.totals.occupancy.availableHours, 4 * 28);
 });
 
-test('TC-DSH-15 tách theo Zone & tổng khớp tổng các Zone', () => {
+test('TC-DSH-15 tách theo Zone & tổng khớp tổng các Zone (số đơn); doanh thu Zone lấy từ buildRevenue', () => {
+  const spaceById = new Map(spaces.map((x) => [String(x._id), x]));
+  const revenue = buildRevenue({
+    spaceById,
+    transactions: [
+      { type: 'PAYMENT', amount: 300000, at: '2026-11-01T03:00:00Z', spaceId: 's1', final: 300000 },
+      { type: 'PAYMENT', amount: 120000, at: '2026-11-01T04:00:00Z', spaceId: 's3', final: 120000 },
+    ],
+  });
   const r = buildZoneStats({
-    range, spaces, zones,
-    bookingGroups: [g('s1', 'CHECKED_OUT', 1, 300000, 4), g('s3', 'CONFIRMED', 2, 120000, 6, 30)],
+    range, spaces, zones, revenue,
+    bookingGroups: [g('s1', 'CHECKED_OUT', 1, 4), g('s3', 'CONFIRMED', 2, 6, 30)],
   });
   assert.equal(r.zones.length, 2);
   const priv = r.zones.find((z) => z.zoneCode === 'Z-PRIV');
@@ -143,7 +152,7 @@ test('TC-DSH-15 tách theo Zone & tổng khớp tổng các Zone', () => {
   assert.equal(comm.revenue.total, 120000);
   assert.equal(priv.bookings.total, 1);
   assert.equal(comm.bookings.total, 2);
-  assert.equal(r.totals.revenue.total, priv.revenue.total + comm.revenue.total);
+  assert.equal(revenue.total, priv.revenue.total + comm.revenue.total);
   assert.equal(r.totals.bookings.total, 3);
   assert.equal(priv.spaceCount, 2);
 });
@@ -151,10 +160,9 @@ test('TC-DSH-15 tách theo Zone & tổng khớp tổng các Zone', () => {
 test('TC-DSH-16 bỏ qua nhóm thuộc space ngoài phạm vi lọc và trạng thái lạ', () => {
   const r = buildZoneStats({
     range, spaces: [spaces[0]], zones,
-    bookingGroups: [g('s3', 'CONFIRMED', 9, 999), g('s1', 'WEIRD', 4, 111), g('s1', 'CONFIRMED', 1, 50)],
+    bookingGroups: [g('s3', 'CONFIRMED', 9), g('s1', 'WEIRD', 4), g('s1', 'CONFIRMED', 1)],
   });
   assert.equal(r.totals.bookings.total, 1);
-  assert.equal(r.totals.revenue.total, 50);
 });
 
 /* ------------------------------------------------ Top Add-on */
@@ -190,4 +198,124 @@ test('TC-DSH-19 tên lấy từ catalog khi dòng snapshot không có tên; ưu 
   assert.equal(l.name, 'Cắm trại');
   assert.equal(l.revenue, 25);
   assert.equal(normalizeAddonLine({ addon_id: 'x', quantity: 2, unit_price: 10 }).revenue, 20);
+});
+
+/* ------------------------------------------------ Doanh thu thực thu (Report B.3.30, UC-29, UC-31) */
+const spaceById = new Map(spaces.map((x) => [String(x._id), x]));
+// Đơn mẫu: Package 500.000 + Inclusion 59.000 + Add-on 100.000 − Voucher 50.000 − Hạng 9.000 = 600.000
+const SNAP = { final: 600000, inclusion: 59000, addon: 100000, voucherDiscount: 50000, tierDiscount: 9000 };
+const tx = (type, amount, at, extra = {}) => ({ type, amount, at, spaceId: 's1', ...SNAP, ...extra });
+
+test('TC-DSH-20 doanh thu = Σ PAYMENT − Σ REFUND thành công; không phụ thuộc trạng thái đơn', () => {
+  const r = buildRevenue({
+    spaceById,
+    transactions: [
+      tx('PAYMENT', 600000, '2026-11-01T03:00:00Z'),
+      tx('PAYMENT', 300000, '2026-11-01T05:00:00Z', { final: 300000, inclusion: 0, addon: 0, voucherDiscount: 0, tierDiscount: 0 }),
+      tx('REFUND', 200000, '2026-11-02T03:00:00Z', { final: 300000, inclusion: 0, addon: 0, voucherDiscount: 0, tierDiscount: 0 }),
+    ],
+  });
+  assert.equal(r.total, 600000 + 300000 - 200000);
+  assert.equal(r.collected.amount, 900000);
+  assert.equal(r.collected.count, 2);
+  assert.equal(r.refunded.amount, 200000);
+  assert.equal(r.refunded.count, 1);
+});
+
+test('TC-DSH-21 đơn CANCELLED đã hoàn đủ bù trừ về 0; hoàn một phần chỉ giảm đúng số đã hoàn', () => {
+  const full = buildRevenue({ spaceById, transactions: [tx('PAYMENT', 600000, '2026-11-01T03:00:00Z'), tx('REFUND', 600000, '2026-11-01T04:00:00Z')] });
+  assert.equal(full.total, 0);
+  assert.deepEqual(full.breakdown, { package: 0, inclusionSurcharge: 0, addon: 0, discount: 0 });
+  const partial = buildRevenue({ spaceById, transactions: [tx('PAYMENT', 600000, '2026-11-01T03:00:00Z'), tx('REFUND', 450000, '2026-11-01T04:00:00Z')] });
+  assert.equal(partial.total, 150000); // phần phí hủy giữ lại vẫn là doanh thu
+});
+
+test('TC-DSH-22 hoàn tiền FAILED/PENDING không vào doanh thu nên chưa trừ; đối soát ghi REFUND mới thì mới trừ', () => {
+  // Pipeline chỉ lấy giao dịch SUCCESS; ở đây mô phỏng đúng đầu vào của buildRevenue.
+  const before = buildRevenue({ spaceById, transactions: [tx('PAYMENT', 600000, '2026-11-01T03:00:00Z')] });
+  assert.equal(before.total, 600000);
+  const after = buildRevenue({ spaceById, transactions: [tx('PAYMENT', 600000, '2026-11-01T03:00:00Z'), tx('REFUND', 600000, '2026-11-03T03:00:00Z')] });
+  assert.equal(after.total, 0);
+});
+
+test('TC-DSH-23 phân rã: Package + Inclusion + Add-on − Giảm giá = doanh thu', () => {
+  const r = buildRevenue({ spaceById, transactions: [tx('PAYMENT', 600000, '2026-11-01T03:00:00Z')] });
+  assert.deepEqual(r.breakdown, { package: 500000, inclusionSurcharge: 59000, addon: 100000, discount: 59000 });
+  const b = r.breakdown;
+  assert.equal(b.package + b.inclusionSurcharge + b.addon - b.discount, r.total);
+  assert.equal(r.total, 600000);
+});
+
+test('TC-DSH-24 phân rã vẫn khớp tổng khi hoàn một phần (chia theo tỷ lệ, làm tròn dồn vào Package)', () => {
+  const r = buildRevenue({
+    spaceById,
+    transactions: [tx('PAYMENT', 600000, '2026-11-01T03:00:00Z'), tx('REFUND', 100000, '2026-11-02T03:00:00Z')],
+  });
+  const b = r.breakdown;
+  assert.equal(r.total, 500000);
+  assert.equal(b.package + b.inclusionSurcharge + b.addon - b.discount, r.total);
+  assert.ok(Number.isInteger(b.package) && Number.isInteger(b.inclusionSurcharge) && Number.isInteger(b.addon) && Number.isInteger(b.discount));
+  const p = allocateAmount(100000, SNAP);
+  assert.equal(p.package + p.inclusionSurcharge + p.addon - p.discount, 100000);
+});
+
+test('TC-DSH-25 doanh thu theo thời điểm giao dịch, ngày giờ VN, tăng dần; Σ daily = tổng', () => {
+  const r = buildRevenue({
+    spaceById,
+    transactions: [
+      tx('PAYMENT', 600000, '2026-11-01T16:30:00Z'), // 23:30 VN 01/11
+      tx('PAYMENT', 600000, '2026-11-01T17:00:00Z'), // 00:00 VN 02/11
+      tx('REFUND', 200000, '2026-11-01T18:00:00Z'),  // 01:00 VN 02/11
+    ],
+  });
+  assert.deepEqual(r.daily, [
+    { date: '2026-11-01', revenue: 600000, payment: 600000, refund: 0 },
+    { date: '2026-11-02', revenue: 400000, payment: 600000, refund: 200000 },
+  ]);
+  assert.equal(r.daily.reduce((a, d) => a + d.revenue, 0), r.total);
+});
+
+test('TC-DSH-26 kỳ chỉ có hoàn tiền cho ra doanh thu âm (không chặn ở 0); kỳ rỗng = 0', () => {
+  const neg = buildRevenue({ spaceById, transactions: [tx('REFUND', 150000, '2026-11-05T03:00:00Z')] });
+  assert.equal(neg.total, -150000);
+  const empty = buildRevenue({ spaceById, transactions: [] });
+  assert.equal(empty.total, 0);
+  assert.deepEqual(empty.daily, []);
+  assert.equal(empty.collected.count, 0);
+});
+
+test('TC-DSH-27 lọc Zone: bỏ giao dịch của Booking ngoài Zone; không lọc thì tính đủ và chia theo Zone', () => {
+  const transactions = [
+    tx('PAYMENT', 600000, '2026-11-01T03:00:00Z', { spaceId: 's1' }),
+    tx('PAYMENT', 600000, '2026-11-01T03:00:00Z', { spaceId: 's3' }),
+    tx('PAYMENT', 600000, '2026-11-01T03:00:00Z', { spaceId: 'ghost' }), // Booking của Space đã xóa
+  ];
+  const all = buildRevenue({ spaceById, transactions });
+  assert.equal(all.total, 1800000);
+  assert.equal(all.byZone.get('z1').total, 600000);
+  assert.equal(all.byZone.get('z2').total, 600000);
+  assert.equal(all.byZone.get('null').total, 600000);
+  const onlyZ2 = buildRevenue({ spaceById: new Map([['s3', spaces[2]]]), zoneFiltered: true, transactions });
+  assert.equal(onlyZ2.total, 600000);
+});
+
+test('TC-DSH-28 loại loại giao dịch lạ và số tiền 0; số tiền REFUND âm vẫn được hiểu là số tiền hoàn', () => {
+  const r = buildRevenue({
+    spaceById,
+    transactions: [
+      tx('PAYMENT', 600000, '2026-11-01T03:00:00Z'),
+      tx('ADJUST', 99999, '2026-11-01T03:00:00Z'),
+      tx('PAYMENT', 0, '2026-11-01T03:00:00Z'),
+      tx('REFUND', -100000, '2026-11-01T04:00:00Z'),
+    ],
+  });
+  assert.equal(r.total, 500000);
+});
+
+test('TC-DSH-29 Zone chỉ có giao dịch (không có đơn bắt đầu trong kỳ) vẫn hiện doanh thu trong zones[]', () => {
+  const revenue = buildRevenue({ spaceById, transactions: [tx('PAYMENT', 600000, '2026-11-01T03:00:00Z', { spaceId: 's3' })] });
+  const r = buildZoneStats({ range, spaces, zones, bookingGroups: [], revenue });
+  const comm = r.zones.find((z) => z.zoneCode === 'Z-COMM');
+  assert.equal(comm.revenue.total, 600000);
+  assert.equal(comm.bookings.total, 0);
 });
