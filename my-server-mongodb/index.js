@@ -71,6 +71,10 @@ async function startServer() {
     app.use('/api', authRouter);
     app.use('/api/auth', authRouter);
     app.use('/api/profile', require('./src/routes/profile'));
+    const { recommendationRouter, adminForecastRouter } = require('./src/routes/forecast');
+    app.use('/api', recommendationRouter);
+    app.use('/api/admin/forecast', adminForecastRouter);
+    app.use('/api/admin', require('./src/routes/admin'));
 
     // 5. Cronjob thu hồi đơn PENDING_PAYMENT quá hạn 15 phút (UC-36, BR-E03)
     const { expirePendingBookings } = require('./src/services/bookingService');

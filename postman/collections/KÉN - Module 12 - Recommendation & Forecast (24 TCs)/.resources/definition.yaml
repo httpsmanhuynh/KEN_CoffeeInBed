@@ -1,0 +1,3 @@
+$kind: collection
+name: "KÉN - Module 12: Recommendation & Forecast (24 TCs)"
+description: "Bộ kiểm thử 24 test cases Backend Phân hệ 12: (1) Top Trending Pop-up & trang /top-trending không phân role (GET /api/recommendations, /api/recommendations/top-trending); (2) Recommend theo nhóm khách hàng (users.ml_cluster_id) trong luồng Booking ngay tại menu Inclusion & Add-ons (GET /api/recommendations/booking, GET /api/bookings/recommendations, GET /api/products?recommend=true, GET /api/addons?recommend=true); (3) Admin Forecast ngày hôm sau: số lượng món (dishes) -> quy đổi nguyên vật liệu phù hợp (items), lịch sử kho, xu hướng, cảnh báo tồn kho & phân quyền RBAC. Đồng bộ 100% với Module12_Recommendation_Forecast.xlsx và tests/."

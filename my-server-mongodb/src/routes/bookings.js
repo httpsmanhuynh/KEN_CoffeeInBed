@@ -29,11 +29,14 @@ const {
   createReview,
 } = require('../services/reviewService');
 const { enrichBookingWithReview } = require('../domain/review');
+const { AdminError } = require('../domain/adminError');
+const { getBookingMenuRecommendations } = require('../services/forecastService');
+const { resolveOptionalUser } = require('./forecast');
 
 const router = express.Router();
 
 const handleErr = (res, err) => {
-  if (err instanceof BookingError) {
+  if (err instanceof BookingError || err instanceof AdminError) {
     return res.status(err.status).json({
       code: err.code,
       message: err.message,
@@ -214,6 +217,21 @@ router.post(
     const db = req.app.locals.db;
     const result = await expirePendingBookings(db);
     res.json(result);
+  }),
+);
+
+// GET /api/bookings/recommendations — Bước 3 (UC-06): Gợi ý sản phẩm Inclusion & Add-ons theo nhóm khách hàng (ml_cluster_id)
+router.get(
+  '/recommendations',
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    try {
+      const user = await resolveOptionalUser(req);
+      const data = await getBookingMenuRecommendations(db, req.query, user);
+      res.json(data);
+    } catch (err) {
+      return handleErr(res, err);
+    }
   }),
 );
 

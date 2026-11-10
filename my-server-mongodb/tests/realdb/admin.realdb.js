@@ -213,17 +213,29 @@ before(async () => {
     },
   ]);
 
-  await db.collection('sales_transactions').insertMany([
+  await db.collection('payment_transactions').insertMany([
     {
-      sold_at: new Date('2026-11-05T04:00:00Z'),
-      total_amount: 120000,
-      quantity: 3,
-      unit_price: 40000,
+      booking_id: ids.bk1,
+      type: 'PAYMENT',
+      status: 'SUCCESS',
+      amount: 250000,
+      paid_at: new Date('2026-11-05T02:00:00Z'), // 09:00 VN ngày 2026-11-05
+      created_at: new Date('2026-11-05T02:00:00Z'),
     },
     {
-      transaction_date: new Date('2026-11-06T04:00:00Z'),
-      quantity: 2,
-      unit_price: 30000, // Không có total_amount -> tự tính 2 * 30000 = 60000
+      booking_id: ids.bk2,
+      type: 'PAYMENT',
+      status: 'SUCCESS',
+      amount: 150000,
+      paid_at: new Date('2026-11-06T03:00:00Z'), // 10:00 VN ngày 2026-11-06
+      created_at: new Date('2026-11-06T03:00:00Z'),
+    },
+    {
+      booking_id: ids.bk3,
+      type: 'PAYMENT',
+      status: 'FAILED', // Giao dịch thất bại không được tính vào doanh thu
+      amount: 999000,
+      created_at: new Date('2026-11-06T04:00:00Z'),
     },
   ]);
 });
@@ -316,7 +328,7 @@ test('TC-ADM-REAL-04 [Atlas] setUserStatus: cập nhật nguyên tử ACTIVE <->
   assert.equal(unlocked.status, 'ACTIVE');
 });
 
-test('TC-ADM-REAL-05 [Atlas] getDashboard: chạy full pipeline Aggregation (Bookings, Occupancy, Top Addons, F&B Direct, Daily Series, Zone Filter)', async () => {
+test('TC-ADM-REAL-05 [Atlas] getDashboard: chạy full pipeline Aggregation (Bookings, Occupancy, Top Addons, Doanh thu TRANSACTION_TIME, Daily Series, Zone Filter)', async () => {
   const now = new Date('2026-11-08T05:00:00Z');
   const dash = await svc.getDashboard(
     db,
@@ -330,22 +342,23 @@ test('TC-ADM-REAL-05 [Atlas] getDashboard: chạy full pipeline Aggregation (Boo
   assert.equal(dash.bookings.byStatus.CONFIRMED, 1);
   assert.equal(dash.bookings.byStatus.CANCELLED, 1);
 
-  // Doanh thu booking: 250k + 150k = 400k; F&B trực tiếp: 120k + 60k = 180k; Tổng = 580k
-  assert.equal(dash.revenue.bookings.total, 400000);
-  assert.equal(dash.revenue.fnbDirect.total, 180000);
-  assert.equal(dash.revenue.fnbDirect.transactions, 2);
-  assert.equal(dash.revenue.grandTotal, 580000);
+  // Doanh thu thực thu theo thời điểm giao dịch (PAYMENT SUCCESS: 250k + 150k = 400k; FAILED 999k bỏ qua)
+  assert.equal(dash.revenue.basis, 'TRANSACTION_TIME');
+  assert.equal(dash.revenue.total, 400000);
+  assert.deepEqual(dash.revenue.collected, { amount: 400000, count: 2 });
+  assert.deepEqual(dash.revenue.refunded, { amount: 0, count: 0 });
+  assert.equal('fnbDirect' in dash.revenue, false);
 
   // Top Add-ons từ $lookup booking_addons
   assert.equal(dash.topAddons.length, 2);
   assert.equal(dash.topAddons[0].name, 'Cold Brew Cam Sả');
   assert.equal(dash.topAddons[0].revenue, 90000);
 
-  // Chuỗi theo ngày ($dateToString timezone +07:00)
+  // Chuỗi doanh thu theo ngày giờ VN (+07:00)
   assert.ok(Array.isArray(dash.daily));
   assert.equal(dash.daily.length, 2);
-  assert.deepEqual(dash.daily[0], { date: '2026-11-05', bookings: 1, revenue: 250000 });
-  assert.deepEqual(dash.daily[1], { date: '2026-11-06', bookings: 1, revenue: 150000 });
+  assert.deepEqual(dash.daily[0], { date: '2026-11-05', revenue: 250000, payment: 250000, refund: 0 });
+  assert.deepEqual(dash.daily[1], { date: '2026-11-06', revenue: 150000, payment: 150000, refund: 0 });
 
   // Lọc theo zone_code ('Z-PRIV')
   const byZone = await svc.getDashboard(
@@ -354,7 +367,7 @@ test('TC-ADM-REAL-05 [Atlas] getDashboard: chạy full pipeline Aggregation (Boo
     now,
   );
   assert.equal(byZone.filters.zoneCode, 'Z-PRIV');
-  assert.equal(byZone.revenue.bookings.total, 250000);
+  assert.equal(byZone.revenue.total, 250000);
 
   // Lọc theo zone _id
   const byZoneOid = await svc.getDashboard(
@@ -363,7 +376,7 @@ test('TC-ADM-REAL-05 [Atlas] getDashboard: chạy full pipeline Aggregation (Boo
     now,
   );
   assert.equal(byZoneOid.filters.zoneCode, 'Z-COMM');
-  assert.equal(byZoneOid.revenue.bookings.total, 150000);
+  assert.equal(byZoneOid.revenue.total, 150000);
 
   // Zone không tồn tại -> 404 ZONE_NOT_FOUND
   await assert.rejects(
@@ -402,7 +415,7 @@ test('TC-ADM-REAL-06 [Atlas] HTTP Routes /api/admin/* kết nối DB thật (use
     const rDash = await fetch(`${baseUrl}/dashboard?from=2026-11-05&to=2026-11-06&groupBy=day`);
     assert.equal(rDash.status, 200);
     const bDash = await rDash.json();
-    assert.equal(bDash.revenue.grandTotal, 580000);
+    assert.equal(bDash.revenue.total, 400000);
   } finally {
     server.close();
   }

@@ -120,3 +120,7 @@ values:
     value: '2026-11-01'
   - key: toDate
     value: '2026-11-30'
+  - key: ingredientId
+    value: 8ef89de69e384466f8f6c236
+  - key: alertId
+    value: 99f89de69e384466f8f6c001
