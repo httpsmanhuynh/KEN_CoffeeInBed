@@ -486,7 +486,6 @@ async function buildBookingQuote(
 
   const addonDocs = [];
   const pricingAddons = [];
-  const seenPerBookingAddon = new Set();
 
   for (const item of addons) {
     const qty = Number(item && item.quantity);
@@ -497,12 +496,6 @@ async function buildBookingQuote(
     const addon = await db.collection('addons').findOne({ _id: addonOid, is_active: true }, opts);
     if (!addon) {
       throw new BookingError(404, 'ADDON_NOT_FOUND', 'Dịch vụ cộng thêm không tồn tại hoặc ngừng phục vụ');
-    }
-    if (addon.unit === 'PER_BOOKING') {
-      if (qty !== 1 || seenPerBookingAddon.has(String(addon._id))) {
-        throw new BookingError(422, 'ADDON_PER_BOOKING_LIMIT', 'Dịch vụ này chỉ tính tối đa 1 lần mỗi đơn');
-      }
-      seenPerBookingAddon.add(String(addon._id));
     }
 
     let unitPrice = Number(addon.price);
