@@ -124,7 +124,187 @@
     },
     {
       "key": "pkgFixedPerson70kId",
+      "value": "6f0600000000000000000101",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "pkgWlFlexId",
       "value": "ac64f28f5bfd0e11f87bd5f2",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "pkgHourlySpace100kId",
+      "value": "6f0600000000000000000102",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "pkgHourlyPerson50kId",
+      "value": "6f0600000000000000000103",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "pkgHourlyMin2hId",
+      "value": "6f0600000000000000000104",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "pkgFixedSpace200kId",
+      "value": "6f0600000000000000000105",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "pkgFixedSpace70kId",
+      "value": "6f0600000000000000000106",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "pkgFixedSpace123457Id",
+      "value": "6f0600000000000000000107",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "pkgFixedSpace99999Id",
+      "value": "6f0600000000000000000108",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "pkgFixedSpace3333333Id",
+      "value": "6f0600000000000000000109",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "pkgFixedSpace0Id",
+      "value": "6f060000000000000000010a",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "incFpDrinkId",
+      "value": "789c8cb8ac3b2b88b0d32e5e",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "incFpDrinkQuota2Id",
+      "value": "6f0600000000000000000201",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "incNoLimitId",
+      "value": "6f0600000000000000000202",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "incWlDrinkId",
+      "value": "6f0600000000000000000203",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "prodMatchaId",
+      "value": "6bf253898080b443d05ccd37",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "prodAmericanoId",
+      "value": "72e8fee2e96c48aa51f97b90",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "prodDrink50kId",
+      "value": "bc5de21debe41541dd6dd77f",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "prodDrink50001Id",
+      "value": "6f0600000000000000000301",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "prodDrink62kId",
+      "value": "6f0600000000000000000302",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "prodDrink70kId",
+      "value": "6f0600000000000000000303",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "prodDrink90kId",
+      "value": "6f0600000000000000000304",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "addonMonitorId",
+      "value": "4937c361d6efe7b2437044c3",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "addon40kId",
+      "value": "4781b8610bc1ac73f7afe67d",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "addon15kId",
+      "value": "02ea32d64bb213f7d49a1f53",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "addon25kId",
+      "value": "6f0600000000000000000401",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "addon33333Id",
+      "value": "6f0600000000000000000402",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "addon47500Id",
+      "value": "6f0600000000000000000403",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "silverPhone",
+      "value": "0909123401",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "goldPhone",
+      "value": "0909123402",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "diamondPhone",
+      "value": "0909123403",
       "type": "default",
       "enabled": true
     }

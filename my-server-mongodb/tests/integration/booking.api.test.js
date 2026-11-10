@@ -472,7 +472,7 @@ test('TC-BKG-09..12\tTC-BK-07\tAUTO-BK-07: Kiểm tra ngoại lệ báo giá (In
     { code: 'INVALID_PRODUCT_VARIANT' },
   );
 
-  // Lỗi Add-on: số lượng <= 0, không tồn tại, PER_BOOKING > 1, sai variant
+  // Lỗi Add-on: số lượng <= 0, không tồn tại, sai variant
   await assert.rejects(
     () =>
       buildBookingQuote(db, {
@@ -495,17 +495,15 @@ test('TC-BKG-09..12\tTC-BK-07\tAUTO-BK-07: Kiểm tra ngoại lệ báo giá (In
       }),
     { code: 'ADDON_NOT_FOUND' },
   );
-  await assert.rejects(
-    () =>
-      buildBookingQuote(db, {
-        spaceId: IDS.spaceFocusPod,
-        packageId: IDS.pkgFpHalf,
-        startAt,
-        guestCount: 1,
-        addons: [{ addonId: IDS.addonMonitor, quantity: 2 }],
-      }),
-    { code: 'ADDON_PER_BOOKING_LIMIT' },
-  );
+  // AUTO-PRICING-017 / TC-PRICING-024: Add-on PER_BOOKING cho phép số lượng > 1 (50.000đ x 2 = 100.000đ)
+  const quoteWithMonitor = await buildBookingQuote(db, {
+    spaceId: IDS.spaceFocusPod,
+    packageId: IDS.pkgFpHalf,
+    startAt,
+    guestCount: 1,
+    addons: [{ addonId: IDS.addonMonitor, quantity: 2 }],
+  });
+  assert.strictEqual(quoteWithMonitor.pricing.addonTotal, 100000);
   await assert.rejects(
     () =>
       buildBookingQuote(db, {
