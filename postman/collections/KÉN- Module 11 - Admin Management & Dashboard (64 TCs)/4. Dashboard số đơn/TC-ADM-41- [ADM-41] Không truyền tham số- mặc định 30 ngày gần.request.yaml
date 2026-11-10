@@ -1,0 +1,31 @@
+$kind: http-request
+name: "TC-ADM-41: [ADM-41] Không truyền tham số: mặc định 30 ngày gần nhất kết thúc hôm nay (giờ VN) (Branch: ADM-B41)"
+description: |-
+  **Mã TC:** ADM-41 (TC-ADM-41)
+  **Nhóm:** Dashboard số đơn
+  **API / Thành phần:** GET /api/admin/dashboard
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed zones/spaces/bookings/booking_addons/payment_transactions.
+  **Dữ liệu vào:** Không có tham số
+  **Các bước thực hiện:**
+  1) GET /api/admin/dashboard&#10;2) Kiểm tra range, filters
+  **Kết quả mong đợi:** 200 range.days = 30; range.to = hôm nay (VN); range.from = hôm nay − 29 ngày; timezone Asia/Ho_Chi_Minh; filters.zoneId = null (vd. 10/11/2026: from 2026-10-12, to 2026-11-10) (HTTP: 200)
+  **Nhánh code bao phủ:** ADM-B41
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/admin/dashboard"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-41] Không truyền tham số: mặc định 30 ngày gần nhất kết thúc hôm nay (giờ VN)
+      pm.test("[TC-ADM-41] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+      pm.test("[TC-ADM-41] Mặc định 30 ngày gần nhất theo múi giờ Asia/Ho_Chi_Minh và filters.zoneId = null", function () {
+          const json = pm.response.json();
+          pm.expect(json.range.days).to.eql(30);
+          pm.expect(json.range.timezone).to.eql("Asia/Ho_Chi_Minh");
+          pm.expect(json.filters.zoneId).to.be.null;
+      });
+    language: text/javascript
+order: 4000

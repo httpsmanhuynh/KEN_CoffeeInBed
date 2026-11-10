@@ -1,0 +1,30 @@
+$kind: http-request
+name: "TC-ADM-06: [ADM-06] User không tồn tại (id đúng định dạng ObjectId) (Branch: ADM-B06)"
+description: |-
+  **Mã TC:** ADM-06 (TC-ADM-06)
+  **Nhóm:** Xem hồ sơ & lịch sử Booking
+  **API / Thành phần:** GET /api/admin/users/:id
+  **Loại:** Negative
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed users/bookings.
+  **Dữ liệu vào:** 000000000000000000000000
+  **Các bước thực hiện:**
+  1) GET /api/admin/users/<id>&#10;2) GET /api/admin/users/<id>/bookings
+  **Kết quả mong đợi:** 404 USER_NOT_FOUND ở cả 2 endpoint; body { error, message }; không lỗi 500 (HTTP: 404)
+  **Nhánh code bao phủ:** ADM-B06
+  **Ghi chú:** Review: id sai định dạng trả 400 INVALID_ID chứ không phải 404 → tách sang ADM-34. Chuỗi "abc!@#" bị cắt tại ký tự # (fragment) nên không dùng làm dữ liệu test.
+url: "{{baseUrl}}/api/admin/users/000000000000000000000000"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-06] User không tồn tại (id đúng định dạng ObjectId)
+      pm.test("[TC-ADM-06] Status code is 404", function () {
+          pm.expect(pm.response.code).to.be.oneOf([404]);
+      });
+      pm.test("[TC-ADM-06] Trả về mã lỗi USER_NOT_FOUND", function () {
+          const json = pm.response.json();
+          pm.expect(json.error).to.eql("USER_NOT_FOUND");
+          pm.expect(json).to.have.property("message");
+      });
+    language: text/javascript
+order: 4000

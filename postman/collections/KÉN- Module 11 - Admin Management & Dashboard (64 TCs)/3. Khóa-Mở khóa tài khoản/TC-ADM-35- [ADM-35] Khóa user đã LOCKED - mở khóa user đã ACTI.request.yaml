@@ -1,0 +1,28 @@
+$kind: http-request
+name: "TC-ADM-35: [ADM-35] Khóa user đã LOCKED / mở khóa user đã ACTIVE (Branch: ADM-B35)"
+description: |-
+  **Mã TC:** ADM-35 (TC-ADM-35)
+  **Nhóm:** Khóa/Mở khóa tài khoản
+  **API / Thành phần:** POST /api/admin/users/:id/lock
+  **Loại:** Negative
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed users/bookings.
+  **Dữ liệu vào:** User LOCKED → lock ; User ACTIVE → unlock
+  **Các bước thực hiện:**
+  1) POST …/lock với user đang LOCKED&#10;2) POST …/unlock với user đang ACTIVE
+  **Kết quả mong đợi:** Bước 1: 409 USER_ALREADY_LOCKED; bước 2: 409 USER_ALREADY_ACTIVE; DB không đổi (HTTP: 409)
+  **Nhánh code bao phủ:** ADM-B35
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/admin/users/{{userId}}/lock"
+method: POST
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-35] Khóa user đã LOCKED / mở khóa user đã ACTIVE
+      pm.test("[TC-ADM-35] Status code is 409", function () {
+          pm.expect(pm.response.code).to.be.oneOf([409]);
+      });
+      pm.test("[TC-ADM-35] Trả về 409 USER_ALREADY_LOCKED hoặc USER_ALREADY_ACTIVE", function () {
+          pm.expect(["USER_ALREADY_LOCKED", "USER_ALREADY_ACTIVE"]).to.include(pm.response.json().error);
+      });
+    language: text/javascript
+order: 7000
