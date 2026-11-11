@@ -13,6 +13,72 @@ export interface KenProduct {
   detail?: string;
 }
 
+export interface KenSpaceRate {
+  hours: number;
+  price: number;
+}
+
+export interface KenBookingSpace {
+  id: string;
+  name: string;
+  image: string;
+  description: string;
+  capacity: string;
+  minGuests: number;
+  maxGuests: number;
+  perPerson: boolean;
+  rates: KenSpaceRate[];
+}
+
+export const KEN_BOOKING_SPACES: KenBookingSpace[] = [
+  {
+    id: 'focus', name: 'Ô tập trung cá nhân', image: 'listing-focus.png',
+    description: 'Một góc riêng tư, yên tĩnh cho học tập và làm việc tập trung.',
+    capacity: '01 khách', minGuests: 1, maxGuests: 1, perPerson: false,
+    rates: [{ hours: 1, price: 45000 }, { hours: 4, price: 140000 }]
+  },
+  {
+    id: 'work', name: 'Khu làm việc chung', image: 'listing-work.png',
+    description: 'Không gian làm việc linh hoạt, phù hợp làm việc cá nhân hoặc theo nhóm.',
+    capacity: '1–20 khách', minGuests: 1, maxGuests: 20, perPerson: true,
+    rates: [{ hours: 1, price: 30000 }, { hours: 4, price: 90000 }, { hours: 14, price: 150000 }]
+  },
+  {
+    id: 'meeting-small', name: 'Phòng họp nhỏ', image: 'listing-meeting-small.png',
+    description: 'Phòng họp riêng cho nhóm nhỏ, trang bị Wi-Fi, máy chiếu và bảng từ.',
+    capacity: '3–6 khách', minGuests: 3, maxGuests: 6, perPerson: false,
+    rates: [{ hours: 3, price: 250000 }]
+  },
+  {
+    id: 'meeting-large', name: 'Phòng họp lớn', image: 'listing-meeting-large.png',
+    description: 'Không gian họp riêng cho nhóm đông, trang bị máy chiếu và bảng từ.',
+    capacity: '6–12 khách', minGuests: 6, maxGuests: 12, perPerson: false,
+    rates: [{ hours: 3, price: 450000 }]
+  },
+  {
+    id: 'single', name: 'KÉN nghỉ đơn', image: 'listing-single.png',
+    description: 'Khoảng nghỉ riêng tư dành cho một người, có rèm che và đèn đọc sách.',
+    capacity: '01 khách', minGuests: 1, maxGuests: 1, perPerson: false,
+    rates: [{ hours: 1, price: 70000 }, { hours: 2, price: 130000 }, { hours: 4, price: 220000 }]
+  },
+  {
+    id: 'double', name: 'KÉN nghỉ đôi', image: 'listing-double.png',
+    description: 'Không gian nghỉ ngơi riêng dành cho tối đa hai khách.',
+    capacity: '1–2 khách', minGuests: 1, maxGuests: 2, perPerson: false,
+    rates: [{ hours: 1, price: 100000 }, { hours: 2, price: 180000 }, { hours: 4, price: 310000 }]
+  },
+  {
+    id: 'private', name: 'Phòng riêng tư', image: 'listing-private.png',
+    description: 'Phòng riêng có bàn ghế, phù hợp cho nhóm từ hai đến bốn khách.',
+    capacity: '2–4 khách', minGuests: 2, maxGuests: 4, perPerson: false,
+    rates: [{ hours: 1, price: 150000 }, { hours: 2, price: 280000 }, { hours: 4, price: 480000 }]
+  }
+];
+
+export function kenBookingSpace(id: string): KenBookingSpace {
+  return KEN_BOOKING_SPACES.find(space => space.id === id) || KEN_BOOKING_SPACES[0];
+}
+
 export const KEN_MENU: KenProduct[] = [
   { id: 'coffee', name: 'Cà phê Đen / Sữa', price: 40000, image: 'coffee.png', category: 'coffee', description: 'Đá / Nóng' },
   { id: 'americano', name: 'Americano', price: 40000, image: 'americano.png', category: 'coffee', description: 'Một lựa chọn cà phê quen thuộc' },
@@ -57,11 +123,13 @@ export const KEN_EXTRAS: KenExtra[] = [
 ];
 
 export interface KenBookingDraft {
+  spaceId: string;
   date: string;
   startHour: number;
-  hours: 1 | 4;
+  hours: number;
   guests: number;
   drinkId: string | null;
+  drinkQuantities: Record<string, number>;
   extras: Record<string, number>;
   fullName: string;
   phone: string;
@@ -91,8 +159,8 @@ export class KenBookingState {
 
   private defaults(): KenBookingDraft {
     return {
-      date: kenNextDay(), startHour: 9, hours: 4, guests: 1,
-      drinkId: 'matcha', extras: {}, fullName: '', phone: '', email: '', note: '',
+      spaceId: 'focus', date: kenNextDay(), startHour: 9, hours: 4, guests: 1,
+      drinkId: 'matcha', drinkQuantities: {}, extras: {}, fullName: '', phone: '', email: '', note: '',
       voucher: '', agreed: false, holdUntil: null
     };
   }
@@ -104,11 +172,17 @@ export class KenBookingState {
       if (!text) return empty;
       const obj = JSON.parse(text) as Partial<KenBookingDraft>;
       if (!obj || typeof obj !== 'object') return empty;
-      const state = { ...empty, ...obj, extras: { ...empty.extras, ...(obj.extras || {}) } };
+      const state = {
+        ...empty, ...obj,
+        drinkQuantities: { ...empty.drinkQuantities, ...(obj.drinkQuantities || {}) },
+        extras: { ...empty.extras, ...(obj.extras || {}) }
+      };
+      const space = kenBookingSpace(state.spaceId);
+      state.spaceId = space.id;
+      if (!space.rates.some(rate => rate.hours === state.hours)) state.hours = space.rates[0].hours;
       if (!/^\d{4}-\d\d-\d\d$/.test(state.date) || state.date < new Date().toLocaleDateString('en-CA')) state.date = kenNextDay();
-      if (state.hours !== 1 && state.hours !== 4) state.hours = 4;
       if (!Number.isInteger(state.startHour) || state.startHour < 8 || state.startHour + state.hours > 22) state.startHour = 9;
-      state.guests = 1; // Focus Pod: chỉ cho một khách
+      state.guests = Math.max(space.minGuests, Math.min(space.maxGuests, Number(state.guests) || space.minGuests));
       return state;
     } catch {
       return empty;
@@ -118,14 +192,30 @@ export class KenBookingState {
   set(change: Partial<KenBookingDraft>): void {
     const previous = this.draft();
     const next = { ...previous, ...change };
+    if (change.spaceId !== undefined && change.spaceId !== previous.spaceId) {
+      const space = kenBookingSpace(change.spaceId);
+      if (change.hours === undefined) next.hours = space.rates[0].hours;
+      if (change.guests === undefined) {
+        next.guests = Math.max(space.minGuests, Math.min(space.maxGuests, previous.guests));
+      }
+      next.drinkId = null;
+      next.drinkQuantities = {};
+      next.extras = {};
+    } else if (change.guests !== undefined && change.guests !== previous.guests && change.drinkQuantities === undefined) {
+      next.drinkId = null;
+      next.drinkQuantities = {};
+    }
 
     // Huy thoi han giu cho cu neu noi dung dat cho thay doi.
     const selectionChanged =
       (change.date !== undefined && change.date !== previous.date) ||
       (change.startHour !== undefined && change.startHour !== previous.startHour) ||
       (change.hours !== undefined && change.hours !== previous.hours) ||
+      (change.spaceId !== undefined && change.spaceId !== previous.spaceId) ||
       (change.guests !== undefined && change.guests !== previous.guests) ||
       (change.drinkId !== undefined && change.drinkId !== previous.drinkId) ||
+      (change.drinkQuantities !== undefined &&
+       JSON.stringify(change.drinkQuantities) !== JSON.stringify(previous.drinkQuantities)) ||
       (change.extras !== undefined &&
        JSON.stringify(change.extras) !== JSON.stringify(previous.extras));
 
@@ -143,14 +233,58 @@ export class KenBookingState {
     this.set({ extras });
   }
 
-  get selectedDrink(): KenProduct | undefined {
-    return this.drinks.find(d => d.id === this.draft().drinkId);
+  setDrinkQuantity(id: string, count: number): void {
+    if (!this.drinks.some(item => item.id === id)) return;
+    const drinkQuantities = { ...this.draft().drinkQuantities };
+    const quantityLimit = this.requiredDrinkCount || 9;
+    const quantity = Math.max(0, Math.min(quantityLimit, count));
+    if (quantity === 0) delete drinkQuantities[id];
+    else drinkQuantities[id] = quantity;
+    const drinkId = Object.keys(drinkQuantities).find(key => drinkQuantities[key] > 0) || null;
+    this.set({ drinkId, drinkQuantities });
   }
 
-  get base(): number { return this.draft().hours === 4 ? 140000 : 45000; }
-  get entitlement(): number { return this.draft().hours === 4 ? 50000 : 0; }
+  get space(): KenBookingSpace { return kenBookingSpace(this.draft().spaceId); }
+  getSpace(id: string): KenBookingSpace | undefined {
+    return KEN_BOOKING_SPACES.find(space => space.id === id);
+  }
+  get isFocusSpace(): boolean { return this.draft().spaceId === 'focus'; }
+  get requiredDrinkCount(): number {
+    if (this.isFocusSpace) return this.draft().hours === 4 ? 1 : 0;
+    return this.draft().guests;
+  }
+  get selectedDrinkCount(): number {
+    const quantities = this.draft().drinkQuantities;
+    return Object.keys(quantities).length
+      ? Object.values(quantities).reduce((total, count) => total + count, 0)
+      : (this.draft().drinkId ? 1 : 0);
+  }
+  drinkQuantity(id: string): number {
+    const quantities = this.draft().drinkQuantities;
+    return quantities[id] ?? (this.draft().drinkId === id ? 1 : 0);
+  }
+  get selectedDrinks(): Array<{ product: KenProduct; quantity: number }> {
+    return this.drinks
+      .map(product => ({ product, quantity: this.drinkQuantity(product.id) }))
+      .filter(item => item.quantity > 0);
+  }
+
+  get selectedDrink(): KenProduct | undefined {
+    return this.drinks.find(d => d.id === this.draft().drinkId) || this.selectedDrinks[0]?.product;
+  }
+
+  get base(): number {
+    const rate = this.space.rates.find(item => item.hours === this.draft().hours)?.price || 0;
+    return rate * (this.space.perPerson ? this.draft().guests : 1);
+  }
+  get entitlement(): number {
+    return this.isFocusSpace && this.draft().hours !== 4 ? 0 : 50000;
+  }
   get drinkSurcharge(): number {
-    return this.selectedDrink ? (this.entitlement ? Math.max(0, this.selectedDrink.price - this.entitlement) : this.selectedDrink.price) : 0;
+    return this.selectedDrinks.reduce(
+      (total, item) => total + item.quantity * Math.max(0, item.product.price - this.entitlement),
+      0
+    );
   }
   get extrasTotal(): number {
     return this.extras.reduce((sum, product) => sum + product.price * (this.draft().extras[product.id] || 0), 0);

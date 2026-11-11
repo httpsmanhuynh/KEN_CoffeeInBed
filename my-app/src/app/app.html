@@ -1,4 +1,4 @@
-<app-header [member]="member()"></app-header>
+<app-header [member]="auth.isAuthenticated" [userName]="auth.user?.fullName ?? 'Khách hàng'"></app-header>
 <main class="app-content" id="main-content">
   <router-outlet></router-outlet>
 </main>

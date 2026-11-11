@@ -1,9 +1,60 @@
-<main class="kf kf-payment"><section class="kf-container kf-checkout-head"><div class="kf-crumb"><a routerLink="/">Trang chủ</a> / KÉN Tập Trung / <a routerLink="/booking/review">Xem lại đặt chỗ</a> / <strong>Thanh toán</strong></div><div class="kf-checkout-heading"><div><p class="kf-overline">CHỈ CÒN MỘT BƯỚC ĐỂ CHẠM VÀO KHOẢNG YÊN</p><h1>Thanh toán đặt chỗ</h1><p>Hoàn tất thanh toán, để KÉN sẵn sàng đón bạn.</p></div><div class="kf-checkout-progress"><span>✓ Đặt chỗ</span><span>✓ Xem lại</span><b>3</b><strong>Thanh toán</strong></div></div><button type="button" class="kf-back-link kf-link-button" (click)="back()">← Quay lại xem đặt chỗ</button></section>
-  <div class="kf-container kf-checkout-grid"><div class="kf-checkout-main">
-    <div class="kf-hold-banner"><img class="kf-icon" src="/images/ken-flow/icons/payment-clock.svg" alt=""><div><strong>KÉN giữ khoảng riêng cho bạn trong 15 phút — mô phỏng</strong><p>Trang demo không giữ chỗ thực tế. Bộ đếm chỉ chạy trong trình duyệt.</p></div><div class="kf-countdown"><strong>{{ countdown }}</strong><small>ĐẾM NGƯỢC MẪU</small></div></div>
-    <p class="kf-inline-feedback" *ngIf="demoExpired">Đồng hồ demo đã hết thời gian. Quay lại Xem lại đặt chỗ để khởi tạo một lượt mô phỏng mới.</p>
-    <section class="kf-panel kf-transfer-panel"><div class="kf-panel-heading"><div><p class="kf-overline">THANH TOÁN CHUYỂN KHOẢN</p><h2>Quét mã, giữ một khoảng yên.</h2></div><span class="kf-small-status">Chờ thanh toán · minh họa</span></div><div class="kf-transfer-layout"><div class="kf-fake-qr-box"><div class="kf-qr-placeholder" aria-label="QR minh họa không quét được"><img class="kf-qr-svg" src="/images/ken-flow/icons/payment-qr.svg" alt="" aria-hidden="true"><strong>MINH HỌA</strong></div><p>QR minh họa cho đồ án KÉN<br>Không dùng để chuyển tiền</p></div><div class="kf-transfer-steps"><div><b>1</b><span><strong>Mở ứng dụng ngân hàng</strong><small>Trong sản phẩm hoàn chỉnh, khách chọn chức năng quét mã QR để thanh toán.</small></span></div><div><b>2</b><span><strong>Kiểm tra trước khi chuyển</strong><small>Chỉ thực hiện giao dịch sau khi thông tin ngân hàng chính thức được cấu hình đầy đủ.</small></span></div><div><b>3</b><span><strong>Chờ xác nhận từ KÉN</strong><small>Chức năng cập nhật trạng thái từ máy chủ chưa tích hợp trong đồ án này.</small></span></div></div></div><p class="kf-entitlement"><img class="kf-icon" src="/images/ken-flow/icons/payment-info.svg" alt=""> Đây là giao diện tĩnh. QR và trạng thái chỉ để minh họa; chưa kết nối ngân hàng và không tiếp nhận thanh toán thực.</p></section>
-    <section class="kf-panel"><div class="kf-panel-heading"><h2>Thông tin chuyển khoản</h2><span class="kf-small-status">CHƯA CẤU HÌNH</span></div><div class="kf-transfer-info"><div><span>Ngân hàng</span><strong>Chưa cấu hình</strong></div><div><span>Tên người thụ hưởng</span><strong>Chưa cấu hình</strong></div><div><span>Số tài khoản</span><strong>Chưa cấu hình</strong></div><div><span>Nội dung chuyển khoản</span><strong>Sẽ tạo theo mã đặt chỗ</strong></div></div><hr><div class="kf-sum-row kf-total"><span>Số tiền cần thanh toán</span><strong>{{ money(state.total) }}</strong></div><p class="kf-help-mini">Chỉ chuyển tiền khi thông tin nhận thanh toán chính thức được hiển thị đầy đủ. Bản này không hiển thị số tài khoản thật.</p></section>
-    <section class="kf-payment-contact"><div class="kf-panel-heading"><h2>Thông tin người đặt</h2><a routerLink="/booking/review">Bổ sung thông tin</a></div><div class="kf-contact-info"><div><small>Họ và tên</small><strong>{{ state.draft().fullName || 'Chưa nhập' }}</strong></div><div><small>Số điện thoại</small><strong>{{ state.draft().phone || 'Chưa nhập' }}</strong></div><div><small>Email</small><strong>{{ state.draft().email || 'Chưa nhập' }}</strong></div></div><hr><div class="kf-help-row"><div><strong><img class="kf-icon" src="/images/ken-flow/icons/payment-note.svg" alt=""> Cần KÉN giúp một chút?</strong><p>Nếu đã chuyển khoản trong hệ thống thực nhưng chưa nhận xác nhận, hãy giữ lại biên lai và liên hệ nhân viên.</p></div><a class="kf-btn kf-btn-light" routerLink="/support">Nhắn KÉN ↗</a></div></section>
-  </div><aside class="kf-checkout-aside"><section class="kf-panel kf-payment-aside"><img src="/images/ken-flow/listing-focus.png" alt="Ô tập trung cá nhân Focus Pod"><div class="kf-payment-aside-inner"><p class="kf-overline">KHOẢNG RIÊNG CỦA BẠN</p><h2>Tóm tắt đặt chỗ</h2><h3>Ô tập trung cá nhân</h3><p>KÉN Tập Trung · Focus Pod</p><div class="kf-sum-row"><span>Ngày</span><strong>{{ state.dateLabel }}</strong></div><div class="kf-sum-row"><span>Giờ sử dụng</span><strong>{{ state.timeLabel }}</strong></div><div class="kf-sum-row"><span>Thời lượng</span><strong>{{ state.draft().hours }} giờ</strong></div><div class="kf-sum-row"><span>Số khách</span><strong>01 khách</strong></div><div class="kf-highlight-box"><strong>Tập trung {{ state.draft().hours === 4 ? 'nửa ngày' : 'theo giờ' }}</strong><small>{{ state.selectedDrink?.name || 'Chưa chọn đồ uống' }} · {{ state.draft().hours === 4 ? 'Gói hỗ trợ 50.000đ' : 'Món tính ngoài gói' }}.</small></div><div class="kf-sum-row"><span>01 ô × {{ state.draft().hours }} giờ</span><strong>{{ money(state.base) }}</strong></div><div class="kf-sum-row"><span>Phụ thu đồ uống</span><strong>+{{ money(state.drinkSurcharge) }}</strong></div><div class="kf-sum-row"><span>Dịch vụ thêm</span><strong>{{ money(state.extrasTotal) }}</strong></div><hr><div class="kf-sum-row"><span>Tạm tính</span><strong>{{ money(state.subtotal) }}</strong></div><div class="kf-sum-row"><span>Ưu đãi Bạc · 5% (demo)</span><strong>−{{ money(state.silverDiscount) }}</strong></div><hr><div class="kf-sum-row kf-total"><strong>Tổng thanh toán</strong><strong>{{ money(state.total) }}</strong></div><p class="kf-help-mini">Trạng thái đơn chỉ là minh họa. Không kết nối ngân hàng, không có thao tác thanh toán tự động.</p></div></section><div class="kf-checkout-note"><h3>Một nhắc nhỏ trước khi đến</h3><p>Bạn có thể check-in sớm 15 phút. Thời gian dọn ô sau giờ sử dụng không tính vào gói.</p></div></aside></div>
+<main class="kf kf-payment" *ngIf="authorized">
+  <section class="kf-container kf-checkout-head">
+    <div class="kf-crumb"><a routerLink="/">Trang chủ</a> / Đặt chỗ KÉN / <a routerLink="/booking/review">Xem lại đặt chỗ</a> / <strong>Thanh toán</strong></div>
+    <div class="kf-checkout-heading">
+      <div><p class="kf-overline">CHỈ CÒN MỘT BƯỚC ĐỂ CHẠM VÀO KHOẢNG YÊN</p><h1>Thanh toán đặt chỗ</h1><p>Hoàn tất thanh toán, để KÉN sẵn sàng đón bạn.</p></div>
+      <div class="kf-checkout-progress"><span>✓ Đặt chỗ</span><span>✓ Xem lại</span><b>3</b><strong>Thanh toán</strong></div>
+    </div>
+    <button type="button" class="kf-back-link kf-link-button" (click)="back()">← Quay lại xem đặt chỗ</button>
+  </section>
+  <div class="kf-container kf-checkout-grid">
+    <div class="kf-checkout-main">
+      <div class="kf-hold-banner"><img class="kf-icon" src="/images/ken-flow/icons/payment-clock.svg" alt=""><div><strong>KÉN giữ khoảng riêng cho bạn trong 15 phút — mô phỏng</strong><p>Trang demo không giữ chỗ thực tế. Bộ đếm chỉ chạy trong trình duyệt.</p></div><div class="kf-countdown"><strong>{{ countdown }}</strong><small>ĐẾM NGƯỢC MẪU</small></div></div>
+      <p class="kf-inline-feedback" *ngIf="demoExpired">Đồng hồ demo đã hết thời gian. Quay lại Xem lại đặt chỗ để khởi tạo một lượt mô phỏng mới.</p>
+      <section class="kf-panel kf-transfer-panel">
+        <div class="kf-panel-heading"><div><p class="kf-overline">THANH TOÁN CHUYỂN KHOẢN</p><h2>Quét mã, giữ một khoảng yên.</h2></div><span class="kf-small-status">Chờ thanh toán · minh họa</span></div>
+        <div class="kf-transfer-layout">
+          <div class="kf-fake-qr-box"><div class="kf-qr-placeholder" aria-label="QR minh họa không quét được"><img class="kf-qr-svg" src="/images/ken-flow/icons/payment-qr.svg" alt="" aria-hidden="true"><strong>MINH HỌA</strong></div><p>QR minh họa cho đồ án KÉN<br>Không dùng để chuyển tiền</p></div>
+          <div class="kf-transfer-steps">
+            <div><b>1</b><span><strong>Mở ứng dụng ngân hàng</strong><small>Trong sản phẩm hoàn chỉnh, khách chọn chức năng quét mã QR để thanh toán.</small></span></div>
+            <div><b>2</b><span><strong>Kiểm tra trước khi chuyển</strong><small>Chỉ thực hiện giao dịch sau khi thông tin ngân hàng chính thức được cấu hình đầy đủ.</small></span></div>
+            <div><b>3</b><span><strong>Chờ xác nhận từ KÉN</strong><small>Chức năng cập nhật trạng thái từ máy chủ chưa tích hợp trong đồ án này.</small></span></div>
+          </div>
+        </div>
+        <p class="kf-entitlement"><img class="kf-icon" src="/images/ken-flow/icons/payment-info.svg" alt=""> QR và trạng thái chỉ để minh họa; chưa kết nối ngân hàng và không tiếp nhận thanh toán thực.</p>
+      </section>
+      <section class="kf-panel">
+        <div class="kf-panel-heading"><h2>Thông tin chuyển khoản</h2><span class="kf-small-status">CHƯA CẤU HÌNH</span></div>
+        <div class="kf-transfer-info"><div><span>Ngân hàng</span><strong>Chưa cấu hình</strong></div><div><span>Tên người thụ hưởng</span><strong>Chưa cấu hình</strong></div><div><span>Số tài khoản</span><strong>Chưa cấu hình</strong></div><div><span>Nội dung chuyển khoản</span><strong>Sẽ tạo theo mã đặt chỗ</strong></div></div>
+        <hr><div class="kf-sum-row kf-total"><span>Số tiền cần thanh toán</span><strong>{{ money(state.total) }}</strong></div><p class="kf-help-mini">Bản này không hiển thị số tài khoản thật.</p>
+      </section>
+      <section class="kf-payment-contact">
+        <div class="kf-panel-heading"><h2>Thông tin người đặt</h2><a routerLink="/booking/review">Bổ sung thông tin</a></div>
+        <div class="kf-contact-info"><div><small>Họ và tên</small><strong>{{ state.draft().fullName || 'Chưa nhập' }}</strong></div><div><small>Số điện thoại</small><strong>{{ state.draft().phone || 'Chưa nhập' }}</strong></div><div><small>Email</small><strong>{{ state.draft().email || 'Chưa nhập' }}</strong></div></div>
+        <hr><div class="kf-help-row"><div><strong><img class="kf-icon" src="/images/ken-flow/icons/payment-note.svg" alt=""> Cần KÉN giúp một chút?</strong><p>Nếu đã chuyển khoản trong hệ thống thực nhưng chưa nhận xác nhận, hãy giữ lại biên lai và liên hệ nhân viên.</p></div><a class="kf-btn kf-btn-light" routerLink="/support">Nhắn KÉN ↗</a></div>
+      </section>
+    </div>
+    <aside class="kf-checkout-aside">
+      <section class="kf-panel kf-payment-aside">
+        <img [src]="'/images/ken-flow/' + state.space.image" [alt]="state.space.name">
+        <div class="kf-payment-aside-inner">
+          <p class="kf-overline">KHOẢNG RIÊNG CỦA BẠN</p><h2>Tóm tắt đặt chỗ</h2><h3>{{ state.space.name }}</h3>
+          <p>{{ state.draft().guests }} khách · {{ state.draft().hours }} giờ</p>
+          <div class="kf-sum-row"><span>Ngày</span><strong>{{ state.dateLabel }}</strong></div>
+          <div class="kf-sum-row"><span>Giờ sử dụng</span><strong>{{ state.timeLabel }}</strong></div>
+          <div class="kf-sum-row"><span>Số khách</span><strong>{{ state.draft().guests }} khách</strong></div>
+          <div class="kf-highlight-box"><strong>Đồ uống đi kèm</strong><small *ngFor="let item of state.selectedDrinks">{{ item.product.name }} × {{ item.quantity }}</small><small *ngIf="!state.selectedDrinks.length">Chưa chọn đồ uống</small></div>
+          <div class="kf-sum-row"><span>{{ state.space.name }}</span><strong>{{ money(state.base) }}</strong></div>
+          <div class="kf-sum-row"><span>Phụ thu đồ uống</span><strong>+{{ money(state.drinkSurcharge) }}</strong></div>
+          <div class="kf-sum-row"><span>Dịch vụ thêm</span><strong>{{ money(state.extrasTotal) }}</strong></div>
+          <hr>
+          <div class="kf-sum-row"><span>Tạm tính</span><strong>{{ money(state.subtotal) }}</strong></div>
+          <div class="kf-sum-row"><span>Ưu đãi Bạc · 5% (demo)</span><strong>−{{ money(state.silverDiscount) }}</strong></div>
+          <hr><div class="kf-sum-row kf-total"><strong>Tổng thanh toán</strong><strong>{{ money(state.total) }}</strong></div>
+          <p class="kf-help-mini">Giao diện thanh toán là minh họa, chưa kết nối ngân hàng hoặc xác nhận thanh toán.</p>
+        </div>
+      </section>
+      <div class="kf-checkout-note"><h3>Sau khi thanh toán được xác nhận</h3><p>KÉN gửi xác nhận đặt chỗ và mã check-in. Bạn check-in sớm nhất 15 phút, sử dụng không gian theo gói rồi check-out khi kết thúc.</p><p>Trạng thái hiện chưa được tự động cập nhật vì dự án chưa kết nối cổng thanh toán và API booking.</p></div>
+    </aside>
+  </div>
 </main>

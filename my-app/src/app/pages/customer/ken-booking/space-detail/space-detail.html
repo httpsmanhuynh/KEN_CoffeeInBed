@@ -1,0 +1,62 @@
+<main class="ken-space-detail" *ngIf="space as item; else unavailable">
+  <div class="ksd-container">
+    <nav class="ksd-breadcrumb" aria-label="Đường dẫn">
+      <div class="ksd-crumb"><a routerLink="/spaces">Không gian</a><span aria-hidden="true">/</span><span>{{ item.name }}</span></div>
+      <a routerLink="/spaces" class="ksd-back">← Quay lại tất cả không gian</a>
+    </nav>
+
+    <section class="ksd-heading">
+      <div class="ksd-heading-copy">
+        <p class="ksd-eyebrow">{{ content?.eyebrow }}</p>
+        <h1>{{ item.name }}</h1>
+        <p class="ksd-lead">{{ content?.lead }}</p>
+      </div>
+      <div class="ksd-facts">
+        <div class="ksd-facts-row"><span class="ksd-badge">{{ item.perPerson ? 'Dùng chung' : 'Dùng riêng' }}</span><strong>{{ item.capacity }}</strong></div>
+        <div class="ksd-facts-row"><span class="ksd-clock">◷</span><span>08:00–22:00 · Một cơ sở</span></div>
+      </div>
+    </section>
+
+    <section class="ksd-gallery" [attr.aria-label]="'Hình ảnh ' + item.name">
+      <figure class="ksd-gallery-main">
+        <img [src]="content?.gallery?.[0]" [alt]="content?.captions?.[0]">
+        <figcaption>{{ content?.captions?.[0] }} · Minh họa concept</figcaption>
+      </figure>
+      <div class="ksd-gallery-side">
+        <figure><img [src]="content?.gallery?.[1]" [alt]="content?.captions?.[1]"><figcaption>{{ content?.captions?.[1] }} · Minh họa concept</figcaption></figure>
+        <figure><img [src]="content?.gallery?.[2]" [alt]="content?.captions?.[2]"><figcaption>{{ content?.captions?.[2] }} · Minh họa concept</figcaption></figure>
+      </div>
+    </section>
+
+    <section class="ksd-content">
+      <div class="ksd-experience">
+        <h2>Một góc dành cho nhu cầu của bạn</h2>
+        <p class="ksd-description">{{ item.description }} Chọn thời lượng phù hợp với lịch trình của bạn. Giờ sử dụng từ 08:00 đến 22:00.</p>
+        <div class="ksd-amenities"><span class="ksd-amenity-icon">✦</span><span>{{ content?.amenities }}</span></div>
+        <div class="ksd-advice">
+          <div><h3>Phù hợp khi...</h3><p>{{ content?.fit }}</p></div>
+          <div class="ksd-divider"></div>
+          <div><h3>Cân nhắc trước khi chọn...</h3><p>{{ content?.consider }}</p></div>
+        </div>
+      </div>
+
+      <aside class="ksd-pricing">
+        <div class="ksd-pricing-heading"><h2>Các gói sử dụng</h2><span>GIÁ &amp; QUYỀN LỢI</span></div>
+        <article class="ksd-package" *ngFor="let rate of item.rates">
+          <div class="ksd-package-top">
+            <h3>{{ getRateLabel(rate) }}</h3>
+            <div class="ksd-price"><strong>{{ money(rate.price) }}</strong><small>{{ item.perPerson ? '/ người / gói' : '/ không gian / gói' }}</small></div>
+          </div>
+          <p>{{ packageNote(rate.hours) }}</p>
+        </article>
+        <div class="ksd-booking"><a [routerLink]="bookingPath()">Kiểm tra lịch &amp; chọn gói</a></div>
+        <p class="ksd-pricing-note">Chọn lịch ở bước tiếp theo. Chưa giữ chỗ cho đến khi xác nhận.</p>
+      </aside>
+    </section>
+
+    <div class="ksd-notice"><span aria-hidden="true">ⓘ</span><p>Sử dụng trong giờ 08:00–22:00. Kiểm tra lịch trước khi chọn gói. {{ content?.bufferNote }} Lịch hiển thị hiện là mô phỏng, chưa kết nối máy chủ.</p></div>
+  </div>
+</main>
+<ng-template #unavailable>
+  <main class="ksd-container"><h1>Không tìm thấy không gian</h1><a routerLink="/spaces">Quay lại tất cả không gian</a></main>
+</ng-template>

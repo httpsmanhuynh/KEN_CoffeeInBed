@@ -4,7 +4,7 @@ import { SuggestionPopupService } from '../../services/suggestion-popup.service'
 
 interface Slide { id: string; name: string; price: string; desc: string; image: string; }
 
-const SLIDE_MS = 7000;   // Figma: tự chuyển 7 giây mỗi món
+const SLIDE_MS = 5000;
 const TICK_MS = 50;
 const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
@@ -30,17 +30,20 @@ export class SuggestionPopup implements OnDestroy {
 
   index = 0;
   progress = 0;          // 0..1 của slide hiện tại
-  paused = false;
+  readonly slideDurationMs = SLIDE_MS;
   private timer?: ReturnType<typeof setInterval>;
   private lastFocus: Element | null = null;
   private wasOpen = false;
+  private lastOpenVersion = 0;
 
   constructor() {
     effect(() => {
       const open = this.popup.isOpen();
-      if (open && !this.wasOpen) this.onOpen();
+      const version = this.popup.openVersion();
+      if (open && (!this.wasOpen || version !== this.lastOpenVersion)) this.onOpen();
       else if (!open && this.wasOpen) this.onClose();
       this.wasOpen = open;
+      this.lastOpenVersion = version;
     });
   }
 
@@ -59,7 +62,7 @@ export class SuggestionPopup implements OnDestroy {
   prev(): void { this.go((this.index - 1 + this.slides.length) % this.slides.length); }
   private go(i: number): void { this.index = i; this.progress = 0; this.current = [this.slides[i]]; }
 
-  close(): void { this.popup.markSeen(); this.popup.hide(); }
+  close(): void { this.popup.hide(); }
   explore(): void { this.close(); this.router.navigateByUrl('/top-trending'); }
   later(): void { this.close(); this.router.navigateByUrl('/menu'); }
   onBackdrop(ev: MouseEvent): void { if (ev.target === ev.currentTarget) this.close(); }
@@ -85,13 +88,13 @@ export class SuggestionPopup implements OnDestroy {
   }
 
   private onOpen(): void {
-    this.go(0); this.paused = false;
+    clearInterval(this.timer);
+    this.go(0);
     this.lastFocus = document.activeElement;
     document.body.style.overflow = 'hidden';
     const reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (!reduced) {
       this.timer = setInterval(() => {
-        if (this.paused) return;
         this.progress += TICK_MS / SLIDE_MS;
         if (this.progress >= 1) this.next();
       }, TICK_MS);
@@ -105,5 +108,8 @@ export class SuggestionPopup implements OnDestroy {
     (this.lastFocus as HTMLElement | null)?.focus?.();
   }
 
-  ngOnDestroy(): void { clearInterval(this.timer); document.body.style.overflow = ''; }
+  ngOnDestroy(): void {
+    clearInterval(this.timer);
+    document.body.style.overflow = '';
+  }
 }

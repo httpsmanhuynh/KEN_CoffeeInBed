@@ -31,6 +31,7 @@ import { KenFocusPodPage } from './pages/customer/ken-booking/focus-pod/focus-po
 import { KenDrinkPickerPage } from './pages/customer/ken-booking/drink-picker/drink-picker';
 import { KenBookingReviewPage } from './pages/customer/ken-booking/booking-review/booking-review';
 import { KenBookingPaymentPage } from './pages/customer/ken-booking/booking-payment/booking-payment';
+import { KenBookingSpaceDetailPage } from './pages/customer/ken-booking/space-detail/space-detail';
 import { SupportComponent } from './pages/customer/support/support';
 import { PolicyPage } from './pages/customer/policy-page/policy-page';
 import { TermsPage } from './pages/customer/terms-page/terms-page';
@@ -81,10 +82,17 @@ const routes: Routes = [
     children: [
       { path: '', redirectTo: 'spaces', pathMatch: 'full' },
       { path: 'spaces', component: KenSpaceListingPage },
-      { path: 'space/:id', component: KenOtherSpacePage },
       { path: 'focus-pod', component: KenFocusPodPage },
       { path: 'drinks', component: KenDrinkPickerPage },
       { path: 'review', component: KenBookingReviewPage },
+      { path: 'payment', component: KenBookingPaymentPage },
+      { path: ':id', component: KenOtherSpacePage },
+    ],
+  },
+  {
+    path: 'bookings',
+    component: KenBookingShell,
+    children: [
       { path: 'payment', component: KenBookingPaymentPage },
     ],
   },
@@ -103,6 +111,7 @@ const routes: Routes = [
   { path: 'spaces/work-lounge', component: CoworkPage },
   { path: 'spaces/focus-pod', component: FocusPage },
   { path: 'spaces/small-meeting-room', component: MeetingPage },
+  { path: 'spaces/booking/:id', component: KenBookingSpaceDetailPage },
   { path: 'spaces', component: SpacesPage },
 
   // Legacy redirects

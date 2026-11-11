@@ -41,7 +41,7 @@ export class KenSpaceListingPage {
 
   zone: 'all' | 'focus' | 'rest' = 'all';
   selectedSpaceId: string | null = null;
-  readonly guestOptions = Array.from({ length: 12 }, (_, i) => i + 1);
+  readonly guestOptions = Array.from({ length: 20 }, (_, i) => i + 1);
   readonly hours = Array.from({ length: 14 }, (_, i) => i + 8);
   readonly cards: KenListingSpace[] = [
     { id: 'work', name: 'Khu làm việc chung', image: 'listing-work.png', zone: 'focus', occupancy: '1–20 khách · Dùng chung', rate: '30.000đ / người/giờ', badge: 'Mẫu: còn 14/20 chỗ', features: ['Wi-Fi', 'Ổ cắm', 'Linh hoạt'], url: '/spaces/work-lounge', canBook: false },
@@ -53,10 +53,19 @@ export class KenSpaceListingPage {
     { id: 'private', name: 'Phòng riêng tư', image: 'listing-private.png', zone: 'rest', occupancy: '2–4 người · Bàn + ghế', rate: 'Từ 150.000đ', badge: 'Tối thiểu 2 khách', features: ['1h · 150K', '2h · 280K', '4h · 480K'], canBook: false }
   ];
   constructor(public state: KenBookingState, private router: Router) {}
-  get focusCards(): KenListingSpace[] { return this.zone === 'rest' ? [] : this.cards.filter(x => x.zone === 'focus'); }
-  get restCards(): KenListingSpace[] { return this.zone === 'focus' ? [] : this.cards.filter(x => x.zone === 'rest'); }
+  get focusCards(): KenListingSpace[] {
+    return this.zone === 'rest' ? [] : this.cards.filter(x => x.zone === 'focus' && this.fitsGuests(x));
+  }
+  get restCards(): KenListingSpace[] {
+    return this.zone === 'focus' ? [] : this.cards.filter(x => x.zone === 'rest' && this.fitsGuests(x));
+  }
   setDate(value: string): void { this.state.set({ date: value }); }
   setHour(value: string): void { this.state.set({ startHour: Number(value) }); }
+  private fitsGuests(space: KenListingSpace): boolean {
+    const config = this.state.getSpace(space.id);
+    const guests = this.state.draft().guests;
+    return !!config && guests >= config.minGuests && guests <= config.maxGuests;
+  }
 
   choose(space: KenListingSpace): void {
     if (this.selectedSpaceId !== space.id) {
@@ -65,25 +74,16 @@ export class KenSpaceListingPage {
       return;
     }
 
-    if (space.id === 'focus') {
-      this.state.set({ guests: 1, holdUntil: null });
-      this.router.navigateByUrl('/booking/focus-pod');
-      return;
-    }
-
-    this.router.navigateByUrl('/booking/space/' + space.id);
+    this.open(space);
   }
 
   open(space: KenListingSpace): void {
     const details: Record<string, string> = {
-      work: '/spaces/work-lounge',
       focus: '/spaces/focus-pod',
-      'meeting-small': '/spaces/small-meeting-room'
+      work: '/spaces/work-lounge',
+      'meeting-small': '/spaces/small-meeting-room',
     };
-
-    this.router.navigateByUrl(
-      details[space.id] || '/booking/space/' + space.id
-    );
+    this.router.navigateByUrl(details[space.id] || '/spaces/booking/' + space.id);
   }
 
   get minDate(): string { return kenNextDay(); }

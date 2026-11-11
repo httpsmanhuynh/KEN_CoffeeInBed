@@ -2,6 +2,7 @@ import { Component, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
+import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../../core/auth.service';
 
 /** Trạng thái lỗi chung (khớp các frame Figma). */
@@ -25,10 +26,15 @@ export class LoginPage {
 
   readonly form: FormGroup;
 
+  get requiresLogin(): boolean {
+    return !!this.route.snapshot.queryParamMap.get('returnUrl');
+  }
+
   constructor(
     private fb: FormBuilder,
     @Inject(AuthService) private auth: AuthService,
     private router: Router,
+    private route: ActivatedRoute,
   ) {
     this.form = this.fb.nonNullable.group({
       identifier: ['', [Validators.required, Validators.maxLength(100)]],
@@ -73,8 +79,14 @@ export class LoginPage {
     this.auth.login({ identifier: v.identifier.trim(), password: v.password }).subscribe({
       next: (res) => {
         // Không điều hướng tới route 2FA chưa tồn tại; hiển thị trạng thái rõ ràng.
-        if (res?.twoFactorRequired) { this.loading = false; this.error = 'two-factor-unavailable'; }
-        else this.router.navigate(['/points-tier']);
+        if (res?.requires2FA) { this.loading = false; this.error = 'two-factor-unavailable'; }
+        else {
+          const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+          const destination = returnUrl?.startsWith('/') && !returnUrl.startsWith('//')
+            ? returnUrl
+            : '/home-logged-in';
+          this.router.navigateByUrl(destination);
+        }
       },
       error: (err: HttpErrorResponse) => {
         this.loading = false;

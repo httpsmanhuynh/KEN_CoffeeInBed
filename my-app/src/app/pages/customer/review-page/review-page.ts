@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthService } from '../../../core/auth.service';
 
 interface ReviewBooking {
   label: string;
@@ -102,6 +104,9 @@ export class ReviewPage {
   selectedFiles: File[] = [];
   notice = '';
   moreNotice = false;
+  checkingSession = false;
+
+  constructor(private auth: AuthService, private router: Router) {}
 
   get booking(): ReviewBooking {
     return this.bookings[this.selectedBooking];
@@ -166,6 +171,25 @@ export class ReviewPage {
   }
 
   submit(): void {
+    if (this.checkingSession) return;
+    this.checkingSession = true;
+    this.auth.ensureSession().subscribe({
+      next: user => {
+        this.checkingSession = false;
+        if (!user) {
+          this.router.navigate(['/login'], { queryParams: { returnUrl: '/reviews' } });
+          return;
+        }
+        this.submitReview();
+      },
+      error: () => {
+        this.checkingSession = false;
+        this.router.navigate(['/login'], { queryParams: { returnUrl: '/reviews' } });
+      },
+    });
+  }
+
+  private submitReview(): void {
     if (this.rating < 1 || this.rating > 5) {
       this.notice = 'Vui lòng chọn từ 1 đến 5 sao.';
       return;

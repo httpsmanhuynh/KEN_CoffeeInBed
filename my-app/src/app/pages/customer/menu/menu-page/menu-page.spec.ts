@@ -1,29 +1,24 @@
 import { TestBed } from '@angular/core/testing';
-import { ActivatedRoute, convertToParamMap, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { MenuPage } from './menu-page';
 import { SuggestionPopupService } from '../../../../shared/services/suggestion-popup.service';
 
-function setup(params: Record<string, string>) {
+async function setup() {
   sessionStorage.clear();
-  TestBed.configureTestingModule({
+  await TestBed.configureTestingModule({
     imports: [RouterModule.forRoot([])],
     declarations: [MenuPage],
-    providers: [{ provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: convertToParamMap(params) } } }],
-  });
-  const f = TestBed.createComponent(MenuPage);
-  return { c: f.componentInstance, svc: TestBed.inject(SuggestionPopupService) };
+  }).compileComponents();
+  const fixture = TestBed.createComponent(MenuPage);
+  return { fixture, svc: TestBed.inject(SuggestionPopupService) };
 }
 
 describe('MenuPage', () => {
-  it('opens the suggestion popup with ?popup=1', () => {
-    const { c, svc } = setup({ popup: '1' });
-    c.ngOnInit();
-    expect(svc.isOpen()).toBe(true);
-  });
+  it('does not open the popup when the Menu page is visited', async () => {
+    const { fixture, svc } = await setup();
+    fixture.detectChanges();
 
-  it('the button reopens the popup on demand', () => {
-    const { c, svc } = setup({});
-    c.openSuggestion();
-    expect(svc.isOpen()).toBe(true);
+    expect(svc.isOpen()).toBe(false);
+    fixture.destroy();
   });
 });

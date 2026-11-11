@@ -147,8 +147,8 @@
             Cho phép hiển thị đánh giá công khai
           </label>
 
-          <button type="button" class="review-submit" (click)="submit()">
-            <img src="/images/review-icons/submit-arrow.svg" alt="" /> Gửi đánh giá
+          <button type="button" class="review-submit" (click)="submit()" [disabled]="checkingSession">
+            <img src="/images/review-icons/submit-arrow.svg" alt="" /> {{ checkingSession ? 'Đang kiểm tra…' : 'Gửi đánh giá' }}
           </button>
 
           <p class="review-hint">

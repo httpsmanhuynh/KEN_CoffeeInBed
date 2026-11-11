@@ -10,7 +10,8 @@ export interface NavItem {
 export const MAIN_NAV: NavItem[] = [
   { label: 'Trang chủ', path: '/' },
   { label: 'Không gian', path: '/spaces' },
-  { label: 'Menu', path: '/menu', match: ['/menu', '/top-trending'] }, // Figma: Top Trending vẫn gạch chân "Menu"
+  { label: 'Menu', path: '/menu' },
+  { label: 'Top Trending', path: '/top-trending' },
   { label: 'Hỗ trợ', children: [
     { label: 'Trung tâm hỗ trợ', path: '/support' },
   ] },
@@ -38,17 +39,13 @@ export const FOOTER_POLICY: NavChild[] = [
   { label: 'Điều kiện & điều khoản', path: '/terms' },
 ];
 
-/**
- * Chỉ các trang xác thực (auth) dùng header khách (Đăng nhập / Đăng ký).
- * MỌI trang customer khác (tài khoản, đặt chỗ, thành viên, menu, top trending...)
- * dùng header đã đăng nhập - nên trang mới thêm sau này tự động đúng, không cần khai báo lại.
- */
+/** Các route xác thực; không dùng URL để xác định trạng thái phiên hay header. */
 export const GUEST_PATHS = [
   '/register', '/otp-verify', '/login',
   '/forgot-password', '/forgot-otp', '/reset-password',
 ];
 
-/** true nếu URL thuộc nhóm trang auth (kể cả có query, hash, dấu "/" cuối hoặc route con). */
+/** true nếu URL là route xác thực (kể cả có query, hash, dấu "/" cuối hoặc route con). */
 export function isGuestPath(url: string): boolean {
   const path = '/' + url.split(/[?#]/)[0].replace(/^\/+|\/+$/g, '').toLowerCase();
   if (path === '/') return true; // "/" được điều hướng về /register

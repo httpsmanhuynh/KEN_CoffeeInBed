@@ -48,6 +48,8 @@ import { KenFocusPodPage } from './pages/customer/ken-booking/focus-pod/focus-po
 import { KenDrinkPickerPage } from './pages/customer/ken-booking/drink-picker/drink-picker';
 import { KenBookingReviewPage } from './pages/customer/ken-booking/booking-review/booking-review';
 import { KenBookingPaymentPage } from './pages/customer/ken-booking/booking-payment/booking-payment';
+import { KenBookingSpaceDetailPage } from './pages/customer/ken-booking/space-detail/space-detail';
+import { KenDrinkSelectionComponent } from './pages/customer/ken-booking/drink-selection/drink-selection';
 import { SupportComponent } from './pages/customer/support/support';
 import { PolicyPage } from './pages/customer/policy-page/policy-page';
 import { TermsPage } from './pages/customer/terms-page/terms-page';
@@ -100,6 +102,8 @@ import { MeetingPage } from './pages/customer/space-details/meeting-page/meeting
     KenDrinkPickerPage,
     KenBookingReviewPage,
     KenBookingPaymentPage,
+    KenBookingSpaceDetailPage,
+    KenDrinkSelectionComponent,
     SupportComponent,
     PolicyPage,
     TermsPage,

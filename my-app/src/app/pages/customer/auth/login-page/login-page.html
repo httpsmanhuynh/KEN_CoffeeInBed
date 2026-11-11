@@ -13,6 +13,10 @@
       <p class="lg__welcome" role="status">Đặt lại mật khẩu thành công. Vui lòng đăng nhập bằng mật khẩu mới.</p>
     }
 
+    @if (requiresLogin) {
+      <p class="lg__welcome" role="status">Vui lòng đăng nhập để tiếp tục thao tác.</p>
+    }
+
     <form class="lg__form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
       <!-- Email hoặc SĐT -->
       <div class="field">

@@ -1,8 +1,5 @@
-import { Location } from '@angular/common';
 import { Component, HostListener, inject, signal } from '@angular/core';
-import { NavigationEnd, Router } from '@angular/router';
-import { filter } from 'rxjs';
-import { isGuestPath } from './core/nav-links';
+import { AuthService } from './core/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -11,16 +8,14 @@ import { isGuestPath } from './core/nav-links';
   templateUrl: './app.html',
 })
 export class App {
-  private readonly router = inject(Router);
-  private readonly location = inject(Location);
+  protected readonly auth = inject(AuthService);
 
   protected readonly title = signal('my-app');
-  protected readonly member = signal(!isGuestPath(this.location.path()));
 
   constructor() {
-    this.router.events
-      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
-      .subscribe((e) => this.member.set(!isGuestPath(e.urlAfterRedirects)));
+    this.auth.loadSession().subscribe({
+      error: error => console.error('Không thể kiểm tra phiên đăng nhập.', error),
+    });
   }
 
   @HostListener('document:click', ['$event'])
