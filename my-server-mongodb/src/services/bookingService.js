@@ -39,7 +39,7 @@ const toOid = (id, errCode = 'INVALID_ID', errMsg = 'ID không hợp lệ') => {
 
 // Chạy Multi-Document ACID Transaction; tự động retry khi gặp WriteConflict (code 112 / TransientTransactionError).
 async function runInTransaction(db, _lockKey, fn) {
-  const maxRetries = 5;
+  const maxRetries = 15;
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     const session = db.client.startSession();
     try {
@@ -50,7 +50,7 @@ async function runInTransaction(db, _lockKey, fn) {
       return result;
     } catch (err) {
       if (err && err.code === 112 && attempt < maxRetries) {
-        await new Promise((r) => setTimeout(r, attempt * 5));
+        await new Promise((r) => setTimeout(r, attempt * 5 + Math.floor(Math.random() * (attempt * 12))));
         continue;
       }
       throw err;
@@ -763,17 +763,23 @@ async function createBooking(
     const bookingId = new ObjectId();
 
     if (quote.voucherDoc) {
-      await db.collection('vouchers').updateOne(
+      const vUpd = await db.collection('vouchers').updateOne(
         { _id: quote.voucherDoc._id, status: 'ACTIVE', usage_count: { $lt: quote.voucherDoc.usage_limit } },
         { $inc: { usage_count: 1 }, $set: { updated_at: now } },
         opts,
       );
+      if (vUpd.matchedCount !== 1) {
+        throw new BookingError(422, 'VOUCHER_USAGE_LIMIT', 'M? ?u ??i ?? h?t l??t s? d?ng');
+      }
       if (quote.userVoucherDoc) {
-        await db.collection('user_vouchers').updateOne(
+        const uvUpd = await db.collection('user_vouchers').updateOne(
           { _id: quote.userVoucherDoc._id, used_booking_id: null },
           { $set: { used_booking_id: bookingId, used_at: now } },
           opts,
         );
+        if (uvUpd.matchedCount !== 1) {
+          throw new BookingError(422, 'VOUCHER_NOT_OWNED', 'B?n ch?a quy ??i m? ?u ??i n?y ho?c ?? d?ng h?t l??t');
+        }
       }
     }
 
