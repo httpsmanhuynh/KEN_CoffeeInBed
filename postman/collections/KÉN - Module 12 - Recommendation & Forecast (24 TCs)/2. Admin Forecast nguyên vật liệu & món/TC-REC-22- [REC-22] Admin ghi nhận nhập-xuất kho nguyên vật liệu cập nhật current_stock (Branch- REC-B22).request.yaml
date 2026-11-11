@@ -1,0 +1,40 @@
+$kind: http-request
+name: "TC-REC-22: [REC-22] Admin ghi nhận nhập/xuất kho nguyên vật liệu (IN/OUT) cập nhật đồng bộ current_stock (Branch: REC-B22)"
+description: |-
+  **Mã TC:** REC-22 (TC-REC-22)
+  **Nhóm:** Admin Forecast nguyên vật liệu & món
+  **API / Thành phần:** POST /api/admin/forecast/ingredients/:id/movements
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; nguyên vật liệu {{ingredientId}} tồn tại.
+  **Dữ liệu vào:** { "movementType": "IN", "quantityChange": 100, "reason": "Nhập bổ sung kho kiểm thử" }
+  **Các bước thực hiện:**
+  1) POST /api/admin/forecast/ingredients/{{ingredientId}}/movements&#10;2) Kiểm tra balance_after khớp với ingredient.current_stock
+  **Kết quả mong đợi:** 200 tạo bản ghi ingredient_stock_movements và cập nhật ingredients.current_stock = balance_after (HTTP: 200)
+  **Nhánh code bao phủ:** REC-B22
+url: "{{baseUrl}}/api/admin/forecast/ingredients/{{ingredientId}}/movements"
+method: POST
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "movementType": "IN",
+      "quantityChange": 100,
+      "reason": "Nhập bổ sung kho kiểm thử"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-REC-22] Admin ghi nhận nhập kho nguyên vật liệu
+      pm.test("[TC-REC-22] Status code is 200", function () {
+          pm.expect(pm.response.code).to.eql(200);
+      });
+      pm.test("[TC-REC-22] balance_after khớp với current_stock mới của nguyên vật liệu", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.include.all.keys("movement", "ingredient");
+          pm.expect(json.movement.balance_after).to.eql(json.ingredient.current_stock);
+      });
+    language: text/javascript
+order: 7000
