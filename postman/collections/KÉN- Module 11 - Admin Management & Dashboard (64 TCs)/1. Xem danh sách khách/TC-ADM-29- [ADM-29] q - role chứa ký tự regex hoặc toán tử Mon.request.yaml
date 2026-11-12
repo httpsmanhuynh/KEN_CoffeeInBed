@@ -1,0 +1,25 @@
+$kind: http-request
+name: "TC-ADM-29: [ADM-29] q/role chứa ký tự regex hoặc toán tử Mongo (Branch: ADM-B29)"
+description: |-
+  **Mã TC:** ADM-29 (TC-ADM-29)
+  **Nhóm:** Xem danh sách khách
+  **API / Thành phần:** GET /api/admin/users?q
+  **Loại:** Security
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed users/bookings.
+  **Dữ liệu vào:** ?q=.* ; ?q=( ; ?q=%20%20 ; ?role[$ne]=ADMIN ; ?q[$regex]=.*
+  **Các bước thực hiện:**
+  1) GET lần lượt từng bộ tham số
+  **Kết quả mong đợi:** 200, không lỗi 500; q=.* chỉ khớp chuỗi ".*" nguyên văn (đã escape regex); q toàn khoảng trắng = không lọc; toán tử Mongo không được thực thi (HTTP: 200)
+  **Nhánh code bao phủ:** ADM-B29
+  **Ghi chú:** Code: escapeRegex, String(query.*).
+url: "{{baseUrl}}/api/admin/users?q=.*"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-29] q/role chứa ký tự regex hoặc toán tử Mongo
+      pm.test("[TC-ADM-29] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 6000

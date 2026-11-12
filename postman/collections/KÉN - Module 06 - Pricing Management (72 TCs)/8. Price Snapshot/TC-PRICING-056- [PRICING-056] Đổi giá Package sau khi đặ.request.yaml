@@ -1,0 +1,39 @@
+$kind: http-request
+name: "TC-PRICING-056: [PRICING-056] Đổi giá Package sau khi đặt: Booking cũ giữ nguyên giá đã đóng băng (Branch: SNP-B02)"
+description: |-
+  **Mã TC:** PRICING-056 (TC-PRICING-056)
+  **Nhóm:** Price Snapshot
+  **API / Thành phần:** GET /api/bookings/{{bookingId}} (MongoDB Compass: collection bookings (price_snapshot))
+  **Loại:** State Transition
+  **Điều kiện tiên quyết:** Server chạy (http://localhost:3002) và ứng dụng giao diện chạy; đã chạy npm run setup (có hạng thành viên); dữ liệu giá/Inclusion/Add-on/Voucher theo cột 'Dữ liệu vào' đã có trong MongoDB (tạo bằng Compass nếu chưa có).
+  **Dữ liệu vào:** Tài khoản: Customer hạng Vàng (giảm 10%)&#10;Package: trọn gói, tính theo không gian, đơn giá 200.000đ&#10;Inclusion: không có phụ phí&#10;Add-on: không chọn&#10;Voucher: giảm cố định 50.000đ&#10;Sau khi đặt: Admin/Compass đổi giá Package từ 200.000đ thành 250.000đ
+  **Các bước thực hiện:**
+  1) Đăng nhập Customer hạng Vàng, đặt Package 200.000đ với Voucher cố định 50.000đ; ghi lại final_amount trong price_snapshot.&#10;2) Compass: đổi giá Package thành 250.000đ.&#10;3) UI: mở chi tiết Booking vừa tạo.&#10;4) Compass: xem lại price_snapshot của Booking đó.&#10;5) Tạo 1 Booking mới cùng Package để so sánh.&#10;6) Khôi phục giá Package gốc.
+  **Kết quả mong đợi:** Booking cũ: price_snapshot và UI vẫn Thành tiền 135.000đ (không đổi). Booking mới: tính theo giá mới 250.000đ (Voucher 50.000đ, giảm hạng 20.000đ, Thành tiền 180.000đ). (HTTP: 200)
+  **Nhánh code bao phủ:** SNP-B02
+  **Ghi chú:** CẦN XEM XÉT – ánh xạ không 1-1 (AUTO-PRICING-041 dùng chung cho 4 Manual TC). Automated TC ứng viên (chưa xác nhận, chỉ để truy vết, KHÔNG phải kết quả Manual): AUTO-PRICING-041: toPriceSnapshot: đóng băng sâu, có chi tiết dòng, khớp trường phẳng
+url: "{{baseUrl}}/api/bookings/{{bookingId}}"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-PRICING-056] Đổi giá Package sau khi đặt: Booking cũ giữ nguyên giá đã đóng băng
+      pm.test("[TC-PRICING-056] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+      pm.test("[TC-PRICING-056] Snapshot giá trên Booking khớp đúng dữ liệu đóng băng từ DB", function () {
+          const json = pm.response.json();
+          pm.expect(json.package_price).to.eql(200000);
+          pm.expect(json.inclusion_surcharge).to.eql(0);
+          pm.expect(json.addon_total).to.eql(0);
+          pm.expect(json.subtotal).to.eql(200000);
+          pm.expect(json.voucher_discount).to.eql(50000);
+          pm.expect(json.tier_rate).to.eql(0.1);
+          pm.expect(json.tier_discount).to.eql(15000);
+          pm.expect(json.discount_amount).to.eql(65000);
+          pm.expect(json.final_amount).to.eql(135000);
+          pm.expect(Number.isInteger(json.final_amount) && json.final_amount >= 0).to.be.true;
+          if (json._id) { pm.collectionVariables.set("lastCreatedBookingId", String(json._id)); }
+      });
+    language: text/javascript
+order: 2000

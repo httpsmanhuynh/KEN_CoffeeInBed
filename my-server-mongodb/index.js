@@ -10,7 +10,7 @@ const path = require('path');
 const { MongoClient } = require('mongodb');
 
 const app = express();
-const port = process.env.PORT || 3002; // Cổng 3002 theo slide của thầy
+const port = process.env.PORT || 3002; // Cổng 3002
 const isProd = process.env.NODE_ENV === 'production';
 
 // 1. Middleware cơ bản
@@ -37,7 +37,12 @@ app.use(
   session({
     secret: process.env.SESSION_SECRET || 'dev-only-secret',
     // Lưu session trong MongoDB (collection sessions): restart server không mất đăng nhập; TTL tự dọn session hết hạn.
-    store: MongoStore.create({ client, dbName: DB_NAME, collectionName: 'sessions', ttl: 24 * 60 * 60 }),
+    store: MongoStore.create({
+      client,
+      dbName: DB_NAME,
+      collectionName: 'sessions',
+      ttl: 24 * 60 * 60,
+    }),
     resave: false,
     saveUninitialized: false,
     cookie: { httpOnly: true, secure: isProd, sameSite: 'lax', maxAge: 24 * 60 * 60 * 1000 },
@@ -64,6 +69,10 @@ async function startServer() {
     app.use('/api', authRouter);
     app.use('/api/auth', authRouter);
     app.use('/api/profile', require('./src/routes/profile'));
+    const { recommendationRouter, adminForecastRouter } = require('./src/routes/forecast');
+    app.use('/api', recommendationRouter);
+    app.use('/api/admin/forecast', adminForecastRouter);
+    app.use('/api/admin', require('./src/routes/admin'));
 
     // 5. Cronjob thu hồi đơn PENDING_PAYMENT quá hạn 15 phút (UC-36, BR-E03)
     const { expirePendingBookings } = require('./src/services/bookingService');

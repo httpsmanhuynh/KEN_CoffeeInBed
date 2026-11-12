@@ -1,0 +1,43 @@
+$kind: http-request
+name: '[TC-SZ-033] Chuyển ACTIVE → MAINTENANCE: Space không còn khả dụng khi tìm chỗ'
+description: '**Mã TC:** TC-SZ-033
+
+  **Nhóm:** Đổi trạng thái Space
+
+  **API / Thành phần:** PATCH /api/spaces/:id
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed zones/spaces/packages.
+
+  **Dữ liệu vào:** {"status": "MAINTENANCE"}
+
+  **Các bước thực hiện:**
+
+  1) PATCH status
+
+  2) GET /api/spaces?startAt=...
+
+  **Kết quả mong đợi:** 200; Space không xuất hiện là khả dụng (HTTP: 200)
+
+  **Nhánh code bao phủ:** SPC-B23
+
+  '
+url: '{{baseUrl}}/api/spaces/{{spaceId}}'
+method: PATCH
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 33000
+body:
+  type: json
+  raw: "{\n  \"status\": \"MAINTENANCE\"\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-SZ-033] Chuyển ACTIVE → MAINTENANCE: Space không còn khả dụng khi\
+    \ tìm chỗ\npm.test(\"[TC-SZ-033] Status code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-SZ-033] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

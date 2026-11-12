@@ -1,0 +1,37 @@
+$kind: http-request
+name: "TC-BKG-09- [BKG-09] Never Trust the Client- gửi final_amount giả (Branch- BKG-B0"
+description: |-
+  **Mã TC:** BKG-09 (TC-BKG-09)
+  **Nhóm:** Tạo đơn giữ chỗ
+  **API / Thành phần:** POST /api/bookings
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer.
+  **Dữ liệu vào:** final_amount: 1
+  **Các bước thực hiện:**
+  1) POST /api/bookings
+  **Kết quả mong đợi:** Đơn lưu final_amount do Backend tính, bỏ qua giá client (HTTP: 201)
+  **Nhánh code bao phủ:** BKG-B09
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/bookings"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "spaceId": "{{spaceId}}",
+      "packageId": "{{packageId}}",
+      "startAt": "{{bookingStartAt}}",
+      "guestCount": 2,
+      "final_amount": 1
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-BKG-09] Never Trust the Client- gửi final_amount giả
+      pm.test("[TC-BKG-09] Status code is 201", function () {
+          pm.expect(pm.response.code).to.be.oneOf([201]);
+      });
+    language: text/javascript
+order: 9000

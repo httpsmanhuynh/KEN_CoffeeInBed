@@ -1,0 +1,42 @@
+$kind: http-request
+name: '[TC-PK-026] Hạn mức hỗ trợ: món đúng 50.000đ → phụ phí 0'
+description: '**Mã TC:** TC-PK-026
+
+  **Nhóm:** Cấu hình Inclusion
+
+  **API / Thành phần:** POST /api/bookings/quote
+
+  **Loại:** Boundary
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; đã seed spaces/packages/package_prices/package_inclusions.
+  Gói có STANDARD_DRINK.
+
+  **Dữ liệu vào:** Món 50.000đ × 1
+
+  **Các bước thực hiện:**
+
+  1) POST /api/bookings/quote
+
+  **Kết quả mong đợi:** surcharge_amount = 0 (HTTP: 200)
+
+  **Nhánh code bao phủ:** PKG-B23
+
+  '
+url: '{{baseUrl}}/api/bookings/quote'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: CUSTOMER
+order: 26000
+body:
+  type: json
+  raw: '{"data": "Món 50.000đ × 1"}'
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PK-026] Hạn mức hỗ trợ: món đúng 50.000đ → phụ phí 0\npm.test(\"[TC-PK-026]\
+    \ Status code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-PK-026] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

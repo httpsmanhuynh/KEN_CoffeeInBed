@@ -14,12 +14,13 @@ my-server-mongodb/
 │   ├── workflow/
 │   │   ├── booking-5-steps.md       # Quy trình Đặt không gian 5 bước (BR-D01), Vận hành & Chống đặt trùng
 │   │   ├── catalog-payment-loyalty.md # Quy trình Catalog CRUD, Voucher, Payment Idempotent & Loyalty
-│   │   └── review-management.md     # Quy trình Quản lý Đánh giá sau sử dụng (UC-16, BR-H01, FR-4.3)
+│   │   ├── review-management.md     # Quy trình Quản lý Đánh giá sau sử dụng (UC-16, BR-H01, FR-4.3)
+│   │   └── admin-dashboard.md       # Quy trình Admin: Khóa/Mở khóa User & Dashboard thống kê (Module 11)
 │   ├── memory/
 │   │   ├── decisions.md             # Các quyết định kiến trúc đã chốt (Auth, Booking, Concurrency, Validator)
 │   │   └── open-questions.md        # Các câu hỏi mở / hạng mục tiếp theo
 │   ├── principle/
-│   │   └── lessons.md               # Quy tắc cốt lõi (Rate limit, Session BR-A05, Express 5, Schema Atlas)
+│   │   └── lessons.md               # Quy tắc cốt lõi (Rate limit, Session, Express 5, Schema Atlas, Doanh thu Dashboard)
 │   └── project/
 │       └── changes.md               # Lịch sử thay đổi cấu hình, env, scripts & files
 ├── src/
@@ -27,20 +28,25 @@ my-server-mongodb/
 │   │   ├── constants.js             # Hằng số nghiệp vụ (HOLD=15p, BUFFER=15p, CUTOFF=120p, REVIEW_RATING=1..5...)
 │   │   └── indexes.js               # ensureIndexes() cho users, otp_codes, loyalty, payment, catalog, reviews
 │   ├── domain/                      # Pure business logic (không phụ thuộc DB)
+│   │   ├── adminError.js            # AdminError(status, code, message) cho Module 11
+│   │   ├── adminUser.js             # Luật Khóa/Mở khóa (decideStatusChange) & sanitizeUser
 │   │   ├── availability.js          # Kiểm tra chỗ trống EXCLUSIVE (kèm buffer 15p) & SHARED (theo capacity)
 │   │   ├── bookingStateMachine.js   # Vòng đời 7 trạng thái đơn & kiểm tra điều kiện chuyển trạng thái
+│   │   ├── dashboard.js             # Dashboard thuần: khoảng ngày VN, 7 trạng thái, Occupancy, doanh thu theo giao dịch + phân rã, Top Add-on
 │   │   ├── loyalty.js               # Tính Điểm/Coins (10.000đ = 1 Điểm + 1 Coin), nâng hạng, rollover đầu năm
 │   │   ├── payment.js               # Kiểm tra điều kiện thanh toán (BR-E01/E02/E03)
 │   │   ├── pricing.js               # Tính giá tự động: Package + Inclusion + Add-on - Voucher - Hạng (BR-B03)
 │   │   └── review.js                # Kiểm tra dữ liệu đánh giá, điều kiện chính chủ & CHECKED_OUT, cờ nhắc đánh giá
 │   ├── middleware/
-│   │   ├── auth.js                  # requireAuth (đọc lại DB thu hồi session BR-A05), requireRole, startSession
+│   │   ├── auth.js                  # requireAuth (đọc lại DB, thu hồi session tài khoản bị khóa), requireRole, startSession
 │   │   └── rateLimit.js             # Bộ giới hạn tần suất theo IP / SĐT / User ID (BR-A08)
 │   ├── services/
+│   │   ├── adminService.js          # Dịch vụ Admin: danh sách/hồ sơ/lịch sử User, lock/unlock, getDashboard (aggregate)
 │   │   ├── bookingService.js        # Dịch vụ Đặt chỗ 5 bước, Transaction + lock_version, Check-in/out, Cron
-│   │   ├── otp.js                   # Phát hành & xác thực OTP băm bcrypt (chống race condition)
+│   │   ├── otp.js                   # Phát hành & xác thực OTP băm HMAC-SHA256 (chống race condition)
 │   │   └── reviewService.js         # Dịch vụ Tạo/Xem đánh giá trong Transaction, chống trùng & gắn lời nhắc đánh giá
 │   ├── routes/
+│   │   ├── admin.js                 # Admin Management & Dashboard (/api/admin)
 │   │   ├── auth.js                  # Đăng ký, OTP, Đăng nhập, 2FA, Quên/Đổi MK, Đăng xuất (/api & /api/auth)
 │   │   ├── profile.js               # Xem/Sửa hồ sơ, Đổi MK, Đổi SĐT, Bật/Tắt 2FA (/api/profile)
 │   │   ├── catalog.js               # Khám phá chỗ trống (UC-04/05) & Admin CRUD Catalog (/api & /api/catalog)
@@ -50,15 +56,27 @@ my-server-mongodb/
 │   │   └── reviews.js               # Tạo & Xem đánh giá, kiểm tra điều kiện & lời nhắc đánh giá (/api/reviews)
 │   └── utils/
 │       └── http.js                  # Helper wrap, fail, str, publicUser, tierOf
-└── test/
-    ├── auth.mw.test.js              # 14 test cases middleware xác thực & thu hồi session (TC-MW-01..14)
-    ├── booking.test.js              # 8 kịch bản tích hợp Booking 5 bước & Concurrency (TC-BK-01..08)
-    ├── domain.test.js               # 7 test cases domain thuần (pricing, loyalty, stateMachine, availability)
-    ├── logout.test.js               # Test lỗi hủy session
-    ├── loyalty.test.js              # 26 test cases domain & tích hợp Loyalty (BR-H03..H06)
-    ├── otp.test.js                  # 15 test cases dịch vụ OTP (100% coverage)
-    ├── payment_catalog.test.js      # 15 test cases Payment domain, Idempotency & Catalog Admin RBAC
-    └── review.test.js               # 3 bộ kịch bản Domain & Tích hợp Review Management (TC-REV-01..03)
+└── tests/
+    ├── helpers/
+    │   └── mockDb.js                    # In-Memory MongoDB Mock hỗ trợ Transaction & WriteConflict
+    ├── unit/
+    │   ├── adminUser.test.js            # 9 test cases luật Khóa/Mở khóa, hạng/Điểm/Coins (TC-ADM-01..06, 14..16)
+    │   ├── auth.test.js                 # 21 test cases OTP & Session (TC-OTP-01..17, TC-MW-06..09)
+    │   ├── availability.test.js         # Kiểm tra chỗ trống EXCLUSIVE + buffer & SHARED (TC-AVAIL-01)
+    │   ├── bookingStateMachine.test.js  # Vòng đời 7 trạng thái đơn (TC-BSM-01)
+    │   ├── dashboard.test.js            # 29 test cases Dashboard thuần (TC-DSH-01..29)
+    │   ├── loyalty.test.js              # 20 test cases Loyalty Management đồng bộ Excel (TC-LOY-01..20)
+    │   ├── pricing.test.js              # 5 test cases Pricing & Catalog (TC-PRC-01..05)
+    │   └── system.test.js               # 18 test cases System Config (TC-SYS-01..29)
+    ├── integration/
+    │   ├── admin.api.test.js            # 7 test cases Admin service + route, DB giả lập (TC-ADM-07..13)
+    │   ├── auth.api.test.js             # 12 test cases middleware xác thực & thu hồi session (bao gồm 9 TC-MW-01..09 trên Excel)
+    │   ├── booking.api.test.js          # 7 kịch bản tích hợp Booking & Concurrency (TC-BK-02..08)
+    │   ├── payment.api.test.js          # 15 test cases Payment domain, Idempotency & RBAC (TC-PAY-01..15)
+    │   ├── review.api.test.js           # 18 test cases Review Management đồng bộ Excel (TC-REV-01..18)
+    │   └── voucher.api.test.js          # 28 test cases Voucher Management đồng bộ Excel (TC-VCH-01..28)
+    └── e2e/
+        └── customer-flow.test.js        # Quy trình chuẩn 5 bước End-to-End (TC-BK-01)
 ```
 
 ---
@@ -77,7 +95,7 @@ my-server-mongodb/
 | **8** | **Voucher Management** | ✅ **100%** | `src/routes/catalog.js`, `src/routes/loyalty.js`, `src/services/bookingService.js` |
 | **9** | **Loyalty Management** | ✅ **100%** | `src/domain/loyalty.js`, `src/routes/loyalty.js`, `src/services/bookingService.js` |
 | **10** | **Review Management** | ✅ **100%** | `src/domain/review.js`, `src/services/reviewService.js`, `src/routes/reviews.js`, `src/routes/bookings.js` |
-| **11** | **Admin Management & Dashboard** | 🟡 **Một phần** | Đã có Admin xem/lọc danh sách Booking (`GET /api/bookings`); chưa có Khóa/Mở khóa User & Thống kê Dashboard |
+| **11** | **Admin Management & Dashboard** | 🟢 **Đã code + unit test** (chờ chạy thử trên Mongo thật) | `src/routes/admin.js`, `src/services/adminService.js`, `src/domain/dashboard.js`, `src/domain/adminUser.js`, `GET /api/bookings` |
 | **12** | **Recommendation & Forecast API** | ⏳ **Chưa làm** | *(Dự kiến: đọc `demand_forecasts`, `inventory_alerts`, `sales_history_daily`, `sales_transactions`)* |
 | **13** | **System Configuration** | ✅ **100%** | `index.js`, `src/config/constants.js`, `src/config/indexes.js`, `src/middleware/rateLimit.js`, `src/utils/http.js` |
 
@@ -163,13 +181,24 @@ my-server-mongodb/
 | `GET` | `/api/spaces/:id/reviews` | Public | Alias xem đánh giá theo Không gian trong nhóm Catalog |
 | `GET` | `/api/reviews` | Public | Danh sách đánh giá có bộ lọc (`spaceId`, `bookingId`, `userId`, `rating`) |
 
+### 3.6. Admin Management & Dashboard (`/api/admin`) — toàn bộ yêu cầu `ADMIN`
+| Method | Endpoint | Mô tả |
+| :---: | :--- | :--- |
+| `GET` | `/api/admin/users` | Danh sách người dùng (`?q=&status=&role=&tier=&page=&limit=`) kèm `loyalty { tier, tierName, points, coins }`, `bookingCount`, `lastBookingAt` |
+| `GET` | `/api/admin/users/:id` | Hồ sơ người dùng (đã loại field nhạy cảm, có `loyalty`) + `bookingStats` (đơn theo 7 trạng thái, `totalSpent`) |
+| `GET` | `/api/admin/users/:id/bookings` | Lịch sử Booking của khách (`?status=&page=&limit=`) kèm thông tin Space |
+| `POST` | `/api/admin/users/:id/lock` | Khóa tài khoản `ACTIVE → LOCKED` (không tự khóa mình, không khóa Admin) |
+| `POST` | `/api/admin/users/:id/unlock` | Mở khóa `LOCKED → ACTIVE` |
+| `GET` | `/api/admin/dashboard` | Thống kê theo Zone/thời gian (`?from=YYYY-MM-DD&to=YYYY-MM-DD&zoneId=&topAddons=5&groupBy=day`): 4 nhóm chỉ số: số đơn theo 7 trạng thái, Occupancy Rate, Top Add-on (theo `start_at`) và doanh thu thực thu = Σ PAYMENT − Σ REFUND thành công (theo thời điểm giao dịch) kèm phân rã Package / Phụ phí Inclusion / Add-on / Giảm giá |
+| `GET` | `/api/bookings` | *(đã có)* Admin lọc danh sách Booking theo `status`, `spaceId`, `userId` |
+
 ---
 
-## 4. Hướng dẫn chạy kiểm thử (94 Tests — 100% Pass)
+## 4. Hướng dẫn chạy kiểm thử (109 Tests cũ + 45 Tests Module 11)
 
 ```powershell
 cd d:\hk7\PTWKDNC\KEN\my-server-mongodb
-# Chạy toàn bộ 94 test cases
+# Chạy toàn bộ 109 test cases
 npm test
 
 # Chạy kèm báo cáo độ phủ dòng lệnh (Line / Branch / Function Coverage)

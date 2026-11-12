@@ -1,0 +1,29 @@
+$kind: http-request
+name: "TC-REC-20: [REC-20] Lọc cảnh báo tồn kho theo status (OPEN), severity (CRITICAL/WARNING), alertType (LOW_STOCK/REORDER/DEFROST) (Branch: REC-B20)"
+description: |-
+  **Mã TC:** REC-20 (TC-REC-20)
+  **Nhóm:** Cảnh báo tồn kho
+  **API / Thành phần:** GET /api/admin/forecast/alerts?status&severity&alertType
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin.
+  **Dữ liệu vào:** ?status=OPEN&alertType=LOW_STOCK
+  **Các bước thực hiện:**
+  1) GET /api/admin/forecast/alerts?status=OPEN&alertType=LOW_STOCK
+  **Kết quả mong đợi:** 200 chỉ trả các cảnh báo khớp bộ lọc status=OPEN và alert_type=LOW_STOCK; sai enum trả 422 (HTTP: 200)
+  **Nhánh code bao phủ:** REC-B20
+url: "{{baseUrl}}/api/admin/forecast/alerts?status=OPEN&alertType=LOW_STOCK"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-REC-20] Lọc cảnh báo tồn kho theo status, severity, alertType
+      pm.test("[TC-REC-20] Status code is 200", function () {
+          pm.expect(pm.response.code).to.eql(200);
+      });
+      pm.test("[TC-REC-20] Bộ lọc ghi nhận đúng status=OPEN và alertType=LOW_STOCK", function () {
+          const json = pm.response.json();
+          pm.expect(json.filters.status).to.eql("OPEN");
+          pm.expect(json.filters.alertType).to.eql("LOW_STOCK");
+      });
+    language: text/javascript
+order: 2000

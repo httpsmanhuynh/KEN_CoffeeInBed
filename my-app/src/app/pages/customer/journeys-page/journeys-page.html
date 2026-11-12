@@ -1,0 +1,105 @@
+<main class="journeys-page">
+  <section class="journeys-hero">
+    <div class="journeys-container journeys-hero-inner">
+      <div class="journeys-hero-copy">
+        <span class="journeys-eyebrow">CÂU CHUYỆN CỦA CHÚNG TÔI</span>
+        <h1>Câu chuyện của một chú sâu</h1>
+        <p>Dệt từng sợi nhỏ, thành một cuộc đời của riêng mình.</p>
+        <span class="journeys-script">Lười một chút, chill một góc</span>
+      </div>
+
+      <img
+        class="journeys-hero-image"
+        [src]="heroImage"
+        alt="Chú sâu bắt đầu hành trình tại KÉN"
+      />
+    </div>
+  </section>
+
+  <div class="journeys-container">
+    <section class="journeys-introduction">
+      <p *ngFor="let paragraph of introduction">{{ paragraph }}</p>
+    </section>
+
+    <section class="journeys-heading">
+      <h2>Ba hành trình tại KÉN</h2>
+      <p>Kết nối · Tập Trung · Tái Tạo</p>
+    </section>
+
+    <section class="journeys-list" aria-label="Ba hành trình tại KÉN">
+      <article
+        class="journeys-card"
+        *ngFor="let item of journeys"
+        [ngClass]="item.tone"
+      >
+        <header class="journeys-card-header">
+          <div class="journeys-card-identity">
+            <div class="journeys-header-icon">
+              <img [src]="'/images/ken-journeys/' + item.icon" alt="" />
+            </div>
+
+            <div>
+              <span>HÀNH TRÌNH {{ item.number }}</span>
+              <h3>{{ item.name }}</h3>
+            </div>
+          </div>
+
+          <span class="journeys-header-badge">{{ item.badge }}</span>
+        </header>
+
+        <div class="journeys-card-body">
+          <div class="journeys-card-image">
+            <img [src]="item.image" [alt]="item.imageAlt" />
+          </div>
+
+          <div class="journeys-card-content">
+            <h4>{{ item.title }}</h4>
+            <p class="journeys-lead">{{ item.subtitle }}</p>
+
+            <p *ngFor="let paragraph of item.paragraphs" class="journeys-story">
+              {{ paragraph }}
+            </p>
+
+            <div class="journeys-details">
+              <div *ngFor="let detail of item.details">
+                <strong>{{ detail.title }}</strong>
+                <span>{{ detail.note }}</span>
+              </div>
+            </div>
+
+            <a [routerLink]="item.route" class="journeys-primary-button">
+              {{ item.action }}
+              <img src="/images/ken-journeys/arrow.svg" alt="" />
+            </a>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="journeys-outro">
+      <span class="journeys-outro-label">3 hành trình · 1 câu chuyện</span>
+
+      <h2>Từ câu chuyện của một chú sâu nhỏ, KÉN ra đời.</h2>
+
+      <p>
+        Kết nối để tìm thấy những sợi tơ đầu tiên. Tập trung để đan
+        chúng thành kết cấu vững vàng. Tái tạo để có đủ năng lượng
+        tiếp tục lớn lên. Không phải để trốn khỏi cuộc sống, mà để
+        trở lại với cuộc sống theo nhịp của chính mình.
+      </p>
+
+      <span class="journeys-script">Lười một chút, chill một góc</span>
+
+      <div class="journeys-outro-actions">
+        <a routerLink="/spaces" class="journeys-primary-button">
+          Khám phá ba không gian KÉN
+          <img src="/images/ken-journeys/arrow-large.svg" alt="" />
+        </a>
+
+        <a routerLink="/spaces" class="journeys-secondary-button">
+          Đặt chỗ ngay →
+        </a>
+      </div>
+    </section>
+  </div>
+</main>

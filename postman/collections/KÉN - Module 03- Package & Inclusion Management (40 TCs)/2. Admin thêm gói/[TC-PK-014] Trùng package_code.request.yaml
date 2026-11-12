@@ -1,0 +1,46 @@
+$kind: http-request
+name: '[TC-PK-014] Trùng package_code'
+description: '**Mã TC:** TC-PK-014
+
+  **Nhóm:** Admin thêm gói
+
+  **API / Thành phần:** POST /api/packages
+
+  **Loại:** Negative
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed spaces/packages/package_prices/package_inclusions.
+  Đã có PKG-T01.
+
+  **Dữ liệu vào:** {"package_code": "PKG-T01", "name": "Gói test", "pricing_type":
+  "HOURLY", "unit": "PER_SPACE", "duration_hours": null, "min_hours": 2, "is_full_day":
+  false, "is_active": true}
+
+  **Các bước thực hiện:**
+
+  1) POST /api/packages lần 2
+
+  **Kết quả mong đợi:** 409 (HTTP: 409)
+
+  **Nhánh code bao phủ:** PKG-B12
+
+  '
+url: '{{baseUrl}}/api/packages'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 14000
+body:
+  type: json
+  raw: "{\n  \"package_code\": \"PKG-T01\",\n  \"name\": \"Gói test\",\n  \"pricing_type\"\
+    : \"HOURLY\",\n  \"unit\": \"PER_SPACE\",\n  \"duration_hours\": null,\n  \"min_hours\"\
+    : 2,\n  \"is_full_day\": false,\n  \"is_active\": true\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PK-014] Trùng package_code\npm.test(\"[TC-PK-014] Status code is 409\"\
+    , function () {\n    pm.expect(pm.response.code).to.be.oneOf([409]);\n});\npm.test(\"\
+    [TC-PK-014] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

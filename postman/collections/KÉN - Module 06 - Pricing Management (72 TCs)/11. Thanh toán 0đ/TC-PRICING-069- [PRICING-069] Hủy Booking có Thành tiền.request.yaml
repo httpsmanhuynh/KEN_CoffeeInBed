@@ -1,0 +1,38 @@
+$kind: http-request
+name: "TC-PRICING-069: [PRICING-069] Hủy Booking có Thành tiền 0đ: không tạo REFUND (Branch: VCH-B07)"
+description: |-
+  **Mã TC:** PRICING-069 (TC-PRICING-069)
+  **Nhóm:** Thanh toán 0đ
+  **API / Thành phần:** POST /api/bookings/{{bookingId}}/cancel (UI Hủy Booking (Customer) + Compass)
+  **Loại:** State Transition
+  **Điều kiện tiên quyết:** Server chạy (http://localhost:3002) và ứng dụng giao diện chạy; đã chạy npm run setup (có hạng thành viên); dữ liệu giá/Inclusion/Add-on/Voucher theo cột 'Dữ liệu vào' đã có trong MongoDB (tạo bằng Compass nếu chưa có).
+  **Dữ liệu vào:** Booking đã tạo từ TC trước với Thành tiền 0đ (Package 70.000đ, Voucher 500.000đ)&#10;Thời điểm hủy: trước cut-off hủy 2 giờ
+  **Các bước thực hiện:**
+  1) Dùng Booking Thành tiền 0đ ở trên (chưa quá cut-off hủy 2 giờ).&#10;2) UI: Customer hủy Booking.&#10;3) Compass: kiểm tra collection REFUND (tên: TBD) không có bản ghi cho Booking này.
+  **Kết quả mong đợi:** Booking chuyển sang trạng thái đã hủy; KHÔNG có bản ghi REFUND cho Booking này. (HTTP: 200)
+  **Nhánh code bao phủ:** VCH-B07
+  **Ghi chú:** Không có Automated Test tương ứng – chỉ kiểm tra thủ công.
+url: "{{baseUrl}}/api/bookings/{{bookingId}}/cancel"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {}
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-PRICING-069] Hủy Booking có Thành tiền 0đ: không tạo REFUND
+      pm.test("[TC-PRICING-069] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+      const json = pm.response.json();
+            pm.test("[TC-PRICING-069] Đơn 0đ chuyển sang CANCELLED và KHÔNG tạo giao dịch REFUND", function () {
+                pm.expect(json).to.have.property("booking");
+                pm.expect(json.booking.status).to.eql("CANCELLED");
+                pm.expect(json.booking.refund_status).to.eql("NONE");
+                pm.expect(json.refundTransaction).to.be.null;
+            });
+    language: text/javascript
+order: 2000

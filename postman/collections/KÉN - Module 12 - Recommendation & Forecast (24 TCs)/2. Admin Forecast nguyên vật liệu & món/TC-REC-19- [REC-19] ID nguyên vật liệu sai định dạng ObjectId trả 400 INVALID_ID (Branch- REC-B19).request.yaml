@@ -1,0 +1,28 @@
+$kind: http-request
+name: "TC-REC-19: [REC-19] ID nguyên vật liệu sai định dạng ObjectId (abc!@#) → 400 INVALID_ID (Branch: REC-B19)"
+description: |-
+  **Mã TC:** REC-19 (TC-REC-19)
+  **Nhóm:** Admin Forecast nguyên vật liệu & món
+  **API / Thành phần:** GET /api/admin/forecast/ingredients/:id
+  **Loại:** Negative
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin.
+  **Dữ liệu vào:** id = abc!@#
+  **Các bước thực hiện:**
+  1) GET /api/admin/forecast/ingredients/abc!@#
+  **Kết quả mong đợi:** 400 INVALID_ID; không lỗi 500 (HTTP: 400)
+  **Nhánh code bao phủ:** REC-B19
+url: "{{baseUrl}}/api/admin/forecast/ingredients/abc!@%23"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-REC-19] ID nguyên vật liệu sai định dạng ObjectId -> 400 INVALID_ID
+      pm.test("[TC-REC-19] Status code is 400", function () {
+          pm.expect(pm.response.code).to.eql(400);
+      });
+      pm.test("[TC-REC-19] Mã lỗi INVALID_ID", function () {
+          const json = pm.response.json();
+          pm.expect(json.code || json.error).to.eql("INVALID_ID");
+      });
+    language: text/javascript
+order: 6000

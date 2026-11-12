@@ -1,0 +1,52 @@
+$kind: http-request
+name: "TC-PRICING-065: [PRICING-065] Client gửi đơn giá Add-on giả: Backend dùng giá trong DB (Branch: ADD-B04; SNP-B02)"
+description: |-
+  **Mã TC:** PRICING-065 (TC-PRICING-065)
+  **Nhóm:** Bảo mật phía Client
+  **API / Thành phần:** POST /api/bookings (Backend – API tạo Booking (endpoint TBD) – Postman)
+  **Loại:** Security
+  **Điều kiện tiên quyết:** Server chạy (http://localhost:3002); Postman bật Cookie jar và đã đăng nhập Customer; dữ liệu theo cột 'Dữ liệu vào' đã có trong MongoDB. Endpoint tạo Booking: TBD (chưa có trong tài liệu được cấp) – điền endpoint thực tế vào bước 2 trước khi chạy.
+  **Dữ liệu vào:** Tài khoản: Customer hạng BASIC&#10;Package trọn gói 140.000đ&#10;Add-on (giá DB 40.000đ) gửi kèm "unit_price": 1, quantity = 2
+  **Các bước thực hiện:**
+  1) Postman: gọi API tạo Booking với Add-on có quantity 2 và thêm trường giả unit_price = 1.&#10;2) Ghi lại HTTP status/body.&#10;3) Compass: xem price_snapshot của Booking vừa tạo.
+  **Kết quả mong đợi:** Nếu tạo thành công: addon_total = 80.000đ (40.000 × 2 theo giá DB), không phải 2đ. (HTTP: 201)
+  **Nhánh code bao phủ:** ADD-B04; SNP-B02
+  **Ghi chú:** Không có Automated Test tương ứng – chỉ kiểm tra thủ công.
+url: "{{baseUrl}}/api/bookings"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "spaceId": "{{spaceId}}",
+      "packageId": "{{packageId}}",
+      "startAt": "2026-12-25T02:00:00.000Z",
+      "guestCount": 1,
+      "addons": [
+        {
+          "addonId": "{{addon40kId}}",
+          "unit_price": 1,
+          "quantity": 2
+        }
+      ]
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-PRICING-065] Client gửi đơn giá Add-on giả: Backend dùng giá trong DB
+      pm.test("[TC-PRICING-065] Status code is 201", function () {
+          pm.expect(pm.response.code).to.be.oneOf([201]);
+      });
+      pm.test("[TC-PRICING-065] Snapshot giá trên Booking khớp đúng dữ liệu đóng băng từ DB", function () {
+          const json = pm.response.json();
+          pm.expect(json.package_price).to.eql(140000);
+          pm.expect(json.addon_total).to.eql(80000);
+          pm.expect(json.subtotal).to.eql(220000);
+          pm.expect(json.final_amount).to.eql(220000);
+          pm.expect(Number.isInteger(json.final_amount) && json.final_amount >= 0).to.be.true;
+          if (json._id) { pm.collectionVariables.set("lastCreatedBookingId", String(json._id)); }
+      });
+    language: text/javascript
+order: 3000

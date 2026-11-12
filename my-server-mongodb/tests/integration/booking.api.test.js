@@ -18,7 +18,7 @@ const {
 } = require('../../src/services/bookingService');
 const { cloneDoc, matchFilter, createMockDb, IDS, buildSeedDb } = require('../helpers/mockDb');
 
-test('TC-BK-02\tAUTO-BK-02: Hủy đơn CONFIRMED trước Cut-off Time, hoàn trả Voucher và đối soát hoàn tiền', async () => {
+test('TC-BKG-23..27\tTC-BK-02\tAUTO-BK-02: Hủy đơn CONFIRMED trước Cut-off Time, hoàn trả Voucher và đối soát hoàn tiền', async () => {
   const db = buildSeedDb();
   const user1 = await db.collection('users').findOne({ _id: IDS.user1 });
   const now = new Date('2026-05-12T01:00:00Z');
@@ -75,7 +75,7 @@ test('TC-BK-02\tAUTO-BK-02: Hủy đơn CONFIRMED trước Cut-off Time, hoàn t
   assert.equal(reconciled.refund_status, 'MANUALLY_RESOLVED');
 });
 
-test('TC-BK-03\tAUTO-BK-03: Cronjob thu hồi đơn PENDING_PAYMENT quá hạn 15 phút và giải phóng khung giờ', async () => {
+test('TC-BKG-31..33\tTC-BK-03\tAUTO-BK-03: Cronjob thu hồi đơn PENDING_PAYMENT quá hạn 15 phút và giải phóng khung giờ', async () => {
   const db = buildSeedDb();
   const user1 = await db.collection('users').findOne({ _id: IDS.user1 });
   const now = new Date('2026-05-15T01:00:00Z');
@@ -106,7 +106,7 @@ test('TC-BK-03\tAUTO-BK-03: Cronjob thu hồi đơn PENDING_PAYMENT quá hạn 1
 });
 
 // ---------- 3. TEST SONG SONG (Concurrency / Race Condition — NFR-02) ----------
-test('TC-BK-04\tAUTO-BK-04: TEST SONG SONG (EXCLUSIVE): Hai người đặt cùng một khung giờ thì chỉ một người thành công', async () => {
+test('TC-BKG-01,19\tTC-BK-04\tAUTO-BK-04: TEST SONG SONG (EXCLUSIVE): Hai người đặt cùng một khung giờ thì chỉ một người thành công', async () => {
   const db = buildSeedDb();
   const [user1, user2] = await Promise.all([
     db.collection('users').findOne({ _id: IDS.user1 }),
@@ -152,7 +152,7 @@ test('TC-BK-04\tAUTO-BK-04: TEST SONG SONG (EXCLUSIVE): Hai người đặt cùn
   assert.equal(spaceAfter.lock_version, 1);
 });
 
-test('TC-BK-05\tAUTO-BK-05: TEST SONG SONG (SHARED): Hai nhóm khách cùng đặt vượt sức chứa còn lại thì chỉ một nhóm thành công', async () => {
+test('TC-BKG-03,20\tTC-BK-05\tAUTO-BK-05: TEST SONG SONG (SHARED): Hai nhóm khách cùng đặt vượt sức chứa còn lại thì chỉ một nhóm thành công', async () => {
   const db = buildSeedDb();
   const [user1, user2] = await Promise.all([
     db.collection('users').findOne({ _id: IDS.user1 }),
@@ -205,7 +205,7 @@ test('TC-BK-05\tAUTO-BK-05: TEST SONG SONG (SHARED): Hai nhóm khách cùng đ�
 });
 
 // ---------- 4. Kiểm thử chi tiết các nhánh ngoại lệ & biên nghiệp vụ (Full Coverage) ----------
-test('TC-BK-06\tAUTO-BK-06: Kiểm tra khung giờ (FIXED, HOURLY, is_full_day) và bộ lọc searchAvailableSpaces / selectSpaceAndPackage', async () => {
+test('TC-BKG-05,06\tTC-BK-06\tAUTO-BK-06: Kiểm tra khung giờ (FIXED, HOURLY, is_full_day) và bộ lọc searchAvailableSpaces / selectSpaceAndPackage', async () => {
   const db = buildSeedDb();
   const user1 = await db.collection('users').findOne({ _id: IDS.user1 });
   const now = new Date('2026-05-22T01:00:00Z');
@@ -366,7 +366,7 @@ test('TC-BK-06\tAUTO-BK-06: Kiểm tra khung giờ (FIXED, HOURLY, is_full_day) 
   );
 });
 
-test('TC-BK-07\tAUTO-BK-07: Kiểm tra ngoại lệ báo giá (Inclusion, Add-on, Variant, Voucher Coins) và điều kiện Checkout', async () => {
+test('TC-BKG-09..12\tTC-BK-07\tAUTO-BK-07: Kiểm tra ngoại lệ báo giá (Inclusion, Add-on, Variant, Voucher Coins) và điều kiện Checkout', async () => {
   const db = buildSeedDb();
   const user1 = await db.collection('users').findOne({ _id: IDS.user1 });
   const now = new Date('2026-05-25T01:00:00Z');
@@ -472,7 +472,7 @@ test('TC-BK-07\tAUTO-BK-07: Kiểm tra ngoại lệ báo giá (Inclusion, Add-on
     { code: 'INVALID_PRODUCT_VARIANT' },
   );
 
-  // Lỗi Add-on: số lượng <= 0, không tồn tại, PER_BOOKING > 1, sai variant
+  // Lỗi Add-on: số lượng <= 0, không tồn tại, sai variant
   await assert.rejects(
     () =>
       buildBookingQuote(db, {
@@ -495,17 +495,15 @@ test('TC-BK-07\tAUTO-BK-07: Kiểm tra ngoại lệ báo giá (Inclusion, Add-on
       }),
     { code: 'ADDON_NOT_FOUND' },
   );
-  await assert.rejects(
-    () =>
-      buildBookingQuote(db, {
-        spaceId: IDS.spaceFocusPod,
-        packageId: IDS.pkgFpHalf,
-        startAt,
-        guestCount: 1,
-        addons: [{ addonId: IDS.addonMonitor, quantity: 2 }],
-      }),
-    { code: 'ADDON_PER_BOOKING_LIMIT' },
-  );
+  // AUTO-PRICING-017 / TC-PRICING-024: Add-on PER_BOOKING cho phép số lượng > 1 (50.000đ x 2 = 100.000đ)
+  const quoteWithMonitor = await buildBookingQuote(db, {
+    spaceId: IDS.spaceFocusPod,
+    packageId: IDS.pkgFpHalf,
+    startAt,
+    guestCount: 1,
+    addons: [{ addonId: IDS.addonMonitor, quantity: 2 }],
+  });
+  assert.strictEqual(quoteWithMonitor.pricing.addonTotal, 100000);
   await assert.rejects(
     () =>
       buildBookingQuote(db, {
@@ -736,7 +734,7 @@ test('TC-BK-07\tAUTO-BK-07: Kiểm tra ngoại lệ báo giá (Inclusion, Add-on
   );
 });
 
-test('TC-BK-08\tAUTO-BK-08: Kiểm tra các nhánh vận hành: Đơn 0đ, No-show, lỗi phân quyền & đổi lịch gói Cả ngày', async () => {
+test('TC-BKG-08,28..30\tTC-BK-08\tAUTO-BK-08: Kiểm tra các nhánh vận hành: Đơn 0đ, No-show, lỗi phân quyền & đổi lịch gói Cả ngày', async () => {
   const db = buildSeedDb();
   const [user1, user2] = await Promise.all([
     db.collection('users').findOne({ _id: IDS.user1 }),

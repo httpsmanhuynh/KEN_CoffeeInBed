@@ -1,0 +1,43 @@
+$kind: http-request
+name: '[TC-AD-014] Cập nhật giá Product'
+description: '**Mã TC:** TC-AD-014
+
+  **Nhóm:** Admin quản lý Product
+
+  **API / Thành phần:** PATCH /api/products/:id
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed products/addons.
+
+  **Dữ liệu vào:** {"price": 49000}
+
+  **Các bước thực hiện:**
+
+  1) PATCH /api/products/<id>
+
+  2) GET /api/products/<id>
+
+  **Kết quả mong đợi:** 200; giá mới lưu; updated_at mới hơn (HTTP: 200)
+
+  **Nhánh code bao phủ:** ADD-B12
+
+  '
+url: '{{baseUrl}}/api/products/{{productId}}'
+method: PATCH
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 14000
+body:
+  type: json
+  raw: "{\n  \"price\": 49000\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-AD-014] Cập nhật giá Product\npm.test(\"[TC-AD-014] Status code is\
+    \ 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-AD-014] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

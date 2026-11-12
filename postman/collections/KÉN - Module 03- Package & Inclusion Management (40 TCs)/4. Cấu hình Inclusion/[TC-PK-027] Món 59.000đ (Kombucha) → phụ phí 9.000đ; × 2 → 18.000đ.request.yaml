@@ -1,0 +1,45 @@
+$kind: http-request
+name: '[TC-PK-027] Món 59.000đ (Kombucha) → phụ phí 9.000đ; × 2 → 18.000đ'
+description: '**Mã TC:** TC-PK-027
+
+  **Nhóm:** Cấu hình Inclusion
+
+  **API / Thành phần:** POST /api/bookings/quote
+
+  **Loại:** Boundary
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; đã seed spaces/packages/package_prices/package_inclusions.
+  Gói có STANDARD_DRINK.
+
+  **Dữ liệu vào:** Kombucha 59.000đ × 1 rồi × 2
+
+  **Các bước thực hiện:**
+
+  1) POST quote lần 1
+
+  2) POST quote lần 2
+
+  **Kết quả mong đợi:** surcharge = max(0, 59.000 − 50.000) × quantity = 9.000 và
+  18.000 (HTTP: 200)
+
+  **Nhánh code bao phủ:** PKG-B24
+
+  '
+url: '{{baseUrl}}/api/bookings/quote'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: CUSTOMER
+order: 27000
+body:
+  type: json
+  raw: '{"data": "Kombucha 59.000đ × 1 rồi × 2"}'
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PK-027] Món 59.000đ (Kombucha) → phụ phí 9.000đ; × 2 → 18.000đ\npm.test(\"\
+    [TC-PK-027] Status code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-PK-027] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

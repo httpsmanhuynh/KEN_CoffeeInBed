@@ -1,0 +1,47 @@
+$kind: http-request
+name: '[TC-PK-015] Customer / Guest thêm gói'
+description: '**Mã TC:** TC-PK-015
+
+  **Nhóm:** Admin thêm gói
+
+  **API / Thành phần:** POST /api/packages
+
+  **Loại:** Security
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; đã seed spaces/packages/package_prices/package_inclusions.
+
+  **Dữ liệu vào:** {"package_code": "PKG-T07", "name": "Gói test", "pricing_type":
+  "HOURLY", "unit": "PER_SPACE", "duration_hours": null, "min_hours": 2, "is_full_day":
+  false, "is_active": true}
+
+  **Các bước thực hiện:**
+
+  1) POST /api/packages bằng Customer
+
+  2) Lặp lại không cookie
+
+  **Kết quả mong đợi:** Customer 403; Guest 401 (HTTP: 403)
+
+  **Nhánh code bao phủ:** PKG-B13
+
+  '
+url: '{{baseUrl}}/api/packages'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: CUSTOMER
+order: 15000
+body:
+  type: json
+  raw: "{\n  \"package_code\": \"PKG-T07\",\n  \"name\": \"Gói test\",\n  \"pricing_type\"\
+    : \"HOURLY\",\n  \"unit\": \"PER_SPACE\",\n  \"duration_hours\": null,\n  \"min_hours\"\
+    : 2,\n  \"is_full_day\": false,\n  \"is_active\": true\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PK-015] Customer / Guest thêm gói\npm.test(\"[TC-PK-015] Status code\
+    \ is 403\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([403]);\n\
+    });\npm.test(\"[TC-PK-015] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

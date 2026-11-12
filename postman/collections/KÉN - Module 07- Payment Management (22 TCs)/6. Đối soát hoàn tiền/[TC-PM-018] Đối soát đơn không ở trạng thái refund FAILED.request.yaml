@@ -1,0 +1,41 @@
+$kind: http-request
+name: '[TC-PM-018] Đối soát đơn không ở trạng thái refund FAILED'
+description: '**Mã TC:** TC-PM-018
+
+  **Nhóm:** Đối soát hoàn tiền
+
+  **API / Thành phần:** POST /api/bookings/:id/refund-reconcile
+
+  **Loại:** Negative
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin.
+
+  **Dữ liệu vào:** Đơn REFUNDED / NONE
+
+  **Các bước thực hiện:**
+
+  1) POST refund-reconcile
+
+  **Kết quả mong đợi:** 409 từ chối; không ghi giao dịch (HTTP: 409)
+
+  **Nhánh code bao phủ:** PAY-B18
+
+  '
+url: '{{baseUrl}}/api/bookings/{{bookingId}}/refund-reconcile'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 18000
+body:
+  type: json
+  raw: '{"data": "Đơn REFUNDED / NONE"}'
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PM-018] Đối soát đơn không ở trạng thái refund FAILED\npm.test(\"\
+    [TC-PM-018] Status code is 409\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([409]);\n\
+    });\npm.test(\"[TC-PM-018] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

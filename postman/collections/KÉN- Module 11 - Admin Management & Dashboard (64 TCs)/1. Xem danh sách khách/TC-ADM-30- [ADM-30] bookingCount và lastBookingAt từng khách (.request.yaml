@@ -1,0 +1,25 @@
+$kind: http-request
+name: "TC-ADM-30: [ADM-30] bookingCount và lastBookingAt từng khách (Branch: ADM-B30)"
+description: |-
+  **Mã TC:** ADM-30 (TC-ADM-30)
+  **Nhóm:** Xem danh sách khách
+  **API / Thành phần:** GET /api/admin/users
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; khách A có 3 đơn (nhiều trạng thái), khách B chưa có đơn.
+  **Dữ liệu vào:** ?q=<SĐT A> ; ?q=<SĐT B>
+  **Các bước thực hiện:**
+  1) GET /api/admin/users?q=<SĐT A>&#10;2) GET ...?q=<SĐT B>&#10;3) Đối chiếu bookings theo user_id
+  **Kết quả mong đợi:** A: bookingCount = 3 (mọi trạng thái), lastBookingAt = max(created_at); B: bookingCount = 0, lastBookingAt = null (HTTP: 200)
+  **Nhánh code bao phủ:** ADM-B30
+  **Ghi chú:** Code: listUsers (aggregate trên trang hiện tại, chưa có test tự động).
+url: "{{baseUrl}}/api/admin/users?q={{testPhone}}"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-30] bookingCount và lastBookingAt từng khách
+      pm.test("[TC-ADM-30] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 7000

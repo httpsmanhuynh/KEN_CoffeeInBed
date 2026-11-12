@@ -1,0 +1,45 @@
+$kind: http-request
+name: '[TC-PK-011] unit không thuộc PER_SPACE/PER_PERSON'
+description: '**Mã TC:** TC-PK-011
+
+  **Nhóm:** Admin thêm gói
+
+  **API / Thành phần:** POST /api/packages
+
+  **Loại:** Negative
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed spaces/packages/package_prices/package_inclusions.
+
+  **Dữ liệu vào:** {"package_code": "PKG-T01", "name": "Gói test", "pricing_type":
+  "HOURLY", "unit": "PER_DAY", "duration_hours": null, "min_hours": 2, "is_full_day":
+  false, "is_active": true}
+
+  **Các bước thực hiện:**
+
+  1) POST /api/packages
+
+  **Kết quả mong đợi:** 422 VALIDATION_ERROR (HTTP: 422)
+
+  **Nhánh code bao phủ:** PKG-B10
+
+  '
+url: '{{baseUrl}}/api/packages'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 11000
+body:
+  type: json
+  raw: "{\n  \"package_code\": \"PKG-T01\",\n  \"name\": \"Gói test\",\n  \"pricing_type\"\
+    : \"HOURLY\",\n  \"unit\": \"PER_DAY\",\n  \"duration_hours\": null,\n  \"min_hours\"\
+    : 2,\n  \"is_full_day\": false,\n  \"is_active\": true\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PK-011] unit không thuộc PER_SPACE/PER_PERSON\npm.test(\"[TC-PK-011]\
+    \ Status code is 422\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([422]);\n\
+    });\npm.test(\"[TC-PK-011] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

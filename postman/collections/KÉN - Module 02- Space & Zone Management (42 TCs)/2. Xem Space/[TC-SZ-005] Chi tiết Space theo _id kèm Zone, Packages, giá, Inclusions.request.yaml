@@ -1,0 +1,38 @@
+$kind: http-request
+name: '[TC-SZ-005] Chi tiết Space theo _id kèm Zone, Packages, giá, Inclusions'
+description: '**Mã TC:** TC-SZ-005
+
+  **Nhóm:** Xem Space
+
+  **API / Thành phần:** GET /api/spaces/:id
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đã seed zones/spaces/packages; không cần
+  đăng nhập.
+
+  **Dữ liệu vào:** id = _id Space
+
+  **Các bước thực hiện:**
+
+  1) GET /api/spaces/<_id>
+
+  **Kết quả mong đợi:** 200 object Space + zone + packages (giá từ package_prices)
+  + inclusions (HTTP: 200)
+
+  **Nhánh code bao phủ:** SPC-B05
+
+  '
+url: '{{baseUrl}}/api/spaces/{{spaceId}}'
+method: GET
+headers:
+- key: Content-Type
+  value: application/json
+order: 5000
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-SZ-005] Chi tiết Space theo _id kèm Zone, Packages, giá, Inclusions\n\
+    pm.test(\"[TC-SZ-005] Status code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-SZ-005] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

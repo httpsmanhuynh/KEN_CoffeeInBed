@@ -1,0 +1,257 @@
+﻿<div class="support-page">
+
+  <!-- ═══════════════ HERO ═══════════════ -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1 class="hero-title">Trung tâm Hỗ trợ KÉN</h1>
+      <p class="hero-tagline">Làm một chút, chill một góc</p>
+      <div class="search-bar">
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Nhập câu hỏi ở đây (ví dụ: KÉN ĐIỂM, đặt chỗ...)"
+          [value]="searchQuery"
+          (input)="onSearchInput($event)"
+        />
+        <button class="search-btn" type="button" aria-label="Tìm kiếm">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <circle cx="9" cy="9" r="6.5" stroke="#4A3123" stroke-width="2"/>
+            <line x1="13.5" y1="13.5" x2="18" y2="18" stroke="#4A3123" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ MAIN: FAQ + CATEGORIES ═══════════════ -->
+  <section class="main-content">
+    <div class="container">
+      <div class="content-grid">
+
+        <!-- ——— FAQ ——— -->
+        <div class="faq-section">
+          <div class="section-header">
+            <h2 class="section-title">Chủ đề phổ biến</h2>
+            <div class="faq-nav">
+              <button class="nav-arrow" type="button" aria-label="Trang trước">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                  <path d="M11 4L6 9L11 14" stroke="#4A3123" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <button class="nav-arrow" type="button" aria-label="Trang sau">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                  <path d="M7 4L12 9L7 14" stroke="#4A3123" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="faq-list">
+            <div
+              *ngFor="let item of filteredFAQ"
+              class="faq-item"
+              [class.faq-item--open]="item.isOpen"
+              (click)="toggleFAQ(item)"
+            >
+              <div class="faq-question">
+                <span>{{ item.question }}</span>
+                <svg
+                  class="faq-chevron"
+                  [class.faq-chevron--open]="item.isOpen"
+                  width="16" height="16" viewBox="0 0 16 16" fill="none"
+                >
+                  <path d="M4 6L8 10L12 6" stroke="#4A3123" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div class="faq-answer" *ngIf="item.isOpen">
+                <p>{{ item.answer }}</p>
+              </div>
+            </div>
+          </div>
+
+          <p class="faq-footer">{{ filteredFAQ.length }} chủ đề hỗ trợ phổ biến</p>
+        </div>
+
+        <!-- ——— CATEGORIES ——— -->
+        <div class="categories-section">
+          <h2 class="section-title">Phân loại theo dịch vụ</h2>
+          <div class="categories-grid">
+
+            <div *ngFor="let cat of categories" class="category-card">
+              <div class="category-icon">
+                <!-- Thông tin chung -->
+                <img *ngIf="cat.iconId === 'info'" src="/images/figma-info-circle.svg" width="24" height="24" alt="" />
+                <!-- Đặt chỗ & Lịch -->
+                <img *ngIf="cat.iconId === 'calendar'" src="/images/figma-calendar.svg" width="24" height="24" alt="" />
+                <!-- KÉN Tập Trung -->
+                <img *ngIf="cat.iconId === 'focus'" src="/images/figma-clock.svg" width="24" height="24" alt="" />
+                <!-- KÉN Kết Nối -->
+                <img *ngIf="cat.iconId === 'connect'" src="/images/clock-history.svg" width="24" height="24" alt="" />
+                <!-- KÉN Tái Tạo -->
+                <img *ngIf="cat.iconId === 'spa'" src="/images/figma-gift-fill.svg" width="24" height="24" alt="" />
+                <!-- Hủy & Đổi lịch -->
+                <img *ngIf="cat.iconId === 'reschedule'" src="/images/figma-info.svg" width="24" height="24" alt="" />
+                <!-- Thanh toán -->
+                <img *ngIf="cat.iconId === 'payment'" src="/images/figma-wallet-fill.svg" width="24" height="24" alt="" />
+                <!-- KÉN ĐIỂM & KÉN Coins -->
+                <img *ngIf="cat.iconId === 'coins'" src="/images/figma-gift.svg" width="24" height="24" alt="" />
+                <!-- Tài khoản & bảo mật -->
+                <img *ngIf="cat.iconId === 'security'" src="/images/figma-wallet.svg" width="24" height="24" alt="" />
+              </div>
+              <span class="category-name">{{ cat.name }}</span>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ CONTACT ═══════════════ -->
+  <section class="contact-section">
+    <div class="container">
+      <div class="contact-card">
+
+        <div class="contact-brand">
+          <div class="brand-box">
+            <svg class="brand-icon" width="48" height="48" viewBox="0 0 48 48" fill="none">
+              <ellipse cx="24" cy="22" rx="12" ry="16" stroke="#A9763F" stroke-width="2"/>
+              <path d="M16 14C16 14 20 10 24 10C28 10 32 14 32 14" stroke="#A9763F" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M18 18C18 18 21 16 24 16C27 16 30 18 30 18" stroke="#A9763F" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <span class="brand-name">KÉN</span>
+            <span class="brand-tagline">Làm một chút</span>
+          </div>
+        </div>
+
+        <div class="contact-info">
+          <h2 class="contact-title">Liên Hệ KÉN</h2>
+          <p class="contact-subtitle">Vui lòng kiểm tra email phản hồi sau khi gửi yêu cầu</p>
+          <div class="contact-channels">
+            <a class="channel-btn" href="tel:1900123456">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M3.5 1.5H6.5L8 5L6 6.5C6.8 8.2 7.8 9.2 9.5 10L11 8L14.5 9.5V12.5C14.5 13.3 13.8 14 13 14C7.5 13.7 2.3 8.5 2 3C2 2.2 2.7 1.5 3.5 1.5Z"
+                  stroke="#4A3123" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              1900 123 456
+            </a>
+            <a class="channel-btn" href="#">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M2 3H14V11C14 11.6 13.6 12 13 12H6L3 14.5V12H3C2.4 12 2 11.6 2 11V3Z"
+                  stroke="#4A3123" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="5.5" cy="7.5" r="0.8" fill="#4A3123"/>
+                <circle cx="8" cy="7.5" r="0.8" fill="#4A3123"/>
+                <circle cx="10.5" cy="7.5" r="0.8" fill="#4A3123"/>
+              </svg>
+              Chat hỗ trợ trực tuyến
+            </a>
+            <a class="channel-btn" href="#">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <circle cx="8" cy="5.5" r="3" stroke="#4A3123" stroke-width="1.3"/>
+                <path d="M2 14C2 11.2 4.7 9 8 9C11.3 9 14 11.2 14 14" stroke="#4A3123" stroke-width="1.3" stroke-linecap="round"/>
+              </svg>
+              Cộng đồng KÉN
+            </a>
+          </div>
+          <div class="contact-auth">
+            <button class="btn-register" type="button">Đăng ký</button>
+            <button class="btn-login" type="button">Đăng nhập</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ FORM ═══════════════ -->
+  <section class="form-section">
+    <div class="container">
+      <h2 class="form-title">Gửi yêu cầu hỗ trợ KÉN</h2>
+
+      <form [formGroup]="supportForm" (ngSubmit)="onSubmit()">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="fullName">Họ và tên</label>
+            <input
+              id="fullName"
+              type="text"
+              formControlName="fullName"
+              placeholder="Nhập họ và tên..."
+              [class.input-error]="isFieldInvalid('fullName')"
+            />
+            <span class="error-msg" *ngIf="isFieldInvalid('fullName')">{{ getFieldError('fullName') }}</span>
+          </div>
+          <div class="form-group">
+            <label for="email">Email liên hệ</label>
+            <input
+              id="email"
+              type="email"
+              formControlName="email"
+              placeholder="example@email.com"
+              [class.input-error]="isFieldInvalid('email')"
+            />
+            <span class="error-msg" *ngIf="isFieldInvalid('email')">{{ getFieldError('email') }}</span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="category">Danh mục</label>
+            <select
+              id="category"
+              formControlName="category"
+              [class.input-error]="isFieldInvalid('category')"
+            >
+              <option value="" disabled>Chọn danh mục...</option>
+              <option *ngFor="let cat of formCategories" [value]="cat">{{ cat }}</option>
+            </select>
+            <span class="error-msg" *ngIf="isFieldInvalid('category')">{{ getFieldError('category') }}</span>
+          </div>
+          <div class="form-group">
+            <label for="title">Tiêu đề yêu cầu</label>
+            <input
+              id="title"
+              type="text"
+              formControlName="title"
+              placeholder="Nhập tiêu đề ngắn gọn..."
+              [class.input-error]="isFieldInvalid('title')"
+            />
+            <span class="error-msg" *ngIf="isFieldInvalid('title')">{{ getFieldError('title') }}</span>
+          </div>
+        </div>
+
+        <div class="form-group form-group--full">
+          <label for="content">Nội dung</label>
+          <textarea
+            id="content"
+            formControlName="content"
+            placeholder="Mô tả chi tiết câu hỏi hoặc vấn đề của bạn... (tối thiểu 10 ký tự)"
+            [class.input-error]="isFieldInvalid('content')"
+          ></textarea>
+          <span class="error-msg" *ngIf="isFieldInvalid('content')">{{ getFieldError('content') }}</span>
+        </div>
+
+        <div class="form-group form-group--full">
+          <label>Tập đính kèm (tùy chọn)</label>
+          <div class="file-input-wrapper">
+            <button type="button" class="file-btn" (click)="fileInput.click()">Chọn tập</button>
+            <span class="file-name">{{ selectedFileName || 'Chưa chọn tập nào' }}</span>
+            <input #fileInput type="file" hidden (change)="onFileSelected($event)" />
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-submit">Gửi yêu cầu</button>
+          <button type="button" class="btn-reset" (click)="resetForm()">Đặt lại</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+</div>
+
+
+
+
+

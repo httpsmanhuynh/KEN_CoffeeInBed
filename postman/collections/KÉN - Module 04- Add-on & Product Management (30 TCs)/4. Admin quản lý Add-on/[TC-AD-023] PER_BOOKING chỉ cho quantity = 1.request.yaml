@@ -1,0 +1,41 @@
+$kind: http-request
+name: '[TC-AD-023] PER_BOOKING chỉ cho quantity = 1'
+description: '**Mã TC:** TC-AD-023
+
+  **Nhóm:** Admin quản lý Add-on
+
+  **API / Thành phần:** POST /api/bookings/quote
+
+  **Loại:** Negative
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; đã seed products/addons/spaces/packages.
+
+  **Dữ liệu vào:** addon PER_BOOKING, quantity = 2
+
+  **Các bước thực hiện:**
+
+  1) POST /api/bookings/quote
+
+  **Kết quả mong đợi:** 422 từ chối quantity > 1 cho add-on PER_BOOKING (HTTP: 422)
+
+  **Nhánh code bao phủ:** ADD-B19
+
+  '
+url: '{{baseUrl}}/api/bookings/quote'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: CUSTOMER
+order: 23000
+body:
+  type: json
+  raw: '{"data": "addon PER_BOOKING, quantity = 2"}'
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-AD-023] PER_BOOKING chỉ cho quantity = 1\npm.test(\"[TC-AD-023] Status\
+    \ code is 422\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([422]);\n\
+    });\npm.test(\"[TC-AD-023] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

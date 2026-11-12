@@ -1,7 +1,7 @@
 # Quyết định đã chốt (Auth + Booking 5 bước + Catalog/Payment/Loyalty)
 
 ## 1. Auth & Session
-- **Thu hồi session (`BR-A05`):** `requireAuth` đọc lại user từ DB ở mọi request. User bị khóa/xóa, hoặc `users.password_changed_at` khác `session.user.pwdAt` thì hủy session, trả 401. `requireRole` lấy vai trò từ `req.user.role` (DB), không tin role trong session.
+- **Thu hồi session (cơ chế của `BR-A05`: tài khoản `LOCKED` không đăng nhập và không đặt chỗ mới):** `requireAuth` đọc lại user từ DB ở mọi request. User bị khóa/xóa, hoặc `users.password_changed_at` khác `session.user.pwdAt` thì hủy session, trả 401. `requireRole` lấy vai trò từ `req.user.role` (DB), không tin role trong session.
 - **Rate limit (`BR-A08`):** gắn từng route, không dùng `router.use`.
   - Đăng nhập: theo identifier, 10 lần / 15'.
   - Gửi OTP: theo SĐT, 5 lần / 10'. Dùng chung bộ đếm cho `register`, `forgot-password` và OTP 2FA khi đăng nhập (gọi `phoneOtpLimiter.hit()` trong handler vì SĐT chỉ biết sau khi tra DB).
@@ -28,3 +28,14 @@
 - **Chặn đánh giá trùng (`BR-H01`, `EX-5.6`):** Trong Transaction lưu đánh giá, hệ thống lấy khóa ghi trên bản ghi `bookings` và kết hợp với unique index `uq_reviews_booking` (`{ booking_id: 1 }`) để đảm bảo tối đa 01 đánh giá/Booking ngay cả khi gửi trùng đồng thời. Nếu đơn đã có đánh giá, trả `409 REVIEW_ALREADY_EXISTS` kèm bản ghi `review` đã gửi để hiển thị ở chế độ chỉ xem (`AF2`).
 - **Tuân thủ `reviews.validator.json`:** Chỉ lưu đúng 6 trường (`_id`, `booking_id`, `user_id`, `rating` nguyên từ `1..5`, `comment` tối đa `500` ký tự hoặc `null`, `created_at >= booking.checked_out_at`). Không lưu `space_id` dư thừa vào `reviews` (đạt 3NF Chương 6; khi xem đánh giá theo Space thì truy vết qua `bookings`).
 - **Lời nhắc đánh giá trong Lịch sử đặt chỗ (`GET /api/bookings/me`, `GET /api/bookings/:id`):** Dùng `attachReviewsToBookings` để gắn động các trường `has_review`, `can_review`, `review_reminder` (`true` khi `status === 'CHECKED_OUT' && !has_review`) và `review` vào JSON trả về mà không làm bẩn schema `bookings` trong DB.
+
+## 5. Admin Management & Dashboard (Module 11)
+- **Khóa/Mở khóa:** `POST /api/admin/users/:id/lock|unlock`. Cập nhật nguyên tử `updateOne({_id, status: from})` thay vì đọc-rồi-ghi; không tự khóa mình, không khóa Admin. Chỉ ghi `status`, không thêm field `locked_at/reason` vì validator `users` là `additionalProperties:false`.
+- **Doanh thu (theo Report B.3.30, UC-29, UC-31):** Σ `PAYMENT` thành công − Σ `REFUND` thành công trong `payment_transactions`, tính theo thời điểm giao dịch, không theo trạng thái đơn hay `start_at`. Đơn `CANCELLED` đã hoàn đủ bù trừ về 0, hoàn một phần chỉ trừ đúng số đã hoàn, hoàn tiền `PENDING`/`FAILED` chưa trừ cho đến khi Admin đối soát. Kỳ chỉ có hoàn tiền cho ra số âm (suy ra từ công thức, chờ team xác nhận).
+- **Phân rã doanh thu:** Package, Phụ phí Inclusion, Add-on, trừ Giảm giá (voucher + hạng); tổng phân rã luôn bằng doanh thu. Chia mỗi giao dịch theo Price Snapshot theo tỷ lệ `amount / final_amount`, Package là phần còn lại (quy ước của nhóm, Report không nêu công thức chia).
+- **F&B trực tiếp:** nằm ngoài phạm vi hệ thống (bán tại quầy bằng POS) nên Dashboard không có F&B, không đọc `sales_transactions`; Dashboard chỉ có 4 nhóm chỉ số.
+- **Mốc thời gian Dashboard:** số đơn, Occupancy Rate, Top Add-on lọc theo `bookings.start_at`; doanh thu lọc theo thời điểm giao dịch. Cùng theo ngày giờ VN (UTC+7), khoảng `[from, to+1 ngày)`.
+- **Danh sách khách:** hiển thị hạng, KÉN Điểm (`users.tier_points`), KÉN Coins (`users.coin_balance`) trong `loyalty`.
+- **Occupancy Rate:** giờ-không-gian đã dùng ÷ giờ-không-gian khả dụng; `SHARED` quy đổi bằng giờ-khách ÷ `capacity` để cùng đơn vị với `EXCLUSIVE`. Chỉ tính Booking đã thanh toán và chưa hủy (`PAID_STATUSES`: `CONFIRMED`, `CHECKED_IN`, `CHECKED_OUT`, `NO_SHOW`); `NO_SHOW` vẫn tính vì đã thanh toán. Công thức là quy ước của nhóm.
+- **Tách lớp:** tính toán ở `src/domain/dashboard.js` (thuần, test không cần Mongo); `adminService.js` chỉ truy vấn rồi gọi domain.
+- **Mã lỗi Admin:** `{ error, message }` qua `AdminError`.

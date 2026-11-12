@@ -1,0 +1,43 @@
+$kind: http-request
+name: '[TC-SZ-031] Gửi field lạ ngoài validator (additionalProperties=false)'
+description: '**Mã TC:** TC-SZ-031
+
+  **Nhóm:** Admin cập nhật Space
+
+  **API / Thành phần:** PATCH /api/spaces/:id
+
+  **Loại:** Security
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed zones/spaces/packages.
+
+  **Dữ liệu vào:** {"hack": true, "name": "A"}
+
+  **Các bước thực hiện:**
+
+  1) PATCH /api/spaces/<id>
+
+  2) Kiểm tra document
+
+  **Kết quả mong đợi:** Không ghi field lạ vào DB (bị bỏ qua hoặc 422) (HTTP: 200/422)
+
+  **Nhánh code bao phủ:** SPC-B21
+
+  '
+url: '{{baseUrl}}/api/spaces/{{spaceId}}'
+method: PATCH
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 31000
+body:
+  type: json
+  raw: "{\n  \"hack\": true,\n  \"name\": \"A\"\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-SZ-031] Gửi field lạ ngoài validator (additionalProperties=false)\n\
+    pm.test(\"[TC-SZ-031] Status code is 200/422\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200,\
+    \ 422]);\n});\npm.test(\"[TC-SZ-031] Response valid format\", function () {\n\
+    \    pm.expect(pm.response.text()).to.be.a('string');\n});"

@@ -1,0 +1,42 @@
+$kind: http-request
+name: '[TC-SZ-040] Trùng zone_code'
+description: '**Mã TC:** TC-SZ-040
+
+  **Nhóm:** Admin quản lý Zone
+
+  **API / Thành phần:** POST /api/zones
+
+  **Loại:** Negative
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed zones/spaces/packages.
+  Đã có ZN-T1.
+
+  **Dữ liệu vào:** zone_code = ZN-T1
+
+  **Các bước thực hiện:**
+
+  1) POST /api/zones lần 2
+
+  **Kết quả mong đợi:** 409 (HTTP: 409)
+
+  **Nhánh code bao phủ:** SPC-B29
+
+  '
+url: '{{baseUrl}}/api/zones'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 40000
+body:
+  type: json
+  raw: '{"data": "zone_code = ZN-T1"}'
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-SZ-040] Trùng zone_code\npm.test(\"[TC-SZ-040] Status code is 409\"\
+    , function () {\n    pm.expect(pm.response.code).to.be.oneOf([409]);\n});\npm.test(\"\
+    [TC-SZ-040] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

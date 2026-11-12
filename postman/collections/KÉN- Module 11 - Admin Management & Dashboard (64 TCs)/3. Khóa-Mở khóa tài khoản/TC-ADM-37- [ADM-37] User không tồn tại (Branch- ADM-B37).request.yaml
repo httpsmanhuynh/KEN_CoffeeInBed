@@ -1,0 +1,28 @@
+$kind: http-request
+name: "TC-ADM-37: [ADM-37] User không tồn tại (Branch: ADM-B37)"
+description: |-
+  **Mã TC:** ADM-37 (TC-ADM-37)
+  **Nhóm:** Khóa/Mở khóa tài khoản
+  **API / Thành phần:** POST /api/admin/users/:id/lock
+  **Loại:** Negative
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed users/bookings.
+  **Dữ liệu vào:** 000000000000000000000000
+  **Các bước thực hiện:**
+  1) POST /api/admin/users/<id>/lock&#10;2) POST /api/admin/users/<id>/unlock
+  **Kết quả mong đợi:** 404 USER_NOT_FOUND ở cả 2 bước (HTTP: 404)
+  **Nhánh code bao phủ:** ADM-B37
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/admin/users/000000000000000000000000/lock"
+method: POST
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-37] User không tồn tại
+      pm.test("[TC-ADM-37] Status code is 404", function () {
+          pm.expect(pm.response.code).to.be.oneOf([404]);
+      });
+      pm.test("[TC-ADM-37] Trả về 404 USER_NOT_FOUND", function () {
+          pm.expect(pm.response.json().error).to.eql("USER_NOT_FOUND");
+      });
+    language: text/javascript
+order: 9000

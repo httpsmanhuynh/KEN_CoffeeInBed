@@ -1,0 +1,37 @@
+$kind: http-request
+name: "TC-BKG-06- [BKG-06] Gói HOURLY- hours less than min_hours bị từ chối (Branch- BK"
+description: |-
+  **Mã TC:** BKG-06 (TC-BKG-06)
+  **Nhóm:** Kiểm tra chỗ trống
+  **API / Thành phần:** POST /api/bookings/select-package
+  **Loại:** Negative
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer.
+  **Dữ liệu vào:** hours = min_hours − 1
+  **Các bước thực hiện:**
+  1) POST select-package hours=0
+  **Kết quả mong đợi:** 422 từ chối (không đủ min_hours) (HTTP: 422)
+  **Nhánh code bao phủ:** BKG-B06
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/bookings/select-package"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "spaceId": "{{spaceId}}",
+      "packageId": "{{hourlyPackageId}}",
+      "startAt": "{{bookingStartAt}}",
+      "hours": 0,
+      "guestCount": 2
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-BKG-06] Gói HOURLY- hours less than min_hours bị từ chối
+      pm.test("[TC-BKG-06] Status code is 422", function () {
+          pm.expect(pm.response.code).to.be.oneOf([422]);
+      });
+    language: text/javascript
+order: 6000

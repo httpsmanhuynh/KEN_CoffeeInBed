@@ -1,0 +1,33 @@
+$kind: http-request
+name: "TC-VCH-21: [VCH-21] Đổi Coins lấy Voucher: trừ Coins, giữ Điểm/Hạng, thêm vào ví (Branch: VCH-B19)"
+description: |-
+  **Mã TC:** VCH-21 (TC-VCH-21)
+  **Nhóm:** Đổi Coins lấy Voucher
+  **API / Thành phần:** POST /api/loyalty/redeem
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; coin_balance=100; Voucher coins_cost=50.
+  **Dữ liệu vào:** {"voucherId": "<_id>"}
+  **Các bước thực hiện:**
+  1) POST /api/loyalty/redeem&#10;2) Kiểm tra users, user_vouchers, loyalty_transactions
+  **Kết quả mong đợi:** 200; coin_balance=50; tier_points không đổi; có bản ghi ví; REDEEM coins_delta=-50, points_delta=0; redeem_count +1 (HTTP: 200)
+  **Nhánh code bao phủ:** VCH-B19
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/loyalty/redeem"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "voucherId": "{{voucherId}}"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-VCH-21] Đổi Coins lấy Voucher: trừ Coins, giữ Điểm/Hạng, thêm vào ví
+      pm.test("[TC-VCH-21] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 1000

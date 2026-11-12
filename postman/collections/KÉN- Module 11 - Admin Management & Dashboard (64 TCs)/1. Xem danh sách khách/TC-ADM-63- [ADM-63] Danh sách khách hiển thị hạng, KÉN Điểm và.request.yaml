@@ -1,0 +1,33 @@
+$kind: http-request
+name: "TC-ADM-63: [ADM-63] Danh sách khách hiển thị hạng, KÉN Điểm và KÉN Coins (Branch: ADM-B63)"
+description: |-
+  **Mã TC:** ADM-63 (TC-ADM-63)
+  **Nhóm:** Xem danh sách khách
+  **API / Thành phần:** GET /api/admin/users
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; khách A hạng SILVER (tier_points 1.200, coin_balance 300); khách B mới, chưa tích điểm.
+  **Dữ liệu vào:** ?q=<SĐT A> ; ?q=<SĐT B> ; id khách A
+  **Các bước thực hiện:**
+  1) GET /api/admin/users?q=<SĐT A>&#10;2) GET /api/admin/users?q=<SĐT B>&#10;3) GET /api/admin/users/<id A>&#10;4) Đối chiếu users trên Atlas
+  **Kết quả mong đợi:** 200 mỗi item (và user trong hồ sơ) có loyalty { tier, tierName, points, coins }: A = { SILVER, KÉN Bạc, 1200, 300 }; B = { BASIC, KÉN Mới, 0, 0 }; points = users.tier_points, coins = users.coin_balance; không lộ password_hash/OTP/token (HTTP: 200)
+  **Nhánh code bao phủ:** ADM-B63
+  **Ghi chú:** Test mới theo Report (UC-29: danh sách khách hiển thị hạng, KÉN Điểm, KÉN Coins). Cần xác nhận users có tier_points, coin_balance; hạng lấy users.tier nếu có, thiếu thì suy từ điểm. Code: loyaltyOf.
+url: "{{baseUrl}}/api/admin/users?q={{testPhone}}"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-63] Danh sách khách hiển thị hạng, KÉN Điểm và KÉN Coins
+      pm.test("[TC-ADM-63] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+      pm.test("[TC-ADM-63] Mỗi item có loyalty { tier, tierName, points, coins } khớp tier_points và coin_balance", function () {
+          const json = pm.response.json();
+          json.items.forEach(function (u) {
+              pm.expect(u).to.have.property("loyalty");
+              pm.expect(u.loyalty).to.include.all.keys("tier", "tierName", "points", "coins");
+              pm.expect(u).to.not.have.property("password_hash");
+          });
+      });
+    language: text/javascript
+order: 8000

@@ -1,0 +1,28 @@
+$kind: http-request
+name: "TC-REC-09: [REC-09] Nguyên vật liệu không tồn tại (ObjectId hợp lệ nhưng không có trong DB) → 404 (Branch: REC-B09)"
+description: |-
+  **Mã TC:** REC-09 (TC-REC-09)
+  **Nhóm:** Admin Forecast nguyên vật liệu & món
+  **API / Thành phần:** GET /api/admin/forecast/ingredients/:id
+  **Loại:** Negative
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin.
+  **Dữ liệu vào:** id = 000000000000000000000000
+  **Các bước thực hiện:**
+  1) GET /api/admin/forecast/ingredients/000000000000000000000000
+  **Kết quả mong đợi:** 404 INGREDIENT_NOT_FOUND; không lỗi 500 (HTTP: 404)
+  **Nhánh code bao phủ:** REC-B09
+url: "{{baseUrl}}/api/admin/forecast/ingredients/000000000000000000000000"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-REC-09] Nguyên vật liệu không tồn tại -> 404 INGREDIENT_NOT_FOUND
+      pm.test("[TC-REC-09] Status code is 404", function () {
+          pm.expect(pm.response.code).to.eql(404);
+      });
+      pm.test("[TC-REC-09] Mã lỗi INGREDIENT_NOT_FOUND", function () {
+          const json = pm.response.json();
+          pm.expect(json.code || json.error).to.eql("INGREDIENT_NOT_FOUND");
+      });
+    language: text/javascript
+order: 5000

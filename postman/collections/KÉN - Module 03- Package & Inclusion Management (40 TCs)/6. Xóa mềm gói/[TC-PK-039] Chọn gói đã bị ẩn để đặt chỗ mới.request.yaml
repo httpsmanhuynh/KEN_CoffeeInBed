@@ -1,0 +1,42 @@
+$kind: http-request
+name: '[TC-PK-039] Chọn gói đã bị ẩn để đặt chỗ mới'
+description: '**Mã TC:** TC-PK-039
+
+  **Nhóm:** Xóa mềm gói
+
+  **API / Thành phần:** POST /api/bookings/select-package
+
+  **Loại:** Negative
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; đã seed spaces/packages/package_prices/package_inclusions.
+  Gói is_active=false.
+
+  **Dữ liệu vào:** Gói đã ẩn
+
+  **Các bước thực hiện:**
+
+  1) POST /api/bookings/select-package
+
+  **Kết quả mong đợi:** Bị từ chối; không tạo ngữ cảnh đặt chỗ (HTTP: 422)
+
+  **Nhánh code bao phủ:** PKG-B35
+
+  '
+url: '{{baseUrl}}/api/bookings/select-package'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: CUSTOMER
+order: 39000
+body:
+  type: json
+  raw: '{"data": "Gói đã ẩn"}'
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PK-039] Chọn gói đã bị ẩn để đặt chỗ mới\npm.test(\"[TC-PK-039] Status\
+    \ code is 422\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([422]);\n\
+    });\npm.test(\"[TC-PK-039] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

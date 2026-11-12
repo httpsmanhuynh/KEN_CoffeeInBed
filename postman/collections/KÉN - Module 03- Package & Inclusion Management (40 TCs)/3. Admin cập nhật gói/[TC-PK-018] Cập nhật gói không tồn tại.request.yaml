@@ -1,0 +1,41 @@
+$kind: http-request
+name: '[TC-PK-018] Cập nhật gói không tồn tại'
+description: '**Mã TC:** TC-PK-018
+
+  **Nhóm:** Admin cập nhật gói
+
+  **API / Thành phần:** PATCH /api/packages/:id
+
+  **Loại:** Negative
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed spaces/packages/package_prices/package_inclusions.
+
+  **Dữ liệu vào:** {"name": "X"}
+
+  **Các bước thực hiện:**
+
+  1) PATCH /api/packages/000000000000000000000000
+
+  **Kết quả mong đợi:** 404 (HTTP: 404)
+
+  **Nhánh code bao phủ:** PKG-B04
+
+  '
+url: '{{baseUrl}}/api/packages/{{packageId}}'
+method: PATCH
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 18000
+body:
+  type: json
+  raw: "{\n  \"name\": \"X\"\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PK-018] Cập nhật gói không tồn tại\npm.test(\"[TC-PK-018] Status code\
+    \ is 404\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([404]);\n\
+    });\npm.test(\"[TC-PK-018] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

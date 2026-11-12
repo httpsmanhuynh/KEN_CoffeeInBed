@@ -1,0 +1,221 @@
+<main class="ken-spaces-page">
+
+  <section class="ks-hero">
+    <div class="ks-container">
+
+      <div class="ks-hero-intro">
+        <div>
+          <p class="ks-eyebrow">KHÔNG GIAN KÉN · MỘT ĐIỂM ĐẾN, BA TRẠNG THÁI</p>
+          <h1>Một góc vừa đủ,<br>cho nhịp riêng của bạn.</h1>
+        </div>
+
+        <div class="ks-hero-side">
+          <p>
+            Gặp gỡ, tập trung hay nghỉ một chút. Dạo qua từng góc
+            của KÉN để tìm khoảng không hợp với điều bạn cần hôm nay.
+          </p>
+          <a class="ks-primary-button" href="#spaces-overview">
+            Khám phá các không gian ↓
+          </a>
+        </div>
+      </div>
+
+      <figure class="ks-hero-visual">
+        <img
+          src="/images/ken-figma/spaces-hero.png"
+          alt="Không gian café KÉN với bàn gỗ, cây xanh và ánh sáng tự nhiên"
+        >
+        <figcaption>
+          <span>Hình ảnh minh họa concept không gian KÉN</span>
+          <span>Một cơ sở · 08:00–22:00 hằng ngày</span>
+        </figcaption>
+      </figure>
+
+      <div class="ks-zones" aria-label="Ba khu không gian KÉN">
+        <a href="#space-connect" class="ks-zone">
+          <span class="ks-zone-number">01 / <span>↘</span></span>
+          <h2>KÉN Kết Nối</h2>
+          <p>Một ly cà phê, một cuộc chuyện trò.</p>
+          <small>Café mở · Ghé trực tiếp</small>
+        </a>
+
+        <a href="#space-cowork" class="ks-zone">
+          <span class="ks-zone-number">02 / <span>↘</span></span>
+          <h2>KÉN Tập Trung</h2>
+          <p>Góc làm việc đến phòng họp riêng.</p>
+          <small>4 không gian · 1–20 khách</small>
+        </a>
+
+        <a href="#space-single" class="ks-zone">
+          <span class="ks-zone-number">03 / <span>↘</span></span>
+          <h2>KÉN Tái Tạo</h2>
+          <p>Khép lại ồn ào, nạp lại năng lượng.</p>
+          <small>3 không gian · 1–4 khách</small>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="ks-overview" id="spaces-overview">
+    <div class="ks-container">
+      <header class="ks-section-heading">
+        <p class="ks-eyebrow">KHÁM PHÁ KHÔNG GIAN KÉN</p>
+        <h2>Chọn nhanh theo nhu cầu, không chỉ theo hình ảnh.</h2>
+        <p>
+          Xem một góc không gian, cân nhắc số người và mục đích sử dụng.
+          Chọn “Xem chi tiết” để tìm hiểu thêm ảnh đa góc, tiện ích
+          và các gói phù hợp.
+        </p>
+      </header>
+
+      <div class="ks-suggestions">
+        <article>
+          <h3>Gặp gỡ &amp; trò chuyện</h3>
+          <p>
+            Ghé KÉN Kết Nối để hẹn bạn bè và trò chuyện.
+            Nếu muốn ngồi học hoặc làm việc, cân nhắc KÉN Tập Trung.
+          </p>
+        </article>
+
+        <article>
+          <h3>Tập trung &amp; làm việc</h3>
+          <p>
+            Một mình: Bàn chung hoặc Ô tập trung cá nhân.
+            Nhóm 3–6 người: Phòng họp nhỏ; nhóm 6–12 người:
+            Phòng họp lớn.
+          </p>
+        </article>
+
+        <article>
+          <h3>Nghỉ ngơi &amp; riêng tư</h3>
+          <p>
+            Một người: KÉN nghỉ đơn. Một đến hai người: KÉN nghỉ đôi.
+            Nhóm 2–4 người cần phòng riêng: Phòng riêng tư.
+          </p>
+        </article>
+      </div>
+
+      <div class="ks-card-grid">
+        <article
+          class="ks-space-card"
+          *ngFor="let space of spaces; trackBy: trackBySpace"
+          [id]="'space-' + space.id"
+        >
+          <img class="ks-card-photo" [src]="space.image" [alt]="space.title">
+
+          <div class="ks-card-body">
+            <div class="ks-card-heading">
+              <h3>{{ space.title }}</h3>
+              <span class="ks-card-badge">{{ space.badge }}</span>
+            </div>
+
+            <div class="ks-card-description">
+              <strong>{{ space.capacity }}</strong>
+              <p>{{ space.description }}</p>
+            </div>
+
+            <p class="ks-price">{{ space.price }}</p>
+
+            <div class="ks-advice">
+              <p>{{ space.recommended }}</p>
+              <p>{{ space.caution }}</p>
+            </div>
+
+            <div class="ks-card-action">
+              <a
+                *ngIf="space.route; else detailOnly"
+                class="ks-outline-button"
+                [routerLink]="space.route"
+              >
+                Xem chi tiết
+              </a>
+
+              <ng-template #detailOnly>
+                <details class="ks-expand">
+                  <summary class="ks-outline-button">
+                    Xem chi tiết
+                  </summary>
+                  <div class="ks-expanded-content">
+                    <strong>{{ space.capacity }}</strong>
+                    <p>{{ space.description }}</p>
+                    <p>{{ space.price }}</p>
+                    <p>
+                      Để được tư vấn thêm về không gian này,
+                      vui lòng liên hệ KÉN.
+                    </p>
+                    <a routerLink="/support">Đến Trung tâm hỗ trợ</a>
+                  </div>
+                </details>
+              </ng-template>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="ks-before">
+    <div class="ks-container">
+      <p class="ks-eyebrow">ĐỂ KHOẢNG RIÊNG LUÔN TRỌN VẸN</p>
+      <h2>
+        <img src="/images/ken-figma/spaces-info.svg" alt="" aria-hidden="true">
+        Trước khi mình hẹn nhau ở KÉN
+      </h2>
+
+      <div class="ks-notes">
+        <article>
+          <h3>Một điểm hẹn · 08:00–22:00</h3>
+          <p>
+            Một cơ sở, mở cửa 08:00–22:00.
+            Các gói phải kết thúc không muộn hơn giờ đóng cửa.
+          </p>
+        </article>
+
+        <article>
+          <h3>15 phút dọn, không phải giờ của bạn</h3>
+          <p>
+            Không gian dùng riêng có 15 phút dọn sau giờ sử dụng;
+            không trừ vào thời lượng gói.
+          </p>
+        </article>
+
+        <article>
+          <h3>Xem lịch chưa phải giữ chỗ</h3>
+          <p>
+            Xem lịch không giữ chỗ. Đăng nhập để đặt một không gian,
+            một gói và dịch vụ mua thêm nếu có.
+          </p>
+        </article>
+
+        <article>
+          <h3>Xác nhận rồi mới giữ 15 phút</h3>
+          <p>
+            Xác nhận Tóm tắt đặt chỗ mới giữ 15 phút.
+            Thanh toán mô phỏng thành công trong hạn để xác nhận đơn.
+          </p>
+        </article>
+      </div>
+
+      <div class="ks-final-cta">
+        <div>
+          <p class="ks-script">Lười một chút, chill một góc</p>
+          <h2>Bạn đã tìm thấy góc của mình?</h2>
+          <p>
+            Chọn không gian, gói và khung giờ phù hợp.
+            Nếu chỉ muốn một ly cà phê và một cuộc trò chuyện,
+            cứ ghé KÉN Kết Nối.
+          </p>
+        </div>
+
+        <div class="ks-cta-actions">
+          <a class="ks-primary-button" routerLink="/booking/spaces">Đặt không gian của bạn</a>
+
+          <a class="ks-outline-button" routerLink="/menu">Xem menu café</a>
+
+          <small>08:00–22:00 · Một cơ sở duy nhất</small>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>

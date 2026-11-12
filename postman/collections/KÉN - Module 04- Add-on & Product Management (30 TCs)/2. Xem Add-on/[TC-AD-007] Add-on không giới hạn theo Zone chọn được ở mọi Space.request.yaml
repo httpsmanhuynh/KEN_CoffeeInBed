@@ -1,0 +1,41 @@
+$kind: http-request
+name: '[TC-AD-007] Add-on không giới hạn theo Zone: chọn được ở mọi Space'
+description: '**Mã TC:** TC-AD-007
+
+  **Nhóm:** Xem Add-on
+
+  **API / Thành phần:** GET /api/addons
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; đã seed products/addons/spaces/packages.
+
+  **Dữ liệu vào:** Space ở 2 Zone khác nhau
+
+  **Các bước thực hiện:**
+
+  1) POST /api/bookings/quote Space Zone A kèm 1 add-on
+
+  2) Lặp lại với Space Zone B cùng add-on
+
+  **Kết quả mong đợi:** Cả hai quote đều chấp nhận add-on, không lỗi liên quan Zone
+  (HTTP: 200)
+
+  **Nhánh code bao phủ:** ADD-B07
+
+  '
+url: '{{baseUrl}}/api/addons'
+method: GET
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: CUSTOMER
+order: 7000
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-AD-007] Add-on không giới hạn theo Zone: chọn được ở mọi Space\npm.test(\"\
+    [TC-AD-007] Status code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-AD-007] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

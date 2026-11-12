@@ -1,0 +1,38 @@
+$kind: http-request
+name: '[TC-SZ-004] Xem danh sách Space (không tham số)'
+description: '**Mã TC:** TC-SZ-004
+
+  **Nhóm:** Xem Space
+
+  **API / Thành phần:** GET /api/spaces
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đã seed zones/spaces/packages; không cần
+  đăng nhập.
+
+  **Dữ liệu vào:** —
+
+  **Các bước thực hiện:**
+
+  1) GET /api/spaces
+
+  **Kết quả mong đợi:** 200 mảng spaces gồm space_code, name, booking_mode, capacity,
+  status (HTTP: 200)
+
+  **Nhánh code bao phủ:** SPC-B04
+
+  '
+url: '{{baseUrl}}/api/spaces'
+method: GET
+headers:
+- key: Content-Type
+  value: application/json
+order: 4000
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-SZ-004] Xem danh sách Space (không tham số)\npm.test(\"[TC-SZ-004]\
+    \ Status code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-SZ-004] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

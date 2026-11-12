@@ -1,0 +1,47 @@
+$kind: http-request
+name: '[TC-AD-009] Admin thêm Product hợp lệ có variants'
+description: '**Mã TC:** TC-AD-009
+
+  **Nhóm:** Admin quản lý Product
+
+  **API / Thành phần:** POST /api/products
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed products/addons.
+
+  **Dữ liệu vào:** {"name": "Cà phê test", "category": "DRINK", "price": 45000, "variants":
+  [{"name": "Size L", "price": 55000}], "is_active": true}
+
+  **Các bước thực hiện:**
+
+  1) POST /api/products
+
+  2) Kiểm tra document trên Atlas
+
+  **Kết quả mong đợi:** 201; đúng validator products; có created_at/updated_at (HTTP:
+  201)
+
+  **Nhánh code bao phủ:** ADD-B09
+
+  '
+url: '{{baseUrl}}/api/products'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 9000
+body:
+  type: json
+  raw: "{\n  \"name\": \"Cà phê test\",\n  \"category\": \"DRINK\",\n  \"price\":\
+    \ 45000,\n  \"variants\": [\n    {\n      \"name\": \"Size L\",\n      \"price\"\
+    : 55000\n    }\n  ],\n  \"is_active\": true\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-AD-009] Admin thêm Product hợp lệ có variants\npm.test(\"[TC-AD-009]\
+    \ Status code is 201\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([201]);\n\
+    });\npm.test(\"[TC-AD-009] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

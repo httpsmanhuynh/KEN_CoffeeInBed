@@ -1,0 +1,37 @@
+$kind: http-request
+name: "TC-BKG-05- [BKG-05] Giờ bắt đầu phải cách hiện tại ≥ 30 phút (BR-C01) (Branch- B"
+description: |-
+          **Mã TC:** BKG-05 (TC-BKG-05)
+          **Nhóm:** Kiểm tra chỗ trống
+          **API / Thành phần:** POST /api/bookings/select-package
+          **Loại:** Boundary
+          **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer.
+          **Dữ liệu vào:** startAt = now+29 phút rồi now+30 phút
+          **Các bước thực hiện:**
+          1) POST select-package startAt now+29'
+  2) POST select-package startAt now+30'
+          **Kết quả mong đợi:** Lần 1 bị từ chối (422); lần 2 hợp lệ (200) (HTTP: 422)
+          **Nhánh code bao phủ:** BKG-B05
+          **Ghi chú:** 
+url: "{{baseUrl}}/api/bookings/select-package"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "spaceId": "{{spaceId}}",
+      "packageId": "{{packageId}}",
+      "startAt": "{{tooSoonStartAt}}",
+      "guestCount": 2
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-BKG-05] Giờ bắt đầu phải cách hiện tại ≥ 30 phút (BR-C01)
+      pm.test("[TC-BKG-05] Status code is 422", function () {
+          pm.expect(pm.response.code).to.be.oneOf([422]);
+      });
+    language: text/javascript
+order: 5000

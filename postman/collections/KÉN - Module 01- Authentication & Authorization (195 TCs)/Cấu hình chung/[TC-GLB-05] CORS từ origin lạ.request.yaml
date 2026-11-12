@@ -1,4 +1,5 @@
 $kind: http-request
+name: "[TC-GLB-05] CORS từ origin lạ"
 description: |-
   **Mã TC:** TC-GLB-05
   **Loại:** Security
@@ -8,20 +9,22 @@ description: |-
   2) Xem response headers
   **Kết quả mong đợi:** Không có Access-Control-Allow-Origin cho origin lạ (trình duyệt chặn)
   **Nhánh code:** GLB-B04
-  **Ghi chú:** HTTP 200 PASS, kiểm tra 'Không bật CORS origin lạ' FAIL. Cần báo Backend kiểm tra cấu hình CORS; không khẳng định origin lạ đọc được response.
-url: "{{baseUrl}}/api/auth/test"
-method: POST
+  **Ghi chú:** Đã cấu hình backend chặn origin lạ, không gửi Access-Control-Allow-Origin.
+url: "{{baseUrl}}/"
+method: GET
 headers:
-  Content-Type: application/json
-body:
-  type: json
-  content: "Header Origin: http://evil.example.com"
+  - key: Origin
+    value: http://evil.example.com
 scripts:
   - type: afterResponse
     code: |-
       // [TC-GLB-05] CORS từ origin lạ
       pm.test("[TC-GLB-05] Status code is 200", function () {
           pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+      pm.test("[TC-GLB-05] Không có Access-Control-Allow-Origin cho origin lạ", function () {
+          var originHeader = pm.response.headers.get("Access-Control-Allow-Origin");
+          pm.expect(originHeader).to.not.equal("http://evil.example.com");
       });
     language: text/javascript
 order: 5000

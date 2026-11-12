@@ -1,0 +1,32 @@
+$kind: http-request
+name: "TC-ADM-46: [ADM-46] Kỳ không có đơn nào (Branch: ADM-B46)"
+description: |-
+  **Mã TC:** ADM-46 (TC-ADM-46)
+  **Nhóm:** Dashboard số đơn
+  **API / Thành phần:** GET /api/admin/dashboard?from&to
+  **Loại:** Boundary
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed zones/spaces/bookings/booking_addons/payment_transactions.
+  **Dữ liệu vào:** ?from=2020-01-01&to=2020-01-07 (kỳ không có dữ liệu seed)
+  **Các bước thực hiện:**
+  1) GET dashboard với kỳ trên
+  **Kết quả mong đợi:** 200; bookings.byStatus đủ 7 khóa = 0; revenue.total = 0 (breakdown toàn 0, collected/refunded = 0); occupancy.rate = 0; topAddons = []; không NaN, không lỗi 500 (HTTP: 200)
+  **Nhánh code bao phủ:** ADM-B46
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/admin/dashboard?from=2020-01-01&to=2020-01-07"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-46] Kỳ không có đơn nào
+      pm.test("[TC-ADM-46] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+      pm.test("[TC-ADM-46] Kỳ không có đơn trả về toàn bộ chỉ số = 0 và topAddons rỗng", function () {
+          const json = pm.response.json();
+          pm.expect(json.bookings.total).to.eql(0);
+          pm.expect(json.revenue.total).to.eql(0);
+          pm.expect(json.occupancy.rate).to.eql(0);
+          pm.expect(json.topAddons).to.eql([]);
+      });
+    language: text/javascript
+order: 9000
