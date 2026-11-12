@@ -35,9 +35,9 @@
         }
       </div>
 
-      <!-- Ngày sinh (BR-A03: bắt buộc) -->
+      <!-- Ngày sinh (không bắt buộc) -->
       <div class="field">
-        <label for="dob">Ngày sinh <span class="req" aria-hidden="true">*</span></label>
+        <label for="dob">Ngày sinh <span class="opt">(không bắt buộc)</span></label>
         <input id="dob" type="date" formControlName="dateOfBirth" [max]="today" autocomplete="bday"
                [class.is-invalid]="showError('dateOfBirth')" [attr.aria-invalid]="showError('dateOfBirth')" />
         @if (showError('dateOfBirth')) { <small class="field__err">{{ fieldMessage('dateOfBirth') }}</small> }

@@ -60,7 +60,7 @@ export class RegisterPage {
       fullName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
       email: ['', [Validators.required, Validators.email, Validators.maxLength(100)]],
       phone: ['', [Validators.required, Validators.pattern(/^(?:\+84|84|0)(?:3|5|7|8|9)\d{8}$/)]],
-      dateOfBirth: ['', [Validators.required, notFuture]], // bắt buộc theo BR-A03
+      dateOfBirth: ['', [notFuture]], // không bắt buộc
       password: ['', [Validators.required, Validators.minLength(8), maxBytes(72)]],
       confirmPassword: ['', [Validators.required]],
     },
@@ -117,7 +117,7 @@ export class RegisterPage {
       case 'phone':
         return e['required'] ? 'Vui lòng nhập số điện thoại.' : 'Số điện thoại chưa đúng định dạng.';
       case 'dateOfBirth':
-        return e['required'] ? 'Vui lòng chọn ngày sinh.' : 'Ngày sinh không hợp lệ.';
+        return 'Ngày sinh không hợp lệ (không được ở tương lai).';
       case 'password':
         return e['required']
           ? 'Vui lòng nhập mật khẩu.'
@@ -166,7 +166,7 @@ export class RegisterPage {
         fullName: v.fullName.trim(),
         email: v.email.trim() || undefined,
         phone: v.phone.trim(),
-        dateOfBirth: v.dateOfBirth,
+        dateOfBirth: v.dateOfBirth || undefined as any,
         password: v.password,
       })
       .subscribe({

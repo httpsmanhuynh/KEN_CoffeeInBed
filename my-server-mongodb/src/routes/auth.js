@@ -49,15 +49,15 @@ router.post(
     const fullName = str(req.body.fullName),
       phone = str(req.body.phone),
       email = str(req.body.email).toLowerCase();
-    const dob = new Date(str(req.body.dateOfBirth)),
-      password = typeof req.body.password === 'string' ? req.body.password : '';
+    const dobRaw = str(req.body.dateOfBirth);
+    const dob = dobRaw ? new Date(dobRaw) : null;
+    const password = typeof req.body.password === 'string' ? req.body.password : '';
     const hasValidContact = (phone ? PHONE_RE.test(phone) : Boolean(email));
     if (
       fullName.length < 2 ||
       fullName.length > 100 ||
       !hasValidContact ||
-      Number.isNaN(dob.getTime()) ||
-      dob > new Date() ||
+      (dob && (Number.isNaN(dob.getTime()) || dob > new Date())) ||
       !validNewPassword(password) ||
       (email && (!EMAIL_RE.test(email) || email.length > 100))
     )
@@ -72,9 +72,9 @@ router.post(
     const otpIdentifier = phone || email;
     const pendingData = {
       full_name: fullName,
-      date_of_birth: dob,
       password_hash: await bcrypt.hash(password, 10),
     };
+    if (dob) pendingData.date_of_birth = dob;
     if (phone) pendingData.phone = phone;
     if (email) pendingData.email = email;
     await issueOtp(db, { userId: null, purpose: 'REGISTER', phone: otpIdentifier, email, pendingData });
