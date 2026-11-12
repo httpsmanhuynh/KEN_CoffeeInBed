@@ -71,7 +71,7 @@
                   [routerLink]="item.path"
                   [class.is-active]="isActive(item)"
                   [attr.aria-current]="isActive(item) ? 'page' : null"
-                  (click)="closeAll()"
+                  (click)="onNavClick(item)"
                   >{{ item.label }}</a
                 >
               }
@@ -107,7 +107,7 @@
             <ul class="sub sub--account">
               <li><a routerLink="/user-profile" (click)="closeAll()">Tài khoản</a></li>
               <li><a routerLink="/booking-list" (click)="closeAll()">Lịch sử đặt chỗ</a></li>
-              <li><a routerLink="/login" (click)="closeAll()">Đăng xuất</a></li>
+              <li><button type="button" (click)="logout()" [disabled]="loggingOut">{{ loggingOut ? 'Đang đăng xuất…' : 'Đăng xuất' }}</button></li>
             </ul>
           }
         </div>
@@ -118,5 +118,8 @@
         </div>
       }
     </div>
+    @if (logoutError) {
+      <p class="hd__error" role="alert">{{ logoutError }}</p>
+    }
   </div>
 </header>

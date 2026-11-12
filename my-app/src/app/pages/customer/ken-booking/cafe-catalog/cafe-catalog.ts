@@ -1,14 +1,9 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { SuggestionPopupService } from '../../../../shared/services/suggestion-popup.service';
+import { Component } from '@angular/core';
 import { KEN_MENU, kenMoney } from '../booking-state';
 import type { KenDrinkCategory, KenProduct } from '../booking-state';
 
 @Component({ selector: 'app-ken-cafe-catalog', standalone: false, templateUrl: './cafe-catalog.html', styleUrl: './cafe-catalog.css' })
-export class KenCafeCatalogPage implements OnInit {
-  private readonly popup = inject(SuggestionPopupService);
-  private readonly route = inject(ActivatedRoute);
-
+export class KenCafeCatalogPage {
   readonly products = KEN_MENU;
   category: 'all' | KenDrinkCategory = 'all';
   searchText = '';
@@ -24,14 +19,6 @@ export class KenCafeCatalogPage implements OnInit {
     { id: 'refreshment' as KenDrinkCategory, no: '02', title: 'Một chút tươi mát', subtitle: 'Nước uống & trái cây, cho buổi hẹn thêm vui.' },
     { id: 'bakery' as KenDrinkCategory, no: '03', title: 'Bánh & ăn nhẹ', subtitle: 'Nhâm nhi cùng cà phê, hoặc lót dạ một chút.' }
   ];
-
-  ngOnInit(): void {
-    this.popup.autoShow(this.route.snapshot.queryParamMap.get('popup') === '1');
-  }
-
-  openSuggestion(): void {
-    this.popup.show();
-  }
 
   get shownSections() {
     return this.sections.filter(s => this.category === 'all' || this.category === s.id).filter(s => this.forSection(s.id).length > 0);

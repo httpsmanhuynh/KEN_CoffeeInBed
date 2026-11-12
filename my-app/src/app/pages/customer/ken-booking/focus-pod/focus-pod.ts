@@ -1,25 +1,72 @@
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
-import { KenBookingState, KEN_MENU, kenMoney, kenNextDay } from '../booking-state';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { ActivatedRoute, Router } from '@angular/router';
+import { AuthService } from '../../../../core/auth.service';
+import { KenBookingState, kenMoney, kenNextDay } from '../booking-state';
+import { KenAvailabilityService } from '../availability.service';
 
 @Component({ selector: 'app-ken-focus-booking', standalone: false, templateUrl: './focus-pod.html', styleUrl: './focus-pod.css' })
-export class KenFocusPodPage {
+export class KenFocusPodPage implements OnInit {
   extraCategory: 'all' | 'drink' | 'food' | 'equipment' = 'all';
   feedback = '';
+  showAddons = false;
+  checkingSession = false;
+  checkingAvailability = false;
   readonly money = kenMoney;
   readonly hours = Array.from({ length: 14 }, (_, i) => i + 8);
-  readonly drinks = KEN_MENU.filter(x => x.category !== 'bakery');
-  constructor(public state: KenBookingState, private router: Router) {}
+  constructor(
+    public state: KenBookingState,
+    private router: Router,
+    private auth: AuthService,
+    private route: ActivatedRoute,
+    private availability: KenAvailabilityService,
+    private changeDetector: ChangeDetectorRef,
+  ) {}
+  ngOnInit(): void {
+    if (!this.state.isFocusSpace) this.state.set({ spaceId: 'focus', guests: 1 });
+    if (this.route.snapshot.queryParamMap.get('bookingStep') === 'addons') {
+      this.restoreAddonsStep();
+    }
+  }
   get minDate(): string { return kenNextDay(); }
   get filteredExtras() { return this.extraCategory === 'all' ? this.state.extras : this.state.extras.filter(x => x.category === this.extraCategory); }
-  chooseHours(hours: 1 | 4): void { this.state.set({ hours, drinkId: hours === 1 ? null : this.state.draft().drinkId, holdUntil: null }); this.feedback = ''; }
-  changeDate(date: string): void { this.state.set({ date, holdUntil: null }); this.feedback = ''; }
-  changeHour(hour: number): void { this.state.set({ startHour: hour, holdUntil: null }); this.feedback = ''; }
+  chooseHours(hours: 1 | 4): void {
+    this.state.set({
+      hours,
+      drinkId: hours === 1 ? null : this.state.draft().drinkId,
+      drinkQuantities: hours === 1 ? {} : this.state.draft().drinkQuantities,
+      holdUntil: null
+    });
+    this.showAddons = false;
+    this.feedback = '';
+  }
+  changeDate(date: string): void {
+    this.state.set({ date, holdUntil: null });
+    this.showAddons = false;
+    this.feedback = '';
+  }
+  changeHour(hour: number): void {
+    this.state.set({ startHour: hour, holdUntil: null });
+    this.showAddons = false;
+    this.feedback = '';
+  }
   get timeOptions() { return this.hours.filter(h => h + this.state.draft().hours <= 22); }
   extrasCount(id: string): number { return this.state.draft().extras[id] || 0; }
-  drinkTopUp(price: number): number { return Math.max(0, price - this.state.entitlement); }
   changeExtra(id: string, by: number): void { this.state.setExtra(id, this.extrasCount(id) + by); }
-  chooseDrink(id: string): void { this.state.set({ drinkId: id }); }
+  openDrinkPicker(): void {
+    this.router.navigate(['/booking/drinks'], {
+      queryParams: { returnTo: '/booking/focus-pod?bookingStep=addons' },
+    });
+  }
+  beginBooking(): void {
+    if (this.checkingSession || this.checkingAvailability) return;
+    if (!this.state.isSlotValid) {
+      this.feedback = 'Chọn ngày giờ hợp lệ trong khung 08:00–22:00.';
+      return;
+    }
+
+    this.verifyAvailability(() => this.requireSession());
+  }
   toReview(): void {
     if (!this.state.isSlotValid) {
       this.feedback = 'Vui lòng chọn ngày và giờ bắt đầu trong tương lai, cách hiện tại ít nhất 30 phút, và kết thúc trước 22:00.';
@@ -30,5 +77,68 @@ export class KenFocusPodPage {
       return;
     }
     this.router.navigateByUrl('/booking/review');
+  }
+
+  private restoreAddonsStep(): void {
+    this.auth.ensureSession().subscribe({
+      next: user => user ? this.verifyAvailability(() => this.showAddons = true) : this.goToLogin(),
+      error: () => {
+        this.feedback = 'Không thể kiểm tra phiên đăng nhập. Vui lòng thử lại.';
+        this.changeDetector.markForCheck();
+      },
+    });
+  }
+
+  private goToLogin(): void {
+    const returnUrl = `${this.router.url.split('?')[0]}?bookingStep=addons`;
+    this.router.navigate(['/login'], { queryParams: { returnUrl } });
+  }
+
+  private requireSession(): void {
+    this.checkingSession = true;
+    this.auth.ensureSession().subscribe({
+      next: user => {
+        this.checkingSession = false;
+        if (user) {
+          this.showAddons = true;
+          this.feedback = '';
+        } else {
+          this.goToLogin();
+        }
+        this.changeDetector.markForCheck();
+      },
+      error: () => {
+        this.checkingSession = false;
+        this.feedback = 'Không thể kiểm tra phiên đăng nhập. Vui lòng thử lại.';
+        this.changeDetector.markForCheck();
+      },
+    });
+  }
+
+  private verifyAvailability(onAvailable: () => void): void {
+    const draft = this.state.draft();
+    this.checkingAvailability = true;
+    this.availability.check(draft.date, draft.startHour, draft.guests, draft.hours).subscribe({
+      next: spaces => {
+        this.checkingAvailability = false;
+        const selected = this.availability.forSpace('focus', spaces);
+        if (!this.availability.packageAvailable(selected, draft.hours)) {
+          this.showAddons = false;
+          this.feedback = 'Gói này không còn chỗ trong khung giờ đã chọn. Hãy đổi lịch hoặc gói.';
+          this.changeDetector.markForCheck();
+          return;
+        }
+        onAvailable();
+        this.changeDetector.markForCheck();
+      },
+      error: (error: HttpErrorResponse) => {
+        this.checkingAvailability = false;
+        const message = error.error?.message ?? error.message;
+        this.feedback = typeof message === 'string'
+          ? message
+          : 'Không thể kiểm tra lịch lúc này. Vui lòng thử lại.';
+        this.changeDetector.markForCheck();
+      },
+    });
   }
 }

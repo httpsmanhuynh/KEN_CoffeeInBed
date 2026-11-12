@@ -1,0 +1,464 @@
+<div class="bookings-page" data-name="02 · Đặt chỗ">
+  <!-- Page Title -->
+  <div class="page-title-block" data-name="PageTitle">
+    <h1 class="page-title">Theo dõi đơn đặt chỗ</h1>
+
+  </div>
+
+  <!-- Status Cards -->
+  <div class="status-cards-row" data-name="StatusCards">
+    <div
+      class="status-card"
+      [class.active]="selectedFilter === 'ALL'"
+      (click)="filterByStatus('ALL')"
+    >
+      <span class="status-card-label">Tất cả</span>
+      <span class="status-card-val">{{ statusCounts.all }}</span>
+    </div>
+    <div
+      class="status-card"
+      [class.active]="selectedFilter === 'CONFIRMED'"
+      (click)="filterByStatus('CONFIRMED')"
+    >
+      <span class="status-card-label">Đã xác nhận</span>
+      <span class="status-card-val">{{ statusCounts.confirmed }}</span>
+    </div>
+    <div
+      class="status-card"
+      [class.active]="selectedFilter === 'CHECKED_IN'"
+      (click)="filterByStatus('CHECKED_IN')"
+    >
+      <span class="status-card-label">Đang sử dụng</span>
+      <span class="status-card-val">{{ statusCounts.checkedIn }}</span>
+    </div>
+    <div
+      class="status-card"
+      [class.active]="selectedFilter === 'COMPLETED'"
+      (click)="filterByStatus('COMPLETED')"
+    >
+      <span class="status-card-label">Hoàn thành</span>
+      <span class="status-card-val">{{ statusCounts.completed }}</span>
+    </div>
+    <div
+      class="status-card"
+      [class.active]="selectedFilter === 'CANCELLED'"
+      (click)="filterByStatus('CANCELLED')"
+    >
+      <span class="status-card-label">Đã huỷ</span>
+      <span class="status-card-val">{{ statusCounts.cancelled }}</span>
+    </div>
+    <div
+      class="status-card"
+      [class.active]="selectedFilter === 'NO_SHOW'"
+      (click)="filterByStatus('NO_SHOW')"
+    >
+      <span class="status-card-label">Khách không đến</span>
+      <span class="status-card-val">{{ statusCounts.noShow }}</span>
+    </div>
+  </div>
+
+  <!-- Main Booking List Block -->
+  <div class="booking-list-block" data-name="BookingListBlock">
+    <!-- Block Header -->
+    <div class="block-header" data-name="BlockHeader">
+      <img src="/images/figma/lich-dat-cho.svg" alt="" class="block-header-icon" />
+      <h2 class="block-title">Danh sách booking hôm nay</h2>
+      <span class="block-header-count">24 đơn · Ưu tiên đang sử dụng / sắp đến</span>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="filters-container" data-name="Filters">
+      <!-- Filter Row 1 -->
+      <div class="filter-row" data-name="FilterRow1">
+        <div class="search-box">
+          <img src="/images/figma/search.svg" alt="" class="search-icon" />
+          <input
+            type="text"
+            [(ngModel)]="searchTerm"
+            placeholder="Tìm mã đơn, tên hoặc email khách…"
+            class="search-input"
+          />
+        </div>
+
+        <div class="filter-dropdown date-picker">
+          <img src="/images/figma/calendar-date.svg" alt="" class="filter-icon" />
+          <span class="filter-val">{{ selectedDate }}</span>
+          <span class="filter-arrow">⌄</span>
+        </div>
+
+        <div class="filter-dropdown">
+          <span class="filter-val">Khung giờ: {{ selectedTime }}</span>
+          <img src="/images/figma/chevron-down.svg" alt="" class="arrow-icon" />
+        </div>
+      </div>
+
+      <!-- Filter Row 2 -->
+      <div class="filter-row" data-name="FilterRow2">
+        <div class="filter-dropdown flex-1">
+          <img src="/images/figma/filter.svg" alt="" class="filter-icon" />
+          <span class="filter-val">Trạng thái: {{ selectedFilter === 'ALL' ? 'Tất cả' : selectedFilter }}</span>
+          <img src="/images/figma/chevron-down.svg" alt="" class="arrow-icon" />
+        </div>
+
+        <div class="filter-dropdown flex-1">
+          <span class="filter-val">Khu vực: {{ selectedZone }}</span>
+          <img src="/images/figma/chevron-down.svg" alt="" class="arrow-icon" />
+        </div>
+
+        <div class="filter-dropdown flex-1">
+          <span class="filter-val">Thanh toán: {{ selectedPayment }}</span>
+          <img src="/images/figma/chevron-down.svg" alt="" class="arrow-icon" />
+        </div>
+
+        <div class="filter-dropdown flex-1">
+          <span class="filter-val">Sử dụng: Tất cả</span>
+          <img src="/images/figma/chevron-down.svg" alt="" class="arrow-icon" />
+        </div>
+
+        <button type="button" class="btn-reset-filters" (click)="resetFilters()">
+          Đặt lại
+        </button>
+      </div>
+    </div>
+
+    <!-- Table Section -->
+    <div class="table-wrap" data-name="Table">
+      <div class="table-header" data-name="TableHeader">
+        <div class="col col-id">Mã đơn</div>
+        <div class="col col-cus">Khách hàng</div>
+        <div class="col col-space">Không gian / Gói</div>
+        <div class="col col-time">Ngày / Giờ</div>
+        <div class="col col-guest">Khách</div>
+        <div class="col col-amt">Số tiền cuối</div>
+        <div class="col col-pay">Thanh toán</div>
+        <div class="col col-status">Sử dụng</div>
+        <div class="col col-act">Hành động</div>
+      </div>
+
+      <div
+        *ngFor="let b of filteredBookings"
+        class="table-row"
+        [class.selected]="selectedBooking.id === b.id"
+        (click)="selectBooking(b)"
+      >
+        <!-- Cell ID -->
+        <div class="col col-id">
+          <span class="cell-code">{{ b.code }}</span>
+          <span *ngIf="selectedBooking.id === b.id" class="badge-selecting">Đang chọn</span>
+        </div>
+
+        <!-- Cell Customer -->
+        <div class="col col-cus">
+          <span class="cell-cus-name">{{ b.customerName }}</span>
+          <span class="cell-cus-email">{{ b.customerEmail }}</span>
+        </div>
+
+        <!-- Cell Space -->
+        <div class="col col-space">
+          <span class="cell-space-name">{{ b.spaceName }}</span>
+          <span class="cell-space-pkg">{{ b.packageType }}</span>
+        </div>
+
+        <!-- Cell Time -->
+        <div class="col col-time">
+          <span class="cell-date">{{ b.date }}</span>
+          <span class="cell-time-slot">{{ b.timeSlot }}</span>
+        </div>
+
+        <!-- Cell Guest Count -->
+        <div class="col col-guest">
+          <span class="cell-guest-num">{{ b.guestCount }}</span>
+        </div>
+
+        <!-- Cell Final Amount -->
+        <div class="col col-amt">
+          <span class="cell-amount">{{ b.finalAmount }}</span>
+        </div>
+
+        <!-- Cell Payment -->
+        <div class="col col-pay">
+          <span class="cell-pay-status">{{ b.paymentStatus }}</span>
+        </div>
+
+        <!-- Cell Status -->
+        <div class="col col-status">
+          <span class="status-badge" [ngClass]="b.statusBadgeClass">
+            {{ b.statusLabel }}
+          </span>
+        </div>
+
+        <!-- Cell Action -->
+        <div class="col col-act" (click)="$event.stopPropagation()">
+          <button
+            *ngIf="b.actionType === 'CHECK_OUT'"
+            type="button"
+            class="btn-row-action btn-outline"
+            (click)="handleCheckOut(b)"
+          >
+            {{ b.actionLabel }}
+          </button>
+          <button
+            *ngIf="b.actionType === 'CHECK_IN'"
+            type="button"
+            class="btn-row-action btn-gold"
+            (click)="handleCheckIn(b)"
+          >
+            {{ b.actionLabel }}
+          </button>
+          <button
+            *ngIf="b.actionType === 'NO_SHOW'"
+            type="button"
+            class="btn-row-action btn-warning"
+            (click)="handleNoShow(b)"
+          >
+            {{ b.actionLabel }}
+          </button>
+          <span *ngIf="b.actionNote" class="cell-action-note">{{ b.actionNote }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table Pagination -->
+    <div class="table-pagination" data-name="Pagination">
+      <span class="pagination-info">
+        Hiển thị 1–{{ filteredBookings.length }} trên {{ bookings.length }} đơn · Trang 1 / 1
+      </span>
+      <div class="pagination-controls">
+        <span class="page-size">8 / trang</span>
+        <button type="button" class="btn-page-arrow" disabled>‹</button>
+        <button type="button" class="btn-page-num active">1</button>
+        <button type="button" class="btn-page-num">2 · 3</button>
+        <button type="button" class="btn-page-arrow">›</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail Block: Selected Booking -->
+  <div class="detail-block" data-name="DetailBlock">
+    <!-- Detail Header -->
+    <div class="detail-header" data-name="DetailHeader">
+      <img src="/images/figma/eye-view-fill.svg" alt="" class="detail-header-icon" />
+      <h2 class="detail-title">Đơn đang chọn · {{ selectedBooking.code }}</h2>
+      <div class="detail-header-badges">
+        <span class="status-badge" [ngClass]="selectedBooking.statusBadgeClass">
+          {{ selectedBooking.statusLabel }}
+        </span>
+        <span class="badge-paid">Đã thanh toán</span>
+      </div>
+    </div>
+
+    <!-- Detail Body: 4 Cards -->
+    <div class="detail-body-grid">
+      <!-- Card 1: Khách hàng & Không gian -->
+      <div class="detail-subcard">
+        <span class="subcard-tag">KHÁCH HÀNG / KHÔNG GIAN</span>
+        <div class="cust-info">
+          <h3 class="cust-name">{{ selectedBooking.customerName }}</h3>
+          <p class="cust-sub">{{ selectedBooking.customerEmail }} · {{ selectedBooking.customerPhone }}</p>
+        </div>
+        <div class="cust-badges">
+          <span class="badge-tag">{{ selectedBooking.tier }}</span>
+          <span class="badge-tag badge-tag-highlight">{{ selectedBooking.discount }}</span>
+        </div>
+        <div class="subcard-divider"></div>
+        <div class="space-specs">
+          <h4 class="specs-title">{{ selectedBooking.spaceName }}</h4>
+          <div class="spec-row">
+            <span class="spec-label">Khu vực</span>
+            <span class="spec-val">{{ selectedBooking.zoneName }}</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Ngày / Giờ</span>
+            <span class="spec-val text-brand">{{ selectedBooking.date }} · {{ selectedBooking.timeSlot }}</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Số khách</span>
+            <span class="spec-val">0{{ selectedBooking.guestCount }} người</span>
+          </div>
+        </div>
+        <a class="btn-subcard-link">Xem hồ sơ khách →</a>
+      </div>
+
+      <!-- Card 2: Gói & Snapshot giá -->
+      <div class="detail-subcard">
+        <span class="subcard-tag">GÓI / SNAPSHOT GIÁ</span>
+        <h3 class="package-name">{{ selectedBooking.packageType }}</h3>
+        <div class="price-breakdown">
+          <div class="price-line">
+            <span class="price-label">Gói 4 giờ</span>
+            <span class="price-val">140.000đ</span>
+          </div>
+          <div class="price-line">
+            <span class="price-label">Phụ thu Matcha Latte</span>
+            <span class="price-val">+5.000đ</span>
+          </div>
+          <div class="price-line">
+            <span class="price-label">Tạm tính</span>
+            <span class="price-val">145.000đ</span>
+          </div>
+          <div class="price-line">
+            <span class="price-label">Bạc · Giảm 5%</span>
+            <span class="price-val">−7.250đ</span>
+          </div>
+          <div class="subcard-divider"></div>
+          <div class="price-line total-line">
+            <span class="price-label font-bold">Tổng cuối</span>
+            <span class="price-val font-bold text-brand">{{ selectedBooking.finalAmount }}</span>
+          </div>
+        </div>
+        <p class="subcard-footer-note">Snapshot giá tại thời điểm đặt · Không tự điều chỉnh</p>
+      </div>
+
+      <!-- Card 3: Bao gồm & Add-on -->
+      <div class="detail-subcard">
+        <span class="subcard-tag">BAO GỒM / ADD-ON</span>
+        <div class="inclusions-group">
+          <h4 class="group-title">Bao gồm trong gói</h4>
+          <div class="inclusion-item">
+            <img src="/images/ken-figma/cowork-page-wifi.svg" alt="" class="inc-icon" />
+            <span class="inc-text">Wi-Fi tốc độ cao</span>
+          </div>
+          <div class="inclusion-item">
+            <img src="/images/ken-figma/cowork-page-outlet.svg" alt="" class="inc-icon" />
+            <span class="inc-text">Ổ điện & USB tại chỗ</span>
+          </div>
+          <div class="inclusion-item">
+            <img src="/images/ken-home/icons/addon-coffee.svg" alt="" class="inc-icon" />
+            <span class="inc-text">01 Matcha Latte · Hỗ trợ 50.000đ, phụ thu 5.000đ</span>
+          </div>
+        </div>
+        <div class="subcard-divider"></div>
+        <div class="addons-group">
+          <h4 class="group-title">Dịch vụ thêm (Add-on)</h4>
+          <p class="group-text">Chưa chọn thêm dịch vụ trong ca này.</p>
+        </div>
+        <div class="cleanup-group">
+          <h4 class="group-title">Dọn ô sau ca</h4>
+          <p class="group-text">13:00–13:15 · Không tính phí khách</p>
+        </div>
+      </div>
+
+      <!-- Card 4: Thanh toán & Hoàn tiền -->
+      <div class="detail-subcard">
+        <span class="subcard-tag">THANH TOÁN / HOÀN TIỀN</span>
+        <div class="pay-status-row">
+          <span class="badge-paid">Đã thanh toán</span>
+          <span class="pay-time">{{ selectedBooking.paymentTime }}</span>
+        </div>
+        <div class="pay-details-list">
+          <div class="spec-row">
+            <span class="spec-label">Phương thức</span>
+            <span class="spec-val">{{ selectedBooking.paymentMethod }}</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Mã giao dịch</span>
+            <span class="spec-val">{{ selectedBooking.txnCode }}</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Số tiền</span>
+            <span class="spec-val text-brand font-bold">{{ selectedBooking.finalAmount }}</span>
+          </div>
+        </div>
+        <div class="subcard-divider"></div>
+        <div class="refund-section">
+          <h4 class="group-title">Hoàn tiền</h4>
+          <span class="badge-tag">Không áp dụng hoàn tiền</span>
+        </div>
+        <p class="subcard-footer-note">Khi check-out: +13 Điểm và +13 Coins.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Counter Operations Block -->
+  <div class="ops-block" data-name="OpsBlock">
+    <div class="ops-header" data-name="OpsHeader">
+      <img src="/images/figma/filter.svg" alt="" class="ops-header-icon" />
+      <h2 class="ops-title">Thao tác quầy cho đơn đang chọn</h2>
+      <span class="ops-subtitle">Đang xem: {{ selectedBooking.code }}</span>
+    </div>
+
+    <div class="ops-body" data-name="OpsBody">
+      <!-- Operational Rules -->
+      <div class="ops-rules-card" data-name="Conditions">
+        <span class="subcard-tag">QUY TẮC VẬN HÀNH</span>
+        <div class="rules-list">
+          <div class="rule-item">
+            <span class="rule-dot dot-green"></span>
+            <span class="rule-text">Check-in sớm nhất -15 phút trước giờ bắt đầu (08:45)</span>
+          </div>
+          <div class="rule-item">
+            <span class="rule-dot dot-gold"></span>
+            <span class="rule-text">Trễ hơn +30 phút (09:30) → Xác nhận NO_SHOW</span>
+          </div>
+          <div class="rule-item">
+            <span class="rule-dot dot-brown"></span>
+            <span class="rule-text">Đến muộn không kéo dài giờ kết thúc · 13:00 vẫn là giờ trả</span>
+          </div>
+          <div class="rule-item">
+            <span class="rule-dot dot-brown"></span>
+            <span class="rule-text">Dọn ô 15 phút sau khi kết thúc (13:00–13:15) · Không tính giờ khách</span>
+          </div>
+        </div>
+        <div class="subcard-divider"></div>
+        <div class="current-state-note">
+          <img src="/images/figma/info.svg" alt="" class="state-icon" />
+          <span class="state-text">Check-in ghi nhận lúc 08:55 · Đơn đang CHECKED_IN</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="ops-action-buttons" data-name="ActionButtons">
+        <button
+          type="button"
+          class="btn-ops btn-ops-outline"
+          disabled
+          data-name="CheckInBtn"
+        >
+          Check-in
+        </button>
+        <button
+          type="button"
+          class="btn-ops btn-ops-primary"
+          (click)="handleCheckOut(selectedBooking)"
+          data-name="CheckOutBtn"
+        >
+          Check-out
+        </button>
+        <button
+          type="button"
+          class="btn-ops btn-ops-outline"
+          disabled
+          data-name="NoShowBtn"
+        >
+          Xác nhận No-show
+        </button>
+        <span class="ops-btn-hint">Chỉ Check-out khả dụng với đơn đang sử dụng.</span>
+      </div>
+
+      <!-- Status History Table -->
+      <div class="status-history-block" data-name="StatusHistory">
+        <h4 class="history-title">Lịch sử trạng thái</h4>
+        <div class="history-table">
+          <div class="history-header" data-name="HistHeader">
+            <div class="hist-col col-time">Thời điểm</div>
+            <div class="hist-col col-act">Hành động</div>
+            <div class="hist-col col-prev">Trạng thái trước</div>
+            <div class="hist-col col-next">Trạng thái sau</div>
+          </div>
+          <div class="history-row" data-name="HistRow">
+            <div class="hist-col col-time">24/10/2026 · 08:55</div>
+            <div class="hist-col col-act font-semibold">Check-in bởi Admin</div>
+            <div class="hist-col col-prev">
+              <span class="history-badge badge-confirmed">CONFIRMED</span>
+            </div>
+            <div class="hist-col col-next">
+              <span class="history-badge badge-checked-in">CHECKED_IN</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+</div>

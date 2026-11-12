@@ -6,7 +6,7 @@ import {
   ValidatorFn,
   Validators,
 } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../../../core/auth.service';
 
@@ -39,6 +39,12 @@ export class RegisterPage {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+
+  get returnUrl(): string | null {
+    const value = this.route.snapshot.queryParamMap.get('returnUrl');
+    return value?.startsWith('/') && !value.startsWith('//') ? value : null;
+  }
 
   readonly today = new Date().toISOString().split('T')[0];
 
@@ -137,7 +143,10 @@ export class RegisterPage {
       })
       .subscribe({
         // 201: đã gửi OTP → sang bước nhập OTP (tài khoản chỉ tạo sau khi OTP đúng, BR-A03)
-        next: () => this.router.navigate(['/otp-verify'], { state: { phone: v.phone.trim() } }),
+        next: () => this.router.navigate(['/otp-verify'], {
+          queryParams: this.returnUrl ? { returnUrl: this.returnUrl } : undefined,
+          state: { phone: v.phone.trim() },
+        }),
         error: (err: HttpErrorResponse) => {
           this.loading = false;
           this.formError =

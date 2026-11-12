@@ -99,7 +99,7 @@
       </div>
     </form>
 
-    <p class="reg__login">Đã có tài khoản? <a routerLink="/login">Đăng nhập ngay</a></p>
+    <p class="reg__login">Đã có tài khoản? <a routerLink="/login" [queryParams]="returnUrl ? { returnUrl: returnUrl } : null">Đăng nhập ngay</a></p>
 
     <p class="reg__legal">
       Bằng cách đăng ký, bạn đồng ý với Điều khoản &amp; Điều kiện

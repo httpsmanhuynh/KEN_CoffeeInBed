@@ -15,15 +15,6 @@ const STATUS_LABEL: Record<BookingStatus, string> = {
   cancelled: 'Đã huỷ', noshow: 'Không đến',
 };
 
-const INTRO: Record<StatusFilter, string> = {
-  all: 'Những khoảng thời gian bạn đã dành cho mình, được KÉN lưu lại ở đây.',
-  pending: 'Các lịch hẹn đang được KÉN kiểm tra. Bạn có thể theo dõi bước tiếp theo ngay bên dưới.',
-  confirmed: 'Những lịch hẹn đã được KÉN giữ chỗ cho bạn.',
-  completed: 'Những lần ghé KÉN bạn đã hoàn thành.',
-  cancelled: 'Các lịch hẹn đã được huỷ.',
-  noshow: 'Các lịch hẹn bạn chưa kịp ghé.',
-};
-
 const PAGE_SIZE = 10;
 
 @Component({
@@ -62,8 +53,6 @@ export class BookingList {
   newestFirst = true;
   page = 1;
   private applied = { from: this.fromDate, to: this.toDate };
-
-  get intro(): string { return INTRO[this.status]; }
 
   count(key: StatusFilter): number {
     return key === 'all' ? this.bookings.length : this.bookings.filter(b => b.status === key).length;

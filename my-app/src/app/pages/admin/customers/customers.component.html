@@ -1,0 +1,321 @@
+<div class="customers-page" data-name="03 · Khách hàng">
+  <!-- Page Title Row -->
+  <div class="page-title-row" data-name="Page title row">
+    <div class="title-block" data-name="Title block">
+      <div class="title-with-icon" data-name="Title with icon">
+        <img src="/images/figma/nguoi-dung.svg" alt="" class="title-icon" />
+        <h1 class="page-title">Khách hàng & Thành viên</h1>
+      </div>
+
+    </div>
+    <button type="button" class="btn-export" (click)="exportList()" data-name="Export btn">
+      Xuất danh sách ↗
+    </button>
+  </div>
+
+  <!-- Main Block: Customer Table -->
+  <div class="customer-card-block" data-name="Block: Danh sách khách hàng">
+    <!-- Filter Row -->
+    <div class="filters-row" data-name="Filters">
+      <div class="search-input-box">
+        <img src="/images/figma/search.svg" alt="" class="search-icon" />
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          placeholder="Tìm tên, email hoặc mã khách hàng..."
+          class="search-input"
+        />
+      </div>
+
+      <div class="select-dropdown">
+        <select [(ngModel)]="selectedTierFilter" class="custom-select">
+          <option value="ALL">Hạng thành viên (Tất cả)</option>
+          <option value="NONE">Chưa đạt hạng</option>
+          <option value="DONG">Đồng</option>
+          <option value="BAC">Bạc</option>
+          <option value="VANG">Vàng</option>
+          <option value="KIM_CUONG">Kim cương</option>
+        </select>
+        <img src="/images/figma/chevron-down.svg" alt="" class="select-arrow" />
+      </div>
+
+      <div class="select-dropdown">
+        <select [(ngModel)]="selectedStatusFilter" class="custom-select">
+          <option value="ALL">Trạng thái (Tất cả)</option>
+          <option value="ACTIVE">Hoạt động</option>
+          <option value="LOCKED">Tạm khoá</option>
+        </select>
+        <img src="/images/figma/chevron-down.svg" alt="" class="select-arrow" />
+      </div>
+
+      <button type="button" class="btn-filter-action">
+        <img src="/images/figma/filter.svg" alt="" class="filter-icon" />
+        <span>Lọc</span>
+      </button>
+    </div>
+
+    <!-- Tab Pills -->
+    <div class="tab-pills" data-name="Tab pills">
+      <button
+        type="button"
+        class="tab-pill"
+        [class.active]="activeTab === 'ALL'"
+        (click)="setTab('ALL')"
+      >
+        Tất cả · {{ counts.all }}
+      </button>
+      <button
+        type="button"
+        class="tab-pill"
+        [class.active]="activeTab === 'ACTIVE'"
+        (click)="setTab('ACTIVE')"
+      >
+        Hoạt động · {{ counts.active }}
+      </button>
+      <button
+        type="button"
+        class="tab-pill"
+        [class.active]="activeTab === 'LOCKED'"
+        (click)="setTab('LOCKED')"
+      >
+        Tạm khoá · {{ counts.locked }}
+      </button>
+    </div>
+
+    <!-- Table -->
+    <div class="customer-table" data-name="Table">
+      <div class="table-header" data-name="Table header">
+        <div class="col-sel">
+          <div class="checkbox-indicator"></div>
+        </div>
+        <div class="col-name">Khách hàng</div>
+        <div class="col-phone">Điện thoại</div>
+        <div class="col-tier">Hạng</div>
+        <div class="col-points">KÉN Điểm</div>
+        <div class="col-coins">Coins</div>
+        <div class="col-status">Trạng thái</div>
+        <div class="col-action">Chi tiết</div>
+      </div>
+
+      <div
+        *ngFor="let c of filteredCustomers"
+        class="table-row"
+        [class.selected]="selectedCustomer.id === c.id"
+        (click)="selectCustomer(c)"
+      >
+        <div class="col-sel">
+          <div class="checkbox-box" [class.checked]="selectedCustomer.id === c.id">
+            <img *ngIf="selectedCustomer.id === c.id" src="/images/figma/check.svg" alt="" class="check-icon" />
+          </div>
+        </div>
+
+        <div class="col-name">
+          <span class="cust-title">{{ c.name }}</span>
+          <span class="cust-subcode">{{ c.code }}</span>
+        </div>
+
+        <div class="col-phone">
+          <span class="cust-phone">{{ c.phone }}</span>
+        </div>
+
+        <div class="col-tier">
+          <span class="badge-tier" [ngClass]="c.tierBadgeClass">{{ c.tier }}</span>
+        </div>
+
+        <div class="col-points">
+          <span class="points-val">{{ c.pointsFormatted }}</span>
+        </div>
+
+        <div class="col-coins">
+          <span class="coins-val">{{ c.coinsFormatted }}</span>
+        </div>
+
+        <div class="col-status">
+          <span class="badge-status" [ngClass]="c.statusBadgeClass">{{ c.statusLabel }}</span>
+        </div>
+
+        <div class="col-action">
+          <span class="action-link">Chi tiết →</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="table-pagination">
+      <span class="pagination-info">
+        Hiển thị 1–{{ filteredCustomers.length }} trên {{ customers.length }} khách hàng · 8 / trang
+      </span>
+      <div class="pagination-controls">
+        <button type="button" class="btn-page-arrow" disabled>‹</button>
+        <button type="button" class="btn-page-num active">1</button>
+        <button type="button" class="btn-page-num">2</button>
+        <button type="button" class="btn-page-arrow">›</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail Section: Customer Details & Loyalty -->
+  <div class="customer-detail-section" data-name="Section: Chi tiết Customer">
+    <div class="detail-section-header">
+      <img src="/images/figma/eye-view.svg" alt="" class="detail-icon" />
+      <span class="detail-section-title">
+        CHI TIẾT KHÁCH HÀNG · {{ selectedCustomer.code }} (ĐANG CHỌN)
+      </span>
+    </div>
+
+    <div class="detail-top-panels">
+      <!-- Panel 1: Account Info -->
+      <div class="detail-panel info-panel" data-name="Account info panel">
+        <div class="panel-header">
+          <img src="/images/figma/user-round.svg" alt="" class="panel-icon" />
+          <h3 class="panel-title">THÔNG TIN TÀI KHOẢN</h3>
+        </div>
+        <div class="panel-divider"></div>
+
+        <div class="info-rows-list">
+          <div class="info-row">
+            <span class="info-label">Họ tên</span>
+            <span class="info-val font-bold text-brand">{{ selectedCustomer.name }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Điện thoại</span>
+            <span class="info-val">{{ selectedCustomer.phone }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Email</span>
+            <span class="info-val">{{ selectedCustomer.email }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Trạng thái</span>
+            <span class="badge-status" [ngClass]="selectedCustomer.statusBadgeClass">
+              {{ selectedCustomer.statusLabel }}
+            </span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Hạng</span>
+            <span class="badge-tier" [ngClass]="selectedCustomer.tierBadgeClass">
+              {{ selectedCustomer.tier }}
+            </span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Tham gia</span>
+            <span class="info-val">{{ selectedCustomer.joinDate }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Đơn / Chi tiêu</span>
+            <span class="info-val font-bold text-brand">
+              {{ selectedCustomer.totalOrders }} đơn · {{ selectedCustomer.totalSpendFormatted }}
+            </span>
+          </div>
+        </div>
+
+        <div class="panel-divider"></div>
+
+        <div class="lock-action-row">
+          <button
+            type="button"
+            class="btn-lock"
+            [class.btn-unlock]="selectedCustomer.status === 'LOCKED'"
+            (click)="toggleLockCustomer(selectedCustomer)"
+          >
+            <img src="/images/figma/bao-ve-mat-khau.svg" alt="" class="lock-icon" />
+            <span>{{ selectedCustomer.status === 'ACTIVE' ? 'Khoá tài khoản' : 'Mở khoá tài khoản' }}</span>
+          </button>
+          <p class="lock-note">
+            {{ selectedCustomer.status === 'ACTIVE' ? 'Tài khoản đang hoạt động · Khoá để tạm ngừng đăng nhập và đặt mới' : 'Tài khoản đang tạm khoá · Bấm để kích hoạt lại' }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Panel 2: Loyalty Panel -->
+      <div class="detail-panel loyalty-panel" data-name="Loyalty panel">
+        <div class="panel-header">
+          <img src="/images/figma/gem-kim.svg" alt="" class="panel-icon" />
+          <h3 class="panel-title">LOYALTY · {{ selectedCustomer.code }}</h3>
+        </div>
+        <div class="panel-divider"></div>
+
+        <!-- Dark Loyalty Card -->
+        <div class="loyalty-card" data-name="Loyalty card">
+          <div class="loyalty-card-top">
+            <span class="loyalty-owner">{{ selectedCustomer.name }}</span>
+            <span class="loyalty-badge">Hạng {{ selectedCustomer.tier }}</span>
+          </div>
+
+          <div class="loyalty-metrics-row">
+            <div class="loyalty-metric-col">
+              <span class="metric-num">{{ selectedCustomer.pointsFormatted }}</span>
+              <span class="metric-sub">KÉN Điểm · Xét hạng</span>
+            </div>
+            <div class="loyalty-metric-col">
+              <span class="metric-num">{{ selectedCustomer.coinsFormatted }}</span>
+              <span class="metric-sub">KÉN Coins · Đổi quà</span>
+            </div>
+          </div>
+
+          <div class="loyalty-progress-track">
+            <div class="loyalty-progress-fill" [style.width.%]="selectedCustomer.progressPercent"></div>
+          </div>
+
+          <p class="loyalty-progress-note">{{ selectedCustomer.progressText }}</p>
+        </div>
+
+        <!-- Loyalty Description rows -->
+        <div class="loyalty-specs-list">
+          <div class="spec-line">
+            <span class="spec-label">Hạng hiện tại</span>
+            <span class="spec-val font-semibold text-brand">{{ selectedCustomer.tierRange }}</span>
+          </div>
+          <div class="spec-line">
+            <span class="spec-label">Ưu đãi</span>
+            <span class="spec-val font-semibold text-brand">{{ selectedCustomer.tierDiscount }}</span>
+          </div>
+          <div class="spec-line">
+            <span class="spec-label">Quy đổi</span>
+            <span class="spec-val">10.000đ = 1 KÉN Điểm · Coins độc lập</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Block: Booking History -->
+    <div class="booking-history-block" data-name="Block: Lịch sử Booking">
+      <div class="history-header">
+        <img src="/images/figma/clock-history.svg" alt="" class="history-icon" />
+        <h3 class="history-title">Lịch sử Booking</h3>
+        <span class="history-count">{{ selectedCustomer.totalOrders }} đơn · Dữ liệu minh hoạ</span>
+      </div>
+
+      <div class="history-table">
+        <div class="hist-thead">
+          <div class="hist-col-code">Mã Booking</div>
+          <div class="hist-col-space">Không gian</div>
+          <div class="hist-col-date">Ngày</div>
+          <div class="hist-col-status">Trạng thái</div>
+          <div class="hist-col-amt">Tổng tiền</div>
+          <div class="hist-col-act">Chi tiết</div>
+        </div>
+
+        <div *ngIf="selectedCustomer.bookingHistory.length === 0" class="empty-history-row">
+          Chưa có lịch sử booking nào trong kỳ khảo sát.
+        </div>
+
+        <div
+          *ngFor="let h of selectedCustomer.bookingHistory"
+          class="hist-trow"
+        >
+          <div class="hist-col-code font-semibold text-brand">{{ h.code }}</div>
+          <div class="hist-col-space">{{ h.spaceName }}</div>
+          <div class="hist-col-date">{{ h.date }}</div>
+          <div class="hist-col-status">
+            <span class="badge-status badge-status-active">{{ h.status }}</span>
+          </div>
+          <div class="hist-col-amt font-semibold text-brand">{{ h.totalAmount }}</div>
+          <div class="hist-col-act">
+            <a class="action-link">Xem đơn →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
