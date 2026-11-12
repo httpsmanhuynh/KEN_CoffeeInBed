@@ -33,7 +33,13 @@ export class BookingReschedule implements OnInit, OnDestroy {
     { id: 'o3', code: '#KEN-251026-024', name: 'Phòng họp nhỏ', zone: 'KÉN Tập Trung', status: 'pending', date: '2026-10-25', start: '14:00', hours: 3, guests: 4, total: 480000 },
   ];
   readonly statusLabel: Record<OrderStatus, string> = { confirmed: 'Đã xác nhận', pending: 'Chờ xác nhận' };
-  readonly slots = ['08:00', '09:00', '14:00'];
+  get slots(): string[] {
+    const out: string[] = [];
+    for (let h = 8; h + this.hours <= 22; h++) {
+      out.push(`${pad(h)}:00`);
+    }
+    return out;
+  }
   readonly durations = [2, 3, 4, 5, 6];
 
   selectedId = 'o1';
@@ -111,7 +117,7 @@ export class BookingReschedule implements OnInit, OnDestroy {
     if (this.newDate === o.date && this.start === o.start && this.hours === o.hours) return 'same';
     return this.liveFull ? 'full' : 'ok';
   }
-  get canSubmit(): boolean { return this.availability === 'ok' && this.acknowledged && !this.submitted && !this.rechecking; }
+  get canSubmit(): boolean { return this.availability === 'ok' && !this.submitted && !this.rechecking; }
 
   get proposedTitle(): string {
     if (!this.newDate) return 'Chưa chọn ngày';

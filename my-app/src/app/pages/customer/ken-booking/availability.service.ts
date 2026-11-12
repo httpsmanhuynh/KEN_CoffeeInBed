@@ -3,7 +3,9 @@ import { Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 
 export interface KenAvailabilityPackage {
-  durationHours: number;
+  durationHours: number | null;
+  pricing_type?: string;
+  pricingType?: string;
   isAvailable: boolean;
 }
 
@@ -37,7 +39,12 @@ export class KenAvailabilityService {
   }
 
   packageAvailable(space: KenAvailabilitySpace | undefined, hours: number): boolean {
-    return !!space?.packages?.some(pkg => pkg.durationHours === hours && pkg.isAvailable);
+    if (!space?.packages?.length) return false;
+    const exact = space.packages.find(pkg => pkg.durationHours === hours && pkg.isAvailable);
+    if (exact) return true;
+    const isHourly = (pkg: KenAvailabilityPackage) =>
+      pkg.pricing_type === 'HOURLY' || pkg.pricingType === 'HOURLY' || pkg.durationHours === null || pkg.durationHours === 1;
+    return space.packages.some(pkg => isHourly(pkg) && pkg.isAvailable);
   }
 
   private spaceIdFor(space: KenAvailabilitySpace): string | undefined {

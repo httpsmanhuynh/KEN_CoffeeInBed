@@ -27,9 +27,9 @@ export class PointsTierPage implements OnInit {
   private readonly api = inject(CustomerApiService, { optional: true });
   private readonly router = inject(Router, { optional: true });
 
-  tierPoints = 3250;
-  coinsBalance = 650;
-  tierCode = 'SILVER';
+  tierPoints = 0;
+  coinsBalance = 0;
+  tierCode = 'BASIC';
 
   get tierInfo() {
     return TIER_META[this.tierCode] ?? TIER_META['BASIC'];
@@ -41,11 +41,7 @@ export class PointsTierPage implements OnInit {
     return Math.min(100, Math.round((this.tierPoints / next) * 100));
   }
 
-  transactions: Tx[] = [
-    { iso: '2026-10-22', title: 'Focus Pod · #KEN-221026-018', sub: 'Hoàn thành · 145.000đ', points: '+14,5', coins: '+14', coinsNegative: false, note: 'Số dư: 3.250' },
-    { iso: '2026-10-18', title: 'Phòng họp nhỏ · #KEN-181026-012', sub: 'Hoàn thành · 355.000đ', points: '+35,5', coins: '+35', coinsNegative: false, note: 'Số dư: 3.235,5' },
-    { iso: '2026-10-10', title: 'Đổi Voucher giảm 20K', sub: 'Hoàn thành · Dùng 200 Coins', points: null, coins: '-200', coinsNegative: true, note: 'Coins còn: 650' },
-  ];
+  transactions: Tx[] = [];
 
   filterOpen = false;
   fromDate = '';
@@ -62,7 +58,10 @@ export class PointsTierPage implements OnInit {
         this.tierCode = user.membershipTier || 'BASIC';
         this.api!.getLoyaltyHistory().subscribe({
           next: (res) => {
-            if (!res?.transactions?.length) return;
+            if (!res?.transactions?.length) {
+              this.transactions = [];
+              return;
+            }
             this.transactions = res.transactions.map((tx) => {
               const iso = new Date(new Date(tx.created_at).getTime() + 7 * 3600000).toISOString().slice(0, 10);
               return {
@@ -75,6 +74,9 @@ export class PointsTierPage implements OnInit {
                 note: `Điểm: ${tx.points_after.toLocaleString('vi-VN')} · Coins: ${tx.coins_after.toLocaleString('vi-VN')}`,
               };
             });
+          },
+          error: () => {
+            this.transactions = [];
           },
         });
       },

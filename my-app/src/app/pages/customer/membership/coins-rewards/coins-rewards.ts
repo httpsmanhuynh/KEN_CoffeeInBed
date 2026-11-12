@@ -17,7 +17,7 @@ export class CoinsRewardsPage implements OnInit {
   private readonly auth = inject(AuthService, { optional: true });
   private readonly api = inject(CustomerApiService, { optional: true });
   private readonly router = inject(Router, { optional: true });
-  balance = 650;
+  balance = 0;
   activeTab: HistoryTab = 'all';
 
   vouchers: Array<{ id?: string; type: string; name: string; desc: string; cost: number }> = [
@@ -39,12 +39,7 @@ export class CoinsRewardsPage implements OnInit {
     { key: 'spent', label: 'Dùng Coins' },
   ];
 
-  history: { date: string; detail: string; amount: string; state: string; kind: HistoryKind; plus: boolean }[] = [
-    { date: '23/10/2026', detail: 'Ghi nhận Coins · giao dịch minh hoạ', amount: '+80 Coins', state: 'Đang xử lý', kind: 'pending', plus: true },
-    { date: '21/10/2026', detail: 'Đổi voucher đồ uống 30.000đ', amount: '−200 Coins', state: 'Đã đổi', kind: 'spent', plus: false },
-    { date: '20/10/2026', detail: 'Đổi bookmark KÉN', amount: '−50 Coins', state: 'Đã nhận quà', kind: 'spent', plus: false },
-    { date: '19/10/2026', detail: 'Nhận Coins · giao dịch minh hoạ', amount: '+100 Coins', state: 'Đã ghi nhận', kind: 'earned', plus: true },
-  ];
+  history: { date: string; detail: string; amount: string; state: string; kind: HistoryKind; plus: boolean }[] = [];
 
   get filteredHistory() {
     switch (this.activeTab) {
@@ -96,6 +91,8 @@ export class CoinsRewardsPage implements OnInit {
                   plus,
                 };
               });
+            } else {
+              this.history = [];
             }
           },
         });

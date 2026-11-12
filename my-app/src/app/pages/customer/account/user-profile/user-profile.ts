@@ -104,6 +104,7 @@ export class UserProfile implements OnInit, OnDestroy {
           this.saved = { ...this.form };
           this.messageType = 'ok';
           this.message = 'Đã cập nhật thông tin của bạn vào hệ thống.';
+          this.triggerSuccessToast();
         },
         error: (err: HttpErrorResponse) => {
           this.messageType = 'error';
@@ -121,6 +122,7 @@ export class UserProfile implements OnInit, OnDestroy {
     this.message = emailChanged
       ? 'Đã cập nhật. Email mới cần được xác minh lại trước khi dùng làm thông tin liên hệ.'
       : 'Đã cập nhật thông tin của bạn.';
+    this.triggerSuccessToast();
   }
 
   onCancel(): void {
@@ -151,9 +153,26 @@ export class UserProfile implements OnInit, OnDestroy {
     this.messageType = 'ok'; this.message = 'Đã cập nhật ảnh đại diện.';
   }
 
+  showToast = false;
+  private toastTimer?: ReturnType<typeof setTimeout>;
+
+  triggerSuccessToast(): void {
+    this.showToast = false;
+    clearTimeout(this.toastTimer);
+    setTimeout(() => {
+      this.showToast = true;
+      this.toastTimer = setTimeout(() => {
+        this.showToast = false;
+      }, 3500);
+    }, 10);
+  }
+
   logout(): void {
     if (!this.auth) return;
     this.auth.logout().subscribe({ next: () => this.router?.navigateByUrl('/') });
   }
-  ngOnDestroy(): void { if (this.avatarUrl) URL.revokeObjectURL(this.avatarUrl); }
+  ngOnDestroy(): void {
+    clearTimeout(this.toastTimer);
+    if (this.avatarUrl) URL.revokeObjectURL(this.avatarUrl);
+  }
 }

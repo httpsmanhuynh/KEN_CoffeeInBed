@@ -205,7 +205,10 @@ export class KenBookingState {
       };
       const space = kenBookingSpace(state.spaceId);
       state.spaceId = space.id;
-      if (!space.rates.some(rate => rate.hours === state.hours)) state.hours = space.rates[0].hours;
+      const isHourlySpace = space.id === 'work' || space.id === 'focus';
+      if (!space.rates.some(rate => rate.hours === state.hours) && !(isHourlySpace && state.hours >= 1 && state.hours <= 14)) {
+        state.hours = space.rates[0].hours;
+      }
       if (!/^\d{4}-\d\d-\d\d$/.test(state.date) || state.date < new Date().toLocaleDateString('en-CA')) state.date = kenNextDay();
       if (!Number.isInteger(state.startHour) || state.startHour < 8 || state.startHour + state.hours > 22) state.startHour = 9;
       state.guests = Math.max(space.minGuests, Math.min(space.maxGuests, Number(state.guests) || space.minGuests));
@@ -304,8 +307,13 @@ export class KenBookingState {
   }
 
   get base(): number {
-    const rate = this.space.rates.find(item => item.hours === this.draft().hours)?.price || 0;
-    return rate * (this.space.perPerson ? this.draft().guests : 1);
+    const fixedRate = this.space.rates.find(item => item.hours === this.draft().hours)?.price;
+    const price = fixedRate !== undefined
+      ? fixedRate
+      : (this.space.id === 'work' || this.space.id === 'focus')
+        ? this.space.rates[0].price * this.draft().hours
+        : 0;
+    return price * (this.space.perPerson ? this.draft().guests : 1);
   }
   get entitlement(): number {
     return this.isFocusSpace && this.draft().hours !== 4 ? 0 : 50000;

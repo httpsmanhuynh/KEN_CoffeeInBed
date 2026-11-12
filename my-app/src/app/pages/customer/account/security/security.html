@@ -29,43 +29,56 @@
           <div class="field">
             <label class="field__label" for="pw-current">Mật khẩu hiện tại</label>
             <div class="box">
-              <input id="pw-current" type="password" value="demo-pass-12" autocomplete="current-password" />
-              <button type="button" class="box__btn" aria-label="Hiện mật khẩu"><img src="/images/figma/hien-mat-khau.svg" alt="" width="18" height="18" /></button>
+              <input id="pw-current" [type]="showCurrent ? 'text' : 'password'" [(ngModel)]="currentPassword" autocomplete="current-password" placeholder="Nhập mật khẩu hiện tại" />
+              <button type="button" class="box__btn" (click)="showCurrent = !showCurrent" [attr.aria-label]="showCurrent ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'">
+                <img src="/images/figma/hien-mat-khau.svg" alt="" width="18" height="18" [style.opacity]="showCurrent ? '1' : '0.5'" />
+              </button>
             </div>
           </div>
 
           <div class="field">
             <label class="field__label" for="pw-new">Mật khẩu mới</label>
             <div class="box box--focus">
-              <input id="pw-new" type="password" placeholder="Nhập mật khẩu mới" autocomplete="new-password" />
-              <button type="button" class="box__btn" aria-label="Hiện mật khẩu"><img src="/images/figma/hien-mat-khau-active.svg" alt="" width="18" height="18" /></button>
+              <input id="pw-new" [type]="showNew ? 'text' : 'password'" [(ngModel)]="newPassword" placeholder="Tối thiểu 8 ký tự" autocomplete="new-password" />
+              <button type="button" class="box__btn" (click)="showNew = !showNew" [attr.aria-label]="showNew ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'">
+                <img src="/images/figma/hien-mat-khau-active.svg" alt="" width="18" height="18" [style.opacity]="showNew ? '1' : '0.5'" />
+              </button>
             </div>
           </div>
 
           <div class="field">
             <label class="field__label" for="pw-confirm">Xác nhận mật khẩu mới</label>
             <div class="box">
-              <input id="pw-confirm" type="password" placeholder="Nhập lại mật khẩu mới" autocomplete="new-password" />
-              <button type="button" class="box__btn" aria-label="Hiện mật khẩu"><img src="/images/figma/hien-mat-khau.svg" alt="" width="18" height="18" /></button>
+              <input id="pw-confirm" [type]="showConfirm ? 'text' : 'password'" [(ngModel)]="confirmPassword" placeholder="Nhập lại mật khẩu mới" autocomplete="new-password" />
+              <button type="button" class="box__btn" (click)="showConfirm = !showConfirm" [attr.aria-label]="showConfirm ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'">
+                <img src="/images/figma/hien-mat-khau.svg" alt="" width="18" height="18" [style.opacity]="showConfirm ? '1' : '0.5'" />
+              </button>
             </div>
           </div>
 
           <div class="field">
-            <label class="field__label" for="pw-otp">Mã OTP qua SMS</label>
+            <label class="field__label" for="pw-otp">Mã OTP qua Email</label>
             <div class="otp">
               <div class="box box--grow">
-                <input id="pw-otp" type="text" inputmode="numeric" maxlength="6" placeholder="Nhập mã OTP 6 chữ số" autocomplete="one-time-code" />
+                <input id="pw-otp" type="text" inputmode="numeric" maxlength="6" [(ngModel)]="otpCode" placeholder="Nhập mã OTP 6 chữ số" autocomplete="one-time-code" />
                 <img class="box__icon" src="/images/figma/dang-nhap-otp.svg" alt="" width="18" height="18" />
               </div>
-              <button type="button" class="btn-gold" (click)="onSendOtp()">Gửi mã</button>
+              <button type="button" class="btn-gold" [disabled]="otpCooldown > 0 || sendingOtp" (click)="onSendOtp()">
+                {{ sendingOtp ? 'Đang gửi…' : otpCooldown > 0 ? ('Gửi lại ' + otpCooldown + 's') : 'Gửi mã' }}
+              </button>
             </div>
-            <p class="hint">Gửi mã đến số điện thoại đã đăng ký. Chưa xác thực OTP thì chưa thể đổi mật khẩu.</p>
+            <p class="hint">Gửi mã đến email đã đăng ký. Vui lòng nhập mã OTP để đổi mật khẩu.</p>
           </div>
 
           <div class="actions">
-            <button type="button" class="btn-submit" (click)="onSubmitPassword()">Xác nhận OTP & đổi mật khẩu</button>
+            <button type="button" class="btn-submit" [disabled]="submittingPassword" (click)="onSubmitPassword()">
+              {{ submittingPassword ? 'Đang xử lý…' : 'Xác nhận OTP & đổi mật khẩu' }}
+            </button>
             <a class="forgot" routerLink="/forgot-password">Bạn quên mật khẩu hiện tại?</a>
           </div>
+          @if (pwMessage) {
+            <p class="hint" [style.color]="pwMessageType === 'ok' ? '#047857' : '#b42318'" [style.fontWeight]="600" role="alert">{{ pwMessage }}</p>
+          }
         </section>
 
         <aside class="tips">
@@ -83,12 +96,47 @@
         <div class="grow">
           <div class="title-row">
             <h2 class="h-serif">Xác thực hai lớp</h2>
-            <span class="pill pill--muted">Chưa bật</span>
+            <span class="pill" [class.pill--ok]="twoFactorEnabled" [class.pill--muted]="!twoFactorEnabled">
+              {{ twoFactorEnabled ? 'Đang bật' : 'Chưa bật' }}
+            </span>
           </div>
           <p class="text">Thêm một bước xác minh khi đăng nhập để bảo vệ tài khoản tốt hơn.</p>
-          <p class="small">Chưa thiết lập phương thức xác thực. Chọn "Thiết lập" để bắt đầu, tính năng vẫn đang tắt.</p>
+          <p class="small">
+            {{ twoFactorEnabled ? 'Tài khoản của bạn được bảo vệ bằng mã OTP gửi về Email khi đăng nhập.' : 'Chưa thiết lập phương thức xác thực. Chọn "Thiết lập" để bật 2FA.' }}
+          </p>
+
+          @if (twoFactorStep === 'configuring') {
+            <div style="margin-top: 14px; padding: 14px; background: #fffcf7; border: 1px dashed #d48b16; border-radius: 12px; display: flex; flex-direction: column; gap: 10px;">
+              <div class="field">
+                <label class="field__label" for="tf-pw">Mật khẩu hiện tại</label>
+                <div class="box">
+                  <input id="tf-pw" type="password" [(ngModel)]="twoFactorPassword" placeholder="Nhập mật khẩu hiện tại" />
+                </div>
+              </div>
+              <div class="field">
+                <label class="field__label" for="tf-otp">Mã OTP gửi qua Email</label>
+                <div class="otp">
+                  <div class="box box--grow">
+                    <input id="tf-otp" type="text" [(ngModel)]="twoFactorOtp" maxlength="6" placeholder="Nhập 6 số OTP" />
+                  </div>
+                  <button type="button" class="btn-gold" (click)="onSend2FAOtp()">Gửi mã OTP</button>
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button type="button" class="btn-gold" [disabled]="twoFactorLoading" (click)="onToggle2FA()">
+                  {{ twoFactorLoading ? 'Đang xử lý…' : (twoFactorEnabled ? 'Xác nhận tắt 2FA' : 'Xác nhận bật 2FA') }}
+                </button>
+                <button type="button" class="btn-outline" (click)="twoFactorStep = 'idle'">Huỷ</button>
+              </div>
+            </div>
+          }
+          @if (twoFactorMessage) {
+            <p class="hint" style="color: #047857; margin-top: 8px;" role="status">{{ twoFactorMessage }}</p>
+          }
         </div>
-        <button type="button" class="btn-outline" (click)="onSetup2FA()">Thiết lập</button>
+        <button type="button" class="btn-outline" (click)="onSetup2FA()">
+          {{ twoFactorStep === 'configuring' ? 'Đóng' : (twoFactorEnabled ? 'Tắt 2FA' : 'Thiết lập') }}
+        </button>
       </section>
 
       <!-- Thiết bị đang đăng nhập -->
@@ -98,26 +146,26 @@
             <img src="/images/figma/session-clock-icon.svg" alt="" width="20" height="20" />
             <h2 class="h-serif">Thiết bị đang đăng nhập</h2>
           </div>
-          <p class="small">2 phiên hoạt động</p>
+          <p class="small">{{ sessions.length }} phiên hoạt động</p>
         </div>
 
-        <div class="device">
-          <img src="/images/figma/monitor.svg" alt="" width="24" height="24" />
-          <div class="grow">
-            <p class="device__name">Chrome · macOS</p>
-            <p class="small">Máy tính · TP. Hồ Chí Minh · 23/10/2026, 10:42</p>
+        @for (s of sessions; track s.id) {
+          <div class="device">
+            <img src="/images/figma/monitor.svg" alt="" width="24" height="24" />
+            <div class="grow">
+              <p class="device__name">{{ s.name }}</p>
+              <p class="small">{{ s.desc }}</p>
+            </div>
+            @if (s.isCurrent) {
+              <span class="pill pill--ok">Thiết bị này</span>
+            } @else {
+              <button type="button" class="link-btn" (click)="onLogoutSession(s.id)">Đăng xuất phiên</button>
+            }
           </div>
-          <span class="pill pill--ok">Thiết bị này</span>
-        </div>
-
-        <div class="device">
-          <img src="/images/figma/smartphone.svg" alt="" width="24" height="24" />
-          <div class="grow">
-            <p class="device__name">Safari · iPhone</p>
-            <p class="small">Điện thoại · TP. Hồ Chí Minh · 22/10/2026, 20:15</p>
-          </div>
-          <button type="button" class="link-btn" (click)="onLogoutSession('Safari · iPhone')">Đăng xuất phiên</button>
-        </div>
+        }
+        @if (sessionMessage) {
+          <p class="small" style="color: #047857; font-weight: 600;">{{ sessionMessage }}</p>
+        }
 
         <div class="sess-foot">
           <p class="small grow">Không nhận ra thiết bị? Hãy đăng xuất phiên lạ và đổi mật khẩu.</p>

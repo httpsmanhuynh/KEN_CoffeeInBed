@@ -37,10 +37,20 @@
       <p class="kf-entitlement">Không gian đã chọn: <strong>{{ item.name }}</strong> · {{ item.capacity }}. Chọn gói theo thời lượng; số khách đã chọn là {{ guests }}.</p>
       <div class="kf-package-grid">
         <button type="button" *ngFor="let rate of item.rates"
-          [class.selected]="duration === rate.hours" (click)="chooseDuration(rate.hours)">
-          <div><strong>{{ rateLabel(rate) }}</strong><b>{{ money(rate.price) }}{{ item.perPerson ? '/khách' : '' }}</b></div>
-          <small>{{ rate.hours }} giờ · {{ item.perPerson ? 'Tính theo khách' : 'Giá trọn không gian' }} · {{ guests }} khách</small>
+          [class.selected]="isRateSelected(rate)" (click)="chooseDuration(rate.hours)">
+          <div><strong>{{ rateLabel(rate) }}</strong><b>{{ money(rate.price) }}{{ item.perPerson ? '/khách' : '' }}{{ item.id === 'work' && rate.hours === 1 ? '/giờ' : '' }}</b></div>
+          <small>{{ item.id === 'work' && rate.hours === 1 ? 'Tự chọn từ 1 giờ · Nước suối từ 2h' : rate.hours + ' giờ' }} · {{ item.perPerson ? 'Tính theo khách' : 'Giá trọn không gian' }} · {{ guests }} khách</small>
         </button>
+      </div>
+      <div class="kf-date-controls" *ngIf="isHourlyWork" style="margin-top: 12px;">
+        <label>Số giờ sử dụng (đơn vị 1 giờ)
+          <select [value]="duration" (change)="chooseDuration(+$any($event.target).value)">
+            <option *ngFor="let h of hourlyDurationOptions" [value]="h">{{ h }} giờ ({{ ('0' + startHour).slice(-2) }}:00–{{ ('0' + (startHour + h)).slice(-2) }}:00)</option>
+          </select>
+        </label>
+        <p class="kf-entitlement" style="align-self: center; margin: 0;">
+          {{ duration >= 2 ? '✓ Đặt từ 2 giờ: tặng 01 chai nước suối cho mỗi khách.' : 'Gói theo giờ · Đặt từ 2 giờ được tặng 01 chai nước suối/khách.' }}
+        </p>
       </div>
 
       <button *ngIf="!showAddons" type="button" class="kf-btn kf-btn-gold" [disabled]="checkingSession || checkingAvailability" (click)="beginBooking()">

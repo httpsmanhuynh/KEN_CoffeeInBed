@@ -121,7 +121,7 @@ export class KenSpaceListingPage {
 
   availabilityLabel(space: KenListingSpace): string {
     if (this.availabilityState === 'loading') return 'Đang kiểm tra…';
-    if (this.availabilityState !== 'ready') return 'Chưa kiểm tra lịch';
+    if (this.availabilityState !== 'ready') return '';
     const result = this.availabilityBySpace.get(space.id);
     if (!result) return 'Chưa có dữ liệu';
     if (!result.isAvailable) return this.reasonLabel(result.availabilityReason);

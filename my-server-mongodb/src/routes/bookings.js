@@ -252,7 +252,7 @@ router.get(
       return fail(res, 403, 'FORBIDDEN', 'Bạn không có quyền xem đơn này');
     }
 
-    const [inclusions, addons, transactions, review] = await Promise.all([
+    const [inclusions, addons, transactions, review, bookUser] = await Promise.all([
       db.collection('booking_inclusions').find({ booking_id: bOid }).toArray(),
       db.collection('booking_addons').find({ booking_id: bOid }).toArray(),
       db
@@ -261,9 +261,16 @@ router.get(
         .sort({ created_at: 1 })
         .toArray(),
       db.collection('reviews').findOne({ booking_id: bOid }),
+      db.collection('users').findOne({ _id: booking.user_id }, { projection: { full_name: 1, email: 1, phone: 1 } }),
     ]);
 
-    res.json(enrichBookingWithReview({ ...booking, inclusions, addons, transactions }, review));
+    const enrichedResult = enrichBookingWithReview({ ...booking, inclusions, addons, transactions }, review);
+    if (bookUser) {
+      enrichedResult.contact_name = booking.contact_name || bookUser.full_name;
+      enrichedResult.contact_phone = booking.contact_phone || bookUser.phone;
+      enrichedResult.contact_email = booking.contact_email || bookUser.email;
+    }
+    res.json(enrichedResult);
   }),
 );
 

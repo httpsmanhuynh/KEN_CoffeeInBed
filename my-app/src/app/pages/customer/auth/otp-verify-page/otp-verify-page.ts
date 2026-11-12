@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../../../core/auth.service';
@@ -16,6 +16,7 @@ export class OtpVerifyPage implements OnInit, OnDestroy {
   @ViewChild(OtpInput) otp?: OtpInput;
 
   phone = '';
+  email = '';
   masked = '';
   code = '';
   loading = false;
@@ -29,6 +30,7 @@ export class OtpVerifyPage implements OnInit, OnDestroy {
     private auth: AuthService,
     private router: Router,
     private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   private get returnUrl(): string | null {
@@ -37,12 +39,27 @@ export class OtpVerifyPage implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // SĐT được truyền từ trang Đăng ký. Tải lại trang sẽ mất → quay về Đăng ký.
-    const phone = (history.state as { phone?: string } | null)?.phone;
-    if (!phone) { this.router.navigate(['/register']); return; }
-    this.phone = phone;
-    this.masked = this.mask(phone);
+    const state = history.state as { phone?: string; email?: string } | null;
+    const phone = state?.phone;
+    const email = state?.email;
+    if (!phone && !email) {
+      this.router.navigate(['/register']);
+      return;
+    }
+    this.phone = phone || '';
+    this.email = email || '';
+    this.masked = this.email ? this.maskEmail(this.email) : this.mask(this.phone);
     this.startCooldown();
+  }
+
+  /** Mask email dạng k***n@domain.com */
+  private maskEmail(em: string): string {
+    const parts = em.split('@');
+    if (parts.length !== 2) return em;
+    const name = parts[0];
+    const domain = parts[1];
+    if (name.length <= 2) return `${name[0]}*@${domain}`;
+    return `${name.slice(0, 2)}••••${name.slice(-1)}@${domain}`;
   }
 
   ngOnDestroy(): void { clearInterval(this.timer); }
@@ -56,8 +73,13 @@ export class OtpVerifyPage implements OnInit, OnDestroy {
   private startCooldown(): void {
     clearInterval(this.timer);
     this.cooldown = COOLDOWN_SECONDS;
+    this.cdr.detectChanges();
     this.timer = setInterval(() => {
-      if (--this.cooldown <= 0) clearInterval(this.timer);
+      if (--this.cooldown <= 0) {
+        this.cooldown = 0;
+        clearInterval(this.timer);
+      }
+      this.cdr.detectChanges();
     }, 1000);
   }
 
@@ -73,11 +95,14 @@ export class OtpVerifyPage implements OnInit, OnDestroy {
     if (this.loading) return;
     this.loading = true;
     this.error = '';
-    this.auth.verifyOtp({ phone: this.phone, code: this.code }).subscribe({
-      next: () => this.router.navigate(['/login'], {
-        queryParams: this.returnUrl ? { returnUrl: this.returnUrl } : undefined,
-        state: { registered: true },
-      }),
+    this.auth.verifyOtp({ phone: this.phone || this.email, code: this.code }).subscribe({
+      next: () => {
+        try { sessionStorage.removeItem('ken_reg_draft'); } catch {}
+        this.router.navigate(['/login'], {
+          queryParams: this.returnUrl ? { returnUrl: this.returnUrl } : undefined,
+          state: { registered: true },
+        });
+      },
       error: (err: HttpErrorResponse) => {
         this.loading = false;
         this.error = this.messageFor(err);
@@ -90,7 +115,7 @@ export class OtpVerifyPage implements OnInit, OnDestroy {
     if (this.cooldown > 0 || this.resending) return;
     this.resending = true;
     this.error = '';
-    this.auth.resendOtp(this.phone).subscribe({
+    this.auth.resendOtp(this.phone || this.email).subscribe({
       next: () => {
         this.resending = false;
         this.info = 'Đã gửi lại mã OTP.';

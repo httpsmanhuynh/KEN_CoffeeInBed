@@ -116,8 +116,8 @@
         <div class="balance">
           <span>Giao dịch gần đây</span>
           <div class="balance__vals">
-            <span>Điểm hiện tại: <b>3.250</b></span>
-            <span>Coins hiện tại: <b>650</b></span>
+            <span>Điểm hiện tại: <b>{{ tierPoints.toLocaleString('vi-VN') }}</b></span>
+            <span>Coins hiện tại: <b>{{ coinsBalance.toLocaleString('vi-VN') }}</b></span>
           </div>
         </div>
 
@@ -142,7 +142,9 @@
           }
         </div>
 
-        <p class="foot">Số dư trước 18/10: 3.200 điểm. Các giao dịch trên thuộc dữ liệu minh hoạ của đồ án.</p>
+        @if (transactions.length > 0) {
+          <p class="foot">Lịch sử ghi nhận từ các giao dịch hoàn tất tại KÉN.</p>
+        }
       </section>
     </main>
   </div>

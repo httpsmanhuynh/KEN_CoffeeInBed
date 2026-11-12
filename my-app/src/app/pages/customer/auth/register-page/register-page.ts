@@ -28,6 +28,8 @@ const passwordsMatch: ValidatorFn = (g: AbstractControl): ValidationErrors | nul
 const notFuture: ValidatorFn = (c: AbstractControl): ValidationErrors | null =>
   c.value && new Date(c.value) > new Date() ? { future: true } : null;
 
+const REG_DRAFT_KEY = 'ken_reg_draft';
+
 @Component({
   selector: 'app-register-page',
   standalone: false,
@@ -56,8 +58,8 @@ export class RegisterPage {
   readonly form = this.fb.nonNullable.group(
     {
       fullName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-      email: ['', [Validators.email, Validators.maxLength(100)]], // không bắt buộc (BR-A03)
-      phone: ['', [Validators.required, Validators.pattern(/^(?:\+84|84|0)(?:3|5|7|8|9)\d{8}$/)]],
+      email: ['', [Validators.required, Validators.email, Validators.maxLength(100)]],
+      phone: ['', [Validators.pattern(/^(?:\+84|84|0)(?:3|5|7|8|9)\d{8}$/)]], // không bắt buộc
       dateOfBirth: ['', [Validators.required, notFuture]], // bắt buộc theo BR-A03
       password: ['', [Validators.required, Validators.minLength(8), maxBytes(72)]],
       confirmPassword: ['', [Validators.required]],
@@ -66,9 +68,35 @@ export class RegisterPage {
   );
 
   constructor() {
+    // Khôi phục thông tin đã nhập nếu người dùng quay lại từ OTP
+    try {
+      const saved = sessionStorage.getItem(REG_DRAFT_KEY);
+      if (saved) {
+        const d = JSON.parse(saved);
+        this.form.patchValue({
+          fullName: d.fullName || '',
+          email: d.email || '',
+          phone: d.phone || '',
+          dateOfBirth: d.dateOfBirth || '',
+        });
+      }
+    } catch {}
+
     // Người dùng sửa dữ liệu thì xóa thông báo lỗi chung (vd. "đã được sử dụng").
     this.form.valueChanges.subscribe(() => {
       if (this.formError !== 'none') this.formError = 'none';
+      try {
+        const raw = this.form.getRawValue();
+        sessionStorage.setItem(
+          REG_DRAFT_KEY,
+          JSON.stringify({
+            fullName: raw.fullName,
+            email: raw.email,
+            phone: raw.phone,
+            dateOfBirth: raw.dateOfBirth,
+          }),
+        );
+      } catch {}
     });
   }
 
@@ -85,9 +113,9 @@ export class RegisterPage {
       case 'fullName':
         return e['required'] ? 'Vui lòng nhập họ và tên.' : 'Họ và tên từ 2 đến 100 ký tự.';
       case 'email':
-        return 'Email chưa đúng định dạng.';
+        return e['required'] ? 'Vui lòng nhập email để nhận mã OTP.' : 'Email chưa đúng định dạng.';
       case 'phone':
-        return e['required'] ? 'Vui lòng nhập số điện thoại.' : 'Số điện thoại chưa đúng định dạng.';
+        return 'Số điện thoại chưa đúng định dạng.';
       case 'dateOfBirth':
         return e['required'] ? 'Vui lòng chọn ngày sinh.' : 'Ngày sinh không hợp lệ.';
       case 'password':
@@ -145,7 +173,7 @@ export class RegisterPage {
         // 201: đã gửi OTP → sang bước nhập OTP (tài khoản chỉ tạo sau khi OTP đúng, BR-A03)
         next: () => this.router.navigate(['/otp-verify'], {
           queryParams: this.returnUrl ? { returnUrl: this.returnUrl } : undefined,
-          state: { phone: v.phone.trim() },
+          state: { phone: v.phone.trim() || v.email.trim(), email: v.email.trim() },
         }),
         error: (err: HttpErrorResponse) => {
           this.loading = false;

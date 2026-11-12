@@ -10,6 +10,10 @@
       <aside class="review-bookings">
         <h2><img class="review-inline-icon" src="/images/review-icons/receipt-heading.svg" alt="" /> Chọn đặt chỗ để đánh giá</h2>
 
+        <p *ngIf="bookings.length === 0" style="color: #776659; font-size: 14px; line-height: 1.5; padding: 12px 0;">
+          Bạn chưa có đặt chỗ nào đã hoàn tất (Check-out) chờ đánh giá.
+        </p>
+
         <button
           *ngFor="let b of bookings; let i = index"
           type="button"
@@ -34,7 +38,7 @@
       <section class="review-form" aria-label="Viết đánh giá">
         <h2><img class="review-inline-icon" src="/images/review-icons/form-heading.svg" alt="" /> Viết đánh giá</h2>
 
-        <div class="review-form-content">
+        <div class="review-form-content" *ngIf="bookings.length > 0 && booking; else noBookingToReview">
           <div class="review-receipt">
             <div class="review-receipt-icon" aria-hidden="true">
               <img [src]="selectedBooking === 0 ? '/images/review-icons/coffee-detail.svg' : booking.icon" alt="" />
@@ -160,6 +164,12 @@
             {{ notice }}
           </p>
         </div>
+        <ng-template #noBookingToReview>
+          <div class="review-form-content" style="text-align: center; padding: 40px 20px; color: #776659;">
+            <p style="font-size: 15px; margin-bottom: 8px;">Hiện tại bạn không có lịch đặt nào cần đánh giá.</p>
+            <p style="font-size: 13px; color: #9a887a;">Khi bạn hoàn tất buổi đặt chỗ (Check-out) tại KÉN, bạn có thể quay lại đây để chia sẻ trải nghiệm.</p>
+          </div>
+        </ng-template>
       </section>
     </div>
 

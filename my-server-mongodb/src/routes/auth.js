@@ -51,10 +51,11 @@ router.post(
       email = str(req.body.email).toLowerCase();
     const dob = new Date(str(req.body.dateOfBirth)),
       password = typeof req.body.password === 'string' ? req.body.password : '';
+    const hasValidContact = (phone ? PHONE_RE.test(phone) : Boolean(email));
     if (
       fullName.length < 2 ||
       fullName.length > 100 ||
-      !PHONE_RE.test(phone) ||
+      !hasValidContact ||
       Number.isNaN(dob.getTime()) ||
       dob > new Date() ||
       !validNewPassword(password) ||
@@ -63,18 +64,20 @@ router.post(
       return fail(res, 422, 'VALIDATION_ERROR', 'Thông tin đăng ký không hợp lệ');
 
     const users = db.collection('users');
-    if (await users.findOne({ phone }))
+    if (phone && (await users.findOne({ phone })))
       return fail(res, 409, 'PHONE_EXISTS', 'Số điện thoại đã được đăng ký');
     if (email && (await users.findOne({ email })))
       return fail(res, 409, 'EMAIL_EXISTS', 'Email đã được sử dụng');
 
+    const otpIdentifier = phone || email;
     const pendingData = {
       full_name: fullName,
       date_of_birth: dob,
       password_hash: await bcrypt.hash(password, 10),
     };
+    if (phone) pendingData.phone = phone;
     if (email) pendingData.email = email;
-    await issueOtp(db, { userId: null, purpose: 'REGISTER', phone, email, pendingData });
+    await issueOtp(db, { userId: null, purpose: 'REGISTER', phone: otpIdentifier, email, pendingData });
     res.status(201).json({ message: 'Đã gửi OTP xác minh' });
   }),
 );
@@ -87,21 +90,24 @@ router.post(
   wrap(async (req, res) => {
     const db = req.app.locals.db;
     const phone = str(req.body.phone);
-    if (!PHONE_RE.test(phone))
-      return fail(res, 422, 'VALIDATION_ERROR', 'Số điện thoại không hợp lệ');
-    if (await db.collection('users').findOne({ phone }))
+    if (!PHONE_RE.test(phone) && !EMAIL_RE.test(phone.toLowerCase()))
+      return fail(res, 422, 'VALIDATION_ERROR', 'Thông tin liên hệ không hợp lệ');
+    const lookupKey = PHONE_RE.test(phone) ? phone : phone.toLowerCase();
+    if (PHONE_RE.test(phone) && (await db.collection('users').findOne({ phone })))
       return fail(res, 409, 'PHONE_EXISTS', 'Số điện thoại đã được đăng ký');
+    if (!PHONE_RE.test(phone) && (await db.collection('users').findOne({ email: lookupKey })))
+      return fail(res, 409, 'EMAIL_EXISTS', 'Email đã được sử dụng');
 
     const latest = await db
       .collection('otp_codes')
-      .findOne({ phone, purpose: 'REGISTER', is_used: false }, { sort: { created_at: -1 } });
+      .findOne({ phone: lookupKey, purpose: 'REGISTER', is_used: false }, { sort: { created_at: -1 } });
     if (!latest || !latest.pending_data)
       return fail(res, 404, 'REGISTER_SESSION_NOT_FOUND', 'Không tìm thấy phiên đăng ký đang chờ xác minh');
 
     await issueOtp(db, {
       userId: null,
       purpose: 'REGISTER',
-      phone,
+      phone: lookupKey,
       email: latest.pending_data.email || null,
       pendingData: latest.pending_data,
     });
@@ -115,7 +121,8 @@ router.post(
   ipLimiter,
   wrap(async (req, res) => {
     const db = req.app.locals.db;
-    const phone = str(req.body.phone);
+    const rawPhone = str(req.body.phone);
+    const phone = PHONE_RE.test(rawPhone) ? rawPhone : rawPhone.toLowerCase();
     const { status, otp } = await verifyOtp(db, {
       phone,
       purpose: 'REGISTER',
@@ -132,7 +139,6 @@ router.post(
       now = new Date();
     const doc = {
       full_name: p.full_name,
-      phone,
       password_hash: p.password_hash,
       date_of_birth: p.date_of_birth,
       role: 'CUSTOMER',
@@ -144,6 +150,7 @@ router.post(
       created_at: now,
       updated_at: now,
     };
+    if (p.phone || PHONE_RE.test(phone)) doc.phone = p.phone || phone;
     if (p.email) doc.email = p.email;
     try {
       await db.collection('users').insertOne(doc);

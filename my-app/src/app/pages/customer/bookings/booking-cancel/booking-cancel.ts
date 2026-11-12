@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { AuthService } from '../../../../core/auth.service';
@@ -22,6 +22,7 @@ export class BookingCancel implements OnInit {
   private readonly auth = inject(AuthService, { optional: true });
   private readonly api = inject(CustomerApiService, { optional: true });
   private readonly router = inject(Router, { optional: true });
+  private readonly cdr = inject(ChangeDetectorRef, { optional: true });
 
   orders: CancelOrder[] = [
     { code: '#KEN-241026-006', name: 'Ô tập trung cá nhân (Focus Pod)', status: 'confirmed', date: '24/10/2026', time: '09:00–13:00', hours: 4, pkg: 'Nửa ngày', total: 140000 },
@@ -31,7 +32,7 @@ export class BookingCancel implements OnInit {
   readonly statusLabel: Record<CancelStatus, string> = { confirmed: 'Đã xác nhận', pending: 'Chờ xác nhận' };
 
   /** Chọn đơn qua ?code=KEN-xxxx (ví dụ từ trang Lịch sử đặt chỗ); mặc định đơn đầu tiên. */
-  order: CancelOrder = this.pick(this.route.snapshot.queryParamMap.get('code'));
+  order: CancelOrder | null = this.pick(this.route.snapshot.queryParamMap.get('code'));
   submitted = false;
   cancelError = '';
 
@@ -47,7 +48,12 @@ export class BookingCancel implements OnInit {
           next: ({ bookings, spaces }) => {
             const spaceMap = new Map<string, any>(spaces.map((s) => [String(s._id), s]));
             const cancellable = bookings.filter((b) => b.status === 'CONFIRMED' || b.status === 'PENDING_PAYMENT');
-            if (!cancellable.length) return;
+            if (!cancellable.length) {
+              this.orders = [];
+              this.order = null;
+              this.cdr?.markForCheck();
+              return;
+            }
             this.orders = cancellable.map((b) => {
               const sVn = new Date(new Date(b.start_at).getTime() + 7 * 3600000);
               const eVn = new Date(new Date(b.end_at).getTime() + 7 * 3600000);
@@ -66,18 +72,26 @@ export class BookingCancel implements OnInit {
               };
             });
             this.order = this.pick(this.route.snapshot.queryParamMap.get('code'));
+            this.cdr?.markForCheck();
           },
         });
       },
     });
   }
 
-  private pick(code: string | null): CancelOrder {
+  selectOrder(o: CancelOrder): void {
+    this.order = o;
+    this.submitted = false;
+    this.cancelError = '';
+  }
+
+  private pick(code: string | null): CancelOrder | null {
+    if (!this.orders.length) return null;
     const c = (code ?? '').replace('#', '');
     return this.orders.find(o => o.code.replace('#', '') === c) ?? this.orders[0];
   }
 
-  get isConfirmed(): boolean { return this.order.status === 'confirmed'; }
+  get isConfirmed(): boolean { return this.order?.status === 'confirmed'; }
   get conditionLine(): string {
     return this.isConfirmed ? 'Đã xác nhận · áp dụng hạn huỷ' : 'Đơn chưa được xác nhận';
   }
@@ -86,15 +100,21 @@ export class BookingCancel implements OnInit {
       ? 'KÉN sẽ kiểm tra điều kiện huỷ sau khi nhận yêu cầu.'
       : 'KÉN sẽ kiểm tra yêu cầu sau khi nhận.';
   }
-  get paidText(): string { return this.isConfirmed ? this.fmtMoney(this.order.total) : 'Chờ đối chiếu'; }
+  get paidText(): string { return this.isConfirmed && this.order ? this.fmtMoney(this.order.total) : 'Chờ đối chiếu'; }
 
   confirmCancel(): void {
-    if (this.submitted) return;
+    if (this.submitted || !this.order) return;
     if (this.api && this.order.rawId) {
       this.cancelError = '';
       this.api.cancelBooking(this.order.rawId).subscribe({
-        next: () => { this.submitted = true; },
-        error: (err) => { this.cancelError = err.error?.message || 'Không thể huỷ đơn lúc này.'; },
+        next: () => {
+          this.submitted = true;
+          this.cdr?.markForCheck();
+        },
+        error: (err) => {
+          this.cancelError = err.error?.message || 'Không thể huỷ đơn lúc này.';
+          this.cdr?.markForCheck();
+        },
       });
       return;
     }

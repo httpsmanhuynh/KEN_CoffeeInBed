@@ -30,11 +30,15 @@ export class KenFocusPodPage implements OnInit {
   }
   get minDate(): string { return kenNextDay(); }
   get filteredExtras() { return this.extraCategory === 'all' ? this.state.extras : this.state.extras.filter(x => x.category === this.extraCategory); }
-  chooseHours(hours: 1 | 4): void {
+  get hourlyDurationOptions(): number[] {
+    const maxHours = Math.max(1, 22 - this.state.draft().startHour);
+    return Array.from({ length: maxHours }, (_, i) => i + 1);
+  }
+  chooseHours(hours: number): void {
     this.state.set({
       hours,
-      drinkId: hours === 1 ? null : this.state.draft().drinkId,
-      drinkQuantities: hours === 1 ? {} : this.state.draft().drinkQuantities,
+      drinkId: hours === 4 ? this.state.draft().drinkId : null,
+      drinkQuantities: hours === 4 ? this.state.draft().drinkQuantities : {},
       holdUntil: null
     });
     this.showAddons = false;

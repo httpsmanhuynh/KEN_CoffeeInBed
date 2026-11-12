@@ -129,22 +129,30 @@ export class ReviewPage implements OnInit {
     this.auth.ensureSession().subscribe({
       next: (user) => {
         if (!user) return;
+        this.reviewText = '';
         this.api!.getMyReviews().subscribe({
           next: (myRes) => {
             if (myRes?.pendingReminders?.length) {
               this.bookings = myRes.pendingReminders.map((b) => ({
-                rawBookingId: String(b._id),
+                rawBookingId: String(b.bookingId || b.booking_id || b._id),
                 label: `${b.space_name || 'Không gian KÉN'}`,
                 date: b.start_at ? new Date(b.start_at).toLocaleDateString('vi-VN') : '',
                 code: `#${b.booking_code}`,
-                time: '',
+                time: b.start_at && b.end_at
+                  ? `${new Date(b.start_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} – ${new Date(b.end_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`
+                  : '',
                 amount: b.final_amount ? `${Number(b.final_amount).toLocaleString('vi-VN')}đ` : '',
-                area: 'Đơn đã hoàn thành',
-                detail: b.space_name || 'Không gian KÉN',
+                area: b.zone_name || 'Đơn đã hoàn thành',
+                detail: b.package_name || b.space_name || 'Không gian KÉN',
                 icon: '/images/review-icons/laptop.svg',
               }));
               this.selectedBooking = 0;
+            } else {
+              this.bookings = [];
             }
+          },
+          error: () => {
+            this.bookings = [];
           },
         });
       },

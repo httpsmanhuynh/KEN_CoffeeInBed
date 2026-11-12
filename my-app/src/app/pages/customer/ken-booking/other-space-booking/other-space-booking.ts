@@ -68,6 +68,22 @@ export class KenOtherSpacePage implements OnInit {
     );
   }
 
+  get isHourlyWork(): boolean {
+    return this.space?.id === 'work' && this.duration !== 4 && this.duration !== 14;
+  }
+
+  get hourlyDurationOptions(): number[] {
+    const maxHours = Math.max(1, 22 - this.startHour);
+    return Array.from({ length: maxHours }, (_, i) => i + 1);
+  }
+
+  isRateSelected(rate: { hours: number; price: number }): boolean {
+    if (this.space?.id === 'work' && rate.hours === 1) {
+      return this.duration !== 4 && this.duration !== 14;
+    }
+    return this.duration === rate.hours;
+  }
+
   chooseDuration(hours: number): void {
     this.duration = hours;
     this.startHour = Math.min(this.startHour, 22 - hours);
@@ -143,7 +159,7 @@ export class KenOtherSpacePage implements OnInit {
   rateLabel(rate: { hours: number; price: number }): string {
     if (this.space?.id === 'work' && rate.hours === 14) return 'Cả ngày · 08:00–22:00';
     if (this.space?.id === 'work' && rate.hours === 4) return 'Nửa ngày · 4 giờ';
-    return this.space?.id === 'work' ? 'Linh hoạt · 1 giờ' : `${rate.hours} giờ`;
+    return this.space?.id === 'work' ? 'Linh hoạt · Theo giờ' : `${rate.hours} giờ`;
   }
 
   toReview(): void {

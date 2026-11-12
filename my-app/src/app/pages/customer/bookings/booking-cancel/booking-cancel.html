@@ -17,6 +17,16 @@
       </nav>
 
       <div class="stack">
+        @if (orders.length > 1) {
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;">
+            @for (o of orders; track o.code) {
+              <button type="button" class="btn" [class.btn--gold]="order?.code === o.code" [class.btn--outline]="order?.code !== o.code" (click)="selectOrder(o)">
+                {{ o.code }} · {{ o.name }}
+              </button>
+            }
+          </div>
+        }
+        @if (order) {
         <section class="dialog" aria-labelledby="cancel-title">
           <header class="dialog__head">
             <h2 id="cancel-title">Xác nhận huỷ booking</h2>
@@ -71,10 +81,19 @@
             <a class="btn btn--outline" routerLink="/booking-list">Quay lại</a>
             <button type="button" class="btn btn--gold" [disabled]="submitted" (click)="confirmCancel()">{{ submitted ? 'Đã gửi yêu cầu' : 'Xác nhận huỷ' }}</button>
           </div>
+          @if (cancelError) {
+            <p class="foot" style="color: #9b1c1c; background: #fde8e8; padding: 10px 12px; border-radius: 8px; margin-top: 8px;" role="alert">{{ cancelError }}</p>
+          }
           <p class="foot" [class.foot--ok]="submitted" role="status" aria-live="polite">
-            {{ submitted ? 'Đã gửi yêu cầu. Đơn chưa huỷ đến khi KÉN xác nhận.' : 'Gửi yêu cầu huỷ; đơn chưa huỷ ngay.' }}
+            {{ submitted ? 'Đã huỷ đơn thành công.' : 'Xác nhận huỷ đơn đặt chỗ này.' }}
           </p>
         </section>
+        } @else {
+          <section class="dialog" style="text-align: center; padding: 40px 24px;">
+            <p style="color: #776659; font-size: 15px;">Bạn hiện không có đơn đặt chỗ nào có thể huỷ.</p>
+            <a class="btn btn--outline" routerLink="/booking-list" style="margin-top: 12px; display: inline-flex;">Xem lịch sử đặt chỗ</a>
+          </section>
+        }
 
         <aside class="suggest">
           <p class="suggest__title">Đổi ngày thay vì huỷ?</p>

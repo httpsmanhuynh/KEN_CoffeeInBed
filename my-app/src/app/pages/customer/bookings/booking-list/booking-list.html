@@ -86,7 +86,7 @@
         </div>
 
         @for (b of rows; track b.id; let i = $index) {
-          <div class="entry" [class.entry--alt]="i % 2 === 1">
+          <div class="entry" [class.entry--alt]="i % 2 === 1" (click)="viewDetail(b)" style="cursor: pointer;">
             <div class="tr" role="row">
               <div class="td td--id" role="cell">{{ b.id }}</div>
               <div class="td td--stack" role="cell"><strong>{{ b.space }}</strong><small>{{ b.zone }}</small></div>
@@ -95,7 +95,7 @@
               <div class="td td--right" role="cell"><b class="price" [class.price--strike]="b.status === 'cancelled' || b.status === 'noshow'">{{ fmtMoney(b.total) }}</b></div>
               <div class="td" role="cell"><span class="badge badge--{{ b.status }}">{{ statusLabel[b.status] }}</span></div>
               <div class="td td--center" role="cell">
-                <button type="button" class="eye" [disabled]="!b.rawId && (b.status === 'cancelled' || b.status === 'noshow')" (click)="viewDetail(b)" [attr.aria-label]="'Xem chi tiết ' + b.id">
+                <button type="button" class="eye" [disabled]="!b.rawId && (b.status === 'cancelled' || b.status === 'noshow')" (click)="$event.stopPropagation(); viewDetail(b)" [attr.aria-label]="'Xem chi tiết ' + b.id">
                   <img [src]="'/images/figma/' + eyeIcon(b) + '.svg'" alt="" width="18" height="18" />
                 </button>
               </div>
@@ -160,10 +160,14 @@
         } @else {
           <div class="bl-modal__grid">
             <div><span>Không gian</span><strong>{{ detailBooking.spaceName || 'Không gian KÉN' }}</strong></div>
+            <div><span>Gói dịch vụ</span><strong>{{ detailBooking.package_name || 'Theo đặt chỗ' }}</strong></div>
             <div><span>Trạng thái</span><strong>{{ detailBooking.status }}</strong></div>
             <div><span>Bắt đầu</span><strong>{{ fmtDateTime(detailBooking.start_at) }}</strong></div>
             <div><span>Kết thúc</span><strong>{{ fmtDateTime(detailBooking.end_at) }}</strong></div>
             <div><span>Số khách</span><strong>{{ detailBooking.guest_count }} khách</strong></div>
+            <div><span>Người đặt</span><strong>{{ detailBooking.contact_name || '—' }}</strong></div>
+            <div><span>Số điện thoại</span><strong>{{ detailBooking.contact_phone || '—' }}</strong></div>
+            <div><span>Email</span><strong>{{ detailBooking.contact_email || '—' }}</strong></div>
             <div><span>Tổng thanh toán</span><strong>{{ fmtMoney(detailBooking.final_amount) }}</strong></div>
           </div>
           @if (detailBooking.transactions?.length) {

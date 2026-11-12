@@ -21,8 +21,15 @@
     <p class="kf-entitlement">Xem lịch chưa giữ chỗ. Đổi ngày hoặc giờ sẽ kiểm tra lại khi đặt.</p>
 
     <div class="kf-booking-step-title"><span>BƯỚC 02</span><h2>Chọn không gian &amp; gói dịch vụ</h2></div>
-    <div class="kf-package-grid"><button type="button" [class.selected]="state.draft().hours === 1" (click)="chooseHours(1)"><div><strong>Theo giờ</strong><b>45.000đ/h</b></div><small>Tự chọn thời lượng · Tối thiểu 1 giờ · Nước suối từ 2h</small></button><button type="button" [class.selected]="state.draft().hours === 4" (click)="chooseHours(4)"><div><strong>Nửa ngày · 4 giờ</strong><b>140.000đ</b></div><small>Cố định 4 giờ · 01 đồ uống Menu Tiêu chuẩn (≤50.000đ) · {{ state.draft().hours === 4 ? 'Đang chọn ✓' : 'Chọn gói' }}</small></button></div>
-    <p class="kf-entitlement">✓ {{ state.draft().hours === 4 ? '01 đồ uống trong gói · Hỗ trợ tối đa 50.000đ/ly. Món vượt: chỉ trả phần chênh lệch.' : 'Gói theo giờ không bao gồm đồ uống. Đồ uống chọn thêm tính theo giá niêm yết.' }}</p>
+    <div class="kf-package-grid"><button type="button" [class.selected]="state.draft().hours !== 4" (click)="chooseHours(1)"><div><strong>Theo giờ</strong><b>45.000đ/h</b></div><small>Tự chọn thời lượng · Tối thiểu 1 giờ · Nước suối từ 2h</small></button><button type="button" [class.selected]="state.draft().hours === 4" (click)="chooseHours(4)"><div><strong>Nửa ngày · 4 giờ</strong><b>140.000đ</b></div><small>Cố định 4 giờ · 01 đồ uống Menu Tiêu chuẩn (≤50.000đ) · {{ state.draft().hours === 4 ? 'Đang chọn ✓' : 'Chọn gói' }}</small></button></div>
+    <div class="kf-date-controls" *ngIf="state.draft().hours !== 4" style="margin-top: 12px;">
+      <label>Số giờ sử dụng (đơn vị 1 giờ)
+        <select [value]="state.draft().hours" (change)="chooseHours(+$any($event.target).value)">
+          <option *ngFor="let h of hourlyDurationOptions" [value]="h">{{ h }} giờ ({{ ('0' + state.draft().startHour).slice(-2) }}:00–{{ ('0' + (state.draft().startHour + h)).slice(-2) }}:00)</option>
+        </select>
+      </label>
+    </div>
+    <p class="kf-entitlement">✓ {{ state.draft().hours === 4 ? '01 đồ uống trong gói · Hỗ trợ tối đa 50.000đ/ly. Món vượt: chỉ trả phần chênh lệch.' : state.draft().hours >= 2 ? 'Đặt từ 2 giờ: tặng 01 chai nước suối. Đồ uống chọn thêm tính theo giá niêm yết.' : 'Gói theo giờ (tối thiểu 1 giờ) · Đặt từ 2 giờ được tặng 01 chai nước suối.' }}</p>
 
     <button *ngIf="!showAddons" type="button" class="kf-btn kf-btn-gold" [disabled]="checkingSession || checkingAvailability" (click)="beginBooking()">
       {{ checkingSession || checkingAvailability ? 'Đang kiểm tra…' : 'Đặt chỗ ngay' }}

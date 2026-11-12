@@ -37,7 +37,7 @@
 .kf-counter{font-size:12px;margin-left:auto;color:var(--kf-muted)}
 .kf-note{font-size:12px;color:var(--kf-muted);margin:20px 0!important}
 .kf-help-mini{color:var(--kf-muted);font-size:12px;line-height:1.6;margin-top:12px!important}
-.kf-inline-feedback{background:#f6e7cc;color:#714523;border-radius:10px;font-size:13px;line-height:1.5;padding:12px;margin-top:12px!important}
+.kf-inline-feedback{background:#fde8e8;color:#9b1c1c;border:1px solid #f8b4b4;border-radius:10px;font-size:13px;font-weight:500;line-height:1.5;padding:12px 14px;margin-top:12px!important}
 .kf-panel{background:var(--kf-white);border:1px solid var(--kf-border);border-radius:12px;padding:25px;margin-bottom:24px}
 .kf-panel h2{font-family:Inter,Arial,sans-serif;font-size:20px;font-weight:700}
 .kf-panel-heading{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:20px}
