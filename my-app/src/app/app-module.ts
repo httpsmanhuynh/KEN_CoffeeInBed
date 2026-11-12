@@ -64,6 +64,16 @@ import { ConnectPage } from './pages/customer/space-details/connect-page/connect
 import { CoworkPage } from './pages/customer/space-details/cowork-page/cowork-page';
 import { FocusPage } from './pages/customer/space-details/focus-page/focus-page';
 import { MeetingPage } from './pages/customer/space-details/meeting-page/meeting-page';
+import { AdminLayoutComponent } from './pages/admin/admin-layout/admin-layout.component';
+import { DashboardComponent } from './pages/admin/dashboard/dashboard.component';
+import { BookingsComponent } from './pages/admin/bookings/bookings.component';
+import { CustomersComponent } from './pages/admin/customers/customers.component';
+import { AreasComponent } from './pages/admin/areas/areas.component';
+import { SpacesComponent } from './pages/admin/spaces/spaces.component';
+import { ServicePackages } from './pages/admin/service-packages/service-packages';
+import { Addons } from './pages/admin/addons/addons';
+import { Voucher } from './pages/admin/voucher/voucher';
+import { Forecast } from './pages/admin/forecast/forecast';
 
 @NgModule({
   declarations: [
@@ -118,6 +128,16 @@ import { MeetingPage } from './pages/customer/space-details/meeting-page/meeting
     CoworkPage,
     FocusPage,
     MeetingPage,
+    AdminLayoutComponent,
+    DashboardComponent,
+    BookingsComponent,
+    CustomersComponent,
+    AreasComponent,
+    SpacesComponent,
+    ServicePackages,
+    Addons,
+    Voucher,
+    Forecast,
   ],
   imports: [
     BrowserModule,

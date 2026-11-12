@@ -14,7 +14,13 @@
     }
 
     @if (requiresLogin) {
-      <p class="lg__welcome" role="status">Vui lòng đăng nhập để tiếp tục thao tác.</p>
+      <p class="lg__welcome" role="status">
+        @if (returnUrl?.startsWith('/admin')) {
+          Đăng nhập bằng tài khoản quản trị viên để tiếp tục.
+        } @else {
+          Vui lòng đăng nhập để tiếp tục thao tác.
+        }
+      </p>
     }
 
     <form class="lg__form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
@@ -68,7 +74,7 @@
       </button>
     </form>
 
-    <p class="lg__signup">Chưa có tài khoản? <a routerLink="/register">Đăng ký ngay</a></p>
+    <p class="lg__signup">Chưa có tài khoản? <a routerLink="/register" [queryParams]="returnUrl ? { returnUrl: returnUrl } : null">Đăng ký ngay</a></p>
 
     <p class="lg__legal">
       Bằng cách đăng nhập, bạn đồng ý với Điều khoản &amp; Điều kiện

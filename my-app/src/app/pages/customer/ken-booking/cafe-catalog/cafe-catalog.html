@@ -1,24 +1,18 @@
 <main class="kf kf-menu">
   <section class="kf-menu-hero kf-container">
     <div class="kf-menu-intro">
-      
       <h1>Thực đơn của KÉN</h1>
-      <p class="kf-script">để bạn chọn trước, rồi ngắt cho đủ</p>
-      <p>Xem món, gọi và nhờ cafféine sẽ biến mỗi cuộc gặp trở nên đáng chờ đợi hơn cho mình, bạn thêm các món này vào thực đơn trò chuyện của buổi đó.</p>
       <div class="kf-button-row"><a class="kf-btn kf-btn-gold" routerLink="/booking/spaces">Đặt không gian của tôi</a><a class="kf-btn kf-btn-light" href="#ken-menu-catalog">Xem thực đơn <img class="kf-menu-arrow" src="/images/ken-flow/icons/menu-arrow-down-right.svg" alt=""></a></div>
     </div>
     <div class="kf-menu-hero-images">
   <figure class="kf-menu-drink-card">
     <img src="/images/ken-flow/menu-hero-1.png" alt="Cà phê đen tại KÉN">
-    <figcaption><i></i>"cà phê đen"</figcaption>
   </figure>
   <figure class="kf-menu-drink-card">
     <img src="/images/ken-flow/menu-hero-2.png" alt="Trà và latte tại KÉN">
-    <figcaption><i></i>"perhaps tea"</figcaption>
   </figure>
   <figure class="kf-menu-drink-card">
     <img src="/images/ken-flow/menu-hero-3.png" alt="Đồ uống KÉN">
-    <figcaption><i></i>"Night, make it three"</figcaption>
   </figure>
 </div>
   </section>
@@ -35,29 +29,28 @@
     </div>
   </div>
 </div>
-      <div><h2>Ở KÉN, bạn luôn có một<br>không gian của riêng mình</h2><p>Mỗi cuộc cà phê, không gian là thành tố. Ở đây từ giá cả phê mới đến phòng nhóm kín. Thực đơn ở đây là phần đã sẵn, giúp bạn ngồi đủ hơn và thoải mái hơn.</p><a class="kf-btn kf-btn-gold" routerLink="/spaces">Khám phá các không gian <img class="kf-menu-arrow" src="/images/ken-flow/icons/menu-arrow-bar-right.svg" alt=""></a></div>
+      <div><h2>Ở KÉN, bạn luôn có một<br>không gian của riêng mình</h2><a class="kf-btn kf-btn-gold" routerLink="/spaces">Khám phá các không gian <img class="kf-menu-arrow" src="/images/ken-flow/icons/menu-arrow-bar-right.svg" alt=""></a></div>
     </div>
   </section>
 
   <section id="ken-cafe-menu" class="kf-menu-catalog kf-container">
     <div class="kf-crumb"><a routerLink="/">Trang chủ</a> / <span>KÉN Kết Nối · Thực đơn café</span></div>
-    <div class="kf-menu-title"><p class="kf-overline">MỘT MÓN HỢP TÂM TRẠNG</p><h2><span id="ken-menu-catalog">Hôm nay, bạn dùng gì?</span></h2><span>Menu chỉ để tham khảo · Gọi món tại quầy</span></div>
+    <div class="kf-menu-title"><h2><span id="ken-menu-catalog">Hôm nay, bạn dùng gì?</span></h2></div>
     <div class="kf-filter-line">
       <label class="kf-search"><span class="kf-sr">Tìm đồ uống</span><input type="search" [(ngModel)]="searchText" placeholder="Tìm món bạn thích, như bạc xỉu, matcha, croissant..."></label>
       <select aria-label="Lọc mức giá" [(ngModel)]="priceFilter"><option value="all">Mức giá: Tất cả</option><option value="under50">Dưới 50.000đ</option><option value="from50">Từ 50.000đ</option></select>
       <select aria-label="Sắp xếp" [(ngModel)]="sorting"><option value="group">Sắp xếp: Theo danh mục</option><option value="price-asc">Giá tăng dần</option><option value="price-desc">Giá giảm dần</option></select>
     </div>
-    <div class="kf-tabs" aria-label="Lọc danh mục"><button type="button" *ngFor="let tab of categories" [class.active]="category === tab.id" (click)="category = tab.id">{{ tab.label }}</button><span class="kf-counter">{{ resultCount }} món · Đồ uống &amp; ăn nhẹ</span></div>
+    <div class="kf-tabs" aria-label="Lọc danh mục"><button type="button" *ngFor="let tab of categories" [class.active]="category === tab.id" (click)="category = tab.id">{{ tab.label }}</button></div>
     <ng-container *ngFor="let section of shownSections">
-      <div class="kf-section-title"><div><span class="kf-overline">{{ section.no }} /</span><h3>{{ section.title }}</h3></div><p>{{ section.subtitle }}</p></div>
+      <div class="kf-section-title"><div><h3>{{ section.title }}</h3></div></div>
       <div class="kf-menu-grid"><article class="kf-product" *ngFor="let item of forSection(section.id)">
         <img [src]="image(item)" [alt]="item.name" loading="lazy"><div class="kf-product-copy"><h4>{{ item.name }}</h4><p>{{ item.description }}</p><div><strong>{{ money(item.price) }}</strong><small>VNĐ</small></div></div>
       </article></div>
     </ng-container>
     <p class="kf-note" *ngIf="resultCount === 0">Không tìm thấy món phù hợp. Hãy thử đổi từ khóa hoặc mức giá.</p>
-    <p class="kf-note"><img class="kf-icon" src="/images/ken-flow/icons/menu-info.svg" alt=""> Hình ảnh mang tính minh họa. Vui lòng hỏi tại quầy về món và hương vị có sẵn khi bạn ghé.</p>
   </section>
 
-  <section class="kf-menu-visit"><div class="kf-container kf-menu-visit-inner"><img src="/images/ken-flow/menu-cafe-visit.png" alt="Khu café dành cho những buổi gặp gỡ"><div><p class="kf-overline">HẸN GẶP BẠN Ở KÉN</p><h2>Cứ ghé,<br>chúng mình có cà phê.</h2><p>Một mình đọc vài trang sách, cùng bạn bè chuyện trò, hay đơn giản là ngồi lại một lát. KÉN Kết Nối là không gian café mở để bạn ghé trực tiếp.</p><p><img class="kf-icon" src="/images/ken-flow/icons/menu-clock.svg" alt=""> 08:00–22:00 hằng ngày</p><p><img class="kf-icon" src="/images/ken-flow/icons/menu-location.svg" alt=""> 123 Nguyễn Văn Cừ, Phường Chợ Lớn, TP.HCM</p></div></div></section>
-  <section class="kf-container kf-menu-zone"><div><p class="kf-overline">CẦN TẬP TRUNG HAY NGHỈ MỘT CHÚT?</p><h2>Không gian dành riêng cho bạn</h2><p>Hãy khám phá KÉN Tập Trung và KÉN Tái Tạo, nơi bạn chủ động chọn gói và khung giờ sử dụng.</p></div><div class="kf-zone-links"><a routerLink="/booking/spaces"><img src="/images/ken-flow/listing-work.png" alt="KÉN Tập Trung"><strong>KÉN Tập Trung</strong><span>Đặt chỗ theo giờ →</span></a><a routerLink="/spaces"><img src="/images/ken-flow/listing-single.png" alt="KÉN Tái Tạo"><strong>KÉN Tái Tạo</strong><span>Khám phá thêm →</span></a></div></section>
+  <section class="kf-menu-visit"><div class="kf-container kf-menu-visit-inner"><img src="/images/ken-flow/menu-cafe-visit.png" alt="Khu café dành cho những buổi gặp gỡ"><div><h2>Cứ ghé,<br>chúng mình có cà phê.</h2><p><img class="kf-icon" src="/images/ken-flow/icons/menu-clock.svg" alt=""> 08:00–22:00 hằng ngày</p><p><img class="kf-icon" src="/images/ken-flow/icons/menu-location.svg" alt=""> 123 Nguyễn Văn Cừ, Phường Chợ Lớn, TP.HCM</p></div></div></section>
+  <section class="kf-container kf-menu-zone"><div><h2>Không gian dành riêng cho bạn</h2></div><div class="kf-zone-links"><a routerLink="/booking/spaces"><img src="/images/ken-flow/listing-work.png" alt="KÉN Tập Trung"><strong>KÉN Tập Trung</strong><span>Đặt chỗ theo giờ →</span></a><a routerLink="/spaces"><img src="/images/ken-flow/listing-single.png" alt="KÉN Tái Tạo"><strong>KÉN Tái Tạo</strong><span>Khám phá thêm →</span></a></div></section>
 </main>

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { KenBookingState, kenMoney } from '../booking-state';
 
 @Component({ selector: 'app-ken-drink-picker', standalone: false, templateUrl: './drink-picker.html', styleUrl: './drink-picker.css' })
@@ -10,7 +10,11 @@ export class KenDrinkPickerPage {
   sorting: 'default' | 'price-asc' | 'price-desc' = 'default';
   feedback = '';
   readonly money = kenMoney;
-  constructor(public state: KenBookingState, private router: Router) {}
+  constructor(
+    public state: KenBookingState,
+    private router: Router,
+    private route: ActivatedRoute,
+  ) {}
   get filteredDrinks() {
     let arr = this.state.drinks.filter(d =>
       (this.category === 'all' || d.category === this.category) &&
@@ -45,6 +49,11 @@ export class KenDrinkPickerPage {
   back(): void {
     if (!this.canContinue) {
       this.feedback = `Chọn đủ ${this.state.requiredDrinkCount} đồ uống để tiếp tục.`;
+      return;
+    }
+    const returnTo = this.route.snapshot.queryParamMap.get('returnTo');
+    if (returnTo?.startsWith('/booking/') && !returnTo.startsWith('//')) {
+      this.router.navigateByUrl(returnTo);
       return;
     }
     this.router.navigateByUrl(this.isFocusSpace ? '/booking/focus-pod' : `/booking/${this.state.draft().spaceId}`);

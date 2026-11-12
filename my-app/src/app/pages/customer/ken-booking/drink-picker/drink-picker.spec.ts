@@ -2,7 +2,7 @@ import { KenDrinkPickerPage } from './drink-picker';
 import { TestBed } from '@angular/core/testing';
 import { AppModule } from '../../../../app-module';
 import { KenBookingState, kenNextDay } from '../booking-state';
-import { Router } from '@angular/router';
+import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { vi } from 'vitest';
 
 describe('KenDrinkPickerPage', () => {
@@ -19,7 +19,8 @@ describe('KenDrinkPickerPage', () => {
     state.set({ spaceId: 'private', date: kenNextDay(), guests: 4, hours: 4 });
     const navigateByUrl = vi.fn();
     const router = { navigateByUrl } as unknown as Router;
-    const page = new KenDrinkPickerPage(state, router);
+    const route = { snapshot: { queryParamMap: convertToParamMap({}) } } as ActivatedRoute;
+    const page = new KenDrinkPickerPage(state, router, route);
 
     page.select('coffee');
     page.select('water');
@@ -39,7 +40,8 @@ describe('KenDrinkPickerPage', () => {
   it('requires exactly two drinks for a two-person booking', () => {
     const state = new KenBookingState();
     state.set({ spaceId: 'double', date: kenNextDay(), guests: 2, hours: 2 });
-    const page = new KenDrinkPickerPage(state, { navigateByUrl: vi.fn() } as unknown as Router);
+    const route = { snapshot: { queryParamMap: convertToParamMap({}) } } as ActivatedRoute;
+    const page = new KenDrinkPickerPage(state, { navigateByUrl: vi.fn() } as unknown as Router, route);
 
     page.select('coffee');
     expect(page.canContinue).toBe(false);
@@ -53,7 +55,8 @@ describe('KenDrinkPickerPage', () => {
     const state = new KenBookingState();
     state.set({ spaceId: 'focus', hours: 4 });
     const navigateByUrl = vi.fn();
-    const page = new KenDrinkPickerPage(state, { navigateByUrl } as unknown as Router);
+    const route = { snapshot: { queryParamMap: convertToParamMap({}) } } as ActivatedRoute;
+    const page = new KenDrinkPickerPage(state, { navigateByUrl } as unknown as Router, route);
 
     page.select('coffee');
     page.back();

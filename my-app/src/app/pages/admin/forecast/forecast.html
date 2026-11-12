@@ -1,0 +1,147 @@
+<div class="forecast-page">
+  <div class="breadcrumb">
+    <strong>KÉN</strong><span>/</span><strong>Admin</strong><span>/</span
+    ><strong>Dự báo nhu cầu món</strong>
+  </div>
+
+  <main class="forecast-content">
+    <header class="forecast-heading">
+      <div class="title-row">
+        <h1>Dự báo nhu cầu món</h1>
+      </div>
+    </header>
+
+    <section class="date-panel">
+      <label>
+        <span>Ngày dự báo</span>
+        <div class="date-input">
+          <img src="/images/figma/calendar-date.svg" alt="" />
+          <input type="text" [(ngModel)]="forecastDate" />
+          <img src="/images/figma/chevron-down.svg" alt="" />
+        </div>
+      </label>
+      <strong>Dự báo tổng số lượng trong ngày</strong>
+      <span class="update-badge">Tự động cập nhật</span>
+    </section>
+
+    <section class="kpi-grid">
+      <article class="kpi-card kpi-dark">
+        <span>Tổng số lượng · 03/11</span><strong>560</strong
+        ><small>460 ly đồ uống · 100 phần bánh</small>
+      </article>
+      <article class="kpi-card">
+        <span>Món được dự báo nhiều nhất</span><strong class="featured">Cà phê Đen/Sữa</strong
+        ><small>96 ly · Ngày 03/11/2026</small>
+      </article>
+      <article class="kpi-card kpi-confidence">
+        <span>Độ tin cậy dự báo</span><strong>92%</strong>
+        <div class="progress"><i></i></div>
+        <small>Dựa trên lịch sử 30 ngày qua</small>
+      </article>
+      <article class="kpi-card">
+        <span>Số món trong dự báo</span><strong>10 món</strong><small>7 đồ uống · 3 bánh</small>
+      </article>
+    </section>
+
+    <section class="forecast-card trend-card">
+      <div class="section-heading">
+        <h2>
+          <img src="/images/figma/table.svg" alt="" /> Xu hướng nhu cầu theo ngày <em>Minh họa</em>
+        </h2>
+        <p>
+          <span class="legend actual"></span> Thực tế minh họa · 28/10–02/11
+          <span class="legend forecast"></span> Dự báo · 03/11
+        </p>
+        <small>28/10–03/11/2026 · Tổng số lượng đồ uống và bánh / ăn nhẹ</small>
+      </div>
+      <div class="chart">
+        <div class="axis"><span>750</span><span>500</span><span>250</span><span>0</span></div>
+        <div class="bars">
+          <div *ngFor="let point of trend; let last = last" class="bar-item">
+            <strong>{{ point.value }}</strong>
+            <div
+              class="bar"
+              [class.forecast-bar]="last"
+              [style.height.%]="barHeight(point.value)"
+            ></div>
+            <small>{{ point.date }}</small>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="forecast-card plan-card">
+      <div class="section-heading plan-heading">
+        <h2><img src="/images/figma/table.svg" alt="" /> Kế hoạch chuẩn bị theo món</h2>
+        <small>Ngày 03/11/2026 · 10 món · Đơn vị theo từng món</small>
+      </div>
+      <div class="plan-filters">
+        <label class="plan-search"
+          ><img src="/images/figma/search.svg" alt="" /><input
+            [(ngModel)]="search"
+            placeholder="Tìm tên hoặc mã món..."
+        /></label>
+        <select [(ngModel)]="category">
+          <option>Tất cả</option>
+          <option>Đồ uống</option>
+          <option>Bánh</option>
+        </select>
+        <select [(ngModel)]="sort">
+          <option>Mặc định</option>
+          <option>Số lượng tăng dần</option>
+          <option>Số lượng giảm dần</option>
+        </select>
+      </div>
+      <div class="plan-table-wrap">
+        <table class="plan-table">
+          <thead>
+            <tr>
+              <th>Ngày</th>
+              <th>Tên món</th>
+              <th>Số lượng dự báo</th>
+              <th>So với TB ngày trước</th>
+              <th>Hành động đề xuất</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of filteredItems">
+              <td><span class="date-pill">03/11</span></td>
+              <td>
+                <strong>{{ item.name }}</strong
+                ><small>{{ item.code }}</small>
+              </td>
+              <td>
+                <strong
+                  >{{ item.quantity }} {{ item.category === 'Đồ uống' ? 'ly' : 'phần' }}</strong
+                >
+              </td>
+              <td
+                [class.up]="item.change && item.change > 0"
+                [class.down]="item.change && item.change < 0"
+              >
+                {{ changeLabel(item.change) }}
+              </td>
+              <td
+                [class.action-up]="item.change && item.change > 0"
+                [class.action-down]="item.change && item.change < 0"
+              >
+                {{ item.action }}
+              </td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="2"><strong>03/11 · Tổng</strong> <span>10 món</span></td>
+              <td><strong>560 phần</strong></td>
+              <td>460 ly + 100 phần</td>
+              <td>1 món cần kiểm tra lịch sử</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div class="pagination">
+        Hiển thị 1–{{ filteredItems.length }} trên 10 món <span>Trang 1 / 1</span>
+      </div>
+    </section>
+  </main>
+</div>

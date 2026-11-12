@@ -31,7 +31,7 @@
           {{ ('0' + hour).slice(-2) }}:00<small>→ {{ ('0' + (hour + duration)).slice(-2) }}:00</small>
         </button>
       </div>
-      <p class="kf-entitlement">ⓘ Lịch chọn giờ mô phỏng, chưa xác minh chỗ trống từ máy chủ. KÉN mở cửa 08:00–22:00.</p>
+      <p class="kf-entitlement">Xem lịch không giữ chỗ. KÉN mở cửa 08:00–22:00.</p>
 
       <div class="kf-booking-step-title"><span>BƯỚC 02</span><h2>Chọn không gian &amp; gói dịch vụ</h2></div>
       <p class="kf-entitlement">Không gian đã chọn: <strong>{{ item.name }}</strong> · {{ item.capacity }}. Chọn gói theo thời lượng; số khách đã chọn là {{ guests }}.</p>
@@ -43,6 +43,12 @@
         </button>
       </div>
 
+      <button *ngIf="!showAddons" type="button" class="kf-btn kf-btn-gold" [disabled]="checkingSession || checkingAvailability" (click)="beginBooking()">
+        {{ checkingSession || checkingAvailability ? 'Đang kiểm tra…' : 'Đặt chỗ ngay' }}
+      </button>
+      <p class="kf-inline-feedback" *ngIf="feedback" role="alert">{{ feedback }}</p>
+
+      <ng-container *ngIf="showAddons">
       <div class="kf-booking-step-title"><span>BƯỚC 03</span><h2>Chọn món trong gói &amp; dịch vụ thêm</h2></div>
       <section class="kf-drink-entry">
         <div>
@@ -82,6 +88,7 @@
           </div>
         </article>
       </div>
+      </ng-container>
     </div>
 
     <aside class="kf-booking-aside">
@@ -89,17 +96,21 @@
         <p class="kf-overline">{{ zoneLabel }}</p><h3>Tóm tắt lựa chọn</h3>
         <img class="kf-summary-photo" [src]="'/images/ken-flow/' + item.image" [alt]="item.name">
         <strong>{{ item.name }}</strong><p>{{ state.dateLabel }} · {{ state.timeLabel }} · {{ guests }} khách</p>
-        <div class="kf-sum-row"><span>{{ item.perPerson ? guests + ' khách' : '01 không gian' }} × {{ duration }} giờ</span><strong>{{ money(state.base) }}</strong></div>
-        <div class="kf-sum-row"><span>Đồ uống · {{ state.requiredDrinkCount ? state.selectedDrinkCount + '/' + state.requiredDrinkCount + ' món trong gói' : state.selectedDrinkCount + ' món tùy chọn' }}</span><strong>{{ money(state.drinkSurcharge) }}</strong></div>
+        <div class="kf-sum-row"><span>Gói dịch vụ · {{ item.perPerson ? guests + ' khách' : '01 không gian' }} × {{ duration }} giờ</span><strong>{{ money(state.base) }}</strong></div>
+        <ng-container *ngIf="showAddons">
+        <div class="kf-sum-row"><span>Phụ phí Inclusion / đồ uống</span><strong>{{ money(state.drinkSurcharge) }}</strong></div>
         <div class="kf-sum-row" *ngFor="let drink of state.selectedDrinks"><span>{{ drink.product.name }} × {{ drink.quantity }}</span><strong>{{ money(drink.quantity * (drink.product.price > state.entitlement ? drink.product.price - state.entitlement : 0)) }}</strong></div>
-        <div class="kf-sum-row"><span>Dịch vụ thêm</span><strong>{{ money(state.extrasTotal) }}</strong></div>
+        <div class="kf-sum-row"><span>Add-on</span><strong>{{ money(state.extrasTotal) }}</strong></div>
         <hr>
         <div class="kf-sum-row"><span>Tạm tính</span><strong>{{ money(state.subtotal) }}</strong></div>
-        <div class="kf-sum-row"><span>Ưu đãi Bạc · 5% (demo)</span><strong>−{{ money(state.silverDiscount) }}</strong></div>
-        <div class="kf-sum-row kf-total"><span>Dự tính</span><strong>{{ money(state.total) }}</strong></div>
-        <button type="button" class="kf-btn kf-btn-gold kf-full" (click)="toReview()">Tiếp tục xem lại đặt chỗ →</button>
-        <p class="kf-inline-feedback" *ngIf="feedback" role="alert">{{ feedback }}</p>
-        <p class="kf-help-mini">Xác nhận thông tin, áp dụng voucher và đồng ý điều khoản ở bước tiếp theo.</p>
+        <div class="kf-sum-row"><span>Ưu đãi 5% · mô phỏng</span><strong>−{{ money(state.silverDiscount) }}</strong></div>
+        <div class="kf-sum-row kf-total"><span>Thành tiền</span><strong>{{ money(state.total) }}</strong></div>
+        </ng-container>
+        <button *ngIf="showAddons" type="button" class="kf-btn kf-btn-gold kf-full" (click)="toReview()">Xem tóm tắt đặt chỗ →</button>
+        <button *ngIf="!showAddons" type="button" class="kf-btn kf-btn-gold kf-full" [disabled]="checkingSession || checkingAvailability" (click)="beginBooking()">
+          {{ checkingSession || checkingAvailability ? 'Đang kiểm tra…' : 'Đặt chỗ ngay' }}
+        </button>
+        <p class="kf-help-mini" *ngIf="showAddons">Kiểm tra tổng giá trước khi thanh toán.</p>
       </div>
     </aside>
   </section>

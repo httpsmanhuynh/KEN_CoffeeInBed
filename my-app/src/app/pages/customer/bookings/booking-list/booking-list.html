@@ -8,9 +8,7 @@
 
     <section class="content">
       <header class="intro">
-        <p class="intro__eyebrow">GÓC RIÊNG CỦA BẠN</p>
         <h1 class="intro__title">Lịch sử đặt chỗ</h1>
-        <p class="intro__desc">{{ intro }}</p>
       </header>
 
       <div class="tabs" role="tablist" aria-label="Lọc theo trạng thái">
@@ -57,7 +55,7 @@
           <img src="/images/figma/info.svg" alt="" width="20" height="20" />
           <div class="note__body">
             <p class="note__title">{{ filtered.length }} đơn đang chờ xác nhận</p>
-            <p class="note__text">KÉN sẽ cập nhật tại đây khi kiểm tra xong thông tin và thanh toán liên quan. Trạng thái chờ không đồng nghĩa với đặt chỗ đã được xác nhận.</p>
+            <p class="note__text">Đơn chưa được xác nhận.</p>
           </div>
         </div>
       }
@@ -98,9 +96,9 @@
             @if (b.status === 'pending' && status === 'pending') {
               <div class="next">
                 <p class="next__title">KÉN đang đối chiếu thông tin đặt chỗ</p>
-                <p class="next__text">Chưa xác nhận chỗ. Giữ lại biên lai nếu đã thanh toán để KÉN hỗ trợ.</p>
+                <p class="next__text">Chưa xác nhận chỗ. Giữ biên lai nếu đã thanh toán.</p>
                 <div class="next__row">
-                  <span class="next__text">Cần điều chỉnh? <a routerLink="/booking-reschedule">Đổi / Huỷ lịch →</a></span>
+                  <a class="next__text" routerLink="/booking-reschedule">Đổi / Huỷ lịch →</a>
                   <a class="next__contact" href="#">Liên hệ KÉN ↗</a>
                 </div>
               </div>
@@ -116,7 +114,6 @@
           <img src="/images/figma/message-circle.svg" alt="" width="26" height="26" />
           <div class="help__body">
             <p class="help__title">Cần KÉN kiểm tra giúp?</p>
-            <p class="help__text">Chuẩn bị mã đặt chỗ và biên lai nếu bạn đã thanh toán.</p>
           </div>
           <a class="btn-outline" href="#">Nhắn KÉN ↗</a>
         </div>
@@ -136,7 +133,7 @@
       <div class="note">
         <img src="/images/figma/info.svg" alt="" width="20" height="20" />
         <div class="note__body">
-          <p class="note__text">Chỉ đơn hoàn thành có hoá đơn. Để gửi yêu cầu đổi hoặc huỷ cho đơn tương lai, vào mục Đổi / Huỷ lịch; đơn hoàn thành không thể điều chỉnh.</p>
+          <p class="note__text">Hoá đơn chỉ có cho đơn hoàn thành.</p>
         </div>
       </div>
     </section>

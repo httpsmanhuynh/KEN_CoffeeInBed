@@ -1,0 +1,392 @@
+<div class="dashboard-page" data-name="01 · Tổng quan">
+  <!-- Page Heading -->
+  <div class="page-heading" data-name="Page heading">
+    <div class="heading-title-group">
+      <h1 class="page-title">Dashboard</h1>
+    </div>
+    <button type="button" class="btn-export" (click)="exportReport()" data-name="Export btn">
+      Xuất báo cáo ↗
+    </button>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar" data-name="Filter bar">
+    <!-- From Date -->
+    <div class="filter-field">
+      <div class="field-label-row">
+        <img src="/images/figma/calendar-date.svg" alt="" class="field-icon" />
+        <span class="field-label">Từ ngày</span>
+      </div>
+      <div class="field-input-box">
+        <span class="field-val">24/10/2026</span>
+        <img src="/images/figma/chevron-down.svg" alt="" class="field-arrow" />
+      </div>
+    </div>
+
+    <!-- To Date -->
+    <div class="filter-field">
+      <div class="field-label-row">
+        <img src="/images/figma/calendar-date.svg" alt="" class="field-icon" />
+        <span class="field-label">Đến ngày</span>
+      </div>
+      <div class="field-input-box">
+        <span class="field-val">24/10/2026</span>
+        <img src="/images/figma/chevron-down.svg" alt="" class="field-arrow" />
+      </div>
+    </div>
+
+    <!-- Zone Selector -->
+    <div class="filter-field">
+      <div class="field-label-row">
+        <span class="field-label">Khu vực</span>
+      </div>
+      <div class="field-input-box">
+        <span class="field-val">Tất cả khu vực</span>
+        <img src="/images/figma/chevron-down.svg" alt="" class="field-arrow" />
+      </div>
+    </div>
+
+    <!-- Period Pills -->
+    <div class="period-pills">
+      <button
+        type="button"
+        class="period-pill"
+        [class.active]="selectedPeriod === 'today'"
+        (click)="setPeriod('today')"
+      >
+        Hôm nay
+      </button>
+      <button
+        type="button"
+        class="period-pill"
+        [class.active]="selectedPeriod === '7days'"
+        (click)="setPeriod('7days')"
+      >
+        7 ngày
+      </button>
+      <button
+        type="button"
+        class="period-pill"
+        [class.active]="selectedPeriod === 'month'"
+        (click)="setPeriod('month')"
+      >
+        Tháng này
+      </button>
+    </div>
+
+    <!-- Filter Actions -->
+    <div class="filter-actions">
+      <button type="button" class="btn-filter-action">
+        <img src="/images/figma/filter.svg" alt="" class="action-icon" />
+        <span>Lọc</span>
+      </button>
+      <button type="button" class="btn-filter-action">
+        <img src="/images/figma/search.svg" alt="" class="action-icon" />
+        <span>Tìm</span>
+      </button>
+      <button type="button" class="btn-filter-action" (click)="resetFilters()">
+        <img src="/images/figma/btn-refresh.svg" alt="" class="action-icon" />
+        <span>Đặt lại</span>
+      </button>
+    </div>
+
+    <div class="filter-hint">
+      Cập nhật minh hoạ lúc 10:00 · Không phải dữ liệu thời gian thực
+    </div>
+  </div>
+
+  <!-- Key Operational Metrics -->
+  <div class="metrics-row" data-name="Chỉ số vận hành">
+    <!-- Card 1 (Dark highlighted) -->
+    <div class="metric-card card-dark">
+      <span class="metric-label text-white">Tổng thu mẫu</span>
+      <span class="metric-value text-accent">2.437.750đ</span>
+      <span class="metric-desc text-white">20 đơn đã thanh toán · Sau giảm giá</span>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="metric-card">
+      <span class="metric-label">Booking theo trạng thái</span>
+      <span class="metric-value">24</span>
+      <span class="metric-desc">6 xác nhận · 4 sử dụng · 10 hoàn thành</span>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="metric-card">
+      <span class="metric-label">Tỷ lệ lấp đầy</span>
+      <span class="metric-value">—</span>
+      <span class="metric-desc">Chưa có dữ liệu đủ để tính</span>
+    </div>
+
+    <!-- Card 4 -->
+    <div class="metric-card">
+      <span class="metric-label">Tổng giao dịch</span>
+      <span class="metric-value">—</span>
+      <span class="metric-desc">Chưa có dữ liệu đủ để tính</span>
+    </div>
+  </div>
+
+  <!-- Charts Row: Revenue by Time & Status Distribution -->
+  <div class="charts-row" data-name="Báo cáo doanh thu và trạng thái">
+    <!-- Bar Chart Card -->
+    <div class="chart-card revenue-card" data-name="Biểu đồ doanh thu">
+      <div class="card-header">
+        <div class="header-left">
+          <img src="/images/figma/table.svg" alt="" class="header-icon" />
+          <h2 class="card-title">Doanh thu theo thời gian</h2>
+        </div>
+        <span class="card-badge">Tổng thu mẫu · Sau giảm</span>
+      </div>
+
+      <div class="revenue-summary">
+        <span class="revenue-total">2.437.750đ</span>
+        <span class="revenue-timeframe">24/10 · 08:00–10:00</span>
+      </div>
+
+      <!-- Graph Area -->
+      <div class="bar-chart-container">
+        <!-- Y-Axis -->
+        <div class="y-axis">
+          <span>900.000</span>
+          <span>600.000</span>
+          <span>300.000</span>
+          <span>0đ</span>
+        </div>
+
+        <!-- Bars Area -->
+        <div class="bars-area">
+          <div class="grid-lines">
+            <div class="grid-line" style="top: 0%"></div>
+            <div class="grid-line" style="top: 33.3%"></div>
+            <div class="grid-line" style="top: 66.6%"></div>
+            <div class="grid-line" style="top: 100%"></div>
+          </div>
+
+          <div class="columns-track">
+            <div *ngFor="let col of hourlyData" class="bar-col">
+              <span class="bar-val">{{ col.label }}</span>
+              <div
+                class="bar-fill"
+                [class.peak]="col.isPeak"
+                [style.height.px]="col.heightPercent * 2.16"
+              ></div>
+              <span class="bar-time">{{ col.time }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p class="chart-footer-note">
+        Tổng thu mẫu đến 10:00: 2.437.750đ. Doanh thu thuần cần đối soát giao dịch thanh toán và hoàn tiền.
+      </p>
+    </div>
+
+    <!-- Status Distribution Donut Card -->
+    <div class="chart-card donut-card" data-name="Phân bổ trạng thái">
+      <div class="card-header">
+        <h2 class="card-title">Phân bổ trạng thái</h2>
+        <span class="card-count">24 đơn</span>
+      </div>
+
+      <!-- Donut Circle Visual -->
+      <div class="donut-visual-wrap">
+        <div class="donut-chart-box">
+          <svg viewBox="0 0 194 194" class="donut-svg">
+            <!-- Background circle -->
+            <circle cx="97" cy="97" r="75" fill="none" stroke="#F7EFE2" stroke-width="26" />
+            <!-- Segment 1: Hoàn thành 42% (10/24) #4A3123 -->
+            <circle
+              cx="97"
+              cy="97"
+              r="75"
+              fill="none"
+              stroke="#4A3123"
+              stroke-width="26"
+              stroke-dasharray="197 471"
+              stroke-dashoffset="0"
+              transform="rotate(-90 97 97)"
+            />
+            <!-- Segment 2: Đã xác nhận 25% (6/24) #D9A74A -->
+            <circle
+              cx="97"
+              cy="97"
+              r="75"
+              fill="none"
+              stroke="#D9A74A"
+              stroke-width="26"
+              stroke-dasharray="117 471"
+              stroke-dashoffset="-197"
+              transform="rotate(-90 97 97)"
+            />
+            <!-- Segment 3: Đang sử dụng 17% (4/24) #5B8A62 -->
+            <circle
+              cx="97"
+              cy="97"
+              r="75"
+              fill="none"
+              stroke="#5B8A62"
+              stroke-width="26"
+              stroke-dasharray="80 471"
+              stroke-dashoffset="-314"
+              transform="rotate(-90 97 97)"
+            />
+            <!-- Segment 4: Đã huỷ 8% (2/24) #BA5C48 -->
+            <circle
+              cx="97"
+              cy="97"
+              r="75"
+              fill="none"
+              stroke="#BA5C48"
+              stroke-width="26"
+              stroke-dasharray="38 471"
+              stroke-dashoffset="-394"
+              transform="rotate(-90 97 97)"
+            />
+            <!-- Segment 5: No-show 8% (2/24) #9C8A7A -->
+            <circle
+              cx="97"
+              cy="97"
+              r="75"
+              fill="none"
+              stroke="#9C8A7A"
+              stroke-width="26"
+              stroke-dasharray="39 471"
+              stroke-dashoffset="-432"
+              transform="rotate(-90 97 97)"
+            />
+          </svg>
+
+          <!-- Donut Center Label -->
+          <div class="donut-center">
+            <span class="donut-number">24</span>
+            <span class="donut-sub">đơn hôm nay</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Donut Legend -->
+      <div class="donut-legend">
+        <div class="legend-row">
+          <span class="legend-dot" style="background-color: #D9A74A"></span>
+          <span class="legend-label">Đã xác nhận</span>
+          <span class="legend-val">06</span>
+          <span class="legend-pct">25%</span>
+        </div>
+        <div class="legend-row">
+          <span class="legend-dot" style="background-color: #5B8A62"></span>
+          <span class="legend-label">Đang sử dụng</span>
+          <span class="legend-val">04</span>
+          <span class="legend-pct">17%</span>
+        </div>
+        <div class="legend-row">
+          <span class="legend-dot" style="background-color: #4A3123"></span>
+          <span class="legend-label">Hoàn thành</span>
+          <span class="legend-val">10</span>
+          <span class="legend-pct">42%</span>
+        </div>
+        <div class="legend-row">
+          <span class="legend-dot" style="background-color: #BA5C48"></span>
+          <span class="legend-label">Đã huỷ</span>
+          <span class="legend-val">02</span>
+          <span class="legend-pct">8%</span>
+        </div>
+        <div class="legend-row">
+          <span class="legend-dot" style="background-color: #9C8A7A"></span>
+          <span class="legend-label">Khách không đến</span>
+          <span class="legend-val">02</span>
+          <span class="legend-pct">8%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Zone Activity Section -->
+  <div class="section-block" data-name="Hoạt động theo khu vực">
+    <div class="section-header">
+      <h2 class="section-title">Nhịp hoạt động theo khu vực</h2>
+      <a routerLink="/admin/spaces" class="section-link">Quản lý Khu vực & Không gian →</a>
+    </div>
+
+    <div class="zones-grid">
+      <div *ngFor="let zone of zones" class="zone-card">
+        <h3 class="zone-name">{{ zone.name }}</h3>
+        <p class="zone-sub">{{ zone.subtitle }}</p>
+        <p class="zone-active-now">{{ zone.activeNow }}</p>
+        <div class="zone-stats-row">
+          <span class="zone-today">{{ zone.todayCount }}</span>
+          <span class="zone-rev">{{ zone.revenue }}</span>
+        </div>
+        <p class="zone-breakdown">{{ zone.breakdown }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Two Columns: Priority Tasks & Upcoming Guests -->
+  <div class="tasks-and-guests-row" data-name="Công việc và lượt sắp đến">
+    <!-- Priority Tasks -->
+    <div class="panel-card tasks-card" data-name="Tasks">
+      <div class="panel-header">
+        <div class="header-left">
+          <img src="/images/figma/lich-dat-cho.svg" alt="" class="header-icon" />
+          <h2 class="panel-title">Việc cần mình chăm chút</h2>
+        </div>
+        <span class="panel-badge">3 việc ưu tiên</span>
+      </div>
+
+      <div class="tasks-list">
+        <div *ngFor="let task of tasks" class="task-item">
+          <span class="task-index">{{ task.index }}</span>
+          <div class="task-content">
+            <h4 class="task-title">{{ task.title }}</h4>
+            <p class="task-desc">{{ task.description }}</p>
+            <a
+              class="task-action-btn"
+              (click)="goToBookings(task.bookingCode)"
+            >
+              {{ task.actionText }}
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upcoming Guests -->
+    <div class="panel-card upcoming-card" data-name="Upcoming">
+      <div class="panel-header">
+        <div class="header-left">
+          <img src="/images/figma/clock.svg" alt="" class="header-icon" />
+          <h2 class="panel-title">Khách sắp ghé KÉN</h2>
+        </div>
+        <a (click)="goToBookings()" class="panel-link">Xem tất cả 6 lượt →</a>
+      </div>
+
+      <div class="upcoming-list">
+        <div *ngFor="let guest of upcomingGuests" class="upcoming-item">
+          <div class="upcoming-time-col">
+            <img src="/images/figma/clock.svg" alt="" class="time-clock-icon" />
+            <span class="time-val">{{ guest.time }}</span>
+          </div>
+
+          <div class="upcoming-info-col">
+            <h4 class="guest-name">{{ guest.name }}</h4>
+            <p class="guest-details">{{ guest.code }} · {{ guest.space }} · {{ guest.guests }}</p>
+            <p class="guest-status">{{ guest.paymentStatus }} · {{ guest.bookingStatus }}</p>
+          </div>
+
+          <div class="upcoming-action-col">
+            <button
+              *ngIf="guest.actionLabel"
+              type="button"
+              class="btn-checkin"
+              (click)="handleCheckIn(guest)"
+            >
+              {{ guest.actionLabel }}
+            </button>
+            <span *ngIf="!guest.actionLabel" class="time-note">{{ guest.timeNote }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

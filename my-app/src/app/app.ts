@@ -1,4 +1,5 @@
 import { Component, HostListener, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { AuthService } from './core/auth.service';
 
 @Component({
@@ -9,8 +10,13 @@ import { AuthService } from './core/auth.service';
 })
 export class App {
   protected readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
 
   protected readonly title = signal('my-app');
+
+  get isAdminRoute(): boolean {
+    return this.router.url.startsWith('/admin');
+  }
 
   constructor() {
     this.auth.loadSession().subscribe({

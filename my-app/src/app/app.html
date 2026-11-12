@@ -1,6 +1,6 @@
-<app-header [member]="auth.isAuthenticated" [userName]="auth.user?.fullName ?? 'Khách hàng'"></app-header>
+<app-header *ngIf="!isAdminRoute" [member]="auth.isAuthenticated" [userName]="auth.user?.fullName ?? 'Khách hàng'"></app-header>
 <main class="app-content" id="main-content">
   <router-outlet></router-outlet>
 </main>
-<app-footer></app-footer>
-<app-suggestion-popup></app-suggestion-popup>
+<app-footer *ngIf="!isAdminRoute"></app-footer>
+<app-suggestion-popup *ngIf="!isAdminRoute"></app-suggestion-popup>

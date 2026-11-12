@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../../../core/auth.service';
 import { OtpInput } from '../../../../shared/components/otp-input/otp-input';
@@ -25,7 +25,16 @@ export class OtpVerifyPage implements OnInit, OnDestroy {
   cooldown = COOLDOWN_SECONDS;
   private timer?: ReturnType<typeof setInterval>;
 
-  constructor(private auth: AuthService, private router: Router) {}
+  constructor(
+    private auth: AuthService,
+    private router: Router,
+    private route: ActivatedRoute,
+  ) {}
+
+  private get returnUrl(): string | null {
+    const value = this.route.snapshot.queryParamMap.get('returnUrl');
+    return value?.startsWith('/') && !value.startsWith('//') ? value : null;
+  }
 
   ngOnInit(): void {
     // SĐT được truyền từ trang Đăng ký. Tải lại trang sẽ mất → quay về Đăng ký.
@@ -65,7 +74,10 @@ export class OtpVerifyPage implements OnInit, OnDestroy {
     this.loading = true;
     this.error = '';
     this.auth.verifyOtp({ phone: this.phone, code: this.code }).subscribe({
-      next: () => this.router.navigate(['/login'], { state: { registered: true } }),
+      next: () => this.router.navigate(['/login'], {
+        queryParams: this.returnUrl ? { returnUrl: this.returnUrl } : undefined,
+        state: { registered: true },
+      }),
       error: (err: HttpErrorResponse) => {
         this.loading = false;
         this.error = this.messageFor(err);
@@ -104,5 +116,9 @@ export class OtpVerifyPage implements OnInit, OnDestroy {
     return 'Có lỗi xảy ra. Vui lòng thử lại.';
   }
 
-  backToRegister(): void { this.router.navigate(['/register']); }
+  backToRegister(): void {
+    this.router.navigate(['/register'], {
+      queryParams: this.returnUrl ? { returnUrl: this.returnUrl } : undefined,
+    });
+  }
 }

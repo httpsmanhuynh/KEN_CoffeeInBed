@@ -30,6 +30,11 @@ export class LoginPage {
     return !!this.route.snapshot.queryParamMap.get('returnUrl');
   }
 
+  get returnUrl(): string | null {
+    const value = this.route.snapshot.queryParamMap.get('returnUrl');
+    return value?.startsWith('/') && !value.startsWith('//') ? value : null;
+  }
+
   constructor(
     private fb: FormBuilder,
     @Inject(AuthService) private auth: AuthService,
@@ -81,9 +86,8 @@ export class LoginPage {
         // Không điều hướng tới route 2FA chưa tồn tại; hiển thị trạng thái rõ ràng.
         if (res?.requires2FA) { this.loading = false; this.error = 'two-factor-unavailable'; }
         else {
-          const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
-          const destination = returnUrl?.startsWith('/') && !returnUrl.startsWith('//')
-            ? returnUrl
+          const destination = this.returnUrl
+            ? this.returnUrl
             : '/home-logged-in';
           this.router.navigateByUrl(destination);
         }

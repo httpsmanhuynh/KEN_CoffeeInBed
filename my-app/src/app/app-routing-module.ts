@@ -46,8 +46,10 @@ import { ConnectPage } from './pages/customer/space-details/connect-page/connect
 import { CoworkPage } from './pages/customer/space-details/cowork-page/cowork-page';
 import { FocusPage } from './pages/customer/space-details/focus-page/focus-page';
 import { MeetingPage } from './pages/customer/space-details/meeting-page/meeting-page';
+import { adminRoutes } from './pages/admin/admin.routes';
 
 const routes: Routes = [
+  ...adminRoutes,
   // Home
   { path: '', component: HomeGuestPage, pathMatch: 'full' },
   { path: 'home-logged-in', component: HomeMemberPage },

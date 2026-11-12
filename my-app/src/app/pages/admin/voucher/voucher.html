@@ -1,0 +1,191 @@
+<div class="voucher-page">
+  <div *ngIf="toastMessage" class="toast">{{ toastMessage }}</div>
+
+  <div class="voucher-topline">
+    <img src="/images/figma/icon-pkg.svg" alt="" />
+  </div>
+
+  <header class="voucher-heading">
+    <h1>Quản lý Voucher</h1>
+    <p>Đang chỉnh sửa {{ selectedVoucher.code }}.</p>
+  </header>
+
+  <section class="voucher-card">
+    <div class="voucher-card-heading">
+      <div class="heading-label">
+        <img src="/images/figma/table.svg" alt="" />
+        <h2>Các ưu đãi của KÉN</h2>
+      </div>
+      <span class="count-badge">{{ vouchers.length }} voucher</span>
+    </div>
+
+    <div class="voucher-filters">
+      <label class="search-box">
+        <img src="/images/figma/search.svg" alt="" />
+        <input [(ngModel)]="query" placeholder="Tìm mã hoặc tên voucher..." />
+      </label>
+      <label class="select-box">
+        <img src="/images/figma/filter.svg" alt="" />
+        <select [(ngModel)]="selectedStatus">
+          <option>Tất cả</option>
+          <option>Đang hoạt động</option>
+          <option>Tạm ngưng</option>
+        </select>
+        <img src="/images/figma/chevron-down.svg" alt="" />
+      </label>
+      <label class="select-box area-select">
+        <select [(ngModel)]="selectedArea">
+          <option>Tất cả</option>
+          <option>Mọi khu vực</option>
+          <option>KÉN Tái Tạo</option>
+        </select>
+        <img src="/images/figma/chevron-down.svg" alt="" />
+      </label>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Mã / Tên voucher</th>
+            <th>Loại giảm</th>
+            <th>Mức giảm</th>
+            <th>Đơn tối thiểu</th>
+            <th>Hiệu lực</th>
+            <th>Đã dùng / Tổng</th>
+            <th>Trạng thái</th>
+            <th>Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let voucher of filteredVouchers"
+            [class.selected-row]="selectedVoucher.code === voucher.code"
+            (click)="selectVoucher(voucher)"
+          >
+            <td>
+              <strong>{{ voucher.code }}</strong>
+              <span>{{ voucher.description }}</span>
+              <small>{{ voucher.area }}</small>
+            </td>
+            <td>{{ voucher.type }}</td>
+            <td>
+              <strong>{{ voucher.discount }}</strong>
+              <small *ngIf="voucher.cap">{{ voucher.cap }}</small>
+            </td>
+            <td>{{ voucher.minimum }}</td>
+            <td>
+              <span>{{ voucher.start }}</span
+              ><small>đến {{ voucher.end }}</small>
+            </td>
+            <td>
+              <strong>{{ formatUsed(voucher) }}</strong
+              ><small>lượt sử dụng</small>
+            </td>
+            <td>
+              <span class="status-badge" [class.paused]="voucher.status === 'PAUSED'">
+                {{ voucher.status === 'ACTIVE' ? 'Đang hoạt động' : 'Tạm ngưng' }}
+              </span>
+            </td>
+            <td class="actions" (click)="$event.stopPropagation()">
+              <button type="button" (click)="selectVoucher(voucher)">Sửa</button>
+              <button type="button" (click)="toggleStatus(voucher)">
+                {{ voucher.status === 'ACTIVE' ? 'Ngưng' : 'Mở bán lại' }}
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="filteredVouchers.length === 0">
+            <td colspan="8" class="empty">Không tìm thấy voucher phù hợp.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination">
+      Hiển thị 1–{{ filteredVouchers.length }} trên {{ vouchers.length }} voucher
+      <span>Trang 1 / 1</span>
+    </div>
+  </section>
+
+  <section class="voucher-card editor-card">
+    <div class="editor-heading">
+      <div class="heading-label">
+        <img src="/images/figma/icon-info.svg" alt="" />
+        <div>
+          <h2>Chỉnh sửa Voucher · {{ selectedVoucher.code }}</h2>
+          <p>Thông tin, hiệu lực và giới hạn sử dụng.</p>
+        </div>
+      </div>
+      <span class="editing-badge">Đang chỉnh sửa</span>
+    </div>
+
+    <div class="editor-body">
+      <div class="editor-fields">
+        <h3>Thông tin &amp; điều kiện ưu đãi</h3>
+        <div class="field-grid">
+          <label><span>Mã voucher *</span><input [(ngModel)]="form.code" /></label>
+          <label class="wide"
+            ><span>Tên hiển thị *</span><input [(ngModel)]="form.description"
+          /></label>
+          <label
+            ><span>Loại giảm *</span
+            ><select [(ngModel)]="form.type">
+              <option>Phần trăm</option>
+              <option>Số tiền</option>
+            </select></label
+          >
+          <label><span>Giá trị giảm *</span><input [(ngModel)]="form.discount" /></label>
+          <label><span>Giảm tối đa</span><input [(ngModel)]="form.cap" /></label>
+          <label><span>Đơn tối thiểu</span><input [(ngModel)]="form.minimum" /></label>
+          <label
+            ><span>Khu áp dụng</span
+            ><select [(ngModel)]="form.area">
+              <option>Mọi khu vực</option>
+              <option>KÉN Tái Tạo</option>
+            </select></label
+          >
+          <label><span>Coins cần đổi</span><input value="0" disabled /></label>
+        </div>
+        <h3 class="section-title">Hiệu lực &amp; lượt sử dụng</h3>
+        <div class="field-grid">
+          <label class="wide"
+            ><span>Từ ngày · UTC</span><input value="01/10/2026 00:00:00"
+          /></label>
+          <label class="wide"
+            ><span>Đến ngày · UTC</span><input value="31/12/2026 16:59:59"
+          /></label>
+          <label><span>Tổng lượt sử dụng</span><input value="100" /></label>
+          <label><span>Lượt khách đã sử dụng</span><input value="0" disabled /></label>
+          <label
+            ><span>Trạng thái</span
+            ><select>
+              <option>Đang hoạt động</option>
+              <option>Tạm ngưng</option>
+            </select></label
+          >
+        </div>
+      </div>
+
+      <aside class="voucher-summary">
+        <h3>TÓM TẮT ƯU ĐÃI</h3>
+        <strong>{{ selectedVoucher.code }}</strong>
+        <b>{{
+          selectedVoucher.type === 'Phần trăm'
+            ? 'Giảm ' + selectedVoucher.discount
+            : 'Giảm ' + selectedVoucher.discount
+        }}</b>
+        <p>
+          {{ selectedVoucher.cap }}<br />Cho đơn từ {{ selectedVoucher.minimum }}<br />Áp dụng
+          {{ selectedVoucher.area.toLowerCase() }}
+        </p>
+        <span class="summary-status">Đang hoạt động</span>
+        <small>{{ formatUsed(selectedVoucher) }} lượt đã sử dụng</small>
+      </aside>
+    </div>
+    <div class="editor-actions">
+      <button type="button" class="btn-outline" (click)="selectVoucher(selectedVoucher)">
+        Hủy chỉnh sửa
+      </button>
+      <button type="button" class="btn-primary" (click)="saveVoucher()">Lưu thay đổi</button>
+    </div>
+  </section>
+</div>

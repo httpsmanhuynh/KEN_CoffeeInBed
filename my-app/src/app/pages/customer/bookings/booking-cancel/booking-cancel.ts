@@ -35,12 +35,12 @@ export class BookingCancel {
 
   get isConfirmed(): boolean { return this.order.status === 'confirmed'; }
   get conditionLine(): string {
-    return this.isConfirmed ? 'CONFIRMED — yêu cầu huỷ trước Cut-off Time' : 'PENDING — đơn chưa được xác nhận';
+    return this.isConfirmed ? 'Đã xác nhận · áp dụng hạn huỷ' : 'Đơn chưa được xác nhận';
   }
   get conditionNote(): string {
     return this.isConfirmed
-      ? 'Đơn CONFIRMED chỉ được huỷ khi còn trong Cut-off Time theo chính sách đặt chỗ. KÉN sẽ kiểm tra và xác nhận điều kiện sau khi nhận yêu cầu.'
-      : 'Đơn đang chờ xác nhận. KÉN sẽ kiểm tra và xác nhận điều kiện huỷ sau khi nhận yêu cầu.';
+      ? 'KÉN sẽ kiểm tra điều kiện huỷ sau khi nhận yêu cầu.'
+      : 'KÉN sẽ kiểm tra yêu cầu sau khi nhận.';
   }
   get paidText(): string { return this.isConfirmed ? this.fmtMoney(this.order.total) : 'Chờ đối chiếu'; }
 
