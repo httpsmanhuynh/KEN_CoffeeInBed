@@ -17,16 +17,16 @@
 
       <!-- Email -->
       <div class="field">
-        <label for="email">Email <span class="req" aria-hidden="true">*</span></label>
+        <label for="email">Email <span class="opt">(để nhận mã OTP)</span> <span class="req" aria-hidden="true">*</span></label>
         <input id="email" type="email" formControlName="email" placeholder="VD: ken@email.com"
                autocomplete="email" inputmode="email"
                [class.is-invalid]="showError('email')" [attr.aria-invalid]="showError('email')" />
         @if (showError('email')) { <small class="field__err">{{ fieldMessage('email') }}</small> }
       </div>
 
-      <!-- Số điện thoại (không bắt buộc) -->
+      <!-- Số điện thoại (bắt buộc) -->
       <div class="field">
-        <label for="phone">Số điện thoại <span class="opt">(không bắt buộc)</span></label>
+        <label for="phone">Số điện thoại <span class="req" aria-hidden="true">*</span></label>
         <input id="phone" type="tel" formControlName="phone" placeholder="(+84)"
                autocomplete="tel" inputmode="tel" aria-describedby="phoneHint"
                [class.is-invalid]="showError('phone')" [attr.aria-invalid]="showError('phone')" />
