@@ -1,6 +1,11 @@
 """Kết nối MongoDB Atlas cho pipeline Học máy KÉN (CHỈ ĐỌC).
 
-Chuỗi kết nối lấy từ file .env ở thư mục gốc KEN_ML, không hard-code:
+Chuỗi kết nối lấy từ file .env, không hard-code. Thứ tự tìm .env:
+    1. my-server-mongodb/.env  (cùng cấp với KEN_ML, trong cùng project)
+    2. KEN_ML/.env             (tùy chọn, nếu muốn ghi đè)
+    3. Biến môi trường hệ thống (nếu đã đặt sẵn)
+
+Các biến cần có:
     MONGODB_URI=mongodb+srv://...
     DB_NAME=ken_space_booking
 """
@@ -18,18 +23,33 @@ from pymongo.errors import (
     ServerSelectionTimeoutError,
 )
 
-ROOT_DIR = Path(__file__).resolve().parent.parent
+ROOT_DIR = Path(__file__).resolve().parent.parent          # KEN_ML
+PROJECT_DIR = ROOT_DIR.parent                              # thư mục project chứa cả 2 folder
+SERVER_ENV = PROJECT_DIR / "my-server-mongodb" / ".env"
+LOCAL_ENV = ROOT_DIR / ".env"
 DEFAULT_DB_NAME = "ken_space_booking"
+
+
+def _load_env() -> None:
+    """Nạp .env từ my-server-mongodb, sau đó KEN_ML (nếu có).
+
+    override=False nên biến môi trường đã có sẽ không bị ghi đè;
+    file nạp trước có ưu tiên cao hơn file nạp sau.
+    """
+    for env_path in (SERVER_ENV, LOCAL_ENV):
+        if env_path.is_file():
+            load_dotenv(env_path, override=False)
 
 
 def get_database() -> Database:
     """Trả về đối tượng Database sau khi kết nối và ping thành công."""
-    load_dotenv(ROOT_DIR / ".env")
+    _load_env()
     uri = os.getenv("MONGODB_URI") or os.getenv("MONGO_URI")
     db_name = os.getenv("DB_NAME", DEFAULT_DB_NAME)
     if not uri:
         raise RuntimeError(
-            "Thiếu MONGODB_URI trong file .env (đặt ở thư mục gốc KEN_ML)."
+            "Không tìm thấy MONGODB_URI. Đã thử đọc: "
+            f"{SERVER_ENV} và {LOCAL_ENV}, cùng biến môi trường hệ thống."
         )
 
     try:
