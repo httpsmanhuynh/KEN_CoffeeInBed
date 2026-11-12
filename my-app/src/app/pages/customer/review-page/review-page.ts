@@ -1,8 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/auth.service';
+import { CustomerApiService } from '../../../core/customer-api.service';
 
 interface ReviewBooking {
+  rawBookingId?: string;
   label: string;
   date: string;
   code: string;
@@ -27,10 +29,11 @@ interface RecentReview {
   templateUrl: './review-page.html',
   styleUrl: './review-page.css',
 })
-export class ReviewPage {
+export class ReviewPage implements OnInit {
+  private readonly api = inject(CustomerApiService, { optional: true });
   readonly stars = [1, 2, 3, 4, 5];
 
-  readonly bookings: ReviewBooking[] = [
+  bookings: ReviewBooking[] = [
     {
       label: 'KÉN Kết Nối · Cà phê',
       date: '20/11/2025',
@@ -73,7 +76,7 @@ export class ReviewPage {
     },
   ];
 
-  readonly recentReviews: RecentReview[] = [
+  recentReviews: RecentReview[] = [
     {
       name: 'Khách minh họa 01',
       place: 'KÉN Kết Nối · Cà phê',
@@ -107,6 +110,46 @@ export class ReviewPage {
   checkingSession = false;
 
   constructor(private auth: AuthService, private router: Router) {}
+
+  ngOnInit(): void {
+    if (!this.api) return;
+    this.api.getReviews().subscribe({
+      next: (res) => {
+        if (res?.reviews?.length) {
+          this.recentReviews = res.reviews.slice(0, 6).map((r) => ({
+            name: r.user_name || 'Khách hàng KÉN',
+            place: r.space_name || 'Không gian KÉN',
+            date: r.created_at ? new Date(r.created_at).toLocaleDateString('vi-VN') : '',
+            rating: r.rating,
+            content: r.comment || 'Khách hàng đã đánh giá bằng số sao.',
+          }));
+        }
+      },
+    });
+    this.auth.ensureSession().subscribe({
+      next: (user) => {
+        if (!user) return;
+        this.api!.getMyReviews().subscribe({
+          next: (myRes) => {
+            if (myRes?.pendingReminders?.length) {
+              this.bookings = myRes.pendingReminders.map((b) => ({
+                rawBookingId: String(b._id),
+                label: `${b.space_name || 'Không gian KÉN'}`,
+                date: b.start_at ? new Date(b.start_at).toLocaleDateString('vi-VN') : '',
+                code: `#${b.booking_code}`,
+                time: '',
+                amount: b.final_amount ? `${Number(b.final_amount).toLocaleString('vi-VN')}đ` : '',
+                area: 'Đơn đã hoàn thành',
+                detail: b.space_name || 'Không gian KÉN',
+                icon: '/images/review-icons/laptop.svg',
+              }));
+              this.selectedBooking = 0;
+            }
+          },
+        });
+      },
+    });
+  }
 
   get booking(): ReviewBooking {
     return this.bookings[this.selectedBooking];
@@ -197,6 +240,26 @@ export class ReviewPage {
 
     if (this.reviewText.trim().length < 20) {
       this.notice = 'Vui lòng nhập nhận xét tối thiểu 20 ký tự.';
+      return;
+    }
+
+    if (this.api && this.booking?.rawBookingId) {
+      this.api
+        .createReview({
+          bookingId: this.booking.rawBookingId,
+          rating: this.rating,
+          comment: this.reviewText.trim(),
+        })
+        .subscribe({
+          next: () => {
+            this.notice = 'Cảm ơn bạn! Đánh giá của bạn đã được ghi nhận trên hệ thống.';
+            this.bookings = this.bookings.filter((_, idx) => idx !== this.selectedBooking);
+            this.selectedBooking = 0;
+          },
+          error: (err) => {
+            this.notice = err.error?.message || 'Không thể gửi đánh giá lúc này.';
+          },
+        });
       return;
     }
 

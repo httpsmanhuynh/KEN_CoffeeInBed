@@ -33,6 +33,7 @@ export class AuthService {
   // Server: http://localhost:3002 (đặt proxy.conf.json để /api chuyển sang cổng này)
   private readonly base = '/api/auth';
   private readonly currentUser = signal<AuthenticatedUser | null>(null);
+  readonly avatarUrl = signal<string | null>(null);
   private sessionChecked = false;
   private sessionRequest?: Observable<AuthenticatedUser | null>;
 
@@ -76,8 +77,31 @@ export class AuthService {
   }
 
   setUser(user: AuthenticatedUser | null): void {
+    const prevId = this.currentUser()?.id ?? null;
     this.currentUser.set(user);
     this.sessionChecked = true;
+    try {
+      if (user) {
+        if (prevId && prevId !== user.id) localStorage.removeItem('ken-figma-booking-demo-v1');
+        this.avatarUrl.set(localStorage.getItem(`ken-avatar-${user.id}`));
+      } else {
+        this.avatarUrl.set(null);
+      }
+    } catch {
+      this.avatarUrl.set(null);
+    }
+  }
+
+  setAvatar(dataUrl: string | null): void {
+    this.avatarUrl.set(dataUrl);
+    const id = this.currentUser()?.id;
+    if (!id) return;
+    try {
+      if (dataUrl) localStorage.setItem(`ken-avatar-${id}`, dataUrl);
+      else localStorage.removeItem(`ken-avatar-${id}`);
+    } catch {
+      // ignore storage quota errors
+    }
   }
 
   /** 201 = đã gửi OTP · 409 = trùng SĐT/email · 422 = dữ liệu sai · 429 = quá hạn mức gửi OTP */
@@ -96,7 +120,10 @@ export class AuthService {
 
   logout(): Observable<void> {
     return this.http.post<void>(`${this.base}/logout`, {}, { withCredentials: true }).pipe(
-      tap(() => this.setUser(null)),
+      tap(() => {
+        try { localStorage.removeItem('ken-figma-booking-demo-v1'); } catch {}
+        this.setUser(null);
+      }),
     );
   }
 

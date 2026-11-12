@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthService } from '../../../../core/auth.service';
 
 @Component({
   selector: 'app-security',
@@ -7,6 +9,8 @@ import { Component } from '@angular/core';
   templateUrl: './security.html',
 })
 export class Security {
+  private readonly auth = inject(AuthService, { optional: true });
+  private readonly router = inject(Router, { optional: true });
   user = {
     name: 'Thầy Thanh đẹp trai',
     tier: 'Bạc',
@@ -35,5 +39,10 @@ export class Security {
 
   onRequestDeleteAccount() {
     console.log('Yêu cầu xoá tài khoản');
+  }
+
+  logout(): void {
+    if (!this.auth) return;
+    this.auth.logout().subscribe({ next: () => this.router?.navigateByUrl('/') });
   }
 }

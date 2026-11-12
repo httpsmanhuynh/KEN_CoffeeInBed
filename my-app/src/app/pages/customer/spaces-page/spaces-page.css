@@ -359,7 +359,7 @@
 }
 
 .ks-before {
-  padding: 80px 0 110px;
+  padding: 36px 0 64px;
 }
 
 .ks-before > .ks-container > h2 {
@@ -405,7 +405,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 60px;
-  padding: 140px 10px 0;
+  padding: 24px 10px 0;
 }
 
 .ks-final-cta > div:first-child {

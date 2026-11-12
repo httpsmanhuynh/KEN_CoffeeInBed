@@ -32,10 +32,10 @@ describe('UserProfile', () => {
 
   it('saves valid changes and cancel restores the saved values', () => {
     component.form.name = 'Thanh';
-    expect(component.dirty).toBeTrue();
+    expect(component.dirty).toBe(true);
     component.onUpdate();
     expect(component.messageType).toBe('ok');
-    expect(component.dirty).toBeFalse();
+    expect(component.dirty).toBe(false);
     component.form.name = 'Khác';
     component.onCancel();
     expect(component.form.name).toBe('Thanh');

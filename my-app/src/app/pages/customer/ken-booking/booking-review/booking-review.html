@@ -76,7 +76,7 @@
         <div class="kf-sum-row"><span>Ưu đãi 5% · mô phỏng</span><strong>−{{ money(state.silverDiscount) }}</strong></div>
         <div class="kf-sum-row kf-total"><strong>Thành tiền</strong><strong>{{ money(state.total) }}</strong></div>
         <label class="kf-check-agreement"><input type="checkbox" [checked]="state.draft().agreed" (change)="setAgreed($any($event.target).checked)"><span>Tôi đã đọc và đồng ý với <a routerLink="/terms">Điều kiện &amp; điều khoản</a> và <a routerLink="/policy">Chính sách hoạt động</a> của KÉN.</span></label>
-        <button class="kf-btn kf-btn-gold kf-full" type="button" [disabled]="checkingSession" (click)="confirm()">Xác nhận &amp; tiếp tục thanh toán →</button>
+        <button class="kf-btn kf-btn-gold kf-full" type="button" [disabled]="!state.draft().agreed || checkingSession || submitting" (click)="confirm()">{{ submitting ? 'Đang tạo đơn giữ chỗ…' : 'Xác nhận & tiếp tục thanh toán →' }}</button>
         <p class="kf-inline-feedback" role="alert" *ngIf="feedback">{{ feedback }}</p>
       </div>
       <div class="kf-checkout-note"><p>Bản demo: lịch trống và thanh toán chưa ghi nhận đặt chỗ.</p></div>

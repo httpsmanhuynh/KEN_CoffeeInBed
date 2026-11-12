@@ -86,9 +86,8 @@ export class LoginPage {
         // Không điều hướng tới route 2FA chưa tồn tại; hiển thị trạng thái rõ ràng.
         if (res?.requires2FA) { this.loading = false; this.error = 'two-factor-unavailable'; }
         else {
-          const destination = this.returnUrl
-            ? this.returnUrl
-            : '/home-logged-in';
+          const defaultHome = res?.user?.role === 'ADMIN' ? '/admin/dashboard' : '/home-logged-in';
+          const destination = this.returnUrl ?? defaultHome;
           this.router.navigateByUrl(destination);
         }
       },

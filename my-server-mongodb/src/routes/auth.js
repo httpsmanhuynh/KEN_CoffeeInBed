@@ -79,6 +79,36 @@ router.post(
   }),
 );
 
+// Gửi lại OTP đăng ký dựa trên pending_data đã lưu ở bước /register
+router.post(
+  '/resend-otp',
+  ipLimiter,
+  phoneOtpLimiter,
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    const phone = str(req.body.phone);
+    if (!PHONE_RE.test(phone))
+      return fail(res, 422, 'VALIDATION_ERROR', 'Số điện thoại không hợp lệ');
+    if (await db.collection('users').findOne({ phone }))
+      return fail(res, 409, 'PHONE_EXISTS', 'Số điện thoại đã được đăng ký');
+
+    const latest = await db
+      .collection('otp_codes')
+      .findOne({ phone, purpose: 'REGISTER', is_used: false }, { sort: { created_at: -1 } });
+    if (!latest || !latest.pending_data)
+      return fail(res, 404, 'REGISTER_SESSION_NOT_FOUND', 'Không tìm thấy phiên đăng ký đang chờ xác minh');
+
+    await issueOtp(db, {
+      userId: null,
+      purpose: 'REGISTER',
+      phone,
+      email: latest.pending_data.email || null,
+      pendingData: latest.pending_data,
+    });
+    res.json({ message: 'Đã gửi lại OTP xác minh' });
+  }),
+);
+
 // Xác minh OTP đăng ký -> tạo user ACTIVE với hạng BASIC
 router.post(
   '/verify-otp',

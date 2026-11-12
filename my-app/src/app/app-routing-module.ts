@@ -76,6 +76,8 @@ const routes: Routes = [
   { path: 'menu-intro', component: MenuPage },
   { path: 'top-trending', component: TopTrending },
   { path: 'access-denied', component: AccessDenied },
+  { path: '403', component: AccessDenied },
+  { path: '404', component: NotFound },
 
   // 5-Step Booking Flow (ttrinh)
   {

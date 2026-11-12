@@ -34,20 +34,22 @@
           </div>
         </section>
 
-        <section class="card card--tight" aria-labelledby="cur-title">
-          <div class="card__head">
-            <h2 class="h-serif" id="cur-title">Lịch hiện tại</h2>
-            <span class="badge badge--{{ order.status }}">{{ statusLabel[order.status] }}</span>
-          </div>
-          <p class="strong">{{ shortName(order) }}</p>
-          <p class="text">{{ order.code }} · {{ order.zone }}</p>
-          <hr class="line" />
-          <div class="kv"><img src="/images/figma/calendar-date.svg" alt="" width="16" height="16" /><span>Ngày sử dụng</span><b>{{ fmtDate(order.date) }}</b></div>
-          <div class="kv"><img src="/images/figma/clock-history.svg" alt="" width="16" height="16" /><span>Khung giờ</span><b>{{ order.start }}–{{ orderEnd }}</b></div>
-          <div class="kv"><img src="/images/figma/clock.svg" alt="" width="16" height="16" /><span>Thời lượng · Số khách</span><b>{{ order.hours }} giờ · {{ guests(order) }} khách</b></div>
-          <hr class="line" />
-          <div class="kv kv--total"><span>Tổng tiền đơn</span><b>{{ fmtMoney(order.total) }}</b></div>
-        </section>
+        @if (order) {
+          <section class="card card--tight" aria-labelledby="cur-title">
+            <div class="card__head">
+              <h2 class="h-serif" id="cur-title">Lịch hiện tại</h2>
+              <span class="badge badge--{{ order.status }}">{{ statusLabel[order.status] }}</span>
+            </div>
+            <p class="strong">{{ shortName(order) }}</p>
+            <p class="text">{{ order.code }} · {{ order.zone }}</p>
+            <hr class="line" />
+            <div class="kv"><img src="/images/figma/calendar-date.svg" alt="" width="16" height="16" /><span>Ngày sử dụng</span><b>{{ fmtDate(order.date) }}</b></div>
+            <div class="kv"><img src="/images/figma/clock-history.svg" alt="" width="16" height="16" /><span>Khung giờ</span><b>{{ order.start }}–{{ orderEnd }}</b></div>
+            <div class="kv"><img src="/images/figma/clock.svg" alt="" width="16" height="16" /><span>Thời lượng · Số khách</span><b>{{ order.hours }} giờ · {{ guests(order) }} khách</b></div>
+            <hr class="line" />
+            <div class="kv kv--total"><span>Tổng tiền đơn</span><b>{{ fmtMoney(order.total) }}</b></div>
+          </section>
+        }
       </div>
 
       <!-- Hàng 2: lịch mới + kết quả -->
@@ -114,21 +116,23 @@
               <span class="avail__text">{{ rechecking ? 'Đang kiểm tra lịch trống…' : fmtDate(newDate) + ' · ' + start + '–' + end }}</span>
               @if (!rechecking) {
                 <span class="badge" [class.badge--confirmed]="availability === 'ok'" [class.badge--bad]="availability !== 'ok'">
-                  {{ availability === 'ok' ? 'Còn chỗ' : availability === 'same' ? 'Trùng lịch' : 'Chưa chọn ngày' }}
+                  {{ availability === 'ok' ? 'Còn chỗ' : availability === 'full' ? 'Hết chỗ' : availability === 'same' ? 'Trùng lịch' : 'Chưa chọn ngày' }}
                 </span>
               }
             </div>
             @if (availability === 'same') {
               <p class="text">Lịch mới trùng với lịch hiện tại.</p>
+            } @else if (availability === 'full') {
+              <p class="text">Khung giờ này đã kín chỗ. Vui lòng chọn khung giờ khác.</p>
             }
-            <button type="button" class="btn btn--outline-gold" (click)="recheck()" [disabled]="rechecking">Kiểm tra chỗ lại</button>
             <button type="button" class="btn btn--gold" [disabled]="!canSubmit" (click)="confirm()">Xác nhận đổi →</button>
+            @if (rescheduleError) {
+              <p class="text" style="color:#b42318;" role="alert">{{ rescheduleError }}</p>
+            }
             @if (submitted) {
-              <p class="text text--ok" role="status">Đã gửi yêu cầu. Đơn vẫn {{ statusLabel[order.status] }} đến khi KÉN xác nhận.</p>
+              <p class="text text--ok" role="status">Đã gửi yêu cầu đổi lịch thành công.</p>
             }
           </section>
-
-          <a class="btn btn--outline" routerLink="/booking-list">Giữ lịch hiện tại</a>
         </div>
       </div>
     </main>

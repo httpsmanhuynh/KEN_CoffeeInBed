@@ -1,4 +1,5 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, effect, inject, signal } from '@angular/core';
+import { AuthService } from '../../../core/auth.service';
 
 export type KenZone = 'focus' | 'rest';
 export type KenDrinkCategory = 'coffee' | 'refreshment' | 'bakery';
@@ -138,6 +139,10 @@ export interface KenBookingDraft {
   voucher: string;
   agreed: boolean;
   holdUntil: number | null;
+  createdBookingId?: string | null;
+  createdBookingCode?: string | null;
+  paymentStatus?: string | null;
+  ownerUserId?: string | null;
 }
 
 export function kenMoney(value: number): string {
@@ -152,10 +157,31 @@ export function kenNextDay(): string {
 
 @Injectable({ providedIn: 'root' })
 export class KenBookingState {
+  private readonly auth = inject(AuthService, { optional: true });
   private readonly storageKey = 'ken-figma-booking-demo-v1';
   readonly draft = signal<KenBookingDraft>(this.load());
   readonly drinks = KEN_MENU.filter(item => item.category !== 'bakery');
   readonly extras = KEN_EXTRAS;
+
+  constructor() {
+    if (this.auth) {
+      effect(() => {
+        const uid = this.auth!.user?.id ?? null;
+        const currentOwner = this.draft().ownerUserId ?? null;
+        if (uid && currentOwner && uid !== currentOwner) {
+          this.resetForUser(uid);
+        } else if (uid && !currentOwner) {
+          this.draft.set({ ...this.draft(), ownerUserId: uid });
+        }
+      });
+    }
+  }
+
+  private resetForUser(ownerUserId: string | null): void {
+    const clean = { ...this.defaults(), ownerUserId };
+    this.draft.set(clean);
+    try { localStorage.setItem(this.storageKey, JSON.stringify(clean)); } catch {}
+  }
 
   private defaults(): KenBookingDraft {
     return {
@@ -217,10 +243,14 @@ export class KenBookingState {
       (change.drinkQuantities !== undefined &&
        JSON.stringify(change.drinkQuantities) !== JSON.stringify(previous.drinkQuantities)) ||
       (change.extras !== undefined &&
-       JSON.stringify(change.extras) !== JSON.stringify(previous.extras));
+       JSON.stringify(change.extras) !== JSON.stringify(previous.extras)) ||
+      (change.voucher !== undefined && change.voucher !== previous.voucher);
 
     if (selectionChanged) {
       next.holdUntil = null;
+      next.createdBookingId = null;
+      next.createdBookingCode = null;
+      next.paymentStatus = null;
     }
     if (next.startHour + next.hours > 22) next.startHour = 22 - next.hours;
     this.draft.set(next);
