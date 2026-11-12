@@ -31,13 +31,21 @@
           <b>{{ money(state.base) }}</b>
         </div>
         <hr>
-        <p class="kf-included"><img class="kf-icon" src="/images/ken-flow/icons/review-coffee.svg" alt=""> Đồ uống đã chọn</p>
+        <p class="kf-included"><img class="kf-icon" src="/images/ken-flow/icons/review-coffee.svg" alt=""> Quyền lợi &amp; đồ uống đi kèm (Inclusion)</p>
+        <div class="kf-drink-choice" *ngIf="state.freeWaterCount > 0" style="background: #fdfaf5; border: 1px dashed #dcb685; padding: 10px 14px; border-radius: 10px; margin-bottom: 8px;">
+          <img src="/images/ken-flow/water.png" alt="Nước tinh khiết">
+          <div>
+            <strong>Nước tinh khiết (chai) × {{ state.freeWaterCount }}</strong>
+            <small style="color: #047857; font-weight: 600;">✓ Tặng miễn phí (Đặt từ 2 giờ trở lên)</small>
+          </div>
+          <b style="color: #047857;">0đ</b>
+        </div>
         <div class="kf-drink-choice" *ngFor="let item of state.selectedDrinks">
           <img [src]="'/images/ken-flow/' + item.product.image" [alt]="item.product.name">
           <div><strong>{{ item.product.name }} × {{ item.quantity }}</strong><small>{{ money(item.product.price) }} / món<span *ngIf="state.entitlement"> · Gói hỗ trợ {{ money(state.entitlement) }}/món</span></small></div>
           <b>{{ money(drinkCharge(item.product.price, item.quantity)) }}</b>
         </div>
-        <p *ngIf="!state.selectedDrinks.length">Chưa chọn đồ uống.</p>
+        <p *ngIf="!state.selectedDrinks.length && state.freeWaterCount === 0">Chưa chọn đồ uống.</p>
       </section>
 
       <section class="kf-panel kf-contact-panel">

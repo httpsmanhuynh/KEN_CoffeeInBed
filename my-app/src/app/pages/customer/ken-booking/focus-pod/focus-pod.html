@@ -38,6 +38,19 @@
 
     <ng-container *ngIf="showAddons">
     <div class="kf-booking-step-title"><span>BƯỚC 03</span><h2>Chọn món &amp; dịch vụ thêm</h2></div>
+    <section class="kf-drink-entry" *ngIf="state.freeWaterCount > 0" style="margin-bottom: 14px; border: 1.5px solid #dcb685; background: #fffcf7;">
+      <div>
+        <strong style="color: #047857;">✓ Quyền lợi Inclusion tự động</strong>
+        <p style="margin: 4px 0 0; color: #4a3a2c;">Gói đặt từ 2 giờ: Tự động tặng <strong>01 chai nước tinh khiết</strong>.</p>
+        <div class="kf-drink-entry-list" style="margin-top: 8px;">
+          <article class="kf-drink-entry-item">
+            <img src="/images/ken-flow/water.png" alt="Nước tinh khiết">
+            <span><strong>Nước tinh khiết (chai)</strong><small>01 chai · Miễn phí theo gói ≥ 2h</small></span>
+            <b style="color: #047857;">0đ</b>
+          </article>
+        </div>
+      </div>
+    </section>
     <section class="kf-drink-entry">
       <div>
         <strong>Đồ uống đi kèm</strong>

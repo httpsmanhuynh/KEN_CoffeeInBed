@@ -302,6 +302,15 @@ export class KenBookingState {
       .filter(item => item.quantity > 0);
   }
 
+  get freeWaterCount(): number {
+    const isHourly = (this.space.id === 'work' && this.draft().hours !== 4 && this.draft().hours !== 14) ||
+                     (this.space.id === 'focus' && this.draft().hours !== 4);
+    if (isHourly && this.draft().hours >= 2) {
+      return this.space.perPerson ? this.draft().guests : 1;
+    }
+    return 0;
+  }
+
   get selectedDrink(): KenProduct | undefined {
     return this.drinks.find(d => d.id === this.draft().drinkId) || this.selectedDrinks[0]?.product;
   }
