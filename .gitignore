@@ -47,4 +47,5 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+.mcp.json
 *.zip
