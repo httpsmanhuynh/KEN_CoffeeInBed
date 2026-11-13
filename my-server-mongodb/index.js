@@ -56,6 +56,7 @@ async function startServer() {
     app.locals.db = client.db(DB_NAME); // route dùng req.app.locals.db
     console.log('Mongo host:', client.options.hosts.map((h) => h.host).join(','));
     console.log('Đã kết nối thành công tới MongoDB!');
+    await require('./src/config/membershipTiers').ensureMembershipTiers(app.locals.db);
     // await require('./src/config/indexes').ensureIndexes(app.locals.db); // BR-A02: unique phone/email (idempotent)
 
     // 4. Routes

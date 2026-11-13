@@ -100,7 +100,7 @@ router.post(
 
     const latest = await db
       .collection('otp_codes')
-      .findOne({ phone: lookupKey, purpose: 'REGISTER', is_used: false }, { sort: { created_at: -1 } });
+      .findOne({ phone: lookupKey, purpose: 'REGISTER' }, { sort: { created_at: -1 } });
     if (!latest || !latest.pending_data)
       return fail(res, 404, 'REGISTER_SESSION_NOT_FOUND', 'Không tìm thấy phiên đăng ký đang chờ xác minh');
 
@@ -123,6 +123,8 @@ router.post(
     const db = req.app.locals.db;
     const rawPhone = str(req.body.phone);
     const phone = PHONE_RE.test(rawPhone) ? rawPhone : rawPhone.toLowerCase();
+    const basic = await db.collection('membership_tiers').findOne({ code: 'BASIC' });
+    if (!basic) throw new Error('Thiếu hạng BASIC trong membership_tiers');
     const { status, otp } = await verifyOtp(db, {
       phone,
       purpose: 'REGISTER',
@@ -130,11 +132,6 @@ router.post(
     });
     if (status !== 'OK') return otpError(res, status);
 
-    const basic = await db.collection('membership_tiers').findOne({ code: 'BASIC' });
-    if (!basic)
-      throw new Error(
-        'Thiếu hạng BASIC trong membership_tiers (chạy npm run setup ở thư mục database)',
-      );
     const p = otp.pending_data,
       now = new Date();
     const doc = {
