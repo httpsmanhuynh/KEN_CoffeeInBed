@@ -140,7 +140,7 @@ router.post(
     const doc = {
       full_name: p.full_name,
       password_hash: p.password_hash,
-      date_of_birth: p.date_of_birth,
+      date_of_birth: p.date_of_birth ? new Date(p.date_of_birth) : null,
       role: 'CUSTOMER',
       status: 'ACTIVE',
       two_factor_enabled: false,
