@@ -265,6 +265,11 @@ router.get(
     ]);
 
     const enrichedResult = enrichBookingWithReview({ ...booking, inclusions, addons, transactions }, review);
+    if (booking.status === 'PENDING_PAYMENT' && transactions.some(t => t.txn_type === 'PAYMENT' && t.status === 'FAILED')) {
+      await db.collection('bookings').updateOne({ _id: bOid }, { $set: { status: 'CANCELLED', updated_at: new Date() } });
+      booking.status = 'CANCELLED';
+      enrichedResult.status = 'CANCELLED';
+    }
     if (bookUser) {
       enrichedResult.contact_name = booking.contact_name || bookUser.full_name;
       enrichedResult.contact_phone = booking.contact_phone || bookUser.phone;

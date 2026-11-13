@@ -186,7 +186,7 @@ export class KenBookingState {
   private defaults(): KenBookingDraft {
     return {
       spaceId: 'focus', date: kenNextDay(), startHour: 9, hours: 4, guests: 1,
-      drinkId: 'matcha', drinkQuantities: {}, extras: {}, fullName: '', phone: '', email: '', note: '',
+      drinkId: null, drinkQuantities: {}, extras: {}, fullName: '', phone: '', email: '', note: '',
       voucher: '', agreed: false, holdUntil: null
     };
   }
@@ -206,8 +206,12 @@ export class KenBookingState {
       const space = kenBookingSpace(state.spaceId);
       state.spaceId = space.id;
       const isHourlySpace = space.id === 'work' || space.id === 'focus';
-      if (!space.rates.some(rate => rate.hours === state.hours) && !(isHourlySpace && state.hours >= 1 && state.hours <= 14)) {
-        state.hours = space.rates[0].hours;
+      const minHourly = space.id === 'work' ? 2 : 1;
+      if (!space.rates.some(rate => rate.hours === state.hours) && !(isHourlySpace && state.hours >= minHourly && state.hours <= 14)) {
+        state.hours = space.id === 'work' ? 2 : space.rates[0].hours;
+      }
+      if (space.id === 'work' && state.hours !== 4 && state.hours !== 14 && state.hours < 2) {
+        state.hours = 2;
       }
       if (!/^\d{4}-\d\d-\d\d$/.test(state.date) || state.date < new Date().toLocaleDateString('en-CA')) state.date = kenNextDay();
       if (!Number.isInteger(state.startHour) || state.startHour < 8 || state.startHour + state.hours > 22) state.startHour = 9;
@@ -282,21 +286,41 @@ export class KenBookingState {
     return KEN_BOOKING_SPACES.find(space => space.id === id);
   }
   get isFocusSpace(): boolean { return this.draft().spaceId === 'focus'; }
+  get isHourlyWork(): boolean {
+    return this.draft().spaceId === 'work' && this.draft().hours !== 4 && this.draft().hours !== 14;
+  }
   get requiredDrinkCount(): number {
     if (this.isFocusSpace) return this.draft().hours === 4 ? 1 : 0;
+    // Gói linh hoạt (theo giờ) của Khu làm việc chung tặng cứng nước suối, không chọn đồ uống inclusion
+    if (this.isHourlyWork) {
+      return 0;
+    }
     return this.draft().guests;
   }
   get selectedDrinkCount(): number {
+    if (this.isHourlyWork) return 0;
     const quantities = this.draft().drinkQuantities;
-    return Object.keys(quantities).length
-      ? Object.values(quantities).reduce((total, count) => total + count, 0)
-      : (this.draft().drinkId ? 1 : 0);
+    if (Object.keys(quantities).length > 0) {
+      return Object.values(quantities).reduce((total, count) => total + count, 0);
+    }
+    if (this.requiredDrinkCount > 0 && this.draft().drinkId) {
+      return 1;
+    }
+    return 0;
   }
   drinkQuantity(id: string): number {
+    if (this.isHourlyWork) return 0;
     const quantities = this.draft().drinkQuantities;
-    return quantities[id] ?? (this.draft().drinkId === id ? 1 : 0);
+    if (Object.keys(quantities).length > 0) {
+      return quantities[id] || 0;
+    }
+    if (this.requiredDrinkCount > 0 && this.draft().drinkId === id) {
+      return 1;
+    }
+    return 0;
   }
   get selectedDrinks(): Array<{ product: KenProduct; quantity: number }> {
+    if (this.isHourlyWork) return [];
     return this.drinks
       .map(product => ({ product, quantity: this.drinkQuantity(product.id) }))
       .filter(item => item.quantity > 0);

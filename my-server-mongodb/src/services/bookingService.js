@@ -885,7 +885,12 @@ async function payBooking(db, { bookingId, user, result = 'SUCCESS', now = new D
       completed_at: now,
     };
     await db.collection('payment_transactions').insertOne(failedTxn);
-    return { booking, transaction: failedTxn };
+    await db.collection('bookings').updateOne(
+      { _id: bOid },
+      { $set: { status: 'CANCELLED', updated_at: now } }
+    );
+    const updatedBooking = await db.collection('bookings').findOne({ _id: bOid });
+    return { booking: updatedBooking || { ...booking, status: 'CANCELLED' }, transaction: failedTxn };
   }
 
   return runInTransaction(db, `booking:${String(bOid)}`, async (session) => {

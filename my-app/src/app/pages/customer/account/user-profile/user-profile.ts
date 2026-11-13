@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, NgZone, OnDestroy, OnInit, inject } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../../core/auth.service';
@@ -25,6 +25,8 @@ export class UserProfile implements OnInit, OnDestroy {
   private readonly auth = inject(AuthService, { optional: true });
   private readonly api = inject(CustomerApiService, { optional: true });
   private readonly router = inject(Router, { optional: true });
+  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly ngZone = inject(NgZone);
 
   private saved: Profile = {
     name: 'Thầy Thanh đẹp trai', email: 'thanh@example.com',
@@ -99,19 +101,25 @@ export class UserProfile implements OnInit, OnDestroy {
       if (emailChanged) payload.email = email;
       this.api.updateProfile(payload).subscribe({
         next: (updated) => {
-          this.auth?.setUser(updated);
-          this.form = { ...this.form, name: updated.fullName, email: updated.email || '' };
-          this.saved = { ...this.form };
-          this.messageType = 'ok';
-          this.message = 'Đã cập nhật thông tin của bạn vào hệ thống.';
-          this.triggerSuccessToast();
+          this.ngZone.run(() => {
+            this.auth?.setUser(updated);
+            this.form = { ...this.form, name: updated.fullName, email: updated.email || '' };
+            this.saved = { ...this.form };
+            this.messageType = 'ok';
+            this.message = 'Đã cập nhật thông tin của bạn vào hệ thống.';
+            this.triggerSuccessToast();
+            this.cdr.detectChanges();
+          });
         },
         error: (err: HttpErrorResponse) => {
-          this.messageType = 'error';
-          this.message =
-            err.error?.code === 'INVALID_CURRENT_PASSWORD'
-              ? 'Đổi email cần xác nhận mật khẩu hiện tại (hãy đổi họ tên riêng hoặc dùng trang Bảo mật).'
-              : err.error?.message || 'Không thể cập nhật hồ sơ. Vui lòng thử lại.';
+          this.ngZone.run(() => {
+            this.messageType = 'error';
+            this.message =
+              err.error?.code === 'INVALID_CURRENT_PASSWORD'
+                ? 'Đổi email cần xác nhận mật khẩu hiện tại (hãy đổi họ tên riêng hoặc dùng trang Bảo mật).'
+                : err.error?.message || 'Không thể cập nhật hồ sơ. Vui lòng thử lại.';
+            this.cdr.detectChanges();
+          });
         },
       });
       return;
@@ -123,12 +131,14 @@ export class UserProfile implements OnInit, OnDestroy {
       ? 'Đã cập nhật. Email mới cần được xác minh lại trước khi dùng làm thông tin liên hệ.'
       : 'Đã cập nhật thông tin của bạn.';
     this.triggerSuccessToast();
+    this.cdr.detectChanges();
   }
 
   onCancel(): void {
     this.form = { ...this.saved };
     this.errors = {};
     this.message = ''; this.messageType = '';
+    this.cdr.detectChanges();
   }
 
   onAvatarPicked(ev: Event): void {
@@ -137,34 +147,45 @@ export class UserProfile implements OnInit, OnDestroy {
     input.value = '';
     if (!file) return;
     if (!['image/jpeg', 'image/png'].includes(file.type)) {
-      this.messageType = 'error'; this.message = 'Ảnh đại diện chỉ nhận định dạng JPG hoặc PNG.'; return;
+      this.messageType = 'error'; this.message = 'Ảnh đại diện chỉ nhận định dạng JPG hoặc PNG.';
+      this.cdr.detectChanges();
+      return;
     }
     if (file.size > MAX_AVATAR_BYTES) {
-      this.messageType = 'error'; this.message = 'Ảnh vượt quá 5 MB, vui lòng chọn ảnh nhỏ hơn.'; return;
+      this.messageType = 'error'; this.message = 'Ảnh vượt quá 5 MB, vui lòng chọn ảnh nhỏ hơn.';
+      this.cdr.detectChanges();
+      return;
     }
     if (this.avatarUrl && this.avatarUrl.startsWith('blob:')) URL.revokeObjectURL(this.avatarUrl);
     const reader = new FileReader();
     reader.onload = () => {
-      const dataUrl = typeof reader.result === 'string' ? reader.result : null;
-      this.avatarUrl = dataUrl;
-      this.auth?.setAvatar(dataUrl);
+      this.ngZone.run(() => {
+        const dataUrl = typeof reader.result === 'string' ? reader.result : null;
+        this.avatarUrl = dataUrl;
+        this.auth?.setAvatar(dataUrl);
+        this.messageType = 'ok'; this.message = 'Đã cập nhật ảnh đại diện.';
+        this.triggerSuccessToast();
+        this.cdr.detectChanges();
+      });
     };
     reader.readAsDataURL(file);
-    this.messageType = 'ok'; this.message = 'Đã cập nhật ảnh đại diện.';
   }
 
   showToast = false;
   private toastTimer?: ReturnType<typeof setTimeout>;
 
   triggerSuccessToast(): void {
-    this.showToast = false;
     clearTimeout(this.toastTimer);
-    setTimeout(() => {
+    this.ngZone.run(() => {
       this.showToast = true;
+      this.cdr.detectChanges();
       this.toastTimer = setTimeout(() => {
-        this.showToast = false;
+        this.ngZone.run(() => {
+          this.showToast = false;
+          this.cdr.detectChanges();
+        });
       }, 3500);
-    }, 10);
+    });
   }
 
   logout(): void {

@@ -69,8 +69,8 @@ p, h1, h2, hr { margin: 0; }
 .box__icon { flex: 0 0 16px; width: 16px; height: 16px; display: block; pointer-events: none; }
 .box__icon--lg { flex-basis: 18px; width: 18px; height: 18px; }
 .box input[type='date']::-webkit-calendar-picker-indicator { opacity: 0; position: absolute; inset: 0; width: 100%; cursor: pointer; }
-.slots { display: flex; gap: 10px; }
-.slot { flex: 1 1 0; min-width: 0; min-height: 46px; padding: 10px; border: 1px solid rgba(216,199,178,.62); border-radius: 8px; background: #F7EFE2; color: #4A3123; font: inherit; font-size: 14px; line-height: 22.4px; cursor: pointer; transition: background .18s ease; }
+.slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: 10px; }
+.slot { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 8px 10px; border: 1px solid rgba(216,199,178,.62); border-radius: 8px; background: #F7EFE2; color: #4A3123; font: inherit; font-size: 14px; font-weight: 500; line-height: 22.4px; cursor: pointer; transition: background .18s ease, border-color .18s ease; }
 .slot:hover { border-color: #A9763F; }
 .slot.is-selected { background: #4A3123; border-color: #4A3123; color: #F7EFE2; }
 .check { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }

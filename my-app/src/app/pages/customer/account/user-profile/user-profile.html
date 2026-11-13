@@ -89,7 +89,7 @@
             <hr class="line" />
 
             <div class="actions">
-              <button type="submit" class="btn btn--dark">Cập nhật</button>
+              <button type="submit" class="btn btn--dark" (click)="onUpdate()">Cập nhật</button>
               <button type="button" class="btn btn--outline" (click)="onCancel()">Huỷ chỉnh sửa</button>
             </div>
             <p class="msg" [class.msg--ok]="messageType === 'ok'" [class.msg--error]="messageType === 'error'" role="status" aria-live="polite">{{ message }}</p>

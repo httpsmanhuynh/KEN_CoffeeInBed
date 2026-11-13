@@ -25,6 +25,17 @@ export class KenBookingReviewPage {
   submitting = false;
   readonly money = kenMoney;
   constructor(public state: KenBookingState, private router: Router, private auth: AuthService) {}
+
+  get canConfirm(): boolean {
+    const d = this.state.draft();
+    const hasName = !!d.fullName && d.fullName.trim().length >= 2;
+    const rawPhone = (d.phone || '').trim().replace(/\s+/g, '');
+    const hasPhone = /^(?:\+84|84|0)\d{9,10}$/.test(rawPhone);
+    const hasEmail = !!d.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email.trim());
+    const hasAgreed = !!d.agreed;
+    return hasName && hasPhone && hasEmail && hasAgreed && !this.checkingSession && !this.submitting;
+  }
+
   setContact(key: 'fullName' | 'phone' | 'email' | 'note' | 'voucher', value: string): void {
     this.state.set({ [key]: value } as Pick<KenBookingDraft, typeof key>);
     this.feedback = '';
@@ -80,7 +91,12 @@ export class KenBookingReviewPage {
     });
   }
   confirm(): void {
-    if (this.checkingSession) return;
+    if (this.checkingSession || this.submitting) return;
+    const draft = this.state.draft();
+    if (!draft.fullName?.trim() || !draft.phone?.trim() || !draft.email?.trim() || !draft.agreed) {
+      this.feedback = 'Vui lòng điền đầy đủ Họ và tên, Số điện thoại, Email và đồng ý với điều khoản trước khi xác nhận.';
+      return;
+    }
     this.checkingSession = true;
     this.auth.ensureSession().subscribe({
       next: user => {
@@ -89,12 +105,6 @@ export class KenBookingReviewPage {
           this.router.navigate(['/login'], { queryParams: { returnUrl: '/booking/review' } });
           return;
         }
-        const draft = this.state.draft();
-        this.state.set({
-          fullName: draft.fullName || user.fullName,
-          phone: draft.phone || user.phone,
-          email: draft.email || user.email || '',
-        });
         this.confirmAuthenticated();
       },
       error: () => {

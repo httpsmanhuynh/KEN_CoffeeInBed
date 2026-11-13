@@ -46,6 +46,10 @@ export class KenOtherSpacePage implements OnInit {
       this.startHour = current.startHour;
       this.guests = current.guests;
       this.duration = current.hours;
+      if (this.space?.id === 'work' && this.duration < 2 && this.duration !== 4 && this.duration !== 14) {
+        this.duration = 2;
+        this.state.set({ hours: 2 });
+      }
       this.startHour = Math.min(this.startHour, 22 - this.duration);
       this.feedback = '';
       if (this.route.snapshot.queryParamMap.get('bookingStep') === 'addons') {
@@ -73,8 +77,10 @@ export class KenOtherSpacePage implements OnInit {
   }
 
   get hourlyDurationOptions(): number[] {
-    const maxHours = Math.max(1, 22 - this.startHour);
-    return Array.from({ length: maxHours }, (_, i) => i + 1);
+    const minHours = this.space?.id === 'work' ? 2 : 1;
+    const maxHours = Math.max(minHours, 22 - this.startHour);
+    const length = Math.max(0, maxHours - minHours + 1);
+    return Array.from({ length }, (_, i) => i + minHours);
   }
 
   isRateSelected(rate: { hours: number; price: number }): boolean {
@@ -85,6 +91,9 @@ export class KenOtherSpacePage implements OnInit {
   }
 
   chooseDuration(hours: number): void {
+    if (this.space?.id === 'work' && hours === 1) {
+      hours = 2;
+    }
     this.duration = hours;
     this.startHour = Math.min(this.startHour, 22 - hours);
     this.state.set({ hours });
@@ -132,6 +141,10 @@ export class KenOtherSpacePage implements OnInit {
 
   beginBooking(): void {
     if (this.checkingSession || this.checkingAvailability || !this.space) return;
+    if (this.space.id === 'work' && this.duration < 2 && this.duration !== 4 && this.duration !== 14) {
+      this.feedback = 'Gói theo giờ yêu cầu số giờ nguyên từ 2 giờ trở lên.';
+      return;
+    }
     this.state.set({
       spaceId: this.space.id,
       date: this.date,
@@ -159,11 +172,15 @@ export class KenOtherSpacePage implements OnInit {
   rateLabel(rate: { hours: number; price: number }): string {
     if (this.space?.id === 'work' && rate.hours === 14) return 'Cả ngày · 08:00–22:00';
     if (this.space?.id === 'work' && rate.hours === 4) return 'Nửa ngày · 4 giờ';
-    return this.space?.id === 'work' ? 'Linh hoạt · Theo giờ' : `${rate.hours} giờ`;
+    return this.space?.id === 'work' ? 'Linh hoạt · Từ 2 giờ' : `${rate.hours} giờ`;
   }
 
   toReview(): void {
     if (!this.space) return;
+    if (this.space.id === 'work' && this.duration < 2 && this.duration !== 4 && this.duration !== 14) {
+      this.feedback = 'Gói theo giờ yêu cầu số giờ nguyên từ 2 giờ trở lên.';
+      return;
+    }
     this.state.set({
       spaceId: this.space.id,
       date: this.date,

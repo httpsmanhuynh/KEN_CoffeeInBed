@@ -35,10 +35,12 @@ export class BookingReschedule implements OnInit, OnDestroy {
   readonly statusLabel: Record<OrderStatus, string> = { confirmed: 'Đã xác nhận', pending: 'Chờ xác nhận' };
   get slots(): string[] {
     const out: string[] = [];
-    for (let h = 8; h + this.hours <= 22; h++) {
+    const endLimit = this.hours >= 14 ? 20 : 22 - (this.hours || 1);
+    const maxStart = Math.max(8, Math.min(21, endLimit));
+    for (let h = 8; h <= maxStart; h++) {
       out.push(`${pad(h)}:00`);
     }
-    return out;
+    return out.length ? out : ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'];
   }
   readonly durations = [2, 3, 4, 5, 6];
 

@@ -4,7 +4,7 @@ import { forkJoin } from 'rxjs';
 import { AuthService } from '../../../../core/auth.service';
 import { ApiBooking, CustomerApiService } from '../../../../core/customer-api.service';
 
-export type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'noshow';
+export type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'noshow' | 'failed';
 type StatusFilter = 'all' | BookingStatus;
 
 interface Booking {
@@ -17,7 +17,7 @@ interface Booking {
 
 const STATUS_LABEL: Record<BookingStatus, string> = {
   pending: 'Chờ xác nhận', confirmed: 'Đã xác nhận', completed: 'Hoàn thành',
-  cancelled: 'Đã huỷ', noshow: 'Không đến',
+  cancelled: 'Đã huỷ', noshow: 'Không đến', failed: 'Thất bại',
 };
 
 const PAGE_SIZE = 10;
@@ -36,7 +36,7 @@ export class BookingList implements OnInit {
   readonly statusLabel = STATUS_LABEL;
 
   searchCode = '';
-  detailBooking: (ApiBooking & { spaceName?: string; package_name?: string; contact_name?: string; contact_phone?: string; contact_email?: string; transactions?: any[]; inclusions?: any[]; addons?: any[] }) | null = null;
+  detailBooking: (ApiBooking & { spaceName?: string; package_name?: string; contact_name?: string; contact_phone?: string; contact_email?: string; transactions?: any[]; inclusions?: any[]; addons?: any[]; inclusions_snapshot?: any[] }) | null = null;
   loadingDetail = false;
   detailError = '';
 
@@ -55,6 +55,7 @@ export class BookingList implements OnInit {
     { key: 'pending', label: 'Chờ xác nhận' },
     { key: 'confirmed', label: 'Đã xác nhận' },
     { key: 'completed', label: 'Hoàn thành' },
+    { key: 'failed', label: 'Thất bại' },
     { key: 'cancelled', label: 'Đã huỷ' },
     { key: 'noshow', label: 'Không đến' },
   ];
@@ -103,7 +104,7 @@ export class BookingList implements OnInit {
       CONFIRMED: 'confirmed',
       CHECKED_IN: 'confirmed',
       CHECKED_OUT: 'completed',
-      CANCELLED: 'cancelled',
+      CANCELLED: 'failed',
       EXPIRED: 'cancelled',
       NO_SHOW: 'noshow',
     };
@@ -118,6 +119,26 @@ export class BookingList implements OnInit {
       total: b.final_amount,
       status: statusMap[b.status] ?? 'pending',
     };
+  }
+
+  get detailStatusLabel(): string {
+    if (!this.detailBooking) return '—';
+    const hasFailedTx = this.detailBooking.transactions?.some(t => (t.txn_type === 'PAYMENT' || t.type === 'PAYMENT') && t.status === 'FAILED');
+    if (this.detailBooking.status === 'CANCELLED' || hasFailedTx) return 'Thất bại';
+    if (this.detailBooking.status === 'CONFIRMED' || this.detailBooking.status === 'CHECKED_IN') return 'Đã xác nhận';
+    if (this.detailBooking.status === 'CHECKED_OUT') return 'Hoàn thành';
+    if (this.detailBooking.status === 'PENDING_PAYMENT') return 'Chờ xác nhận';
+    if (this.detailBooking.status === 'NO_SHOW') return 'Không đến';
+    if (this.detailBooking.status === 'EXPIRED') return 'Đã hết hạn';
+    return this.detailBooking.status;
+  }
+
+  get detailStatusColor(): string {
+    const label = this.detailStatusLabel;
+    if (label === 'Thất bại') return '#b42318';
+    if (label === 'Đã xác nhận' || label === 'Hoàn thành') return '#047857';
+    if (label === 'Chờ xác nhận') return '#b54708';
+    return '#4A3123';
   }
 
   count(key: StatusFilter): number {
