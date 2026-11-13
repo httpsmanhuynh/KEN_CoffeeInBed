@@ -1,0 +1,32 @@
+item_code,item_name,category,item_type,baseline_4w,predicted_qty,lower_qty,upper_qty,action_tag
+WATER_BOTTLE,Nước tinh khiết,DRINK,DRINK,45.0,32,19,46,Giảm chuẩn bị
+CF_SUA,Cà phê sữa,DRINK,DRINK,21.75,22,17,30,Giữ mức chuẩn bị
+CF_BAC_XIU,Bạc xỉu,DRINK,DRINK,22.75,19,13,25,Giảm chuẩn bị
+CF_AMERICANO,Americano,DRINK,DRINK,19.25,18,12,25,Giữ mức chuẩn bị
+BAKE_CROISSANT,Croissant bơ,PASTRY,FOOD,13.75,17,11,24,Tăng chuẩn bị
+CF_PHIN,Cà phê phin truyền thống,DRINK,DRINK,15.5,17,12,24,Giữ mức chuẩn bị
+TEA_DAO,Trà đào,DRINK,DRINK,15.0,15,10,20,Giữ mức chuẩn bị
+MATCHA_LATTE,Matcha Latte,DRINK,DRINK,14.5,14,7,23,Giữ mức chuẩn bị
+BAKE_BISCOTTI,Bánh quy hạt,PASTRY,FOOD,13.75,12,10,14,Giữ mức chuẩn bị
+CF_DEN,Cà phê đen,DRINK,DRINK,14.5,12,9,14,Giảm chuẩn bị
+CF_ESPRESSO,Espresso chuẩn Barista,DRINK,DRINK,12.5,12,10,14,Giữ mức chuẩn bị
+CF_SALTED_CARAMEL,Salted Caramel Coffee,DRINK,DRINK,13.25,12,9,16,Giữ mức chuẩn bị
+TEA_OOLONG_MACCHIATO,Hồng trà Oolong Macchiato,DRINK,DRINK,11.25,11,8,14,Giữ mức chuẩn bị
+BAKE_SCONE,Bánh bơ xốp,PASTRY,FOOD,8.75,10,6,13,Giữ mức chuẩn bị
+CAKE_CHEESE,Cheesecake,PASTRY,FOOD,8.0,10,7,13,Tăng chuẩn bị
+CAKE_TIRAMISU,Tiramisu,PASTRY,FOOD,11.25,10,8,13,Giữ mức chuẩn bị
+CF_COLD_BREW,Cold Brew truyền thống,DRINK,DRINK,11.5,10,7,12,Giữ mức chuẩn bị
+CF_COLD_BREW_FRUIT,Cold Brew trái cây,DRINK,DRINK,9.5,10,7,13,Giữ mức chuẩn bị
+CHOC_NONG,Sô-cô-la nóng,DRINK,DRINK,8.75,10,7,13,Giữ mức chuẩn bị
+SNACK_SANDWICH,Sandwich,SNACK,FOOD,14.0,10,5,13,Giảm chuẩn bị
+JUICE_CAM,Nước cam,DRINK,DRINK,8.75,9,7,13,Giữ mức chuẩn bị
+TEA_LUC,Lục trà tươi mát,DRINK,DRINK,6.75,9,6,13,Tăng chuẩn bị
+JUICE_CHANH_DAY,Nước ép chanh dây,DRINK,DRINK,8.0,8,5,13,Giữ mức chuẩn bị
+MOUSSE_CHANH_DAY,Mousse chanh dây,PASTRY,FOOD,7.0,8,6,12,Giữ mức chuẩn bị
+MOUSSE_MATCHA,Mousse trà xanh,PASTRY,FOOD,8.5,8,5,10,Giữ mức chuẩn bị
+SODA_TRAI_CAY,Soda trái cây,DRINK,DRINK,9.5,8,5,12,Giảm chuẩn bị
+TEA_THAO_MOC,Trà thảo mộc,DRINK,DRINK,9.25,8,4,13,Giữ mức chuẩn bị
+HOJICHA_LATTE,Hojicha Latte,DRINK,DRINK,6.0,7,4,9,Tăng chuẩn bị
+SNACK_FRUIT,Trái cây cắt sẵn,SNACK,FOOD,4.25,7,6,10,Tăng chuẩn bị
+TEA_CHAI,Trà Chai Ấn Độ,DRINK,DRINK,5.5,7,5,10,Tăng chuẩn bị
+BREAD_QUE,Bánh mì que,PASTRY,FOOD,5.75,6,4,7,Giữ mức chuẩn bị

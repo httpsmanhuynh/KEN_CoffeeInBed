@@ -1,0 +1,4 @@
+Model,MAE,RMSE
+Baseline (4 tuần cùng thứ),4.1561,5.3456
+Multiple Linear Regression (MLR),3.7851,5.0269
+Random Forest Regressor (Đề xuất),3.9151,5.1312
