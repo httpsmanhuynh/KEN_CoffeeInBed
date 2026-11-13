@@ -19,7 +19,7 @@ import { adminRoutes } from './pages/admin/admin.routes';
 
 const routes: Routes = [
   ...adminRoutes,
-  { path: '', redirectTo: 'register', pathMatch: 'full' },
+  { path: '', redirectTo: 'admin', pathMatch: 'full' },
   { path: 'register', component: RegisterPage },
   { path: 'otp-verify', component: OtpVerifyPage },
   { path: 'login', component: LoginPage },
@@ -41,7 +41,7 @@ const routes: Routes = [
   // Giữ tương thích với các URL cũ đã được dùng trong giao diện.
   { path: 'customer/membership/coins-rewards', redirectTo: 'coins-rewards', pathMatch: 'full' },
   { path: 'customer/membership/points-tier', redirectTo: 'points-tier', pathMatch: 'full' },
-  { path: '**', redirectTo: 'register' },
+  { path: '**', redirectTo: 'admin' },
 ];
 
 @NgModule({

@@ -30,8 +30,13 @@ import { MenuPage } from './pages/customer/menu/menu-page/menu-page';
 import { AdminLayout } from './pages/admin/admin-layout/admin-layout';
 import { Dashboard } from './pages/admin/dashboard/dashboard';
 import { Bookings } from './pages/admin/bookings/bookings';
-
-
+import { Customers } from './pages/admin/customers/customers';
+import { Areas } from './pages/admin/areas/areas';
+import { Spaces } from './pages/admin/spaces/spaces.component';
+import { ServicePackages } from './pages/admin/service-packages/service-packages';
+import { Addons } from './pages/admin/addons/addons';
+import { Voucher } from './pages/admin/voucher/voucher';
+import { Forecast } from './pages/admin/forecast/forecast';
 
 @NgModule({
   declarations: [
@@ -60,7 +65,13 @@ import { Bookings } from './pages/admin/bookings/bookings';
     AdminLayout,
     Dashboard,
     Bookings,
-
+    Customers,
+    Areas,
+    Spaces,
+    ServicePackages,
+    Addons,
+    Voucher,
+    Forecast,
 
     // Remove ConfirmDialog from declarations
   ],

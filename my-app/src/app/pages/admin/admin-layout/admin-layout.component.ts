@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+﻿import { Component, inject } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
 
@@ -57,12 +57,30 @@ export class AdminLayoutComponent {
       return 'Quản lý Booking';
     }
     if (this.currentUrl.includes('/admin/customers')) {
-      return 'Quản lý khách hàng';
+      return 'Khách hàng & Thành viên';
     }
     if (this.currentUrl.includes('/admin/areas') || this.currentUrl.includes('/admin/zones')) {
       return this.currentUrl.includes('/new') || /\/areas\/[^/]+$/.test(this.currentUrl) ? 'Thêm khu vực' : 'Quản lý khu vực';
     }
+    if (this.currentUrl.includes('/admin/spaces')) {
+      if (this.currentUrl.includes('/new')) return 'Thêm không gian';
+      if (this.currentUrl.includes('/edit')) return 'Chỉnh sửa không gian';
+      return 'Quản lý không gian';
+    }
+    if (this.currentUrl.includes('/admin/packages')) {
+      if (this.currentUrl.endsWith('/new')) return 'Thêm gói dịch vụ';
+      if (this.currentUrl.includes('/edit')) return 'Chỉnh sửa gói dịch vụ';
+      if (/\/packages\/[^/]+$/.test(this.currentUrl)) return 'Chi tiết gói dịch vụ';
+      return 'Quản lý gói dịch vụ';
+    }
+    if (this.currentUrl.includes('/admin/addons')) {
+      return 'Sản phẩm & Add-on';
+    }
     return 'Dashboard';
+  }
+
+  isForecastPage(): boolean {
+    return this.currentUrl.startsWith('/admin/forecast');
   }
 
   onRefresh(): void {

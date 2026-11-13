@@ -1,0 +1,79 @@
+:host { display: block; width: 100%; }
+.voucher-page { min-height: 100%; padding: 24px 32px 32px; background: #f7efe2; color: #4a3123; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+.toast { position: fixed; top: 72px; right: 28px; z-index: 20; padding: 12px 18px; border-radius: 999px; background: #4a3123; color: #fffaf2; font-size: 13px; }
+.voucher-topline { display: flex; justify-content: space-between; align-items: center; height: 20px; color: #766252; font-size: 12px; }
+.voucher-topline img { width: 16px; height: 16px; opacity: .7; }
+.voucher-heading { margin: 20px 0 16px; }
+.voucher-heading h1 { margin: 0 0 6px; font-size: 30px; line-height: 36px; }
+.voucher-heading p { margin: 0; color: #766252; font-size: 14px; line-height: 21px; }
+.voucher-card { overflow: hidden; margin-bottom: 16px; border: 1px solid rgba(216,199,178,.62); border-radius: 16px; background: #fffcf7; }
+.voucher-card-heading, .editor-heading { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; }
+.heading-label { display: flex; align-items: center; gap: 10px; }
+.heading-label img { width: 18px; height: 18px; }
+.heading-label h2 { margin: 0; font-size: 16px; font-weight: 700; }
+.count-badge, .editing-badge { padding: 3px 8px; border-radius: 6px; background: #f7efe2; color: #766252; font-size: 12px; font-weight: 600; }
+.editing-badge { border: 1px solid #e3a52f; border-radius: 999px; background: transparent; color: #a9763f; }
+.voucher-filters { display: flex; gap: 10px; padding: 0 22px 16px; }
+.search-box, .select-box { display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border: 1px solid rgba(216,199,178,.62); border-radius: 8px; box-sizing: border-box; }
+.search-box { flex: 1; }
+.search-box img, .select-box > img:first-child { width: 16px; height: 16px; opacity: .7; }
+.select-box { width: 180px; }
+.select-box.area-select { width: 160px; }
+.search-box input, .select-box select { width: 100%; border: 0; outline: 0; background: transparent; color: #4a3123; font: inherit; font-size: 13px; }
+.select-box > img:last-child { width: 16px; height: 16px; }
+.table-wrap { width: 100%; overflow: hidden; }
+table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+th { padding: 11px 16px; border-top: 1px solid #eadccb; border-bottom: 1px solid #eadccb; background: #f7efe2; text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .3px; }
+th:nth-child(1) { width: 22%; } th:nth-child(2) { width: 9%; } th:nth-child(3) { width: 10%; } th:nth-child(4) { width: 9%; } th:nth-child(5) { width: 12%; } th:nth-child(6) { width: 10%; } th:nth-child(7) { width: 14%; } th:nth-child(8) { width: 14%; }
+th, td { overflow-wrap: anywhere; }
+td { padding: 14px 12px; border-bottom: 1px solid #eadccb; vertical-align: middle; font-size: 13px; }
+tbody tr { cursor: pointer; }
+tbody tr:hover, .selected-row { background: #fbf0d3; }
+td:first-child strong, td:first-child span, td:first-child small, td small { display: block; }
+td:first-child strong { font-size: 14px; }
+td:first-child span { margin-top: 4px; line-height: 18px; }
+td small { margin-top: 4px; color: #766252; font-size: 12px; line-height: 17px; }
+.status-badge, .summary-status { display: inline-block; padding: 4px 8px; border-radius: 999px; background: #edf2e9; color: #36543d; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.status-badge.paused { background: #eeeae4; color: #71665d; }
+.actions { white-space: normal; }
+.actions button, .btn-outline { border: 0; background: transparent; color: #4a3123; cursor: pointer; font-size: 12px; font-weight: 600; padding: 0; }
+.actions button + button { margin-left: 8px; color: #a9763f; }
+.empty { padding: 30px; text-align: center; color: #766252; }
+.pagination { display: flex; justify-content: space-between; padding: 14px 22px; color: #766252; font-size: 12px; }
+.editor-heading { border-bottom: 1px solid rgba(216,199,178,.62); }
+.editor-heading p { margin: 3px 0 0; color: #766252; font-size: 12px; }
+.editor-body { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 18px; padding: 18px 22px; }
+.editor-fields h3 { margin: 0 0 12px; font-size: 14px; }
+.section-title { margin-top: 18px !important; }
+.field-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 10px; }
+.field-grid label { display: flex; flex-direction: column; gap: 5px; font-size: 12px; }
+.field-grid label.wide { grid-column: span 2; }
+.field-grid input, .field-grid select { height: 32px; padding: 0 10px; border: 1px solid rgba(216,199,178,.62); border-radius: 8px; background: #f7efe2; color: #766252; outline: 0; font: inherit; }
+.voucher-summary { align-self: start; padding: 16px; border-radius: 12px; background: #f6eddf; }
+.voucher-summary h3 { margin: 0 0 16px; font-size: 11px; letter-spacing: .5px; }
+.voucher-summary > strong, .voucher-summary > b { display: block; }
+.voucher-summary > strong { font-size: 15px; }
+.voucher-summary > b { margin-top: 12px; font-size: 24px; }
+.voucher-summary p { color: #766252; font-size: 12px; line-height: 18px; }
+.voucher-summary small { display: block; margin-top: 10px; color: #766252; }
+.editor-actions { display: flex; gap: 8px; padding: 12px 22px; border-top: 1px solid rgba(216,199,178,.62); }
+.btn-outline, .btn-primary { height: 34px; padding: 0 16px; border-radius: 999px; }
+.btn-outline { border: 1px solid #d8c7b2; }
+.btn-primary { border: 0; background: #e3a52f; color: #4a3123; font-weight: 700; }
+@media (max-width: 900px) {
+  .voucher-page { padding: 20px 14px; }
+  .voucher-filters { flex-direction: column; }
+  .editor-body { grid-template-columns: 1fr; }
+  .select-box, .select-box.area-select { width: 100%; }
+  .field-grid { grid-template-columns: 1fr; }
+  .field-grid label.wide { grid-column: auto; }
+}
+
+@media (max-width: 1100px) {
+  .voucher-page { padding-left: 20px; padding-right: 20px; }
+  th, td { padding-left: 8px; padding-right: 8px; }
+  th, td { font-size: 11px; }
+  td:first-child strong { font-size: 12px; }
+  td small { font-size: 10px; }
+  .status-badge { font-size: 10px; }
+}

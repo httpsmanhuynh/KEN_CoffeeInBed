@@ -1,11 +1,15 @@
+<!-- Khi ở các trang khách hàng: hiển thị Header + Footer của khách -->
 <ng-container *ngIf="!isAdmin(); else adminView">
   <app-header [member]="member()"></app-header>
   <main class="app-content" id="main-content">
-    <app-dashboard></app-dashboard>
+    <router-outlet></router-outlet>
   </main>
   <app-footer></app-footer>
 </ng-container>
 
+<!-- Khi ở các trang Admin (/admin, /admin/dashboard, /admin/bookings):
+     Phải để <router-outlet></router-outlet> để Router nạp AdminLayout (chứa Top Bar & Sidebar)
+     tuyệt đối KHÔNG gõ trực tiếp <app-dashboard> ở đây vì sẽ làm mất Top Bar & Sidebar -->
 <ng-template #adminView>
-  <app-dashboard></app-dashboard>
+  <router-outlet></router-outlet>
 </ng-template>

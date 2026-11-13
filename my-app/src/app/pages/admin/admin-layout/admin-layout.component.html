@@ -57,7 +57,7 @@
   <!-- Main Content Area -->
   <div class="admin-main" data-name="KÉN Admin · Main">
     <!-- Topbar / Header -->
-    <header class="admin-topbar" data-name="Topbar">
+    <header class="admin-topbar" data-name="Topbar" *ngIf="!isForecastPage()">
       <!-- Breadcrumb -->
       <div class="breadcrumb" data-name="Breadcrumb">
         <span class="crumb-link">KÉN</span>
@@ -78,7 +78,6 @@
         >
           <img src="images/admin/refresh.svg" alt="Refresh" class="refresh-icon" />
         </button>
-        <span class="topbar-info">Dữ liệu minh hoạ · 24/10/2026 · 10:00</span>
       </div>
     </header>
 

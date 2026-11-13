@@ -1,0 +1,557 @@
+<div class="spaces-page" data-name="KÉN Admin · Spaces">
+  <!-- Toast Notification -->
+  <div *ngIf="toastMessage" class="toast-notification" [class.toast-info]="toastType === 'info'">
+    <span class="toast-dot"></span>
+    <span class="toast-text">{{ toastMessage }}</span>
+    <button type="button" class="toast-close" (click)="toastMessage = null">✕</button>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- VIEW 1: DANH SÁCH KHÔNG GIAN (Figma 258:3919) -->
+  <!-- ========================================================================= -->
+  <ng-container *ngIf="viewMode === 'list'">
+    <!-- Page Heading -->
+    <div class="page-heading-row" data-name="Page heading">
+      <div class="heading-title-block">
+        <div class="title-with-icon">
+          <div class="page-title-icon-wrap">
+            <img src="images/admin/nav-sidebar-reverse.svg" alt="" class="page-title-icon" />
+          </div>
+          <h1 class="page-title">Quản lý không gian</h1>
+        </div>
+
+      </div>
+
+      <div class="heading-actions">
+        <button type="button" class="btn-action-outline" (click)="exportList()" data-name="Export btn">
+          <span>Xuất danh sách ↗</span>
+        </button>
+        <button type="button" class="btn-action-primary" (click)="openCreateForm()" data-name="Add space btn">
+          <img src="images/admin/plus.svg" alt="" class="btn-icon" />
+          <span>Thêm không gian</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats Row (6 Cards) -->
+    <div class="stats-row" data-name="Stats row">
+      <div class="stat-card" data-name="Stat card - Total">
+        <span class="stat-number text-brown">{{ totalCount }}</span>
+        <span class="stat-label">Tổng Space</span>
+      </div>
+      <div class="stat-card" data-name="Stat card - Active">
+        <span class="stat-number text-green">{{ activeCount }}</span>
+        <span class="stat-label">Đang hoạt động</span>
+      </div>
+      <div class="stat-card" data-name="Stat card - Maintenance">
+        <span class="stat-number text-brown">{{ maintenanceCount }}</span>
+        <span class="stat-label">Bảo trì</span>
+      </div>
+      <div class="stat-card" data-name="Stat card - Inactive">
+        <span class="stat-number text-danger">{{ inactiveCount }}</span>
+        <span class="stat-label">Ngừng hoạt động</span>
+      </div>
+      <div class="stat-card" data-name="Stat card - Zone Tap Trung">
+        <span class="stat-number text-brown">{{ zoneTapTrungCount }}</span>
+        <span class="stat-label">Zone Tập Trung</span>
+      </div>
+      <div class="stat-card" data-name="Stat card - Zone Tai Tao">
+        <span class="stat-number text-brown">{{ zoneTaiTaoCount }}</span>
+        <span class="stat-label">Zone Tái Tạo</span>
+      </div>
+    </div>
+
+    <!-- Inventory Panel -->
+    <div class="inventory-panel" data-name="Inventory panel">
+      <!-- Filter Bar -->
+      <div class="filter-bar" data-name="Filter bar">
+        <!-- Search Input -->
+        <div class="search-input-wrap">
+          <img src="images/admin/search-icon.svg" alt="" class="search-icon" />
+          <input
+            type="text"
+            [(ngModel)]="searchQuery"
+            placeholder="Tìm tên không gian..."
+            class="search-input"
+          />
+        </div>
+
+        <!-- Filter Zone -->
+        <div class="filter-select-wrap">
+          <select [(ngModel)]="selectedZone" class="filter-select">
+            <option value="Tất cả">Zone: Tất cả</option>
+            <option *ngFor="let z of zoneOptions" [value]="z">Zone: {{ z }}</option>
+          </select>
+          <img src="images/admin/arrow-dropdown.svg" alt="" class="select-chevron" />
+        </div>
+
+        <!-- Filter Status -->
+        <div class="filter-select-wrap">
+          <select [(ngModel)]="selectedStatus" class="filter-select">
+            <option value="Tất cả">Trạng thái: Tất cả</option>
+            <option value="Đang hoạt động">Đang hoạt động</option>
+            <option value="Bảo trì">Bảo trì</option>
+            <option value="Ngừng hoạt động">Ngừng hoạt động</option>
+          </select>
+          <img src="images/admin/arrow-dropdown.svg" alt="" class="select-chevron" />
+        </div>
+
+        <!-- Sort Button -->
+        <button type="button" class="btn-sort" (click)="toggleSort()" data-name="Sort btn">
+          <img src="images/admin/sort-gold.svg" alt="" class="sort-icon" />
+          <span>Sắp xếp</span>
+        </button>
+      </div>
+
+      <!-- Tab Pills -->
+      <div class="tab-pills-row" data-name="Tab pills">
+        <button
+          type="button"
+          class="tab-pill"
+          [class.active]="activeTab === 'ALL'"
+          (click)="setTab('ALL')"
+          data-name="tab-all"
+        >
+          Tất cả · {{ totalCount }}
+        </button>
+        <button
+          type="button"
+          class="tab-pill"
+          [class.active]="activeTab === 'ACTIVE'"
+          (click)="setTab('ACTIVE')"
+          data-name="tab-active"
+        >
+          Hoạt động · {{ activeCount }}
+        </button>
+        <button
+          type="button"
+          class="tab-pill"
+          [class.active]="activeTab === 'MAINTENANCE'"
+          (click)="setTab('MAINTENANCE')"
+          data-name="tab-maintenance"
+        >
+          Bảo trì · {{ maintenanceCount }}
+        </button>
+        <button
+          type="button"
+          class="tab-pill"
+          [class.active]="activeTab === 'INACTIVE'"
+          (click)="setTab('INACTIVE')"
+          data-name="tab-inactive"
+        >
+          Ngừng · {{ inactiveCount }}
+        </button>
+      </div>
+
+      <!-- Spaces Table -->
+      <div class="table-responsive">
+        <table class="spaces-table">
+          <thead>
+            <tr class="table-heading-row" data-name="Table headings">
+              <th class="th-space-identity">Tên Space</th>
+              <th class="th-zone">Zone</th>
+              <th class="th-type">Hình thức</th>
+              <th class="th-capacity">Sức chứa</th>
+              <th class="th-min">MIN</th>
+              <th class="th-max">MAX</th>
+              <th class="th-price">Đơn giá</th>
+              <th class="th-status">Trạng thái</th>
+              <th class="th-actions">Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let s of filteredSpaces"
+              class="table-data-row"
+              [class.row-inactive]="s.status === 'INACTIVE'"
+              data-name="Space record"
+            >
+              <!-- Space Identity -->
+              <td class="td-space-identity">
+                <div class="space-title-block">
+                  <span class="space-name-vi">{{ s.name }}</span>
+                  <span class="space-name-en">{{ s.nameEn }}</span>
+                </div>
+              </td>
+
+              <!-- Zone Badge -->
+              <td class="td-zone">
+                <span
+                  class="zone-badge"
+                  [class.zone-focus]="s.zone === 'KÉN Tập Trung'"
+                  [class.zone-renew]="s.zone === 'KÉN Tái Tạo'"
+                  [class.zone-connect]="s.zone === 'KÉN Kết Nối'"
+                >
+                  {{ s.zone }}
+                </span>
+              </td>
+
+              <!-- Hình thức -->
+              <td class="td-type">
+                <span class="type-text">{{ s.type }}</span>
+              </td>
+
+              <!-- Sức chứa -->
+              <td class="td-capacity">
+                <span class="number-cell font-bold">{{ s.capacity }}</span>
+              </td>
+
+              <!-- MIN -->
+              <td class="td-min">
+                <span class="number-cell">{{ s.minGuest }}</span>
+              </td>
+
+              <!-- MAX -->
+              <td class="td-max">
+                <span class="number-cell">{{ s.maxGuest }}</span>
+              </td>
+
+              <!-- Đơn giá -->
+              <td class="td-price">
+                <span class="price-text">{{ s.priceLabel }}</span>
+              </td>
+
+              <!-- Trạng thái Badge -->
+              <td class="td-status">
+                <div
+                  class="status-badge"
+                  [class.status-active]="s.status === 'ACTIVE'"
+                  [class.status-maintenance]="s.status === 'MAINTENANCE'"
+                  [class.status-inactive]="s.status === 'INACTIVE'"
+                >
+                  <span class="status-dot"></span>
+                  <span class="status-text">
+                    {{ s.status === 'ACTIVE' ? 'Đang hoạt động' : s.status === 'MAINTENANCE' ? 'Bảo trì' : 'Ngừng hoạt động' }}
+                  </span>
+                </div>
+              </td>
+
+              <!-- Hành động -->
+              <td class="td-actions">
+                <div class="action-buttons-group">
+                  <!-- Xem -->
+                  <button type="button" class="btn-table-action" (click)="openViewModal(s)" title="Xem chi tiết">
+                    <img src="images/admin/eye-muted.svg" alt="" class="action-svg" />
+                    <span>Xem</span>
+                  </button>
+
+                  <!-- Sửa -->
+                  <button type="button" class="btn-table-action" (click)="openEditForm(s)" title="Chỉnh sửa không gian">
+                    <img src="images/admin/detail.svg" alt="" class="action-svg" />
+                    <span>Sửa</span>
+                  </button>
+
+                  <!-- Ngừng hoặc Kích hoạt -->
+                  <button
+                    type="button"
+                    class="btn-table-action"
+                    [class.text-reactivate]="s.status === 'INACTIVE'"
+                    [class.text-deactivate]="s.status !== 'INACTIVE'"
+                    (click)="toggleSpaceStatus(s)"
+                    [title]="s.status === 'INACTIVE' ? 'Kích hoạt lại' : 'Ngừng hoạt động'"
+                  >
+                    <img
+                      [src]="s.status === 'INACTIVE' ? 'images/admin/check-white.svg' : 'images/admin/clock-icon.svg'"
+                      alt=""
+                      class="action-svg"
+                    />
+                    <span>{{ s.status === 'INACTIVE' ? 'Kích hoạt' : 'Ngừng' }}</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Empty State -->
+            <tr *ngIf="filteredSpaces.length === 0">
+              <td colspan="9" class="td-empty">
+                <div class="empty-state-block">
+                  <p class="empty-title">Không tìm thấy không gian phù hợp</p>
+                  <p class="empty-sub">Hãy thử đổi từ khóa tìm kiếm hoặc bỏ chọn các bộ lọc phía trên.</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Table Footer -->
+      <div class="table-footer-row" data-name="Table footer">
+        <p class="footer-count">
+          Hiển thị {{ filteredSpaces.length }} / {{ totalCount }} không gian · {{ zoneTapTrungCount }} Tập Trung · {{ zoneTaiTaoCount }} Tái Tạo
+        </p>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ========================================================================= -->
+  <!-- VIEW 2: THÊM MỚI / CHỈNH SỬA KHÔNG GIAN (Figma 125:1495 & 125:246) -->
+  <!-- ========================================================================= -->
+  <ng-container *ngIf="viewMode === 'form'">
+    <!-- Page Heading -->
+    <div class="page-heading-row" data-name="Page heading">
+      <div class="heading-title-block">
+        <h1 class="page-title font-large">Quản lý không gian</h1>
+        <p class="page-subtitle text-regular">
+          Cấu hình thông tin và đặt chỗ
+        </p>
+      </div>
+
+      <div class="heading-actions">
+        <button
+          type="button"
+          class="btn-form-header-outline"
+          (click)="openCreateForm()"
+          [disabled]="!isEditing"
+          data-name="Create action"
+        >
+          <img src="images/admin/plus.svg" alt="" class="btn-icon" />
+          <span>Thêm không gian</span>
+        </button>
+        <button type="button" class="btn-form-header-primary" (click)="cancelForm()" data-name="Create action primary">
+          <img src="images/admin/sort-gold.svg" alt="" class="btn-icon" />
+          <span>Quay lại danh sách</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Form Space Card -->
+    <div class="form-space-card" data-name="Form Space">
+      <!-- Form Header -->
+      <div class="form-header-row" data-name="Form header">
+        <div class="form-header-left" data-name="Form title row">
+          <img src="images/admin/cursor-text.svg" alt="" class="form-title-icon" />
+          <h2 class="form-title-text">
+            {{ isEditing ? 'CHỈNH SỬA KHÔNG GIAN' : 'THÔNG TIN KHÔNG GIAN' }}
+          </h2>
+        </div>
+        <p class="form-header-right-note">
+          {{ isEditing ? 'Chỉnh sửa cấu hình & thông tin không gian' : 'Thêm mới hoặc chỉnh sửa không gian' }}
+        </p>
+      </div>
+
+      <!-- Form Body -->
+      <div class="form-body-content" data-name="Form body">
+        <!-- Row 1: Zone, Tên không gian, Tên tiếng Anh -->
+        <div class="form-row-3cols" data-name="Form row">
+          <!-- Zone -->
+          <div class="form-field-col" data-name="Field Zone">
+            <label class="field-label">Zone</label>
+            <div class="custom-select-wrap">
+              <select [(ngModel)]="formData.zone" class="form-select-control">
+                <option value="">Chọn zone…</option>
+                <option *ngFor="let z of zoneOptions" [value]="z">{{ z }}</option>
+              </select>
+              <img src="images/admin/arrow-dropdown.svg" alt="" class="select-chevron-icon" />
+            </div>
+          </div>
+
+          <!-- Tên không gian -->
+          <div class="form-field-col" data-name="Field Tên">
+            <label class="field-label">Tên không gian</label>
+            <div class="custom-input-wrap">
+              <input
+                type="text"
+                [(ngModel)]="formData.name"
+                placeholder="Nhập tên tiếng Việt…"
+                class="form-input-control"
+              />
+            </div>
+          </div>
+
+          <!-- Tên tiếng Anh -->
+          <div class="form-field-col" data-name="Field English">
+            <label class="field-label">Tên tiếng Anh</label>
+            <div class="custom-input-wrap">
+              <input
+                type="text"
+                [(ngModel)]="formData.nameEn"
+                placeholder="English name…"
+                class="form-input-control"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 2: Tiện ích (Amenity Chips) -->
+        <div class="form-amenities-row" data-name="Field Tiện ích">
+          <label class="field-label">Tiện ích</label>
+          <div class="amenity-chips-wrap" data-name="Amenity options">
+            <button
+              *ngFor="let opt of allAmenityOptions"
+              type="button"
+              class="amenity-chip"
+              [class.chip-selected]="hasAmenity(opt.label)"
+              (click)="toggleAmenity(opt.label)"
+              [attr.data-name]="'Amenity chip ' + opt.label"
+            >
+              <img [src]="opt.icon" alt="" class="amenity-icon" />
+              <span>{{ opt.label }}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Row 3: Capacity, Min Guest, Max Guest, Booking Mode, Trạng thái -->
+        <div class="form-row-5cols" data-name="Form row">
+          <!-- Capacity -->
+          <div class="form-field-col col-capacity" data-name="Field Capacity">
+            <label class="field-label">Capacity (Sức chứa)</label>
+            <div class="custom-input-wrap">
+              <input
+                type="number"
+                min="1"
+                [(ngModel)]="formData.capacity"
+                placeholder="0"
+                class="form-input-control"
+              />
+            </div>
+          </div>
+
+          <!-- Min Guest -->
+          <div class="form-field-col col-min" data-name="Field Min Guest">
+            <label class="field-label">Min Guest</label>
+            <div class="custom-input-wrap">
+              <input
+                type="number"
+                min="1"
+                [(ngModel)]="formData.minGuest"
+                placeholder="1"
+                class="form-input-control"
+              />
+            </div>
+          </div>
+
+          <!-- Max Guest -->
+          <div class="form-field-col col-max" data-name="Field Max Guest">
+            <label class="field-label">Max Guest</label>
+            <div class="custom-input-wrap">
+              <input
+                type="number"
+                min="1"
+                [(ngModel)]="formData.maxGuest"
+                placeholder="1"
+                class="form-input-control"
+              />
+            </div>
+          </div>
+
+          <!-- Booking Mode -->
+          <div class="form-field-col col-mode" data-name="Field Booking Mode">
+            <label class="field-label">Booking Mode</label>
+            <div class="custom-select-wrap">
+              <select [(ngModel)]="formData.bookingMode" class="form-select-control">
+                <option value="SHARED">Dùng chung</option>
+                <option value="PRIVATE">Dùng riêng</option>
+              </select>
+              <img src="images/admin/arrow-dropdown.svg" alt="" class="select-chevron-icon" />
+            </div>
+          </div>
+
+          <!-- Trạng thái -->
+          <div class="form-field-col col-status" data-name="Field Trạng thái">
+            <label class="field-label">Trạng thái</label>
+            <div class="custom-select-wrap">
+              <select [(ngModel)]="formData.status" class="form-select-control">
+                <option value="ACTIVE">Đang hoạt động</option>
+                <option value="MAINTENANCE">Bảo trì</option>
+                <option value="INACTIVE">Ngừng hoạt động</option>
+              </select>
+              <img src="images/admin/arrow-dropdown.svg" alt="" class="select-chevron-icon" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Error Message if invalid -->
+        <div *ngIf="formError" class="form-error-alert">
+          <span>⚠ {{ formError }}</span>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions-buttons" data-name="Form actions">
+          <button type="button" class="btn-save-space" (click)="saveSpace()" data-name="Save button">
+            <img src="images/admin/check-white.svg" alt="" class="save-icon" />
+            <span>{{ isEditing ? 'Lưu thay đổi' : 'Lưu Space' }}</span>
+          </button>
+          <button type="button" class="btn-cancel-space" (click)="cancelForm()" data-name="Cancel button">
+            <span>Hủy</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL XEM CHI TIẾT KHÔNG GIAN -->
+  <!-- ========================================================================= -->
+  <div *ngIf="viewingSpace" class="modal-backdrop" (click)="closeViewModal()">
+    <div class="modal-dialog-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title-left">
+          <h3 class="modal-space-name">{{ viewingSpace.name }}</h3>
+          <span class="modal-space-en">{{ viewingSpace.nameEn }}</span>
+        </div>
+        <button type="button" class="modal-close-btn" (click)="closeViewModal()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-photo-wrap" *ngIf="viewingSpace.image">
+          <img [src]="viewingSpace.image" alt="" class="modal-photo" />
+        </div>
+
+        <div class="modal-grid-info">
+          <div class="modal-info-item">
+            <span class="info-k">Khu vực (Zone)</span>
+            <span class="info-v zone-badge">{{ viewingSpace.zone }}</span>
+          </div>
+          <div class="modal-info-item">
+            <span class="info-k">Hình thức</span>
+            <span class="info-v">{{ viewingSpace.type }} ({{ viewingSpace.bookingMode === 'SHARED' ? 'Dùng chung' : 'Dùng riêng' }})</span>
+          </div>
+          <div class="modal-info-item">
+            <span class="info-k">Sức chứa</span>
+            <span class="info-v"><strong>{{ viewingSpace.capacity }}</strong> người (Min: {{ viewingSpace.minGuest }} · Max: {{ viewingSpace.maxGuest }})</span>
+          </div>
+          <div class="modal-info-item">
+            <span class="info-k">Đơn giá</span>
+            <span class="info-v">{{ viewingSpace.priceLabel }}</span>
+          </div>
+          <div class="modal-info-item">
+            <span class="info-k">Trạng thái</span>
+            <span class="info-v">
+              <span
+                class="status-badge"
+                [class.status-active]="viewingSpace.status === 'ACTIVE'"
+                [class.status-maintenance]="viewingSpace.status === 'MAINTENANCE'"
+                [class.status-inactive]="viewingSpace.status === 'INACTIVE'"
+              >
+                <span class="status-dot"></span>
+                {{ viewingSpace.status === 'ACTIVE' ? 'Đang hoạt động' : viewingSpace.status === 'MAINTENANCE' ? 'Bảo trì' : 'Ngừng hoạt động' }}
+              </span>
+            </span>
+          </div>
+          <div class="modal-info-item full-span">
+            <span class="info-k">Tiện ích đi kèm</span>
+            <div class="modal-amenity-list">
+              <span *ngFor="let am of viewingSpace.amenities" class="modal-amenity-tag">
+                ✓ {{ am }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-modal-cancel" (click)="closeViewModal()">
+          Đóng
+        </button>
+        <button
+          type="button"
+          class="btn-modal-edit"
+          (click)="openEditForm(viewingSpace); closeViewModal()"
+        >
+          <img src="images/admin/detail.svg" alt="" class="action-svg" />
+          Chỉnh sửa không gian này
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
