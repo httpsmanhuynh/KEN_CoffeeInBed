@@ -1,59 +1,69 @@
-# MyApp
+# KEN CoffeeInBed
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.7.
+## Requirements
 
-## Development server
+- Node.js 20 or newer and npm.
+- A local MongoDB instance or a MongoDB Atlas connection string.
 
-To start a local development server, run:
+## First-time setup
 
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Clone the `pthao` branch:
 
 ```bash
-ng generate component component-name
+git clone -b pthao https://github.com/httpsmanhuynh/KEN_CoffeeInBed.git
+cd KEN_CoffeeInBed
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Create the backend configuration from the template, then replace
+`MONGODB_URI` and `SESSION_SECRET` with local values:
+
+```bat
+copy my-server-mongodb\.env.example my-server-mongodb\.env
+```
+
+Install dependencies:
 
 ```bash
-ng generate --help
+cd my-server-mongodb
+npm install
+cd ..\my-app
+npm install
 ```
 
-## Building
+## Run the project
 
-To build the project run:
+Open two terminals at the repository root.
+
+Terminal 1 (API):
 
 ```bash
-ng build
+cd my-server-mongodb
+npm start
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+Terminal 2 (Angular):
 
 ```bash
-ng test
+cd my-app
+npm start
 ```
 
-## Running end-to-end tests
+Open `http://localhost:4200`. The Angular proxy forwards `/api` to the
+backend at port `3002`.
 
-For end-to-end (e2e) testing, run:
+## Validate
 
 ```bash
-ng e2e
+cd my-app
+npm run build
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+Backend tests:
 
-## Additional Resources
+```bash
+cd my-server-mongodb
+npm test
+```
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Do not commit `node_modules`, Angular cache, real `.env` files, or `.zip`
+archives. These paths are ignored by the repository `.gitignore`.

@@ -1,0 +1,557 @@
+<div class="packages-page" data-name="KÉN Admin · Service Packages">
+  <!-- Toast Notification -->
+  <div *ngIf="toastMessage" class="toast-notification" [class.toast-info]="toastType === 'info'">
+    <span class="toast-dot"></span>
+    <span class="toast-text">{{ toastMessage }}</span>
+    <button type="button" class="toast-close" (click)="toastMessage = null">✕</button>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- VIEW 1: DANH SÁCH GÓI DỊCH VỤ (Figma 127:2758) -->
+  <!-- ========================================================================= -->
+  <ng-container *ngIf="viewMode === 'list'">
+    <!-- Page Heading -->
+    <div class="page-heading-row" data-name="Page heading">
+      <div class="heading-title-block">
+        <div class="title-with-icon">
+          <div class="page-title-icon-wrap">
+            <img src="images/admin/figma-package-table.svg" alt="" class="page-title-icon" />
+          </div>
+          <h1 class="page-title">Quản lý gói dịch vụ</h1>
+        </div>
+        <p class="page-subtitle">
+          {{ totalCount }} nhóm gói · 2 khu vực · KÉN Tập Trung &amp; KÉN Tái Tạo
+        </p>
+      </div>
+
+      <div class="heading-actions">
+        <button type="button" class="btn-action-primary" (click)="openCreateForm()" data-name="Add package btn">
+          <img src="images/admin/plus.svg" alt="" class="btn-icon" />
+          <span>Thêm gói</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Main List Card -->
+    <div class="packages-list-card" data-name="List card">
+      <!-- Card Heading -->
+      <div class="card-heading-row" data-name="Card heading">
+        <div class="card-heading-left">
+          <img src="images/admin/figma-package-table.svg" alt="" class="card-heading-icon" />
+          <h2 class="card-heading-title">Các gói đang phục vụ</h2>
+        </div>
+        <span class="card-heading-right-info">
+          {{ tapTrungCount }} KÉN Tập Trung · {{ taiTaoCount }} KÉN Tái Tạo
+        </span>
+      </div>
+
+      <!-- Filters Bar -->
+      <div class="filters-bar" data-name="Filters">
+        <!-- Search Input -->
+        <div class="search-input-wrap">
+          <img src="images/admin/search-icon.svg" alt="" class="search-icon" />
+          <input
+            type="text"
+            [(ngModel)]="query"
+            placeholder="Tìm mã hoặc tên gói..."
+            class="search-input"
+          />
+        </div>
+
+        <!-- Filter Khu vực -->
+        <div class="filter-select-wrap">
+          <select [(ngModel)]="selectedGroup" class="filter-select">
+            <option value="Tất cả">Khu vực: Tất cả</option>
+            <option value="KÉN Tập Trung">KÉN Tập Trung</option>
+            <option value="KÉN Tái Tạo">KÉN Tái Tạo</option>
+          </select>
+          <img src="images/admin/arrow-dropdown.svg" alt="" class="select-chevron" />
+        </div>
+
+        <!-- Filter Không gian -->
+        <div class="filter-select-wrap">
+          <select [(ngModel)]="selectedSpace" class="filter-select">
+            <option value="Tất cả">Không gian: Tất cả</option>
+            <option *ngFor="let s of spaceOptions" [value]="s">{{ s }}</option>
+          </select>
+          <img src="images/admin/arrow-dropdown.svg" alt="" class="select-chevron" />
+        </div>
+
+        <!-- Filter Loại gói -->
+        <div class="filter-select-wrap filter-sm">
+          <select [(ngModel)]="selectedType" class="filter-select">
+            <option value="Tất cả">Loại gói: Tất cả</option>
+            <option value="FIXED">FIXED</option>
+            <option value="HOURLY">HOURLY</option>
+          </select>
+          <img src="images/admin/arrow-dropdown.svg" alt="" class="select-chevron" />
+        </div>
+
+        <!-- Filter Trạng thái -->
+        <div class="filter-select-wrap filter-sm">
+          <select [(ngModel)]="selectedStatus" class="filter-select">
+            <option value="Tất cả">Trạng thái: Tất cả</option>
+            <option value="ACTIVE">Hoạt động</option>
+            <option value="INACTIVE">Ngừng hoạt động</option>
+          </select>
+          <img src="images/admin/arrow-dropdown.svg" alt="" class="select-chevron" />
+        </div>
+
+      </div>
+
+      <!-- Packages Table -->
+      <div class="table-responsive">
+        <table class="packages-table">
+          <thead>
+            <tr class="table-heading-row">
+              <th class="th-check"><input type="checkbox" title="Chọn tất cả" /></th>
+              <th class="th-name">Tên Package</th>
+              <th class="th-type">Loại</th>
+              <th class="th-unit">Đơn vị giá</th>
+              <th class="th-duration">Thời lượng</th>
+              <th class="th-price">Giá</th>
+              <th class="th-status">Trạng thái</th>
+              <th class="th-actions">Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            <ng-container *ngFor="let group of packageGroups">
+              <!-- Group Separator Header -->
+              <tr class="group-header-row" *ngIf="groupItems(group).length > 0">
+                <td colspan="8">
+                  <div class="group-title-content">
+                    <img src="images/admin/figma-package-detail-icon.svg" alt="" class="group-icon" />
+                    <span class="group-name">{{ group }}</span>
+                    <span class="group-sep">·</span>
+                    <span class="group-count">{{ groupItems(group).length }} nhóm gói</span>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Package Items in this Group -->
+              <tr
+                *ngFor="let item of groupItems(group)"
+                class="package-data-row"
+                [class.row-inactive]="item.status === 'INACTIVE'"
+                (click)="openDetail(item)"
+              >
+                <!-- Checkbox -->
+                <td class="td-check" (click)="$event.stopPropagation()">
+                  <input type="checkbox" />
+                </td>
+
+                <!-- ID & Tên Package -->
+                <td class="td-name">
+                  <div class="package-name-block">
+                    <span class="package-id">{{ item.id }}</span>
+                    <span class="package-name">{{ item.name }}</span>
+                    <span class="package-space">{{ item.shortName }}</span>
+                  </div>
+                </td>
+
+                <!-- Loại Tag -->
+                <td class="td-type">
+                  <span class="tag-badge" [class.tag-hourly]="item.type === 'HOURLY'" [class.tag-fixed]="item.type === 'FIXED'">
+                    {{ typeLabel(item.type) }}
+                  </span>
+                </td>
+
+                <!-- Đơn vị giá Tag -->
+                <td class="td-unit">
+                  <span class="tag-badge tag-unit">
+                    {{ unitLabel(item.unit) }}
+                  </span>
+                </td>
+
+                <!-- Thời lượng -->
+                <td class="td-duration">
+                  <span class="duration-text">{{ item.duration }}</span>
+                </td>
+
+                <!-- Giá & Inclusion -->
+                <td class="td-price">
+                  <div class="price-cell-block">
+                    <ng-container *ngIf="item.id.startsWith('TT-'); else standardPrice">
+                      <span *ngFor="let line of priceLines(item)" class="price-val">{{ line }}</span>
+                    </ng-container>
+                    <ng-template #standardPrice>
+                      <span class="price-val">{{ priceLabel(item) }}</span>
+                    </ng-template>
+                  </div>
+                </td>
+
+                <!-- Trạng thái -->
+                <td class="td-status">
+                  <span
+                    class="status-pill"
+                    [class.status-active]="item.status === 'ACTIVE'"
+                    [class.status-inactive]="item.status === 'INACTIVE'"
+                  >
+                    <span class="status-dot"></span>
+                    {{ statusLabel(item.status) }}
+                  </span>
+                </td>
+
+                <!-- Hành động -->
+                <td class="td-actions" (click)="$event.stopPropagation()">
+                  <div class="table-actions-flex">
+                    <button type="button" class="btn-tbl-link" (click)="openEditForm(item)" title="Chỉnh sửa">
+                      Sửa
+                    </button>
+                    <span class="action-dot">·</span>
+                    <button type="button" class="btn-tbl-link" (click)="duplicate(item)" title="Nhân bản">
+                      Nhân bản
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </ng-container>
+
+            <!-- Empty Search State -->
+            <tr *ngIf="filteredPackages.length === 0">
+              <td colspan="8" class="td-empty">
+                <div class="empty-state-wrap">
+                  <p class="empty-title">Không tìm thấy gói dịch vụ phù hợp</p>
+                  <p class="empty-sub">Hãy thử đổi từ khóa tìm kiếm hoặc đặt lại các bộ lọc phía trên.</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Table Footer -->
+      <div class="table-footer-row" data-name="Table footer">
+        <span class="footer-count-text">
+          Hiển thị {{ filteredPackages.length }} / {{ totalCount }} nhóm gói
+        </span>
+        <div class="pagination-wrap">
+          <span class="page-size">20 / trang</span>
+          <button type="button" class="page-nav-btn" disabled>‹</button>
+          <span class="page-current">1</span>
+          <button type="button" class="page-nav-btn" disabled>›</button>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ========================================================================= -->
+  <!-- VIEW 2: CHI TIẾT GÓI DỊCH VỤ (Figma 481:11980) -->
+  <!-- ========================================================================= -->
+  <ng-container *ngIf="viewMode === 'detail' && selectedPackage as item">
+    <!-- Page Heading -->
+    <div class="page-heading-row detail-heading" data-name="Detail heading">
+      <div class="heading-title-block">
+        <button type="button" class="btn-back-link" (click)="cancelForm()">
+          ‹ Quay lại danh sách gói
+        </button>
+        <div class="title-with-icon">
+          <img src="images/admin/figma-package-detail-icon.svg" alt="" class="detail-page-icon" />
+          <h1 class="page-title">Chi tiết gói {{ item.id }}</h1>
+        </div>
+        <p class="page-subtitle">
+          {{ item.name }} · {{ item.duration }} · {{ item.shortName }} · Giá {{ formatPrice(item.price) }}
+        </p>
+      </div>
+
+      <div class="heading-actions">
+        <button
+          type="button"
+          class="btn-action-outline"
+          [class.btn-pause]="item.status === 'ACTIVE'"
+          (click)="toggleStatus(item)"
+        >
+          {{ item.status === 'ACTIVE' ? 'Tạm ngưng gói' : 'Kích hoạt gói' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Detail Main Card -->
+    <div class="package-detail-card" data-name="Detail card">
+      <!-- Card Header -->
+      <div class="card-heading-row">
+        <div class="card-heading-left">
+          <img src="images/admin/figma-package-calendar-date.svg" alt="" class="card-heading-icon" />
+          <h2 class="card-heading-title">{{ item.id }} · {{ item.name }}</h2>
+        </div>
+        <span class="card-heading-right-info">Giá và quyền lợi hiện hành</span>
+      </div>
+
+      <!-- Detail Body (3-Column Layout) -->
+      <div class="detail-body-grid">
+        <!-- Column 1: Image & Space Link -->
+        <div class="detail-photo-col">
+          <div class="photo-container">
+            <img [src]="imagePath(item)" [alt]="item.space" class="space-photo" />
+          </div>
+        </div>
+
+        <!-- Column 2: Package Specs & Price -->
+        <div class="detail-specs-col">
+          <h3 class="detail-big-price">
+            {{ formatPrice(item.price) }}
+            <span class="price-unit-sub">/ gói {{ item.duration }}</span>
+          </h3>
+
+          <div class="spec-attributes-list">
+            <div class="spec-row">
+              <span class="spec-k">Áp dụng:</span>
+              <span class="spec-v font-bold">
+                {{ item.space }} · {{ item.unit === 'PER_PERSON' ? '01 khách' : '01 nhóm' }}
+              </span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-k">Giờ phục vụ:</span>
+              <span class="spec-v font-bold">08:00–22:00</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-k">Phân loại:</span>
+              <div class="spec-tags-flex">
+                <span class="tag-badge" [class.tag-hourly]="item.type === 'HOURLY'" [class.tag-fixed]="item.type === 'FIXED'">
+                  {{ typeLabel(item.type) }}
+                </span>
+                <span class="tag-badge tag-unit">
+                  {{ unitLabel(item.unit) }}
+                </span>
+              </div>
+            </div>
+            <div class="spec-row">
+              <span class="spec-k">Trạng thái:</span>
+              <span
+                class="status-pill"
+                [class.status-active]="item.status === 'ACTIVE'"
+                [class.status-inactive]="item.status === 'INACTIVE'"
+              >
+                <span class="status-dot"></span>
+                {{ statusLabel(item.status) }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 3: Benefits Box & Quick Actions -->
+        <div class="detail-benefits-col">
+          <div class="benefit-box">
+            <div class="benefit-head">
+              <img src="images/admin/loyalty.svg" alt="" class="benefit-icon" />
+              <h4 class="benefit-title">{{ benefitTitle(item) }}</h4>
+            </div>
+            <p class="benefit-description">
+              {{ item.inclusion || 'Món ăn và thức uống theo menu hiện hành của quán.' }}
+            </p>
+
+            <div class="benefit-amenities">
+              <span class="amenity-mini-tag">✓ WiFi tốc độ cao</span>
+              <span class="amenity-mini-tag">✓ Ổ cắm điện</span>
+              <span class="amenity-mini-tag">✓ Đặt chỗ trước</span>
+            </div>
+
+            <div class="benefit-actions-row">
+              <button type="button" class="btn-benefit-primary" (click)="openEditForm(item)">
+                Sửa gói
+              </button>
+              <button type="button" class="btn-benefit-outline" (click)="duplicate(item)">
+                Nhân bản
+              </button>
+              <button
+                type="button"
+                class="btn-benefit-outline"
+                (click)="toggleStatus(item)"
+              >
+                {{ item.status === 'ACTIVE' ? 'Tạm ngưng' : 'Kích hoạt' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ========================================================================= -->
+  <!-- VIEW 3: THÊM MỚI / CHỈNH SỬA GÓI DỊCH VỤ (Figma 127:4603 & 127:3613) -->
+  <!-- ========================================================================= -->
+  <ng-container *ngIf="viewMode === 'form'">
+    <!-- Page Heading -->
+    <div class="page-heading-row" data-name="Page heading">
+      <div class="heading-title-block">
+        <button type="button" class="btn-back-link" (click)="cancelForm()">
+          ‹ Quay lại danh sách gói
+        </button>
+        <h1 class="page-title font-large">
+          {{ editingId ? 'Chỉnh sửa gói dịch vụ · ' + editingId : 'Thêm gói dịch vụ' }}
+        </h1>
+        <p class="page-subtitle text-regular">
+          Tạo gói mới cho KÉN Tập Trung và KÉN Tái Tạo · Giá theo từng Space · Snapshot giá nguyên khi cập nhật.
+        </p>
+      </div>
+
+      <div class="heading-actions">
+        <a routerLink="/admin/spaces" class="btn-action-outline link-pill" title="Mở danh sách không gian">
+          <img src="images/admin/nav-sidebar-reverse.svg" alt="" class="btn-sub-icon" />
+          <span>Quản lý không gian ↗</span>
+        </a>
+        <button type="button" class="btn-action-outline" (click)="cancelForm()">
+          <span>Quay lại</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Form Package Card -->
+    <div class="package-form-card" data-name="Form Card">
+      <!-- Form Header -->
+      <div class="card-heading-row">
+        <div class="card-heading-left">
+          <img src="images/admin/cursor-text.svg" alt="" class="card-heading-icon" />
+          <h2 class="card-heading-title">
+            {{ editingId ? 'CHỈNH SỬA PACKAGE · ' + editingId : 'THÔNG TIN GÓI DỊCH VỤ' }}
+          </h2>
+        </div>
+        <span class="card-heading-right-info">
+          {{ editingId ? 'Chỉnh sửa thông tin gói dịch vụ' : 'Tạo gói dịch vụ mới' }}
+        </span>
+      </div>
+
+      <!-- Form Body Grid -->
+      <div class="form-body-content">
+        <!-- Row 1: Khu vực, Tên gói, Không gian áp dụng -->
+        <div class="form-grid-3cols">
+          <!-- Khu vực -->
+          <div class="form-group">
+            <label class="form-label">Khu vực (Zone / Group)</label>
+            <div class="select-wrap">
+              <select [(ngModel)]="formData.group" class="form-select">
+                <option value="KÉN Tập Trung">KÉN Tập Trung</option>
+                <option value="KÉN Tái Tạo">KÉN Tái Tạo</option>
+              </select>
+              <img src="images/admin/arrow-dropdown.svg" alt="" class="select-arrow-icon" />
+            </div>
+          </div>
+
+          <!-- Tên gói -->
+          <div class="form-group span-2">
+            <label class="form-label">Tên gói dịch vụ</label>
+            <input
+              type="text"
+              [(ngModel)]="formData.name"
+              placeholder="Nhập tên gói (Ví dụ: Gói Linh hoạt, Họp nhóm nhỏ...)"
+              class="form-input"
+            />
+          </div>
+        </div>
+
+        <!-- Row 2: Không gian áp dụng, Thời lượng, Giá -->
+        <div class="form-grid-3cols">
+          <!-- Loại Space áp dụng -->
+          <div class="form-group">
+            <label class="form-label">Không gian áp dụng (Space)</label>
+            <div class="select-wrap">
+              <select [(ngModel)]="formData.space" class="form-select">
+                <option value="">Chọn không gian...</option>
+                <option *ngFor="let s of spaceOptions" [value]="s">{{ s }}</option>
+              </select>
+              <img src="images/admin/arrow-dropdown.svg" alt="" class="select-arrow-icon" />
+            </div>
+          </div>
+
+          <!-- Thời lượng -->
+          <div class="form-group">
+            <label class="form-label">Thời lượng sử dụng</label>
+            <input
+              type="text"
+              [(ngModel)]="formData.duration"
+              placeholder="Ví dụ: Từ 1 giờ, 4 giờ, 08:00–22:00..."
+              class="form-input"
+            />
+          </div>
+
+          <!-- Giá -->
+          <div class="form-group">
+            <label class="form-label">Giá gói (VNĐ)</label>
+            <input
+              type="number"
+              min="0"
+              step="1000"
+              [(ngModel)]="formData.price"
+              placeholder="Ví dụ: 30000"
+              class="form-input"
+            />
+          </div>
+        </div>
+
+        <!-- Row 3: Loại gói, Đơn vị giá, Trạng thái -->
+        <div class="form-grid-3cols">
+          <!-- Loại gói (FIXED/HOURLY) -->
+          <div class="form-group">
+            <label class="form-label">Loại gói (FIXED / HOURLY)</label>
+            <div class="select-wrap">
+              <select [(ngModel)]="formData.type" class="form-select">
+                <option value="FIXED">FIXED (Cố định khung giờ)</option>
+                <option value="HOURLY">HOURLY (Tính theo giờ)</option>
+              </select>
+              <img src="images/admin/arrow-dropdown.svg" alt="" class="select-arrow-icon" />
+            </div>
+          </div>
+
+          <!-- Đơn vị giá -->
+          <div class="form-group">
+            <label class="form-label">Đơn vị tính giá</label>
+            <div class="select-wrap">
+              <select [(ngModel)]="formData.unit" class="form-select">
+                <option value="PER_SPACE">PER_SPACE (Theo không gian)</option>
+                <option value="PER_PERSON">PER_PERSON (Theo người)</option>
+              </select>
+              <img src="images/admin/arrow-dropdown.svg" alt="" class="select-arrow-icon" />
+            </div>
+          </div>
+
+          <!-- Trạng thái -->
+          <div class="form-group">
+            <label class="form-label">Trạng thái</label>
+            <div class="select-wrap">
+              <select [(ngModel)]="formData.status" class="form-select">
+                <option value="ACTIVE">Đang hoạt động</option>
+                <option value="INACTIVE">Tạm ngưng hoạt động</option>
+              </select>
+              <img src="images/admin/arrow-dropdown.svg" alt="" class="select-arrow-icon" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 4: Inclusion (Quyền lợi đi kèm) -->
+        <div class="form-group full-width">
+          <label class="form-label">Inclusion (Quyền lợi / Đồ uống đi kèm)</label>
+          <input
+            type="text"
+            [(ngModel)]="formData.inclusion"
+            placeholder="Ví dụ: 01 đồ uống · Dùng không gian Work Lounge · Hỗ trợ tối đa 50.000đ"
+            class="form-input"
+          />
+        </div>
+
+        <!-- Error Alert -->
+        <div *ngIf="formError" class="form-error-alert">
+          <span>⚠ {{ formError }}</span>
+        </div>
+
+        <!-- Form Buttons -->
+        <div class="form-actions-row">
+          <button type="button" class="btn-save-package" (click)="savePackage()">
+            <img src="images/admin/check-white.svg" alt="" class="btn-save-icon" />
+            <span>Lưu {{ editingId ? 'thay đổi' : 'gói' }}</span>
+          </button>
+          <button type="button" class="btn-cancel-package" (click)="cancelForm()">
+            <span>Hủy</span>
+          </button>
+          <button
+            *ngIf="editingId"
+            type="button"
+            class="btn-duplicate-package"
+            (click)="duplicateCurrent()"
+          >
+            <span>Nhân bản gói này</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

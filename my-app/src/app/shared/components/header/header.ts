@@ -17,18 +17,13 @@ export class Header {
 
   /** true = giao diện đã đăng nhập (avatar + tên thay cho nút Đăng nhập/Đăng ký). */
   @Input() member = false;
-
-  @Input()
-  set isLoggedIn(value: boolean) {
-    this.member = value;
-  }
-  get isLoggedIn(): boolean {
-    return this.member;
-  }
-
+  // TODO: lấy từ AuthService khi có API hồ sơ
   @Input() userName = 'Thầy Thanh đẹp trai';
 
-  constructor(private host: ElementRef<HTMLElement>, private router: Router) {}
+  constructor(
+    private host: ElementRef<HTMLElement>,
+    private router: Router,
+  ) {}
 
   /** Mục nav đang xem (gạch chân như Figma). */
   isActive(item: NavItem): boolean {
@@ -38,17 +33,27 @@ export class Header {
   }
 
   // Chuột: hover mở/đóng. Cảm ứng: bỏ qua hover, chỉ dùng click (tránh mở rồi đóng ngay).
-  enter(e: PointerEvent, key: string): void { if (e.pointerType === 'mouse') this.open = key; }
-  leave(e: PointerEvent, key: string): void { if (e.pointerType === 'mouse' && this.open === key) this.open = null; }
-  toggle(key: string): void { this.open = this.open === key ? null : key; }
-  closeAll(): void { this.open = null; this.mobileOpen = false; this.accountOpen = false; }
+  enter(e: PointerEvent, key: string): void {
+    if (e.pointerType === 'mouse') this.open = key;
+  }
+  leave(e: PointerEvent, key: string): void {
+    if (e.pointerType === 'mouse' && this.open === key) this.open = null;
+  }
+  toggle(key: string): void {
+    this.open = this.open === key ? null : key;
+  }
+  closeAll(): void {
+    this.open = null;
+    this.mobileOpen = false;
+    this.accountOpen = false;
+  }
 
   @HostListener('document:click', ['$event'])
   onDocClick(e: Event): void {
     if (!this.host.nativeElement.contains(e.target as Node)) this.closeAll();
   }
   @HostListener('document:keydown.escape')
-  onEsc(): void { this.closeAll(); }
+  onEsc(): void {
+    this.closeAll();
+  }
 }
-
-export { Header as HeaderComponent };
