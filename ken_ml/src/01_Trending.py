@@ -6,9 +6,8 @@ xếp hạng Top-K và ghi vào collection ml_global_trending qua safe_write.rep
 
 Mặc định là CHẠY THỬ (dry-run): chỉ in kết quả, không ghi DB. Ghi thật khi thêm --write.
 
-    python src/02_task1_trending.py                 # chạy thử
-    python src/02_task1_trending.py --h 7 --alpha 0.6
-    python src/02_task1_trending.py --write         # ghi thật (chỉ sau khi đã xem mẫu và báo nhóm)
+    python src/01_Trending.py                 # chạy thử
+    python src/01_Trending.py --write         # ghi thật (chỉ sau khi đã xem mẫu và báo nhóm)
 
 Công thức (mục 2.2.1 và 3.6 của báo cáo):
     Δ_j        = REFERENCE_DATE − sale_date_j (ngày)

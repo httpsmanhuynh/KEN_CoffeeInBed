@@ -1,12 +1,12 @@
 """Nghiệm thu Bài 1: đọc CSV, in Top 12 món ra terminal, KHÔNG chạm DB.
-Chạy: python tests/test_task1.py"""
+Chạy: python tests/trending_test.py"""
 import importlib.util
 from pathlib import Path
 
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
-spec = importlib.util.spec_from_file_location("task1", ROOT / "src" / "02_task1_trending.py")
+spec = importlib.util.spec_from_file_location("task1", ROOT / "src" / "01_Trending.py")
 task1 = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(task1)
 

@@ -1,0 +1,3 @@
+﻿phuong_phap,so_khach_kiem_tra,HitRate@5,Precision@5,Recall@5
+Gợi ý theo cụm,220,0.6136,0.1891,0.2619
+Gợi ý chung (Global Popularity),220,0.5591,0.1755,0.2207

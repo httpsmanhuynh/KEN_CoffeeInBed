@@ -1,0 +1,16 @@
+﻿cluster_id,persona_name,rank,item_code,item_name
+0,Khách thân thiết chi mạnh,1,CF_SUA,Cà phê sữa
+0,Khách thân thiết chi mạnh,2,BAKE_CROISSANT,Croissant bơ
+0,Khách thân thiết chi mạnh,3,CF_AMERICANO,Americano
+0,Khách thân thiết chi mạnh,4,CF_BAC_XIU,Bạc xỉu
+0,Khách thân thiết chi mạnh,5,CF_SALTED_CARAMEL,Salted Caramel Coffee
+1,Khách quen mua đều,1,TEA_DAO,Trà đào
+1,Khách quen mua đều,2,MATCHA_LATTE,Matcha Latte
+1,Khách quen mua đều,3,CF_BAC_XIU,Bạc xỉu
+1,Khách quen mua đều,4,CF_SUA,Cà phê sữa
+1,Khách quen mua đều,5,CF_PHIN,Cà phê phin truyền thống
+2,Khách ngủ đông (lâu chưa quay lại),1,CF_SALTED_CARAMEL,Salted Caramel Coffee
+2,Khách ngủ đông (lâu chưa quay lại),2,TEA_OOLONG_MACCHIATO,Hồng trà Oolong Macchiato
+2,Khách ngủ đông (lâu chưa quay lại),3,TEA_DAO,Trà đào
+2,Khách ngủ đông (lâu chưa quay lại),4,CF_SUA,Cà phê sữa
+2,Khách ngủ đông (lâu chưa quay lại),5,TEA_CHAI,Trà Chai Ấn Độ

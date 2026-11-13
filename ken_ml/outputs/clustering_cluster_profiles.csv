@@ -1,0 +1,4 @@
+﻿cluster_id,persona_name,customers,R_mean,F_mean,M_mean,pastry_share,evening_share,weekend_share,avg_age,recommended_item_codes
+0,Khách thân thiết chi mạnh,61,2.902,64.689,5638770.492,0.291,0.184,0.273,29.049,"CF_SUA, BAKE_CROISSANT, CF_AMERICANO, CF_BAC_XIU, CF_SALTED_CARAMEL"
+1,Khách quen mua đều,215,11.037,18.809,1647116.279,0.295,0.347,0.371,25.553,"TEA_DAO, MATCHA_LATTE, CF_BAC_XIU, CF_SUA, CF_PHIN"
+2,Khách ngủ đông (lâu chưa quay lại),36,116.194,10.0,835277.778,0.217,0.383,0.372,28.278,"CF_SALTED_CARAMEL, TEA_OOLONG_MACCHIATO, TEA_DAO, CF_SUA, TEA_CHAI"

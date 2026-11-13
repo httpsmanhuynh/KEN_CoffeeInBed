@@ -10,8 +10,8 @@ Quy trình ETL tĩnh, CHỈ ĐỌC trên MongoDB:
   Bước 6  Load       : bỏ cột rác/PII, xuất data/master_ken_data.csv
 
 Chạy:
-    python src/01_data_preparation.py                       # đọc từ MongoDB Atlas
-    python src/01_data_preparation.py --json-dir ../database/data   # đọc từ file dump JSON
+    python src/Preparation.py                       # đọc từ MongoDB Atlas
+    python src/Preparation.py --json-dir ../database/data   # đọc từ file dump JSON
 """
 from __future__ import annotations
 
