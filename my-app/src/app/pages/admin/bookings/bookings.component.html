@@ -1,122 +1,136 @@
 <div class="bookings-page" data-name="02 · Đặt chỗ">
-  <!-- Page Title -->
-  <div class="page-title-block" data-name="PageTitle">
-    <h1 class="page-title">Theo dõi đơn đặt chỗ</h1>
-
+  <!-- Inline Toast -->
+  <div *ngIf="toast" class="admin-toast" [class.toast-error]="toast.type === 'error'" [class.toast-success]="toast.type === 'success'">
+    <span>{{ toast.text }}</span>
+    <button type="button" class="toast-close" (click)="toast = null">×</button>
   </div>
 
-  <!-- Status Cards -->
+  <!-- Page Title & Top Actions -->
+  <div class="page-title-block" data-name="PageTitle">
+    <div>
+      <h1 class="page-title">Theo dõi &amp; Xử lý Đặt chỗ</h1>
+      <p class="page-subtitle">Quản lý trạng thái đặt chỗ, tiếp nhận Check-in / Check-out tại quầy và đối soát hoàn tiền</p>
+    </div>
+    <div class="top-actions-row">
+      <button type="button" class="btn-secondary-pill" (click)="expireHolds()" [disabled]="actionLoading">
+        Quét giữ chỗ quá hạn
+      </button>
+      <button type="button" class="btn-secondary-pill" (click)="exportCsv()">
+        Xuất CSV ↗
+      </button>
+    </div>
+  </div>
+
+  <!-- Status Cards (7 Statuses + Refund Reconcile Alert) -->
   <div class="status-cards-row" data-name="StatusCards">
-    <div
-      class="status-card"
-      [class.active]="selectedFilter === 'ALL'"
-      (click)="filterByStatus('ALL')"
-    >
+    <div class="status-card" [class.active]="selectedFilter === 'ALL'" (click)="filterByStatus('ALL')">
       <span class="status-card-label">Tất cả</span>
       <span class="status-card-val">{{ statusCounts.all }}</span>
     </div>
-    <div
-      class="status-card"
-      [class.active]="selectedFilter === 'CONFIRMED'"
-      (click)="filterByStatus('CONFIRMED')"
-    >
+    <div class="status-card" [class.active]="selectedFilter === 'PENDING_PAYMENT'" (click)="filterByStatus('PENDING_PAYMENT')">
+      <span class="status-card-label">Chờ thanh toán</span>
+      <span class="status-card-val">{{ statusCounts.pendingPayment }}</span>
+    </div>
+    <div class="status-card" [class.active]="selectedFilter === 'CONFIRMED'" (click)="filterByStatus('CONFIRMED')">
       <span class="status-card-label">Đã xác nhận</span>
       <span class="status-card-val">{{ statusCounts.confirmed }}</span>
     </div>
-    <div
-      class="status-card"
-      [class.active]="selectedFilter === 'CHECKED_IN'"
-      (click)="filterByStatus('CHECKED_IN')"
-    >
+    <div class="status-card" [class.active]="selectedFilter === 'CHECKED_IN'" (click)="filterByStatus('CHECKED_IN')">
       <span class="status-card-label">Đang sử dụng</span>
       <span class="status-card-val">{{ statusCounts.checkedIn }}</span>
     </div>
-    <div
-      class="status-card"
-      [class.active]="selectedFilter === 'COMPLETED'"
-      (click)="filterByStatus('COMPLETED')"
-    >
+    <div class="status-card" [class.active]="selectedFilter === 'CHECKED_OUT'" (click)="filterByStatus('CHECKED_OUT')">
       <span class="status-card-label">Hoàn thành</span>
-      <span class="status-card-val">{{ statusCounts.completed }}</span>
+      <span class="status-card-val">{{ statusCounts.checkedOut }}</span>
     </div>
-    <div
-      class="status-card"
-      [class.active]="selectedFilter === 'CANCELLED'"
-      (click)="filterByStatus('CANCELLED')"
-    >
+    <div class="status-card" [class.active]="selectedFilter === 'CANCELLED'" (click)="filterByStatus('CANCELLED')">
       <span class="status-card-label">Đã huỷ</span>
       <span class="status-card-val">{{ statusCounts.cancelled }}</span>
     </div>
-    <div
-      class="status-card"
-      [class.active]="selectedFilter === 'NO_SHOW'"
-      (click)="filterByStatus('NO_SHOW')"
-    >
-      <span class="status-card-label">Khách không đến</span>
+    <div class="status-card" [class.active]="selectedFilter === 'NO_SHOW'" (click)="filterByStatus('NO_SHOW')">
+      <span class="status-card-label">No-show</span>
       <span class="status-card-val">{{ statusCounts.noShow }}</span>
+    </div>
+    <div class="status-card" [class.active]="selectedFilter === 'EXPIRED'" (click)="filterByStatus('EXPIRED')">
+      <span class="status-card-label">Hết hạn</span>
+      <span class="status-card-val">{{ statusCounts.expired }}</span>
+    </div>
+    <div
+      class="status-card status-card-alert"
+      [class.active]="selectedFilter === 'REFUND_PENDING'"
+      (click)="filterByStatus('REFUND_PENDING')"
+    >
+      <span class="status-card-label">Chờ đối soát hoàn tiền</span>
+      <span class="status-card-val">{{ statusCounts.refundPending }}</span>
     </div>
   </div>
 
   <!-- Main Booking List Block -->
   <div class="booking-list-block" data-name="BookingListBlock">
-    <!-- Block Header -->
     <div class="block-header" data-name="BlockHeader">
       <img src="/images/figma/lich-dat-cho.svg" alt="" class="block-header-icon" />
-      <h2 class="block-title">Danh sách booking hôm nay</h2>
-      <span class="block-header-count">24 đơn · Ưu tiên đang sử dụng / sắp đến</span>
+      <h2 class="block-title">Danh sách đặt chỗ</h2>
+      <span class="block-header-count">
+        {{ loading ? 'Đang tải dữ liệu...' : (filteredBookings.length + ' đơn phù hợp · ' + bookings.length + ' tổng đơn đã nạp') }}
+      </span>
     </div>
 
-    <!-- Filters Section -->
+    <!-- Real Functional Filters -->
     <div class="filters-container" data-name="Filters">
-      <!-- Filter Row 1 -->
       <div class="filter-row" data-name="FilterRow1">
         <div class="search-box">
           <img src="/images/figma/search.svg" alt="" class="search-icon" />
           <input
             type="text"
             [(ngModel)]="searchTerm"
-            placeholder="Tìm mã đơn, tên hoặc email khách…"
+            (ngModelChange)="currentPage = 1"
+            placeholder="Tìm mã đơn, tên, SĐT, không gian hoặc email khách…"
             class="search-input"
           />
         </div>
 
-        <div class="filter-dropdown date-picker">
-          <img src="/images/figma/calendar-date.svg" alt="" class="filter-icon" />
-          <span class="filter-val">{{ selectedDate }}</span>
-          <span class="filter-arrow">⌄</span>
-        </div>
+        <label class="native-filter-field">
+          <span class="native-filter-label">Ngày:</span>
+          <input
+            type="date"
+            [(ngModel)]="selectedDate"
+            (ngModelChange)="loadBookings()"
+            class="native-filter-control"
+          />
+        </label>
 
-        <div class="filter-dropdown">
-          <span class="filter-val">Khung giờ: {{ selectedTime }}</span>
-          <img src="/images/figma/chevron-down.svg" alt="" class="arrow-icon" />
-        </div>
+        <label class="native-filter-field">
+          <span class="native-filter-label">Khung giờ:</span>
+          <select [(ngModel)]="selectedTimeSlot" (ngModelChange)="currentPage = 1" class="native-filter-control">
+            <option value="ALL">Cả ngày</option>
+            <option value="MORNING">Sáng (&lt; 12:00)</option>
+            <option value="AFTERNOON">Chiều (12:00 – 16:59)</option>
+            <option value="EVENING">Tối (&gt;= 17:00)</option>
+          </select>
+        </label>
       </div>
 
-      <!-- Filter Row 2 -->
       <div class="filter-row" data-name="FilterRow2">
-        <div class="filter-dropdown flex-1">
-          <img src="/images/figma/filter.svg" alt="" class="filter-icon" />
-          <span class="filter-val">Trạng thái: {{ selectedFilter === 'ALL' ? 'Tất cả' : selectedFilter }}</span>
-          <img src="/images/figma/chevron-down.svg" alt="" class="arrow-icon" />
-        </div>
+        <label class="native-filter-field flex-1">
+          <span class="native-filter-label">Khu vực:</span>
+          <select [(ngModel)]="selectedZone" (ngModelChange)="currentPage = 1" class="native-filter-control">
+            <option value="ALL">Tất cả khu vực</option>
+            <option *ngFor="let z of zones" [value]="z.id">{{ z.name }}</option>
+          </select>
+        </label>
 
-        <div class="filter-dropdown flex-1">
-          <span class="filter-val">Khu vực: {{ selectedZone }}</span>
-          <img src="/images/figma/chevron-down.svg" alt="" class="arrow-icon" />
-        </div>
-
-        <div class="filter-dropdown flex-1">
-          <span class="filter-val">Thanh toán: {{ selectedPayment }}</span>
-          <img src="/images/figma/chevron-down.svg" alt="" class="arrow-icon" />
-        </div>
-
-        <div class="filter-dropdown flex-1">
-          <span class="filter-val">Sử dụng: Tất cả</span>
-          <img src="/images/figma/chevron-down.svg" alt="" class="arrow-icon" />
-        </div>
+        <label class="native-filter-field flex-1">
+          <span class="native-filter-label">Thanh toán:</span>
+          <select [(ngModel)]="selectedPaymentFilter" (ngModelChange)="currentPage = 1" class="native-filter-control">
+            <option value="ALL">Tất cả</option>
+            <option value="PAID">Đã thanh toán</option>
+            <option value="UNPAID">Chưa thanh toán / Hoàn tiền</option>
+            <option value="REFUND_PENDING">Hoàn tiền chờ đối soát</option>
+          </select>
+        </label>
 
         <button type="button" class="btn-reset-filters" (click)="resetFilters()">
-          Đặt lại
+          Đặt lại bộ lọc
         </button>
       </div>
     </div>
@@ -129,212 +143,228 @@
         <div class="col col-space">Không gian / Gói</div>
         <div class="col col-time">Ngày / Giờ</div>
         <div class="col col-guest">Khách</div>
-        <div class="col col-amt">Số tiền cuối</div>
+        <div class="col col-amt">Tổng cuối</div>
         <div class="col col-pay">Thanh toán</div>
-        <div class="col col-status">Sử dụng</div>
-        <div class="col col-act">Hành động</div>
+        <div class="col col-status">Trạng thái</div>
+        <div class="col col-act">Thao tác quầy</div>
+      </div>
+
+      <div *ngIf="paginatedBookings.length === 0" class="empty-table-state">
+        Không tìm thấy đơn đặt chỗ nào khớp bộ lọc hiện tại.
       </div>
 
       <div
-        *ngFor="let b of filteredBookings"
+        *ngFor="let b of paginatedBookings"
         class="table-row"
-        [class.selected]="selectedBooking.id === b.id"
+        [class.selected]="selectedBooking?.id === b.id"
         (click)="selectBooking(b)"
       >
-        <!-- Cell ID -->
         <div class="col col-id">
           <span class="cell-code">{{ b.code }}</span>
-          <span *ngIf="selectedBooking.id === b.id" class="badge-selecting">Đang chọn</span>
+          <span *ngIf="selectedBooking?.id === b.id" class="badge-selecting">Đang chọn</span>
         </div>
 
-        <!-- Cell Customer -->
         <div class="col col-cus">
           <span class="cell-cus-name">{{ b.customerName }}</span>
           <span class="cell-cus-email">{{ b.customerEmail }}</span>
         </div>
 
-        <!-- Cell Space -->
         <div class="col col-space">
           <span class="cell-space-name">{{ b.spaceName }}</span>
-          <span class="cell-space-pkg">{{ b.packageType }}</span>
+          <span class="cell-space-pkg">{{ b.packageName }}</span>
         </div>
 
-        <!-- Cell Time -->
         <div class="col col-time">
           <span class="cell-date">{{ b.date }}</span>
           <span class="cell-time-slot">{{ b.timeSlot }}</span>
         </div>
 
-        <!-- Cell Guest Count -->
         <div class="col col-guest">
           <span class="cell-guest-num">{{ b.guestCount }}</span>
         </div>
 
-        <!-- Cell Final Amount -->
         <div class="col col-amt">
-          <span class="cell-amount">{{ b.finalAmount }}</span>
+          <span class="cell-amount">{{ formatMoney(b.finalAmount) }}</span>
         </div>
 
-        <!-- Cell Payment -->
         <div class="col col-pay">
-          <span class="cell-pay-status">{{ b.paymentStatus }}</span>
+          <span class="cell-pay-status">{{ b.paymentLabel }}</span>
+          <span *ngIf="b.refundStatus !== 'NONE'" class="cell-refund-sub">{{ b.refundStatus }}</span>
         </div>
 
-        <!-- Cell Status -->
         <div class="col col-status">
           <span class="status-badge" [ngClass]="b.statusBadgeClass">
             {{ b.statusLabel }}
           </span>
         </div>
 
-        <!-- Cell Action -->
         <div class="col col-act" (click)="$event.stopPropagation()">
           <button
-            *ngIf="b.actionType === 'CHECK_OUT'"
-            type="button"
-            class="btn-row-action btn-outline"
-            (click)="handleCheckOut(b)"
-          >
-            {{ b.actionLabel }}
-          </button>
-          <button
-            *ngIf="b.actionType === 'CHECK_IN'"
+            *ngIf="b.status === 'CONFIRMED'"
             type="button"
             class="btn-row-action btn-gold"
             (click)="handleCheckIn(b)"
+            [disabled]="actionLoading"
           >
-            {{ b.actionLabel }}
+            CHECK-IN
           </button>
           <button
-            *ngIf="b.actionType === 'NO_SHOW'"
+            *ngIf="b.status === 'CHECKED_IN'"
+            type="button"
+            class="btn-row-action btn-outline"
+            (click)="handleCheckOut(b)"
+            [disabled]="actionLoading"
+          >
+            CHECK-OUT
+          </button>
+          <button
+            *ngIf="b.status === 'CANCELLED' && (b.refundStatus === 'PROCESSING' || b.refundStatus === 'FAILED')"
             type="button"
             class="btn-row-action btn-warning"
-            (click)="handleNoShow(b)"
+            (click)="selectBooking(b)"
           >
-            {{ b.actionLabel }}
+            ĐỐI SOÁT HOÀN TIỀN
           </button>
-          <span *ngIf="b.actionNote" class="cell-action-note">{{ b.actionNote }}</span>
+          <span
+            *ngIf="b.status !== 'CONFIRMED' && b.status !== 'CHECKED_IN' && !(b.status === 'CANCELLED' && (b.refundStatus === 'PROCESSING' || b.refundStatus === 'FAILED'))"
+            class="cell-action-note"
+          >
+            {{ b.statusLabel }}
+          </span>
         </div>
       </div>
     </div>
 
-    <!-- Table Pagination -->
+    <!-- Real Table Pagination -->
     <div class="table-pagination" data-name="Pagination">
       <span class="pagination-info">
-        Hiển thị 1–{{ filteredBookings.length }} trên {{ bookings.length }} đơn · Trang 1 / 1
+        Hiển thị {{ pageStartIndex }}–{{ pageEndIndex }} / {{ filteredBookings.length }} đơn · Trang {{ currentPage }} / {{ totalPages }} ({{ pageSize }} đơn/trang)
       </span>
       <div class="pagination-controls">
-        <span class="page-size">8 / trang</span>
-        <button type="button" class="btn-page-arrow" disabled>‹</button>
-        <button type="button" class="btn-page-num active">1</button>
-        <button type="button" class="btn-page-num">2 · 3</button>
-        <button type="button" class="btn-page-arrow">›</button>
+        <button type="button" class="btn-page-arrow" [disabled]="currentPage <= 1" (click)="goToPage(1)" title="Trang đầu">«</button>
+        <button type="button" class="btn-page-arrow" [disabled]="currentPage <= 1" (click)="goToPage(currentPage - 1)">‹ Trước</button>
+        <button
+          *ngFor="let p of pageNumbers"
+          type="button"
+          class="btn-page-num"
+          [class.active]="p === currentPage"
+          (click)="goToPage(p)"
+        >
+          {{ p }}
+        </button>
+        <button type="button" class="btn-page-arrow" [disabled]="currentPage >= totalPages" (click)="goToPage(currentPage + 1)">Tiếp ›</button>
+        <button type="button" class="btn-page-arrow" [disabled]="currentPage >= totalPages" (click)="goToPage(totalPages)" title="Trang cuối">»</button>
       </div>
     </div>
   </div>
 
-  <!-- Detail Block: Selected Booking -->
-  <div class="detail-block" data-name="DetailBlock">
-    <!-- Detail Header -->
+  <!-- Dynamic Detail Block: Selected Booking -->
+  <div class="detail-block" *ngIf="selectedBooking as sel" data-name="DetailBlock">
     <div class="detail-header" data-name="DetailHeader">
       <img src="/images/figma/eye-view-fill.svg" alt="" class="detail-header-icon" />
-      <h2 class="detail-title">Đơn đang chọn · {{ selectedBooking.code }}</h2>
+      <h2 class="detail-title">Đơn đang chọn · {{ sel.code }}</h2>
       <div class="detail-header-badges">
-        <span class="status-badge" [ngClass]="selectedBooking.statusBadgeClass">
-          {{ selectedBooking.statusLabel }}
-        </span>
-        <span class="badge-paid">Đã thanh toán</span>
+        <span class="status-badge" [ngClass]="sel.statusBadgeClass">{{ sel.statusLabel }}</span>
+        <span class="badge-paid">{{ sel.paymentLabel }}</span>
+        <span *ngIf="sel.refundStatus !== 'NONE'" class="badge-tag">{{ sel.refundStatus }}</span>
       </div>
     </div>
 
-    <!-- Detail Body: 4 Cards -->
     <div class="detail-body-grid">
       <!-- Card 1: Khách hàng & Không gian -->
       <div class="detail-subcard">
         <span class="subcard-tag">KHÁCH HÀNG / KHÔNG GIAN</span>
         <div class="cust-info">
-          <h3 class="cust-name">{{ selectedBooking.customerName }}</h3>
-          <p class="cust-sub">{{ selectedBooking.customerEmail }} · {{ selectedBooking.customerPhone }}</p>
+          <h3 class="cust-name">{{ sel.customerName }}</h3>
+          <p class="cust-sub">{{ sel.customerEmail }} · {{ sel.customerPhone }}</p>
         </div>
         <div class="cust-badges">
-          <span class="badge-tag">{{ selectedBooking.tier }}</span>
-          <span class="badge-tag badge-tag-highlight">{{ selectedBooking.discount }}</span>
+          <span class="badge-tag">{{ sel.tierLabel }}</span>
+          <span class="badge-tag badge-tag-highlight">{{ sel.discountLabel }}</span>
         </div>
         <div class="subcard-divider"></div>
         <div class="space-specs">
-          <h4 class="specs-title">{{ selectedBooking.spaceName }}</h4>
+          <h4 class="specs-title">{{ sel.spaceName }} ({{ sel.spaceType }})</h4>
           <div class="spec-row">
             <span class="spec-label">Khu vực</span>
-            <span class="spec-val">{{ selectedBooking.zoneName }}</span>
+            <span class="spec-val">{{ sel.zoneName }}</span>
           </div>
           <div class="spec-row">
             <span class="spec-label">Ngày / Giờ</span>
-            <span class="spec-val text-brand">{{ selectedBooking.date }} · {{ selectedBooking.timeSlot }}</span>
+            <span class="spec-val text-brand">{{ sel.date }} · {{ sel.timeSlot }}</span>
           </div>
           <div class="spec-row">
             <span class="spec-label">Số khách</span>
-            <span class="spec-val">0{{ selectedBooking.guestCount }} người</span>
+            <span class="spec-val">{{ sel.guestCount }} người</span>
           </div>
         </div>
-        <a class="btn-subcard-link">Xem hồ sơ khách →</a>
+        <a class="btn-subcard-link" (click)="viewCustomerProfile(sel)">Xem hồ sơ khách →</a>
       </div>
 
       <!-- Card 2: Gói & Snapshot giá -->
       <div class="detail-subcard">
         <span class="subcard-tag">GÓI / SNAPSHOT GIÁ</span>
-        <h3 class="package-name">{{ selectedBooking.packageType }}</h3>
+        <h3 class="package-name">{{ sel.packageName }}</h3>
         <div class="price-breakdown">
           <div class="price-line">
-            <span class="price-label">Gói 4 giờ</span>
-            <span class="price-val">140.000đ</span>
+            <span class="price-label">Giá gói</span>
+            <span class="price-val">{{ formatMoney(sel.packagePrice) }}</span>
           </div>
           <div class="price-line">
-            <span class="price-label">Phụ thu Matcha Latte</span>
-            <span class="price-val">+5.000đ</span>
+            <span class="price-label">Phụ phí đồ uống vượt chuẩn</span>
+            <span class="price-val">+{{ formatMoney(sel.inclusionSurcharge) }}</span>
           </div>
           <div class="price-line">
-            <span class="price-label">Tạm tính</span>
-            <span class="price-val">145.000đ</span>
+            <span class="price-label">Dịch vụ thêm (Add-on)</span>
+            <span class="price-val">+{{ formatMoney(sel.addonTotal) }}</span>
           </div>
-          <div class="price-line">
-            <span class="price-label">Bạc · Giảm 5%</span>
-            <span class="price-val">−7.250đ</span>
+          <div class="price-line" *ngIf="sel.voucherDiscount > 0">
+            <span class="price-label">Giảm Voucher</span>
+            <span class="price-val">−{{ formatMoney(sel.voucherDiscount) }}</span>
+          </div>
+          <div class="price-line" *ngIf="sel.tierDiscount > 0">
+            <span class="price-label">Giảm hạng ({{ sel.tierLabel }})</span>
+            <span class="price-val">−{{ formatMoney(sel.tierDiscount) }}</span>
           </div>
           <div class="subcard-divider"></div>
           <div class="price-line total-line">
-            <span class="price-label font-bold">Tổng cuối</span>
-            <span class="price-val font-bold text-brand">{{ selectedBooking.finalAmount }}</span>
+            <span class="price-label font-bold">Tổng thanh toán cuối</span>
+            <span class="price-val font-bold text-brand">{{ formatMoney(sel.finalAmount) }}</span>
           </div>
         </div>
-        <p class="subcard-footer-note">Snapshot giá tại thời điểm đặt · Không tự điều chỉnh</p>
+        <p class="subcard-footer-note">Giá được chốt cố định tại thời điểm đặt chỗ · Không bị ảnh hưởng khi bảng giá thay đổi</p>
       </div>
 
       <!-- Card 3: Bao gồm & Add-on -->
       <div class="detail-subcard">
         <span class="subcard-tag">BAO GỒM / ADD-ON</span>
         <div class="inclusions-group">
-          <h4 class="group-title">Bao gồm trong gói</h4>
-          <div class="inclusion-item">
-            <img src="/images/ken-figma/cowork-page-wifi.svg" alt="" class="inc-icon" />
-            <span class="inc-text">Wi-Fi tốc độ cao</span>
-          </div>
-          <div class="inclusion-item">
-            <img src="/images/ken-figma/cowork-page-outlet.svg" alt="" class="inc-icon" />
-            <span class="inc-text">Ổ điện & USB tại chỗ</span>
-          </div>
-          <div class="inclusion-item">
-            <img src="/images/ken-home/icons/addon-coffee.svg" alt="" class="inc-icon" />
-            <span class="inc-text">01 Matcha Latte · Hỗ trợ 50.000đ, phụ thu 5.000đ</span>
-          </div>
+          <h4 class="group-title">Món bao gồm trong gói</h4>
+          <ng-container *ngIf="sel.inclusions.length > 0; else noInclusions">
+            <div *ngFor="let inc of sel.inclusions" class="inclusion-item">
+              <img src="/images/ken-home/icons/addon-coffee.svg" alt="" class="inc-icon" />
+              <span class="inc-text">{{ inc.name }} · {{ inc.detail }}</span>
+            </div>
+          </ng-container>
+          <ng-template #noInclusions>
+            <p class="group-text">Bao gồm tiện ích tiêu chuẩn của không gian.</p>
+          </ng-template>
         </div>
         <div class="subcard-divider"></div>
         <div class="addons-group">
           <h4 class="group-title">Dịch vụ thêm (Add-on)</h4>
-          <p class="group-text">Chưa chọn thêm dịch vụ trong ca này.</p>
+          <ng-container *ngIf="sel.addons.length > 0; else noAddons">
+            <div *ngFor="let add of sel.addons" class="inclusion-item">
+              <span class="inc-text">{{ add.name }} ({{ add.detail }}) = <strong>{{ formatMoney(add.amount) }}</strong></span>
+            </div>
+          </ng-container>
+          <ng-template #noAddons>
+            <p class="group-text">Không có add-on đi kèm.</p>
+          </ng-template>
         </div>
         <div class="cleanup-group">
-          <h4 class="group-title">Dọn ô sau ca</h4>
-          <p class="group-text">13:00–13:15 · Không tính phí khách</p>
+          <h4 class="group-title">Thời gian dọn phòng &amp; chuẩn bị</h4>
+          <p class="group-text">{{ sel.cleanupWindow }}</p>
         </div>
       </div>
 
@@ -342,123 +372,153 @@
       <div class="detail-subcard">
         <span class="subcard-tag">THANH TOÁN / HOÀN TIỀN</span>
         <div class="pay-status-row">
-          <span class="badge-paid">Đã thanh toán</span>
-          <span class="pay-time">{{ selectedBooking.paymentTime }}</span>
+          <span class="badge-paid">{{ sel.paymentLabel }}</span>
+          <span class="pay-time">{{ sel.paymentTime }}</span>
         </div>
         <div class="pay-details-list">
           <div class="spec-row">
             <span class="spec-label">Phương thức</span>
-            <span class="spec-val">{{ selectedBooking.paymentMethod }}</span>
+            <span class="spec-val">{{ sel.paymentMethod }}</span>
           </div>
           <div class="spec-row">
             <span class="spec-label">Mã giao dịch</span>
-            <span class="spec-val">{{ selectedBooking.txnCode }}</span>
+            <span class="spec-val">{{ sel.txnCode }}</span>
           </div>
           <div class="spec-row">
             <span class="spec-label">Số tiền</span>
-            <span class="spec-val text-brand font-bold">{{ selectedBooking.finalAmount }}</span>
+            <span class="spec-val text-brand font-bold">{{ formatMoney(sel.finalAmount) }}</span>
           </div>
         </div>
         <div class="subcard-divider"></div>
         <div class="refund-section">
-          <h4 class="group-title">Hoàn tiền</h4>
-          <span class="badge-tag">Không áp dụng hoàn tiền</span>
+          <h4 class="group-title">Trạng thái hoàn tiền</h4>
+          <span class="badge-tag">{{ sel.refundStatus === 'NONE' ? 'Không phát sinh hoàn tiền' : sel.refundStatus }}</span>
+          <p *ngIf="sel.refundAmount > 0" class="group-text">Số tiền hoàn: <strong>{{ formatMoney(sel.refundAmount) }}</strong></p>
+          <p *ngIf="sel.refundNote" class="group-text">Ghi chú: {{ sel.refundNote }}</p>
         </div>
-        <p class="subcard-footer-note">Khi check-out: +13 Điểm và +13 Coins.</p>
+        <p class="subcard-footer-note">Khi hoàn tất Check-out: cộng +{{ sel.estimatedPoints }} KÉN Điểm &amp; +{{ sel.estimatedPoints }} KÉN Xu.</p>
       </div>
     </div>
   </div>
 
   <!-- Counter Operations Block -->
-  <div class="ops-block" data-name="OpsBlock">
+  <div class="ops-block" *ngIf="selectedBooking as sel" data-name="OpsBlock">
     <div class="ops-header" data-name="OpsHeader">
       <img src="/images/figma/filter.svg" alt="" class="ops-header-icon" />
-      <h2 class="ops-title">Thao tác quầy cho đơn đang chọn</h2>
-      <span class="ops-subtitle">Đang xem: {{ selectedBooking.code }}</span>
+      <h2 class="ops-title">Thao tác quầy &amp; Đối soát hoàn tiền</h2>
+      <span class="ops-subtitle">Đang xem: {{ sel.code }} ({{ sel.status }})</span>
     </div>
 
     <div class="ops-body" data-name="OpsBody">
-      <!-- Operational Rules -->
+      <!-- Dynamic Operational Rules -->
       <div class="ops-rules-card" data-name="Conditions">
-        <span class="subcard-tag">QUY TẮC VẬN HÀNH</span>
+        <span class="subcard-tag">QUY TẮC VẬN HÀNH ĐƠN {{ sel.code }}</span>
         <div class="rules-list">
           <div class="rule-item">
             <span class="rule-dot dot-green"></span>
-            <span class="rule-text">Check-in sớm nhất -15 phút trước giờ bắt đầu (08:45)</span>
+            <span class="rule-text">Mở Check-in sớm nhất (-15 phút): <strong>{{ sel.checkInEarliest }}</strong></span>
           </div>
           <div class="rule-item">
             <span class="rule-dot dot-gold"></span>
-            <span class="rule-text">Trễ hơn +30 phút (09:30) → Xác nhận NO_SHOW</span>
+            <span class="rule-text">Quá hạn (+30 phút) → chuyển NO_SHOW: <strong>{{ sel.noShowThreshold }}</strong> (phí 100%, 0 điểm)</span>
           </div>
           <div class="rule-item">
             <span class="rule-dot dot-brown"></span>
-            <span class="rule-text">Đến muộn không kéo dài giờ kết thúc · 13:00 vẫn là giờ trả</span>
+            <span class="rule-text">Không gian {{ sel.spaceType }} · Buffer dọn ô: <strong>{{ sel.cleanupWindow }}</strong></span>
           </div>
-          <div class="rule-item">
-            <span class="rule-dot dot-brown"></span>
-            <span class="rule-text">Dọn ô 15 phút sau khi kết thúc (13:00–13:15) · Không tính giờ khách</span>
-          </div>
-        </div>
-        <div class="subcard-divider"></div>
-        <div class="current-state-note">
-          <img src="/images/figma/info.svg" alt="" class="state-icon" />
-          <span class="state-text">Check-in ghi nhận lúc 08:55 · Đơn đang CHECKED_IN</span>
         </div>
       </div>
 
-      <!-- Action Buttons -->
+      <!-- Inline No-show Confirmation Box -->
+      <div *ngIf="confirmAction?.type === 'NO_SHOW'" class="inline-confirm-box">
+        <span>Xác nhận đánh dấu <strong>NO_SHOW</strong> cho đơn <strong>{{ sel.code }}</strong> (thu 100% giá trị, 0 điểm)?</span>
+        <div class="inline-confirm-actions">
+          <button type="button" class="btn-ops btn-ops-danger" (click)="confirmNoShow()" [disabled]="actionLoading">Xác nhận No-show</button>
+          <button type="button" class="btn-ops btn-ops-cancel" (click)="confirmAction = null">Huỷ</button>
+        </div>
+      </div>
+
+      <!-- Dynamic Action Buttons -->
       <div class="ops-action-buttons" data-name="ActionButtons">
         <button
           type="button"
-          class="btn-ops btn-ops-outline"
-          disabled
-          data-name="CheckInBtn"
+          class="btn-ops"
+          [ngClass]="sel.status === 'CONFIRMED' ? 'btn-ops-primary' : 'btn-ops-outline'"
+          [disabled]="sel.status !== 'CONFIRMED' || actionLoading"
+          (click)="handleCheckIn(sel)"
         >
           Check-in
         </button>
         <button
           type="button"
-          class="btn-ops btn-ops-primary"
-          (click)="handleCheckOut(selectedBooking)"
-          data-name="CheckOutBtn"
+          class="btn-ops"
+          [ngClass]="sel.status === 'CHECKED_IN' ? 'btn-ops-primary' : 'btn-ops-outline'"
+          [disabled]="sel.status !== 'CHECKED_IN' || actionLoading"
+          (click)="handleCheckOut(sel)"
         >
-          Check-out
+          Check-out (+{{ sel.estimatedPoints }}đ)
         </button>
         <button
           type="button"
-          class="btn-ops btn-ops-outline"
-          disabled
-          data-name="NoShowBtn"
+          class="btn-ops"
+          [ngClass]="sel.status === 'CONFIRMED' ? 'btn-ops-danger-outline' : 'btn-ops-outline'"
+          [disabled]="sel.status !== 'CONFIRMED' || actionLoading"
+          (click)="requestNoShow(sel)"
         >
           Xác nhận No-show
         </button>
-        <span class="ops-btn-hint">Chỉ Check-out khả dụng với đơn đang sử dụng.</span>
+        <span class="ops-btn-hint">
+          {{ sel.status === 'CONFIRMED' ? 'Đơn CONFIRMED sẵn sàng Check-in hoặc đánh dấu No-show.' : sel.status === 'CHECKED_IN' ? 'Khách đang sử dụng, sẵn sàng Check-out.' : 'Đơn đã kết thúc vòng đời sử dụng (' + sel.status + ').' }}
+        </span>
       </div>
 
-      <!-- Status History Table -->
+      <!-- Manual Refund Reconciliation Panel -->
+      <div *ngIf="needsRefundReconcile" class="reconcile-panel">
+        <h4 class="history-title">Đối soát hoàn tiền thủ công (Trạng thái: {{ sel.refundStatus }})</h4>
+        <p class="reconcile-desc">
+          Giao dịch hoàn tiền chưa hoàn tất qua cổng thanh toán. Sau khi chuyển khoản thủ công hoặc phát hiện sai lệch, nhập ghi chú / mã tham chiếu bên dưới:
+        </p>
+        <textarea
+          [(ngModel)]="reconcileNote"
+          rows="2"
+          placeholder="Nhập mã giao dịch chuyển khoản hoàn tiền hoặc mô tả sai lệch đối soát..."
+          class="reconcile-textarea"
+        ></textarea>
+        <div class="reconcile-actions">
+          <button type="button" class="btn-ops btn-ops-primary" (click)="submitRefundReconcile('MANUAL_RESOLVE')" [disabled]="actionLoading">
+            Xác nhận đã hoàn tiền thủ công
+          </button>
+          <button type="button" class="btn-ops btn-ops-danger-outline" (click)="submitRefundReconcile('REPORT_DISCREPANCY')" [disabled]="actionLoading">
+            Báo sai lệch đối soát
+          </button>
+        </div>
+      </div>
+
+      <!-- Dynamic Status History Table -->
       <div class="status-history-block" data-name="StatusHistory">
         <h4 class="history-title">Lịch sử trạng thái</h4>
-        <div class="history-table">
+        <div class="history-table" *ngIf="sel.statusLogs.length > 0; else emptyLogs">
           <div class="history-header" data-name="HistHeader">
             <div class="hist-col col-time">Thời điểm</div>
-            <div class="hist-col col-act">Hành động</div>
-            <div class="hist-col col-prev">Trạng thái trước</div>
-            <div class="hist-col col-next">Trạng thái sau</div>
+            <div class="hist-col col-act">Người / Ghi chú</div>
+            <div class="hist-col col-prev">Trước</div>
+            <div class="hist-col col-next">Sau</div>
           </div>
-          <div class="history-row" data-name="HistRow">
-            <div class="hist-col col-time">24/10/2026 · 08:55</div>
-            <div class="hist-col col-act font-semibold">Check-in bởi Admin</div>
+          <div *ngFor="let log of sel.statusLogs" class="history-row" data-name="HistRow">
+            <div class="hist-col col-time">{{ log.time }}</div>
+            <div class="hist-col col-act font-semibold">{{ log.actor }}{{ log.note ? ' · ' + log.note : '' }}</div>
             <div class="hist-col col-prev">
-              <span class="history-badge badge-confirmed">CONFIRMED</span>
+              <span class="history-badge badge-confirmed">{{ log.fromStatus }}</span>
             </div>
             <div class="hist-col col-next">
-              <span class="history-badge badge-checked-in">CHECKED_IN</span>
+              <span class="history-badge badge-checked-in">{{ log.toStatus }}</span>
             </div>
           </div>
         </div>
+        <ng-template #emptyLogs>
+          <div class="empty-table-state">Đơn hiện ở trạng thái <strong>{{ sel.status }}</strong> (chưa có bản ghi log chi tiết thêm).</div>
+        </ng-template>
       </div>
     </div>
   </div>
-
-
 </div>

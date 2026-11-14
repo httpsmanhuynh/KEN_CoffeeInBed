@@ -49,7 +49,39 @@ export class AdminLayoutComponent {
     if (item.exact) {
       return this.currentUrl === item.path || this.currentUrl === '/admin';
     }
+    if (item.path === '/admin/zones' && this.currentUrl.startsWith('/admin/areas')) {
+      return true;
+    }
     return this.currentUrl.startsWith(item.path);
+  }
+
+  get activeModuleIndex(): number {
+    const idx = this.navItems.findIndex((item) => this.isItemActive(item));
+    return idx >= 0 ? idx : 0;
+  }
+
+  get prevNavItem(): AdminNavItem | null {
+    const idx = this.activeModuleIndex;
+    return idx > 0 ? this.navItems[idx - 1] : null;
+  }
+
+  get nextNavItem(): AdminNavItem | null {
+    const idx = this.activeModuleIndex;
+    return idx >= 0 && idx < this.navItems.length - 1 ? this.navItems[idx + 1] : null;
+  }
+
+  goPrevPage(): void {
+    const target = this.prevNavItem;
+    if (target) {
+      this.router.navigate([target.path]);
+    }
+  }
+
+  goNextPage(): void {
+    const target = this.nextNavItem;
+    if (target) {
+      this.router.navigate([target.path]);
+    }
   }
 
   getCurrentPageTitle(): string {
@@ -60,7 +92,9 @@ export class AdminLayoutComponent {
       return 'Khách hàng & Thành viên';
     }
     if (this.currentUrl.includes('/admin/areas') || this.currentUrl.includes('/admin/zones')) {
-      return this.currentUrl.includes('/new') || /\/areas\/[^/]+$/.test(this.currentUrl) ? 'Thêm khu vực' : 'Quản lý khu vực';
+      if (this.currentUrl.includes('/new')) return 'Thêm khu vực';
+      if (/\/(?:areas|zones)\/[^/]+$/.test(this.currentUrl)) return 'Chi tiết khu vực';
+      return 'Quản lý khu vực';
     }
     if (this.currentUrl.includes('/admin/spaces')) {
       if (this.currentUrl.includes('/new')) return 'Thêm không gian';
@@ -76,6 +110,12 @@ export class AdminLayoutComponent {
     if (this.currentUrl.includes('/admin/addons')) {
       return 'Sản phẩm & Add-on';
     }
+    if (this.currentUrl.includes('/admin/vouchers')) {
+      return 'Khuyến mãi & Voucher';
+    }
+    if (this.currentUrl.includes('/admin/forecast')) {
+      return 'Dự báo & Recommend';
+    }
     return 'Dashboard';
   }
 
@@ -85,6 +125,9 @@ export class AdminLayoutComponent {
 
   onRefresh(): void {
     this.isRefreshing = true;
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('ken-admin-refresh'));
+    }
     setTimeout(() => {
       this.isRefreshing = false;
     }, 600);

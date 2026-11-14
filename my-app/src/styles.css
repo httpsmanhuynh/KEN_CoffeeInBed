@@ -195,6 +195,17 @@ app-header .hd.is-scrolled {
   box-shadow: 0 10px 30px rgba(74, 49, 35, 0.08);
 }
 
+.admin-topbar {
+  transition: background-color 0.28s ease, box-shadow 0.28s ease, backdrop-filter 0.28s ease;
+}
+
+.admin-topbar.is-scrolled {
+  background: rgba(255, 252, 247, 0.88) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 8px 24px rgba(74, 49, 35, 0.08);
+}
+
 /* React Bits-inspired spotlight hover glow */
 [data-ken-spotlight] {
   position: relative;
@@ -259,7 +270,17 @@ app-header .hd.is-scrolled {
 .about-space-button,
 .journeys-primary-button,
 .journeys-secondary-button,
-.hbtn {
+.hbtn,
+.admin-wrapper .btn-primary,
+.admin-wrapper .btn-action-primary,
+.admin-wrapper .btn-export,
+.admin-wrapper .btn-filter-action,
+.admin-wrapper .period-pill,
+.admin-wrapper .tab-pill,
+.admin-wrapper .tab-switch button,
+.admin-wrapper .actions button,
+.admin-wrapper .btn-row-link,
+.admin-wrapper .btn-row-lock {
   transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s ease, background-color 0.22s ease, border-color 0.22s ease, filter 0.22s ease;
 }
 
@@ -270,11 +291,114 @@ app-header .hd.is-scrolled {
 .ken-button:active:not(:disabled),
 .about-btn:active,
 .journeys-primary-button:active,
-.hbtn:active {
-  transform: translateY(0) scale(0.98);
-}
+.hbtn:active,
+.admin-wrapper .btn-primary:active:not(:disabled),
+.admin-wrapper .btn-action-primary:active:not(:disabled),
+.admin-wrapper .btn-export:active:not(:disabled),
+.admin-wrapper .btn-filter-action:active:not(:disabled),
+.admin-wrapper .period-pill:active,
+.admin-wrapper .tab-pill:active,
+  .admin-wrapper .btn-row-link:active,
+  .admin-wrapper .btn-row-lock:active:not(:disabled),
+  .admin-wrapper .btn-page-nav:active:not(:disabled),
+  .admin-wrapper .btn-page-num:active:not(:disabled),
+  .admin-wrapper .btn-topbar-nav:active:not(:disabled) {
+    transform: translateY(0) scale(0.98);
+  }
 
-@media (prefers-reduced-motion: reduce) {
+  /* Shared Admin Flexible Pagination Bar & Interactive Rows */
+  .admin-pagination-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 20px;
+    border-top: 1px solid rgba(216, 199, 178, 0.62);
+    background-color: #fffcf7;
+  }
+
+  .admin-pagination-info {
+    font-size: 12px;
+    color: #8c7a6b;
+  }
+
+  .admin-pagination-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-page-nav,
+  .admin-wrapper .btn-page-arrow,
+  .admin-wrapper .btn-page-num {
+    height: 30px;
+    min-width: 30px;
+    padding: 0 11px;
+    border-radius: 999px;
+    border: 1px solid rgba(216, 199, 178, 0.78);
+    background-color: #fffcf7;
+    color: #4a3123;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    white-space: nowrap;
+    transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  }
+
+  .btn-page-nav:hover:not(:disabled),
+  .admin-wrapper .btn-page-arrow:hover:not(:disabled),
+  .admin-wrapper .btn-page-num:hover:not(:disabled):not(.active) {
+    background-color: #f3e7d4;
+    border-color: rgba(169, 118, 63, 0.55);
+    transform: translateY(-1px);
+  }
+
+  .btn-page-nav:disabled,
+  .admin-wrapper .btn-page-arrow:disabled {
+    opacity: 0.42;
+    cursor: not-allowed;
+  }
+
+  .admin-wrapper .btn-page-num.active {
+    background-color: #4a3123;
+    color: #f7efe2;
+    border-color: #4a3123;
+    box-shadow: 0 4px 10px -4px rgba(74, 49, 35, 0.45);
+  }
+
+  .admin-detail-close-btn {
+    margin-left: auto;
+    height: 30px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(216, 199, 178, 0.85);
+    background-color: #fffcf7;
+    color: #4a3123;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+  }
+
+  .admin-detail-close-btn:hover {
+    background-color: #f3e7d4;
+    transform: translateY(-1px);
+  }
+
+  .customer-table .table-row,
+  .addons-table .trow-item,
+  .voucher-card tbody tr {
+    cursor: pointer;
+    transition: background-color 0.18s ease, box-shadow 0.18s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
   .ken-scroll-progress {
     display: none;
   }

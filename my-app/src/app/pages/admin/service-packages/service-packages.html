@@ -25,6 +25,9 @@
       </div>
 
       <div class="heading-actions">
+        <button type="button" class="btn-back-link" (click)="exportCsv()" style="border:1px solid rgba(216,199,178,.7);padding:8px 16px;border-radius:999px;margin:0">
+          Xuất CSV ↗
+        </button>
         <button type="button" class="btn-action-primary" (click)="openCreateForm()" data-name="Add package btn">
           <img src="/images/figma/sparkles.svg" alt="" class="btn-icon" />
           <span>Thêm gói</span>
@@ -68,21 +71,22 @@
           <img src="/images/figma/chevron-down.svg" alt="" class="select-chevron" />
         </div>
 
-        <!-- Filter Không gian -->
-        <div class="filter-select-wrap">
-          <select [(ngModel)]="selectedSpace" class="filter-select">
-            <option value="Tất cả">Không gian: Tất cả</option>
-            <option *ngFor="let s of spaceOptions" [value]="s">{{ s }}</option>
-          </select>
-          <img src="/images/figma/chevron-down.svg" alt="" class="select-chevron" />
-        </div>
-
         <!-- Filter Loại gói -->
         <div class="filter-select-wrap filter-sm">
           <select [(ngModel)]="selectedType" class="filter-select">
             <option value="Tất cả">Loại gói: Tất cả</option>
-            <option value="FIXED">FIXED</option>
-            <option value="HOURLY">HOURLY</option>
+            <option value="FIXED">Theo gói cố định</option>
+            <option value="HOURLY">Theo giờ lẻ</option>
+          </select>
+          <img src="/images/figma/chevron-down.svg" alt="" class="select-chevron" />
+        </div>
+
+        <!-- Filter Đơn vị giá -->
+        <div class="filter-select-wrap filter-sm">
+          <select [(ngModel)]="selectedUnit" class="filter-select">
+            <option value="Tất cả">Đơn vị: Tất cả</option>
+            <option value="PER_SPACE">Theo không gian / phòng</option>
+            <option value="PER_PERSON">Theo đầu người</option>
           </select>
           <img src="/images/figma/chevron-down.svg" alt="" class="select-chevron" />
         </div>
@@ -97,6 +101,10 @@
           <img src="/images/figma/chevron-down.svg" alt="" class="select-chevron" />
         </div>
 
+        <button type="button" class="btn-back-link" (click)="toggleSort('price')" style="border:1px solid rgba(216,199,178,.7);padding:7px 14px;border-radius:999px;margin:0;white-space:nowrap">
+          Sắp xếp Giá {{ sortKey === 'price' ? (sortAsc ? '↑' : '↓') : '↕' }}
+        </button>
+
       </div>
 
       <!-- Packages Table -->
@@ -104,7 +112,7 @@
         <table class="packages-table">
           <thead>
             <tr class="table-heading-row">
-              <th class="th-check"><input type="checkbox" title="Chọn tất cả" /></th>
+              <th class="th-check">#</th>
               <th class="th-name">Tên Package</th>
               <th class="th-type">Loại</th>
               <th class="th-unit">Đơn vị giá</th>
@@ -130,20 +138,20 @@
 
               <!-- Package Items in this Group -->
               <tr
-                *ngFor="let item of groupItems(group)"
+                *ngFor="let item of groupItems(group); let idx = index"
                 class="package-data-row"
                 [class.row-inactive]="item.status === 'INACTIVE'"
                 (click)="openDetail(item)"
               >
-                <!-- Checkbox -->
+                <!-- Index -->
                 <td class="td-check" (click)="$event.stopPropagation()">
-                  <input type="checkbox" />
+                  <span>{{ idx + 1 }}</span>
                 </td>
 
                 <!-- ID & Tên Package -->
                 <td class="td-name">
                   <div class="package-name-block">
-                    <span class="package-id">{{ item.id }}</span>
+                    <span class="package-id">{{ item.code || item.id }}</span>
                     <span class="package-name">{{ item.name }}</span>
                     <span class="package-space">{{ item.shortName }}</span>
                   </div>
@@ -171,7 +179,7 @@
                 <!-- Giá & Inclusion -->
                 <td class="td-price">
                   <div class="price-cell-block">
-                    <ng-container *ngIf="item.id.startsWith('TT-'); else standardPrice">
+                    <ng-container *ngIf="(item.code || item.id).startsWith('TT-') && item.inclusion.includes('Single'); else standardPrice">
                       <span *ngFor="let line of priceLines(item)" class="price-val">{{ line }}</span>
                     </ng-container>
                     <ng-template #standardPrice>

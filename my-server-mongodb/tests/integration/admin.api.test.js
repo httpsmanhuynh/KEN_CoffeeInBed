@@ -120,10 +120,10 @@ function runAggregate(cols, name, pipeline) {
   if (name === 'payment_transactions') {
     const matched = rows.filter((tx) => matches(tx, firstMatch));
     return matched.map((tx) => {
-      const at = tx.processed_at || tx.paid_at || tx.created_at;
+      const at = tx.completed_at || tx.processed_at || tx.paid_at || tx.created_at;
       const b = (cols.bookings || []).find((bk) => String(bk._id) === String(tx.booking_id)) || {};
       return {
-        type: tx.type,
+        type: tx.txn_type || tx.type,
         amount: tx.amount,
         at,
         spaceId: b.space_id || null,

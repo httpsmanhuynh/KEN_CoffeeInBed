@@ -71,6 +71,7 @@
           <input
             type="text"
             [(ngModel)]="searchQuery"
+            (ngModelChange)="currentPage = 1"
             placeholder="Tìm tên không gian..."
             class="search-input"
           />
@@ -78,7 +79,7 @@
 
         <!-- Filter Zone -->
         <div class="filter-select-wrap">
-          <select [(ngModel)]="selectedZone" class="filter-select">
+          <select [(ngModel)]="selectedZone" (ngModelChange)="currentPage = 1" class="filter-select">
             <option value="Tất cả">Zone: Tất cả</option>
             <option *ngFor="let z of zoneOptions" [value]="z">Zone: {{ z }}</option>
           </select>
@@ -87,7 +88,7 @@
 
         <!-- Filter Status -->
         <div class="filter-select-wrap">
-          <select [(ngModel)]="selectedStatus" class="filter-select">
+          <select [(ngModel)]="selectedStatus" (ngModelChange)="currentPage = 1" class="filter-select">
             <option value="Tất cả">Trạng thái: Tất cả</option>
             <option value="Đang hoạt động">Đang hoạt động</option>
             <option value="Bảo trì">Bảo trì</option>
@@ -161,7 +162,7 @@
           </thead>
           <tbody>
             <tr
-              *ngFor="let s of filteredSpaces"
+              *ngFor="let s of paginatedSpaces"
               class="table-data-row"
               [class.row-inactive]="s.status === 'INACTIVE'"
               data-name="Space record"
@@ -170,7 +171,10 @@
               <td class="td-space-identity">
                 <div class="space-title-block">
                   <span class="space-name-vi">{{ s.name }}</span>
-                  <span class="space-name-en">{{ s.nameEn }}</span>
+                  <span class="space-name-en">
+                    {{ s.nameEn }} · Buffer {{ s.bufferMinutes }}p
+                    <span *ngIf="s.futureBookingCount > 0" class="future-warn-pill"> · {{ s.futureBookingCount }} đơn sắp tới</span>
+                  </span>
                 </div>
               </td>
 
@@ -231,13 +235,15 @@
                 <div class="action-buttons-group">
                   <!-- Xem -->
                   <button type="button" class="btn-table-action" (click)="openViewModal(s)" title="Xem chi tiết">
-                    <img src="/images/figma/eye-view-off.svg" alt="" class="action-svg" />
+                    <img src="/images/figma/eye-view-fill.svg" alt="" class="action-svg" />
                     <span>Xem</span>
                   </button>
 
                   <!-- Sửa -->
                   <button type="button" class="btn-table-action" (click)="openEditForm(s)" title="Chỉnh sửa không gian">
-                    <img src="/images/figma/eye-view.svg" alt="" class="action-svg" />
+                    <svg class="action-svg" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                      <path d="M11.5 2.5a1.5 1.5 0 0 1 2.1 2.1L5.2 13l-2.7.6.6-2.7 8.4-8.4z" />
+                    </svg>
                     <span>Sửa</span>
                   </button>
 
@@ -247,7 +253,7 @@
                     class="btn-table-action"
                     [class.text-reactivate]="s.status === 'INACTIVE'"
                     [class.text-deactivate]="s.status !== 'INACTIVE'"
-                    (click)="toggleSpaceStatus(s)"
+                    (click)="requestToggleStatus(s)"
                     [title]="s.status === 'INACTIVE' ? 'Kích hoạt lại' : 'Ngừng hoạt động'"
                   >
                     <img
@@ -275,10 +281,38 @@
       </div>
 
       <!-- Table Footer -->
-      <div class="table-footer-row" data-name="Table footer">
-        <p class="footer-count">
-          Hiển thị {{ filteredSpaces.length }} / {{ totalCount }} không gian · {{ zoneTapTrungCount }} Tập Trung · {{ zoneTaiTaoCount }} Tái Tạo
+      <div *ngIf="confirmToggleTarget as target" class="space-confirm-banner">
+        <span>
+          {{ target.status === 'INACTIVE'
+            ? 'Xác nhận kích hoạt lại không gian "' + target.name + '"?'
+            : 'Xác nhận chuyển "' + target.name + '" sang Ngừng hoạt động?' }}
+          <strong *ngIf="target.status !== 'INACTIVE' && target.futureBookingCount > 0">
+            Lưu ý: Đang có {{ target.futureBookingCount }} đơn đặt chỗ sắp tới!
+          </strong>
+        </span>
+        <div class="confirm-banner-actions">
+          <button type="button" class="btn-action-primary" (click)="confirmToggleStatus()">Xác nhận</button>
+          <button type="button" class="btn-action-outline" (click)="confirmToggleTarget = null">Huỷ</button>
+        </div>
+      </div>
+
+      <div class="table-footer-row admin-pagination-bar" data-name="Table footer">
+        <p class="footer-count admin-pagination-info">
+          Hiển thị {{ pageStartIndex }}–{{ pageEndIndex }} / {{ filteredSpaces.length }} không gian · {{ zoneTapTrungCount }} Tập Trung · {{ zoneTaiTaoCount }} Tái Tạo
         </p>
+        <div class="admin-pagination-controls" *ngIf="filteredSpaces.length > 0">
+          <button type="button" class="btn-page-nav" [disabled]="currentPage <= 1" (click)="goToPage(currentPage - 1)">‹ Trước</button>
+          <button
+            *ngFor="let page of pageNumbers"
+            type="button"
+            class="btn-page-num"
+            [class.active]="page === currentPage"
+            (click)="goToPage(page)"
+          >
+            {{ page }}
+          </button>
+          <button type="button" class="btn-page-nav" [disabled]="currentPage >= totalPages" (click)="goToPage(currentPage + 1)">Tiếp ›</button>
+        </div>
       </div>
     </div>
   </ng-container>
@@ -308,7 +342,7 @@
           <span>Thêm không gian</span>
         </button>
         <button type="button" class="btn-form-header-primary" (click)="cancelForm()" data-name="Create action primary">
-          <img src="/images/figma/sort-alpha-down-alt.svg" alt="" class="btn-icon" />
+          <img src="/images/figma/arrow-left.svg" alt="" class="btn-icon" />
           <span>Quay lại danh sách</span>
         </button>
       </div>
@@ -460,6 +494,19 @@
           </div>
         </div>
 
+        <!-- Row 4: Image URL & Buffer note -->
+        <div class="form-amenities-row" data-name="Field Image">
+          <label class="field-label">URL Hình ảnh không gian · Thời gian dọn chuẩn bị tự động: {{ formData.bookingMode === 'PRIVATE' ? '15 phút (Phòng riêng)' : '0 phút (Khu vực chung)' }}</label>
+          <div class="custom-input-wrap">
+            <input
+              type="text"
+              [(ngModel)]="formData.image"
+              placeholder="/images/ken-flow/listing-focus.png hoặc https://..."
+              class="form-input-control"
+            />
+          </div>
+        </div>
+
         <!-- Error Message if invalid -->
         <div *ngIf="formError" class="form-error-alert">
           <span>⚠ {{ formError }}</span>
@@ -511,8 +558,8 @@
             <span class="info-v"><strong>{{ viewingSpace.capacity }}</strong> người (Min: {{ viewingSpace.minGuest }} · Max: {{ viewingSpace.maxGuest }})</span>
           </div>
           <div class="modal-info-item">
-            <span class="info-k">Đơn giá</span>
-            <span class="info-v">{{ viewingSpace.priceLabel }}</span>
+            <span class="info-k">Đơn giá &amp; Thời gian chuẩn bị</span>
+            <span class="info-v">{{ viewingSpace.priceLabel }} · {{ viewingSpace.bufferMinutes }} phút dọn phòng</span>
           </div>
           <div class="modal-info-item">
             <span class="info-k">Trạng thái</span>
@@ -548,7 +595,6 @@
           class="btn-modal-edit"
           (click)="openEditForm(viewingSpace); closeViewModal()"
         >
-          <img src="/images/figma/eye-view.svg" alt="" class="action-svg" />
           Chỉnh sửa không gian này
         </button>
       </div>

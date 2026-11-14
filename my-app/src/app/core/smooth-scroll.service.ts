@@ -19,6 +19,7 @@ export class SmoothScrollService {
   private initialized = false;
   private readonly spotlightWired = new WeakSet<HTMLElement>();
   private anchorClickHandler: ((event: MouseEvent) => void) | null = null;
+  private adminRefreshHandler: (() => void) | null = null;
 
   private get isUnsupportedEnv(): boolean {
     if (typeof window === 'undefined' || typeof document === 'undefined') {
@@ -96,6 +97,11 @@ export class SmoothScrollService {
       };
       document.addEventListener('click', this.anchorClickHandler);
 
+      this.adminRefreshHandler = () => {
+        this.scheduleRouteRefresh();
+      };
+      window.addEventListener('ken-admin-refresh', this.adminRefreshHandler);
+
       this.routerSub = this.router.events
         .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
         .subscribe((event) => {
@@ -121,6 +127,10 @@ export class SmoothScrollService {
     if (this.anchorClickHandler && typeof document !== 'undefined') {
       document.removeEventListener('click', this.anchorClickHandler);
       this.anchorClickHandler = null;
+    }
+    if (this.adminRefreshHandler && typeof window !== 'undefined') {
+      window.removeEventListener('ken-admin-refresh', this.adminRefreshHandler);
+      this.adminRefreshHandler = null;
     }
 
     if (this.refreshTimer !== null) {
@@ -236,6 +246,11 @@ export class SmoothScrollService {
     if (header instanceof HTMLElement) {
       header.classList.toggle('is-scrolled', scroll > 24);
     }
+
+    const adminTopbar = document.querySelector('.admin-topbar');
+    if (adminTopbar instanceof HTMLElement) {
+      adminTopbar.classList.toggle('is-scrolled', scroll > 16);
+    }
   }
 
   private scheduleRouteRefresh(): void {
@@ -265,13 +280,15 @@ export class SmoothScrollService {
   private animateCurrentPage(): void {
     this.killPageTriggers();
 
-    if (this.prefersReducedMotion || this.router.url.startsWith('/admin')) {
+    if (this.prefersReducedMotion) {
       return;
     }
 
+    const isAdmin = this.router.url.startsWith('/admin');
+
     // 1. Hero Entrance Stagger
     const heroBodies = document.querySelectorAll(
-      '.kh-hero-body, .ks-hero-intro, .about-hero-copy, .journeys-hero-copy, .kf-listing-hero-copy, .kf-menu-intro, .ken-hero',
+      '.kh-hero-body, .ks-hero-intro, .about-hero-copy, .journeys-hero-copy, .kf-listing-hero-copy, .kf-menu-intro, .ken-hero, .admin-wrapper .page-title-row, .admin-wrapper .page-heading-row, .admin-wrapper .voucher-heading, .admin-wrapper .forecast-heading, .admin-wrapper .areas-header, .admin-wrapper .spaces-header, .admin-wrapper .page-header',
     );
     heroBodies.forEach((body) => {
       if (!(body instanceof HTMLElement) || body.hasAttribute('data-ken-animated')) {
@@ -397,6 +414,26 @@ export class SmoothScrollService {
       '.ken-policy-section',
       '.ken-timeline-row',
       '.ken-story-card',
+      // Admin dashboard & module cards / blocks
+      '.metric-card',
+      '.chart-card',
+      '.panel-card',
+      '.zone-card',
+      '.task-card',
+      '.stat-card',
+      '.booking-card-block',
+      '.detail-card',
+      '.customer-card-block',
+      '.area-summary-card',
+      '.areas-card',
+      '.space-stat-card',
+      '.spaces-card',
+      '.packages-list-card',
+      '.kpi-box',
+      '.voucher-card',
+      '.kpi-card',
+      '.forecast-card',
+      '.date-panel',
     ].join(', ');
 
     const cards = Array.from(document.querySelectorAll(cardSelector)).filter(
@@ -452,7 +489,52 @@ export class SmoothScrollService {
       this.pageTriggers.push(...batchTriggers);
     }
 
-    // 5. React Bits-Style Spotlight & Interactive Card Glow
+    // 5. Admin bar chart grow-in entrance
+    if (isAdmin) {
+      const bars = Array.from(document.querySelectorAll('.bar-fill, .bar')).filter(
+        (el): el is HTMLElement => el instanceof HTMLElement && !el.hasAttribute('data-ken-animated'),
+      );
+      if (bars.length > 0) {
+        bars.forEach((b) => b.setAttribute('data-ken-animated', 'true'));
+        gsap.fromTo(
+          bars,
+          { scaleY: 0.12, opacity: 0.35 },
+          {
+            scaleY: 1,
+            opacity: 1,
+            duration: 0.65,
+            stagger: 0.03,
+            ease: 'power3.out',
+            transformOrigin: '50% 100%',
+            overwrite: true,
+            clearProps: 'transform,opacity',
+          },
+        );
+      }
+
+      const hBars = Array.from(document.querySelectorAll('.pair-bar-fill')).filter(
+        (el): el is HTMLElement => el instanceof HTMLElement && !el.hasAttribute('data-ken-animated'),
+      );
+      if (hBars.length > 0) {
+        hBars.forEach((b) => b.setAttribute('data-ken-animated', 'true'));
+        gsap.fromTo(
+          hBars,
+          { scaleX: 0.12, opacity: 0.4 },
+          {
+            scaleX: 1,
+            opacity: 1,
+            duration: 0.6,
+            stagger: 0.04,
+            ease: 'power2.out',
+            transformOrigin: '0% 50%',
+            overwrite: true,
+            clearProps: 'transform,opacity',
+          },
+        );
+      }
+    }
+
+    // 6. React Bits-Style Spotlight & Interactive Card Glow
     this.attachCardSpotlight();
   }
 
@@ -468,6 +550,17 @@ export class SmoothScrollService {
       '.kf-listing-card',
       '.kf-product',
       '.ken-card',
+      // Admin interactive spotlight cards
+      '.metric-card',
+      '.chart-card',
+      '.panel-card',
+      '.zone-card',
+      '.task-card',
+      '.stat-card',
+      '.area-summary-card',
+      '.space-stat-card',
+      '.kpi-box',
+      '.kpi-card',
     ].join(', ');
 
     const elements = document.querySelectorAll(spotlightSelector);
