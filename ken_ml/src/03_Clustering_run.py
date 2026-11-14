@@ -5,7 +5,7 @@ Ghi vào 2 nơi (qua src/safe_write.py, không có lệnh ghi nào khác trong f
   2) users                      : chỉ $set 2 trường ml_cluster_id (int) và ml_cluster_updated_at
 
 Chạy:
-  python src/03_Clustering_run.py            # CHẠY THỬ (dry-run): chỉ in kết quả, KHÔNG ghi gì
+  python src/03_Clustering_run.py            # CHẠY THỬ (dry-run): chỉ in kết quả
   python src/03_Clustering_run.py --write    # GHI THẬT vào MongoDB
 
 Cần có models/kmeans_cluster.joblib (tạo bằng: python src/03_Clustering_train.py).

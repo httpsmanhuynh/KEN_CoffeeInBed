@@ -1,4 +1,4 @@
-"""Kiểm tra kết nối MongoDB + dữ liệu TRƯỚC khi tiền xử lý ML (CHỈ ĐỌC).
+"""Kiểm tra kết nối MongoDB + dữ liệu TRƯỚC khi tiền xử lý (CHỈ ĐỌC).
 
 Chạy từ thư mục gốc KEN_ML:   python src/_check_connection.py
 """

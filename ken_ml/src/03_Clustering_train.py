@@ -2,7 +2,7 @@
 
 Luồng: CSV -> RFM (khách đăng nhập) -> thử K = 2..8 (Elbow + Silhouette) -> chọn K -> train
        -> đánh số lại cụm -> đặt tên persona gợi ý -> gợi ý theo cụm -> đánh giá Hit Rate@K
-       -> lưu mô hình và các file kết quả/biểu đồ vào outputs/ cho báo cáo.
+       -> lưu mô hình và file kết quả vào outputs/ và biểu đồ vào outputs/figures/ cho báo cáo.
 
 File này CHỈ ĐỌC CSV, KHÔNG kết nối và KHÔNG ghi MongoDB. Ghi DB do 03_Clustering_run.py làm.
 
@@ -35,7 +35,7 @@ from sklearn.pipeline import Pipeline  # noqa: E402
 from sklearn.preprocessing import FunctionTransformer, StandardScaler  # noqa: E402
 
 from Common import (  # noqa: E402
-    DATA_CSV, FEATURES, MODEL_PATH, OUTPUT_DIR, TOP_N, build_rfm, cluster_recommendations,
+    DATA_CSV, FEATURES, FIGURES_DIR, MODEL_PATH, OUTPUT_DIR, TOP_N, build_rfm, cluster_recommendations,
     load_data, predict_cluster_ids, profile_clusters, relabel_by_spend, suggest_persona_names, top_items,
 )
 
@@ -97,7 +97,7 @@ def plot_k_selection(scores: pd.DataFrame, chosen_k: int) -> None:
         ax.legend()
         ax.grid(alpha=0.3)
     fig.tight_layout()
-    fig.savefig(OUTPUT_DIR / "clustering_elbow_silhouette.png", dpi=150)
+    fig.savefig(FIGURES_DIR / "clustering_elbow_silhouette.png", dpi=150)
     plt.close(fig)
 
 
@@ -111,7 +111,7 @@ def plot_scatter3d(rfm: pd.DataFrame, labels: pd.Series, names: dict[int, str]) 
            title="Phân cụm khách hàng theo RFM")
     ax.legend(loc="upper left", fontsize=8)
     fig.tight_layout()
-    fig.savefig(OUTPUT_DIR / "clustering_scatter3d.png", dpi=150)
+    fig.savefig(FIGURES_DIR / "clustering_scatter3d.png", dpi=150)
     plt.close(fig)
 
 
@@ -157,6 +157,7 @@ def main() -> None:
     parser.add_argument("--log", action="store_true", help="Áp log1p lên R, F, M trước khi chuẩn hóa")
     args = parser.parse_args()
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    FIGURES_DIR.mkdir(parents=True, exist_ok=True)
     MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
 
     # ---- 1) Dữ liệu và RFM ----
@@ -219,8 +220,8 @@ def main() -> None:
     check = predict_cluster_ids(joblib.load(MODEL_PATH), rfm)
     assert (check == labels).all(), "Mô hình đã lưu dự đoán khác lúc train"
     logger.info("Đã lưu mô hình: %s", MODEL_PATH)
-    logger.info("Đã lưu kết quả vào: %s (k_selection, cluster_profiles, recommendations, hit_rate, customer_clusters, 2 biểu đồ png)",
-                OUTPUT_DIR)
+    logger.info("Đã lưu kết quả vào: %s (k_selection, cluster_profiles, recommendations, hit_rate, customer_clusters) và 2 biểu đồ png vào: %s",
+                OUTPUT_DIR, FIGURES_DIR)
 
 
 if __name__ == "__main__":

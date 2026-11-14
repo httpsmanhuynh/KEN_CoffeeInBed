@@ -1,8 +1,9 @@
-"""Tiền xử lý dữ liệu (mục 3.4): MongoDB -> data/master_ken_data.csv.
+"""Tiền xử lý dữ liệu: MongoDB -> data/master_ken_data.csv.
 
-Quy trình ETL tĩnh, CHỈ ĐỌC trên MongoDB:
+Quy trình tĩnh, CHỈ ĐỌC trên MongoDB:
   Bước 1  Extract    : kéo booking CHECKED_OUT + giao dịch bán hàng (khóa mốc sale_date
-                       01/04/2026 - 31/10/2026) + danh mục
+                       01/04/2026 - 31/10/2026; dữ liệu thực tế hiện có đến 27/10/2026)
+                       + danh mục
   Bước 2  F&B filter : giữ DRINK / PASTRY / SNACK (theo collection products)
   Bước 3  Flatten    : kiểm tra/đập phẳng mảng lồng nhau (dữ liệu KÉN đã phẳng sẵn)
   Bước 4  Cleaning   : ép kiểu, loại dòng lỗi, gắn ngữ cảnh booking + tuổi khách

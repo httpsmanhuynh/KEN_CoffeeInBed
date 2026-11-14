@@ -9,7 +9,7 @@ Mặc định là CHẠY THỬ (dry-run): chỉ in kết quả, không ghi DB. G
     python src/01_Trending.py                 # chạy thử
     python src/01_Trending.py --write         # ghi thật (chỉ sau khi đã xem mẫu và báo nhóm)
 
-Công thức (mục 2.2.1 và 3.6 của báo cáo):
+Công thức:
     Δ_j        = REFERENCE_DATE − sale_date_j (ngày)
     w(Δ)       = 2^(−Δ/h)
     Q_i        = Σ_j quantity_ij · w(Δ_j)          R_i = Σ_j line_total_vnd_ij · w(Δ_j)
