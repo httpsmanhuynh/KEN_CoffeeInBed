@@ -27,7 +27,7 @@
           <div><span>Khung giờ · {{ state.draft().hours }} giờ</span><strong>{{ state.timeLabel }}</strong></div>
         </div>
         <div class="kf-sum-row">
-          <div><strong>{{ state.space.name }} · {{ state.draft().hours }} giờ</strong><small>{{ state.space.perPerson ? 'Giá theo khách' : 'Giá theo không gian' }} · {{ state.draft().guests }} khách</small></div>
+          <div style="display: grid; gap: 3px;"><strong>{{ state.space.name }} · {{ state.packageName }}</strong><small>{{ state.space.perPerson ? 'Giá theo khách' : 'Giá theo không gian' }} · {{ state.draft().guests }} khách · {{ state.draft().hours }} giờ</small></div>
           <b>{{ money(state.base) }}</b>
         </div>
         <hr>
