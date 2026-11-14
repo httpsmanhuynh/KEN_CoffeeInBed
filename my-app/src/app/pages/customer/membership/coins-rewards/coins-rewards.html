@@ -22,11 +22,6 @@
             <p class="wallet__value">{{ balance }} Coins</p>
           </div>
         </div>
-        <span class="wallet__sep" aria-hidden="true"></span>
-        <div class="wallet__note">
-          <p class="wallet__rule">10.000đ chi tiêu hợp lệ = 1 Coin</p>
-          <p class="wallet__text">Coins ghi nhận sau khi hoàn tất dịch vụ. Chu kỳ 1 năm: hết chu kỳ, toàn bộ Coins còn lại về 0. Đổi Coins không trừ điểm xét hạng.</p>
-        </div>
       </section>
 
       <!-- Đổi voucher -->
@@ -61,11 +56,6 @@
             </div>
           }
         </div>
-
-        <div class="note">
-          <img src="/images/figma/icon-info.svg" alt="" width="16" height="16" />
-          <p>Đổi voucher chỉ trừ Coins, không ảnh hưởng điểm xét hạng. Giao dịch lỗi không trừ số dư.</p>
-        </div>
       </section>
 
       <!-- Quà lưu niệm -->
@@ -91,13 +81,11 @@
         </div>
       </section>
 
-      <p class="muted">Giá đổi thưởng là dữ liệu minh hoạ. Xem điều kiện sử dụng và nhận quà trước khi xác nhận; không mặc định cộng dồn voucher với ưu đãi thành viên.</p>
-
       <!-- Lịch sử Coins -->
       <section class="hist">
         <div class="hist__head">
           <h2 class="h-serif">Lịch sử Coins</h2>
-          <button type="button" class="refresh" (click)="setTab('all')">
+          <button type="button" class="refresh" (click)="loadHistory()">
             <img src="/images/figma/btn-refresh.svg" alt="" width="14" height="14" /><span>Làm mới</span>
           </button>
         </div>
@@ -120,8 +108,6 @@
             <p class="empty">Chưa có giao dịch nào ở mục này.</p>
           }
         </div>
-
-        <p class="muted">10.000đ chi tiêu hợp lệ = 1 Coin. Coins còn lại về 0 khi hết chu kỳ 1 năm.</p>
       </section>
     </main>
   </div>

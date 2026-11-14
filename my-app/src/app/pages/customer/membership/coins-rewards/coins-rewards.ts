@@ -57,6 +57,31 @@ export class CoinsRewardsPage implements OnInit {
     if (!this.auth) return;
     this.auth.logout().subscribe({ next: () => this.router?.navigateByUrl('/') });
   }
+
+  loadHistory(): void {
+    if (!this.api) return;
+    this.api.getLoyaltyHistory().subscribe({
+      next: (history) => {
+        if (history?.transactions?.length) {
+          this.history = history.transactions.map((tx) => {
+            const d = new Date(tx.created_at);
+            const plus = tx.coins_delta >= 0;
+            return {
+              kind: (plus ? 'earned' : 'spent') as HistoryKind,
+              date: d.toLocaleDateString('vi-VN'),
+              detail: tx.note || tx.type,
+              amount: `${plus ? '+' : ''}${tx.coins_delta} Coins`,
+              state: `Số dư: ${tx.coins_after.toLocaleString('vi-VN')} Coins`,
+              plus,
+            };
+          });
+        } else {
+          this.history = [];
+        }
+      },
+    });
+  }
+
   ngOnInit(): void {
     if (!this.api || !this.auth) return;
     this.auth.ensureSession().subscribe({
@@ -101,20 +126,32 @@ export class CoinsRewardsPage implements OnInit {
   }
 
   redeem(name: string, cost: number): void {
-    const voucher = this.vouchers.find((v) => v.name === name);
-    if (this.api && this.auth?.user && voucher?.id) {
-      this.api.redeemCoins({ voucherId: voucher.id }).subscribe({
-        next: (res) => {
-          this.balance = res.coins ?? Math.max(0, this.balance - cost);
-          if (this.auth?.user) this.auth.setUser({ ...this.auth.user, coinsBalance: this.balance });
-          alert(`Đổi thành công “${name}”! Mã voucher đã được lưu vào ví của bạn.`);
-        },
-        error: (err) => {
-          alert(err.error?.message || 'Không thể đổi voucher lúc này.');
-        },
-      });
+    if (!this.api || !this.auth?.user) return;
+    if (!this.enough(cost)) {
+      alert('Bạn chưa đủ số dư Coins để đổi phần quà này.');
       return;
     }
-    alert(`Bạn đang chọn “${name}” (${cost} Coins). Đây là thao tác minh hoạ.`);
+
+    const voucher = this.vouchers.find((v) => v.name === name);
+    const payload = voucher?.id
+      ? { voucherId: voucher.id, cost: voucher.cost, description: voucher.name }
+      : { cost, description: `Đổi quà: ${name}` };
+
+    this.api.redeemCoins(payload).subscribe({
+      next: (res) => {
+        this.balance = res.coins ?? Math.max(0, this.balance - cost);
+        if (this.auth?.user) {
+          this.auth.setUser({ ...this.auth.user, coinsBalance: this.balance });
+        }
+        this.loadHistory();
+        const msg = voucher?.id
+          ? `Đổi thành công “${name}”! Mã voucher đã được lưu vào ví của bạn.`
+          : `Đổi thành công “${name}”! Nhân viên KÉN sẽ liên hệ trao quà cho bạn.`;
+        alert(msg);
+      },
+      error: (err) => {
+        alert(err.error?.message || 'Không thể đổi quà lúc này. Vui lòng thử lại sau.');
+      },
+    });
   }
 }

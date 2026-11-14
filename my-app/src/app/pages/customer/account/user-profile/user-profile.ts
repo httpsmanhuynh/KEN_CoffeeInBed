@@ -38,7 +38,17 @@ export class UserProfile implements OnInit, OnDestroy {
   phoneMasked = '•••• •• 0123';
   readonly phoneVerified = true;
   tier = 'Bạc';
-  points = '3.250';
+  tierCode = 'SILVER';
+  points = '0';
+
+  get discountLabel(): string {
+    switch (this.tierCode) {
+      case 'DIAMOND': return 'giảm 15% tổng hoá đơn';
+      case 'GOLD': return 'giảm 10% tổng hoá đơn';
+      case 'SILVER': return 'giảm 5% tổng hoá đơn';
+      default: return 'tích luỹ điểm để nhận ưu đãi lên đến 15%';
+    }
+  }
 
   ngOnInit(): void {
     this.auth?.ensureSession().subscribe({
@@ -57,8 +67,17 @@ export class UserProfile implements OnInit, OnDestroy {
         };
         this.form = { ...this.saved };
         this.phoneMasked = user.phone.length >= 4 ? `•••• •• ${user.phone.slice(-4)}` : user.phone;
-        this.tier = TIER_LABEL[user.membershipTier] ?? user.membershipTier;
-        this.points = user.tierPoints.toLocaleString('vi-VN');
+        const pts = user.tierPoints ?? 0;
+        let code = user.membershipTier;
+        if (!code || code === 'BASIC') {
+          if (pts >= 10000) code = 'DIAMOND';
+          else if (pts >= 5000) code = 'GOLD';
+          else if (pts >= 1000) code = 'SILVER';
+          else code = 'BASIC';
+        }
+        this.tierCode = code;
+        this.tier = TIER_LABEL[code] ?? code;
+        this.points = pts.toLocaleString('vi-VN');
         this.avatarUrl = this.auth?.avatarUrl() ?? null;
       },
     });

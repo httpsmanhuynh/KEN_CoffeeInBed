@@ -108,7 +108,7 @@ router.post(
     const db = req.app.locals.db;
     const user = req.user;
     const voucherIdRaw = str(req.body.voucherId);
-    let cost = req.body.cost;
+    let cost = req.body.cost !== undefined ? Number(req.body.cost) : undefined;
     let voucher = null;
 
     const now = new Date();
@@ -140,15 +140,15 @@ router.post(
     }
 
     const vOid = voucher ? voucher._id : new ObjectId();
-    const note = str(req.body.description) || (voucher ? `Đổi mã ${voucher.code}` : 'Đổi Coins');
+    const note = str(req.body.description) || (voucher ? `Đổi mã ${voucher.code}` : 'Đổi quà');
 
     if (voucher) {
+      const voucherFilter = { _id: voucher._id, status: 'ACTIVE' };
+      if (voucher.redeem_limit > 0) {
+        voucherFilter.redeem_count = { $lt: voucher.redeem_limit };
+      }
       const upd = await db.collection('vouchers').updateOne(
-        {
-          _id: voucher._id,
-          status: 'ACTIVE',
-          redeem_count: { $lt: voucher.redeem_limit },
-        },
+        voucherFilter,
         { $inc: { redeem_count: 1 }, $set: { updated_at: now } },
       );
       if (upd.modifiedCount !== 1) {

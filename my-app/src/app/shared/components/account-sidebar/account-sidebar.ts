@@ -34,14 +34,21 @@ export class AccountSidebar {
 
   get displayTier(): string {
     if (this.tier) return this.tier;
-    const code = this.auth?.user?.membershipTier;
+    const pts = this.auth?.user?.tierPoints ?? 0;
+    let code = this.auth?.user?.membershipTier;
+    if (!code || code === 'BASIC') {
+      if (pts >= 10000) code = 'DIAMOND';
+      else if (pts >= 5000) code = 'GOLD';
+      else if (pts >= 1000) code = 'SILVER';
+      else code = 'BASIC';
+    }
     return code ? (TIER_LABEL[code] ?? code) : 'Bạc';
   }
 
   get displayPoints(): string {
     if (this.points) return this.points;
     const pts = this.auth?.user?.tierPoints;
-    return pts !== undefined ? `${pts.toLocaleString('vi-VN')} điểm` : '3.250 điểm';
+    return pts !== undefined ? `${pts.toLocaleString('vi-VN')} điểm` : '0 điểm';
   }
 
   get displayAvatar(): string | null {

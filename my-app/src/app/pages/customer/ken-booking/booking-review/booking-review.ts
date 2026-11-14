@@ -66,10 +66,20 @@ export class KenBookingReviewPage {
   private readonly api = tryInjectCustomerApi();
   feedback = '';
   voucherMessage = '';
+  appliedVoucherCode = '';
+  appliedVoucherDiscount = 0;
   checkingSession = false;
   submitting = false;
   readonly money = kenMoney;
   constructor(public state: KenBookingState, private router: Router, private auth: AuthService) {}
+
+  get memberDiscount(): number {
+    return this.state.silverDiscount;
+  }
+
+  get finalTotal(): number {
+    return Math.max(0, this.state.total - this.appliedVoucherDiscount);
+  }
 
   ngOnInit(): void {
     const existing = this.auth.user;
@@ -109,6 +119,11 @@ export class KenBookingReviewPage {
   setContact(key: 'fullName' | 'phone' | 'email' | 'note' | 'voucher', value: string): void {
     this.state.set({ [key]: value } as Pick<KenBookingDraft, typeof key>);
     this.feedback = '';
+    if (key === 'voucher' && !value.trim()) {
+      this.appliedVoucherCode = '';
+      this.appliedVoucherDiscount = 0;
+      this.voucherMessage = '';
+    }
   }
   setAgreed(value: boolean): void { this.state.set({ agreed: value }); this.feedback = ''; }
   extraCount(id: string): number { return this.state.draft().extras[id] || 0; }
@@ -255,7 +270,7 @@ export class KenBookingReviewPage {
   checkVoucher(): void {
     const code = this.state.draft().voucher.trim();
     if (!code) { this.voucherMessage = 'Vui lòng nhập mã khuyến mãi.'; return; }
-    if (!this.api) { this.voucherMessage = 'Mã khuyến mãi chưa kết nối hệ thống. Bản mô phỏng không áp dụng mã này.'; return; }
+    if (!this.api) { this.voucherMessage = 'Mã khuyến mãi chưa kết nối hệ thống.'; return; }
     this.voucherMessage = 'Đang kiểm tra mã…';
     this.resolveRealTarget().pipe(
       switchMap(({ sp, pkg, startAt, d, mappedInclusions, mappedAddons }) => {
@@ -273,9 +288,13 @@ export class KenBookingReviewPage {
       }),
     ).subscribe({
       next: (q) => {
-        this.voucherMessage = `Áp dụng mã ${q.voucherCode} thành công: giảm ${this.money(q.pricing.voucherDiscount)} (tổng thanh toán: ${this.money(q.pricing.finalAmount)}).`;
+        this.appliedVoucherCode = q.voucherCode || code;
+        this.appliedVoucherDiscount = q.pricing?.voucherDiscount || 0;
+        this.voucherMessage = `Áp dụng mã ${this.appliedVoucherCode} thành công: giảm ${this.money(this.appliedVoucherDiscount)} (tổng thanh toán: ${this.money(this.finalTotal)}).`;
       },
       error: (err) => {
+        this.appliedVoucherCode = '';
+        this.appliedVoucherDiscount = 0;
         this.voucherMessage = err?.error?.message || 'Mã voucher không hợp lệ hoặc chưa đủ điều kiện áp dụng.';
       },
     });

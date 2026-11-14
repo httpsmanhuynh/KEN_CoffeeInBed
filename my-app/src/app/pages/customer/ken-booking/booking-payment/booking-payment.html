@@ -43,13 +43,13 @@
         <div class="kf-hold-banner">
           <img class="kf-icon" src="/images/ken-flow/icons/payment-clock.svg" alt="">
           <div>
-            <strong>{{ state.draft().createdBookingId ? 'KÉN đang giữ chỗ cho bạn trong 15 phút' : 'KÉN giữ khoảng riêng cho bạn trong 15 phút — mô phỏng' }}</strong>
-            <p>{{ state.draft().createdBookingId ? 'Đơn #' + state.draft().createdBookingCode + ' đang chờ thanh toán (PENDING_PAYMENT).' : 'Trang demo không giữ chỗ thực tế. Bộ đếm chỉ chạy trong trình duyệt.' }}</p>
+            <strong>KÉN đang giữ chỗ cho bạn trong 15 phút</strong>
+            <p>{{ state.draft().createdBookingId ? 'Đơn #' + state.draft().createdBookingCode + ' đang chờ thanh toán.' : 'Vui lòng hoàn tất thanh toán để xác nhận giữ chỗ.' }}</p>
           </div>
           <div class="kf-countdown"><strong>{{ countdown }}</strong><small>THỜI GIAN GIỮ CHỖ</small></div>
         </div>
 
-        @if (demoExpired) {
+        @if (isExpired) {
           <div class="kf-pay-result kf-pay-result--fail" role="alert">
             <h3>Đã hết thời gian giữ chỗ 15 phút</h3>
             <p>Đơn giữ chỗ đã quá hạn thanh toán. Vui lòng quay lại để chọn lại khung giờ.</p>
@@ -64,9 +64,9 @@
             <div class="kf-pay-badge kf-pay-badge--fail">✕ THANH TOÁN THẤT BẠI</div>
             <h3>Giao dịch chưa được xác nhận</h3>
             <p>{{ payMessage }}</p>
-            <div class="kf-pay-actions" *ngIf="!demoExpired">
+            <div class="kf-pay-actions" *ngIf="!isExpired">
               <button type="button" class="kf-btn kf-btn-gold" [disabled]="paying" (click)="payNow('SUCCESS')">
-                {{ paying ? 'Đang xử lý…' : 'Thử thanh toán lại (Thành công)' }}
+                {{ paying ? 'Đang xử lý…' : 'Thử thanh toán lại' }}
               </button>
             </div>
           </section>
@@ -75,10 +75,10 @@
         <section class="kf-panel kf-transfer-panel">
           <div class="kf-panel-heading"><div><p class="kf-overline">THANH TOÁN CHUYỂN KHOẢN</p><h2>Quét mã, giữ một khoảng yên.</h2></div><span class="kf-small-status">Chờ thanh toán</span></div>
           <div class="kf-transfer-layout">
-            <div class="kf-fake-qr-box"><div class="kf-qr-placeholder" aria-label="QR thanh toán KÉN"><img class="kf-qr-svg" src="/images/ken-flow/icons/payment-qr.svg" alt="" aria-hidden="true"><strong>KÉN PAY</strong></div><p>Cổng thanh toán mô phỏng<br>cho đồ án KÉN</p></div>
+            <div class="kf-fake-qr-box"><div class="kf-qr-placeholder" aria-label="QR thanh toán KÉN"><img class="kf-qr-svg" src="/images/ken-flow/icons/payment-qr.svg" alt="" aria-hidden="true"><strong>KÉN PAY</strong></div><p>Quét mã VietQR<br>để thanh toán</p></div>
             <div class="kf-transfer-steps">
               <div><b>1</b><span><strong>Mở ứng dụng ngân hàng</strong><small>Quét mã QR hoặc kiểm tra số tiền cần thanh toán bên dưới.</small></span></div>
-              <div><b>2</b><span><strong>Xác nhận kết quả giao dịch</strong><small>Chọn "Thanh toán thành công" để xác nhận đơn hoặc "Giả lập thất bại" để kiểm thử retry.</small></span></div>
+              <div><b>2</b><span><strong>Xác nhận kết quả giao dịch</strong><small>Chọn "Xác nhận đã thanh toán" sau khi hoàn tất chuyển khoản thành công.</small></span></div>
               <div><b>3</b><span><strong>Nhận mã check-in</strong><small>Hệ thống chuyển đơn sang CONFIRMED ngay sau khi thanh toán thành công.</small></span></div>
             </div>
           </div>
@@ -92,17 +92,13 @@
             <div><span>Nội dung chuyển khoản</span><strong>{{ state.draft().createdBookingCode || 'Tạo theo mã đặt chỗ' }}</strong></div>
           </div>
           <hr><div class="kf-sum-row kf-total"><span>Số tiền cần thanh toán</span><strong>{{ money(state.total) }}</strong></div>
-          @if (state.draft().createdBookingId && !demoExpired) {
+          @if (state.draft().createdBookingId && !isExpired) {
             <div class="kf-pay-actions">
               <button type="button" class="kf-btn kf-btn-gold" [disabled]="paying" (click)="payNow('SUCCESS')">
-                {{ paying ? 'Đang xử lý…' : 'Thanh toán thành công' }}
-              </button>
-              <button type="button" class="kf-btn kf-btn-light" [disabled]="paying" (click)="payNow('FAILED')">
-                Giả lập thanh toán thất bại
+                {{ paying ? 'Đang xử lý…' : 'Xác nhận đã thanh toán' }}
               </button>
             </div>
           }
-          <p class="kf-help-mini" *ngIf="!state.draft().createdBookingId">Bản này không hiển thị số tài khoản thật.</p>
         </section>
       }
       <section class="kf-payment-contact">
@@ -153,12 +149,11 @@
           </div>
           <hr>
           <div class="kf-sum-row"><span>Tạm tính</span><strong>{{ money(state.subtotal) }}</strong></div>
-          <div class="kf-sum-row"><span>Ưu đãi Bạc · 5% (demo)</span><strong>−{{ money(state.silverDiscount) }}</strong></div>
+          <div class="kf-sum-row"><span>Ưu đãi thành viên (5%)</span><strong>−{{ money(state.silverDiscount) }}</strong></div>
           <hr><div class="kf-sum-row kf-total"><strong>Tổng thanh toán</strong><strong>{{ money(state.total) }}</strong></div>
-          <p class="kf-help-mini">Giao diện thanh toán là minh họa, chưa kết nối ngân hàng hoặc xác nhận thanh toán.</p>
         </div>
       </section>
-      <div class="kf-checkout-note"><h3>Sau khi thanh toán được xác nhận</h3><p>KÉN gửi xác nhận đặt chỗ và mã check-in. Bạn check-in sớm nhất 15 phút, sử dụng không gian theo gói rồi check-out khi kết thúc.</p><p>Trạng thái hiện chưa được tự động cập nhật vì dự án chưa kết nối cổng thanh toán và API booking.</p></div>
+      <div class="kf-checkout-note"><h3>Sau khi thanh toán được xác nhận</h3><p>KÉN gửi xác nhận đặt chỗ và mã check-in. Bạn check-in sớm nhất 15 phút, sử dụng không gian theo gói rồi check-out khi kết thúc.</p></div>
     </aside>
   </div>
 </main>

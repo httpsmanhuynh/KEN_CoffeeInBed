@@ -51,7 +51,8 @@ export class KenBookingPaymentPage implements OnInit, OnDestroy {
   ngOnDestroy(): void { if (this.timer) clearInterval(this.timer); }
   get remaining(): number { return Math.max(0, Math.ceil(((this.state.draft().holdUntil || 0) - this.now) / 1000)); }
   get countdown(): string { const r = this.remaining; return `${String(Math.floor(r / 60)).padStart(2, '0')}:${String(r % 60).padStart(2, '0')}`; }
-  get demoExpired(): boolean { return this.remaining === 0 && this.paymentOutcome !== 'success'; }
+  get isExpired(): boolean { return this.remaining === 0 && this.paymentOutcome !== 'success'; }
+  get demoExpired(): boolean { return this.isExpired; }
   get paidConfirmed(): boolean { return this.paymentOutcome === 'success'; }
   back(): void { this.router.navigateByUrl('/booking/review'); }
 

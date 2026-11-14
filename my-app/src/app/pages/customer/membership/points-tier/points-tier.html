@@ -48,103 +48,55 @@
         </article>
       </div>
 
-      <!-- Giải thích -->
-      <div class="rules">
-        <article class="rule rule--cream">
-          <p class="rule__eyebrow">MỖI LẦN GHÉ, THÊM GẮN BÓ</p>
-          <h2 class="rule__title">10.000đ = 1 KÉN Điểm</h2>
-          <p class="rule__text">Điểm xét hạng tích trong chu kỳ 1 năm. Sang năm hạ 1 bậc, không thấp hơn Bạc.</p>
-        </article>
-        <article class="rule">
-          <p class="rule__eyebrow">HAI GIÁ TRỊ, HAI VAI TRÒ</p>
-          <h2 class="rule__title">Đổi quà thoải mái, vẫn giữ điểm hạng</h2>
-          <p class="rule__text">Kim Cương → Vàng; Vàng → Bạc; Bạc giữ bậc thấp nhất. Đổi Coins không trừ điểm xét hạng.</p>
-        </article>
-      </div>
-
       <!-- Các hạng -->
       <section class="tiers">
         <h2 class="h-serif">Mỗi lần ghé, thêm một nấc thân quen</h2>
         <div class="tiers__row">
           <article class="tier tier--silver">
-            <div class="tier__head"><img src="/images/figma/award-bac.svg" alt="" width="22" height="22" /><span class="badge-here">Bạn đang ở đây</span></div>
+            <div class="tier__head">
+              <img src="/images/figma/award-bac.svg" alt="" width="22" height="22" />
+              @if (tierCode === 'SILVER') {
+                <span class="badge-here">Bạn đang ở đây</span>
+              } @else if (tierCode === 'BASIC') {
+                <span class="tier__next">MỐC TIẾP THEO</span>
+              }
+            </div>
             <h3 class="tier__name">Bạc</h3>
             <p class="tier__pts">1.000 điểm</p>
             <hr class="tier__line" />
             <p class="tier__perk">Giảm 5% tổng hoá đơn</p>
           </article>
+
           <article class="tier tier--gold">
-            <div class="tier__head"><img src="/images/figma/medal-vang.svg" alt="" width="22" height="22" /><span class="tier__next">MỐC TIẾP THEO</span></div>
+            <div class="tier__head">
+              <img src="/images/figma/medal-vang.svg" alt="" width="22" height="22" />
+              @if (tierCode === 'GOLD') {
+                <span class="badge-here">Bạn đang ở đây</span>
+              } @else if (tierCode === 'SILVER') {
+                <span class="tier__next">MỐC TIẾP THEO</span>
+              }
+            </div>
             <h3 class="tier__name">Vàng</h3>
             <p class="tier__pts">5.000 điểm</p>
             <hr class="tier__line" />
             <p class="tier__perk">Giảm 10% tổng hoá đơn</p>
           </article>
+
           <article class="tier tier--diamond">
-            <div class="tier__head"><img src="/images/figma/gem-kim.svg" alt="" width="22" height="22" /><span class="tier__next">MỐC TIẾP THEO</span></div>
+            <div class="tier__head">
+              <img src="/images/figma/gem-kim.svg" alt="" width="22" height="22" />
+              @if (tierCode === 'DIAMOND') {
+                <span class="badge-here">Bạn đang ở đây</span>
+              } @else if (tierCode === 'GOLD') {
+                <span class="tier__next">MỐC TIẾP THEO</span>
+              }
+            </div>
             <h3 class="tier__name">Kim cương</h3>
             <p class="tier__pts">10.000 điểm</p>
             <hr class="tier__line" />
             <p class="tier__perk">Giảm 15% tổng hoá đơn</p>
           </article>
         </div>
-      </section>
-
-      <!-- Lịch sử giao dịch -->
-      <section class="tx">
-        <div class="tx__head">
-          <h2 class="h-serif">Lịch sử giao dịch</h2>
-          <div class="tools">
-            <button type="button" class="tools__btn" (click)="filterOpen = !filterOpen" [attr.aria-expanded]="filterOpen">
-              <img src="/images/figma/calendar-date.svg" alt="" width="16" height="16" />
-              <span>Lọc theo ngày</span>
-            </button>
-            <button type="button" class="tools__icon" aria-label="Lọc giao dịch" (click)="filterOpen = !filterOpen"><img src="/images/figma/filter.svg" alt="" width="16" height="16" /></button>
-            <span class="tools__icon" aria-hidden="true"><img src="/images/figma/table.svg" alt="" width="16" height="16" /></span>
-          </div>
-        </div>
-
-        @if (filterOpen) {
-          <form class="filter" (submit)="$event.preventDefault(); applyFilter()">
-            <label>Từ ngày <input type="date" name="from" [(ngModel)]="fromDate" /></label>
-            <label>Đến ngày <input type="date" name="to" [(ngModel)]="toDate" /></label>
-            <button type="submit" class="btn-gold btn-gold--sm">Áp dụng</button>
-            <button type="button" class="btn-ghost" (click)="clearFilter()">Xoá lọc</button>
-          </form>
-        }
-
-        <div class="balance">
-          <span>Giao dịch gần đây</span>
-          <div class="balance__vals">
-            <span>Điểm hiện tại: <b>{{ tierPoints.toLocaleString('vi-VN') }}</b></span>
-            <span>Coins hiện tại: <b>{{ coinsBalance.toLocaleString('vi-VN') }}</b></span>
-          </div>
-        </div>
-
-        <div class="grid" role="table" aria-label="Lịch sử giao dịch">
-          <div class="grid__head" role="row">
-            <span class="c-date" role="columnheader">NGÀY</span>
-            <span class="c-type" role="columnheader">LOẠI GIAO DỊCH</span>
-            <span class="c-num" role="columnheader">ĐIỂM</span>
-            <span class="c-num" role="columnheader">COINS</span>
-            <span class="c-note" role="columnheader">GHI CHÚ</span>
-          </div>
-          @for (t of rows; track t.iso + t.title) {
-            <div class="grid__row" role="row">
-              <time class="c-date" role="cell">{{ fmtDate(t.iso) }}</time>
-              <div class="c-type c-type--stack" role="cell"><b>{{ t.title }}</b><small>{{ t.sub }}</small></div>
-              <span class="c-num" role="cell" [class.pos]="t.points" [class.dash]="!t.points">{{ t.points ?? '—' }}</span>
-              <span class="c-num" role="cell" [class.pos]="!t.coinsNegative" [class.neg]="t.coinsNegative">{{ t.coins }}</span>
-              <small class="c-note" role="cell">{{ t.note }}</small>
-            </div>
-          } @empty {
-            <p class="empty">Không có giao dịch trong khoảng này.</p>
-          }
-        </div>
-
-        @if (transactions.length > 0) {
-          <p class="foot">Lịch sử ghi nhận từ các giao dịch hoàn tất tại KÉN.</p>
-        }
       </section>
     </main>
   </div>

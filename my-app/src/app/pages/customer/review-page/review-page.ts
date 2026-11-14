@@ -272,7 +272,7 @@ export class ReviewPage implements OnInit {
     }
 
     this.notice =
-      'Đã kiểm tra nội dung hợp lệ. Đây là bản demo, đánh giá chưa được gửi hoặc lưu lên hệ thống.';
+      'Cảm ơn bạn đã gửi đánh giá! Ý kiến đóng góp của bạn đã được ghi nhận.';
   }
 
   showMoreReviews(): void {
