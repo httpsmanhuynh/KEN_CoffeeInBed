@@ -6,7 +6,15 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "ml:check": "node ken_ml/run.js check",
+    "ml:prep": "node ken_ml/run.js prep",
+    "ml:test": "node ken_ml/run.js test",
+    "ml:trending": "node ken_ml/run.js trending --write",
+    "ml:forecast": "node ken_ml/run.js forecast --write",
+    "ml:cluster": "node ken_ml/run.js cluster --write",
+    "ml:all": "node ken_ml/run.js all --write",
+    "ml:dry": "node ken_ml/run.js all"
   },
   "private": true,
   "packageManager": "npm@11.19.0",

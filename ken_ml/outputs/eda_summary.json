@@ -1,0 +1,137 @@
+{
+  "schema_check": [
+    {
+      "Chỉ tiêu": "Số dòng",
+      "Thực tế": "67375",
+      "Mô tả (A1)": "67375",
+      "Khớp": "có"
+    },
+    {
+      "Chỉ tiêu": "Số cột",
+      "Thực tế": "30",
+      "Mô tả (A1)": "30",
+      "Khớp": "có"
+    },
+    {
+      "Chỉ tiêu": "Ngày đầu",
+      "Thực tế": "2026-04-01",
+      "Mô tả (A1)": "2026-04-01",
+      "Khớp": "có"
+    },
+    {
+      "Chỉ tiêu": "Ngày cuối",
+      "Thực tế": "2026-10-27",
+      "Mô tả (A1)": "2026-10-27",
+      "Khớp": "có"
+    },
+    {
+      "Chỉ tiêu": "Số ngày có bán",
+      "Thực tế": "210",
+      "Mô tả (A1)": "210",
+      "Khớp": "có"
+    },
+    {
+      "Chỉ tiêu": "Số ngày theo lịch",
+      "Thực tế": "210",
+      "Mô tả (A1)": "210",
+      "Khớp": "có"
+    },
+    {
+      "Chỉ tiêu": "Số món F&B",
+      "Thực tế": "31",
+      "Mô tả (A1)": "31",
+      "Khớp": "có"
+    },
+    {
+      "Chỉ tiêu": "Số booking",
+      "Thực tế": "8350",
+      "Mô tả (A1)": "8350",
+      "Khớp": "có"
+    },
+    {
+      "Chỉ tiêu": "Số khách đăng nhập",
+      "Thực tế": "312",
+      "Mô tả (A1)": "312",
+      "Khớp": "có"
+    }
+  ],
+  "empty_day_item_pairs": 7,
+  "walk_in_share": 0.5798589981447124,
+  "inclusion_share": 0.2030278293135436,
+  "water_bottle_inclusion_share": 0.7342941094165384,
+  "peak_hour": 12,
+  "low_hour": 21,
+  "part_share": {
+    "Morning": 0.3499,
+    "Afternoon": 0.3714,
+    "Evening": 0.2787
+  },
+  "weekend_vs_weekday_qty_pct": 0.36620428751576295,
+  "dow_mean_qty": {
+    "T2": 247.7,
+    "T3": 251.0,
+    "T4": 251.9,
+    "T5": 272.6,
+    "T6": 298.5,
+    "T7": 367.2,
+    "CN": 355.1
+  },
+  "qty_per_day_first28": 272.0,
+  "qty_per_day_last28": 304.07142857142856,
+  "dry_months": [
+    4
+  ],
+  "spearman_qty_rev": 0.8532258064516131,
+  "top5_overlap": 4,
+  "max_rank_shift": 15,
+  "drink_qty_share": 0.7030235819824522,
+  "rising": [
+    "CF_PHIN",
+    "SNACK_FRUIT",
+    "SNACK_SANDWICH"
+  ],
+  "falling": [
+    "CAKE_TIRAMISU",
+    "CF_DEN",
+    "CF_SALTED_CARAMEL"
+  ],
+  "max_share_change_pp": 0.800750478805172,
+  "n_customers_rfm": 312,
+  "rfm_skew": {
+    "R": 2.62,
+    "F": 1.33,
+    "M": 1.4
+  },
+  "m_over_f_median": 88095.23809523809,
+  "corr_with_total_qty": {
+    "total_rev": 0.998,
+    "n_orders": 0.974,
+    "n_bookings": 0.762,
+    "is_weekend": 0.694,
+    "day_of_week": 0.682,
+    "avg_guest": 0.524,
+    "walkin_share": 0.458,
+    "avg_hours": -0.314,
+    "drink_share": -0.292,
+    "month": 0.144
+  },
+  "item_corr_mean": 0.22297148533558878,
+  "item_corr_max": 0.4153227720441693,
+  "item_corr_min": 0.03478454306612034,
+  "acf_lag1": 0.2172930524806266,
+  "acf_lag7": 0.6127460824546807,
+  "acf_lag14": 0.5668455931280653,
+  "acf_best_lag": 7,
+  "findings": [
+    "Dữ liệu: 67,375 dòng, 210 ngày liên tục, 31 món; khách vãng lai chiếm 58% số dòng, dòng quyền lợi 20%.",
+    "WATER_BOTTLE: 73% số lượng đến từ dòng quyền lợi, nên phải loại dòng quyền lợi trước khi tính Trending (Bài 1) và khi tính gợi ý theo cụm (Bài 3).",
+    "Giờ cao điểm là 12h, thấp điểm là 21h; sáng 35%, chiều 37%, tối 28% tổng số lượng.",
+    "Cuối tuần cao hơn ngày thường 36.6% về số lượng/ngày → dùng đặc trưng thứ trong tuần và cờ cuối tuần (Bài 2).",
+    "Spearman giữa hạng số lượng và hạng doanh thu là 0.85; Top 5 hai bảng trùng 4/5 món → Trending Score cần kết hợp cả số lượng Q và doanh thu R (Bài 1).",
+    "Cơ cấu món khá ổn định: tỷ trọng mỗi món chỉ đổi tối đa 0.80 điểm % giữa 28 ngày cuối và giai đoạn trước (món lên: ['CF_PHIN', 'SNACK_FRUIT', 'SNACK_SANDWICH'], món xuống: ['CAKE_TIRAMISU', 'CF_DEN', 'CF_SALTED_CARAMEL']) → EDA không chứng minh được nhu cầu Time Decay; đây là lựa chọn thiết kế (h = 14), cần kiểm định bằng Hit Rate@K (Bài 1).",
+    "Tự tương quan lag 7 = 0.61, lag 1 = 0.22 → đưa lag_7 và trung bình trượt 28 ngày (đã shift(1)) vào đặc trưng của Bài 2.",
+    "Số cặp (ngày, món) không có dòng: 7 → reindex đủ ngày × món và fillna(0) trước khi dự báo (Bài 2).",
+    "season = DRY chỉ xuất hiện ở tháng [4]: nếu tập kiểm tra nằm cuối kỳ thì cột này không kiểm chứng được tác động của mùa (Bài 2).",
+    "RFM của 312 khách đăng nhập: độ lệch {'R': 2.62, 'F': 1.33, 'M': 1.4}; trung vị M gấp khoảng 88095 lần trung vị F → bắt buộc StandardScaler trước K-Means (Bài 3)."
+  ]
+}
