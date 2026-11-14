@@ -184,11 +184,12 @@ router.post(
     if (user.status !== 'ACTIVE') return fail(res, 403, 'ACCOUNT_LOCKED', 'Tài khoản đã bị khóa');
 
     if (user.two_factor_enabled) {
+      const contactPhone = user.phone || user.email;
       // SĐT chỉ biết sau khi tra DB nên gọi hit() trực tiếp; dùng chung key với phoneOtpLimiter (BR-A08).
-      if (!phoneOtpLimiter.hit(otpKey(user.phone)))
+      if (!phoneOtpLimiter.hit(otpKey(contactPhone)))
         return fail(res, 429, 'TOO_MANY_REQUESTS', 'Thử lại sau ít phút');
       req.session.pending2FA = { userId: String(user._id) }; // KHÔNG gán session.user ở bước này
-      await issueOtp(db, { userId: user._id, purpose: '2FA_LOGIN', phone: user.phone, email: user.email });
+      await issueOtp(db, { userId: user._id, purpose: '2FA_LOGIN', phone: contactPhone, email: user.email });
       return res.json({ requires2FA: true });
     }
     await startSession(req, user);
@@ -206,8 +207,9 @@ router.post(
     const user = await db.collection('users').findOne({ _id: new ObjectId(pending.userId) });
     if (!user || user.status !== 'ACTIVE')
       return fail(res, 403, 'ACCOUNT_LOCKED', 'Tài khoản đã bị khóa');
+    const contactPhone = user.phone || user.email;
     const { status } = await verifyOtp(db, {
-      phone: user.phone,
+      phone: contactPhone,
       purpose: '2FA_LOGIN',
       code: str(req.body.code),
     });
@@ -218,6 +220,29 @@ router.post(
     if (status !== 'OK') return otpError(res, status);
     await startSession(req, user);
     res.json({ user: publicUser(user, await tierOf(db, user)) });
+  }),
+);
+
+router.post(
+  '/login/2fa/resend',
+  ipLimiter,
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    const pending = req.session.pending2FA;
+    if (!pending) return fail(res, 401, 'UNAUTHENTICATED', 'Chưa đăng nhập bước 1');
+    const user = await db.collection('users').findOne({ _id: new ObjectId(pending.userId) });
+    if (!user || user.status !== 'ACTIVE')
+      return fail(res, 403, 'ACCOUNT_LOCKED', 'Tài khoản đã bị khóa');
+    const contactPhone = user.phone || user.email;
+    if (!phoneOtpLimiter.hit(otpKey(contactPhone)))
+      return fail(res, 429, 'TOO_MANY_REQUESTS', 'Thử lại sau ít phút');
+    await issueOtp(db, {
+      userId: user._id,
+      purpose: '2FA_LOGIN',
+      phone: contactPhone,
+      email: user.email,
+    });
+    res.json({ ok: true, resend: true });
   }),
 );
 

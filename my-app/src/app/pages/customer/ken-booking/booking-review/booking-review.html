@@ -32,11 +32,12 @@
         </div>
         <hr>
         <p class="kf-included"><img class="kf-icon" src="/images/ken-flow/icons/review-coffee.svg" alt=""> Quyền lợi &amp; đồ uống đi kèm (Inclusion)</p>
-        <div class="kf-drink-choice" *ngIf="state.freeWaterCount > 0" style="background: #fdfaf5; border: 1px dashed #dcb685; padding: 10px 14px; border-radius: 10px; margin-bottom: 8px;">
-          <img src="/images/ken-flow/water.png" alt="Nước tinh khiết">
+        <div class="kf-drink-choice" *ngFor="let fixed of state.fixedInclusionsList" style="background: #fdfaf5; border: 1px dashed #dcb685; padding: 10px 14px; border-radius: 10px; margin-bottom: 8px;">
+          <img *ngIf="fixed.label === 'Nước suối'" src="/images/ken-flow/water.png" alt="Nước tinh khiết">
+          <span class="kf-fixed-badge" *ngIf="fixed.label !== 'Nước suối'">✓</span>
           <div>
-            <strong>Nước tinh khiết (chai) × {{ state.freeWaterCount }}</strong>
-            <small style="color: #047857; font-weight: 600;">✓ Tặng miễn phí (Đặt từ 2 giờ trở lên)</small>
+            <strong>{{ fixed.label }} × {{ fixed.quantity }}</strong>
+            <small style="color: #047857; font-weight: 600;">✓ Quyền lợi cố định theo gói</small>
           </div>
           <b style="color: #047857;">0đ</b>
         </div>
@@ -45,7 +46,14 @@
           <div><strong>{{ item.product.name }} × {{ item.quantity }}</strong><small>{{ money(item.product.price) }} / món<span *ngIf="state.entitlement"> · Gói hỗ trợ {{ money(state.entitlement) }}/món</span></small></div>
           <b>{{ money(drinkCharge(item.product.price, item.quantity)) }}</b>
         </div>
-        <p *ngIf="!state.selectedDrinks.length && state.freeWaterCount === 0">Chưa chọn đồ uống.</p>
+        <div class="kf-drink-choice" *ngFor="let pastry of state.selectedPastries">
+          <img [src]="'/images/ken-flow/' + pastry.product.image" [alt]="pastry.product.name">
+          <div><strong>{{ pastry.product.name }} × {{ pastry.quantity }}</strong><small>Bánh ngọt đi kèm · Miễn phí theo gói</small></div>
+          <b style="color: #047857;">0đ</b>
+        </div>
+        <p *ngIf="!state.fixedInclusionsList.length && !state.selectedDrinks.length && !state.selectedPastries.length">
+          {{ state.requiredDrinkCount ? 'Chưa chọn đồ uống.' : 'Gói không bao gồm F&B.' }}
+        </p>
       </section>
 
       <section class="kf-panel kf-contact-panel">
@@ -70,11 +78,39 @@
     <aside class="kf-checkout-aside">
       <div class="kf-panel kf-summary-card">
         <p class="kf-overline">GÓC NHỎ BẠN ĐÃ CHỌN</p><h2>Tóm tắt đặt chỗ</h2>
-        <p>{{ state.space.name }} · {{ state.draft().guests }} khách · {{ state.draft().hours }} giờ</p>
+        <p>{{ state.space.name }} · {{ state.packageName }} · {{ state.draft().guests }} khách · {{ state.draft().hours }} giờ</p>
         <hr>
         <div class="kf-sum-row"><span>Gói dịch vụ</span><strong>{{ money(state.base) }}</strong></div>
-        <div class="kf-sum-row"><span>Phụ phí Inclusion / đồ uống</span><strong>{{ money(state.drinkSurcharge) }}</strong></div>
-        <div class="kf-sum-row"><span>Add-on</span><strong>{{ money(state.extrasTotal) }}</strong></div>
+        <div class="kf-sum-group">
+          <div class="kf-sum-row"><span>Phụ phí Inclusion / đồ uống</span><strong>{{ money(state.drinkSurcharge) }}</strong></div>
+          <div class="kf-sum-sublist">
+            <div class="kf-sum-subitem" *ngFor="let fixed of state.fixedInclusionsList">
+              <span>{{ fixed.label }} × {{ fixed.quantity }}</span>
+              <span>0đ</span>
+            </div>
+            <div class="kf-sum-subitem" *ngFor="let item of state.selectedDrinks">
+              <span>{{ item.product.name }} × {{ item.quantity }}</span>
+              <span>{{ money(drinkCharge(item.product.price, item.quantity)) }}</span>
+            </div>
+            <div class="kf-sum-subitem" *ngFor="let pastry of state.selectedPastries">
+              <span>{{ pastry.product.name }} × {{ pastry.quantity }}</span>
+              <span>0đ</span>
+            </div>
+            <div class="kf-sum-subempty" *ngIf="!state.fixedInclusionsList.length && !state.selectedDrinks.length && !state.selectedPastries.length">
+              {{ state.requiredDrinkCount ? 'Chưa chọn đồ uống' : 'Không bao gồm F&amp;B' }}
+            </div>
+          </div>
+        </div>
+        <div class="kf-sum-group">
+          <div class="kf-sum-row"><span>Add-on</span><strong>{{ money(state.extrasTotal) }}</strong></div>
+          <div class="kf-sum-sublist">
+            <div class="kf-sum-subitem" *ngFor="let extraItem of state.selectedExtrasList">
+              <span>{{ extraItem.extra.title }} × {{ extraItem.quantity }}</span>
+              <span>{{ money(extraItem.extra.price * extraItem.quantity) }}</span>
+            </div>
+            <div class="kf-sum-subempty" *ngIf="!state.selectedExtrasList.length">Chưa chọn Add-on</div>
+          </div>
+        </div>
         <hr>
         <label class="kf-voucher">Mã ưu đãi (không bắt buộc)
           <div><input type="text" [value]="state.draft().voucher" (input)="setContact('voucher',$any($event.target).value)" placeholder="Nhập mã ưu đãi"><button type="button" (click)="checkVoucher()">Áp dụng</button></div>

@@ -1,9 +1,18 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { SmoothScrollService } from '../../../../core/smooth-scroll.service';
 import { KEN_MENU, kenMoney } from '../booking-state';
 import type { KenDrinkCategory, KenProduct } from '../booking-state';
 
 @Component({ selector: 'app-ken-cafe-catalog', standalone: false, templateUrl: './cafe-catalog.html', styleUrl: './cafe-catalog.css' })
 export class KenCafeCatalogPage {
+  private readonly smoothScroll = (() => {
+    try {
+      return inject(SmoothScrollService, { optional: true });
+    } catch {
+      return null;
+    }
+  })();
+
   readonly products = KEN_MENU;
   category: 'all' | KenDrinkCategory = 'all';
   searchText = '';
@@ -32,4 +41,16 @@ export class KenCafeCatalogPage {
   }
   get resultCount(): number { return this.sections.reduce((n, s) => n + this.forSection(s.id).length, 0); }
   image = (p: KenProduct) => '/images/ken-flow/' + p.image;
+
+  scrollToMenu(event?: Event): void {
+    event?.preventDefault();
+    if (this.smoothScroll) {
+      this.smoothScroll.scrollTo('#ken-cafe-menu', { offset: -88, duration: 0.9 });
+      return;
+    }
+    if (typeof document !== 'undefined') {
+      const target = document.getElementById('ken-cafe-menu') || document.getElementById('ken-menu-catalog');
+      target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
 }

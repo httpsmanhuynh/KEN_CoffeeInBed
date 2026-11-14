@@ -17,10 +17,10 @@
   <div class="kf-entitlement-bar">
     <div class="kf-container">
       <span>
-        <strong>{{ state.requiredDrinkCount ? 'Gói bao gồm ' + state.requiredDrinkCount + ' đồ uống · tối đa 50.000đ/món' : 'Gói này không bao gồm đồ uống' }}</strong>
-        <small>{{ state.requiredDrinkCount ? 'Chọn đúng 1 món cho mỗi khách; món trên 50.000đ chỉ phụ thu phần chênh lệch.' : 'Bạn có thể mua đồ uống như dịch vụ thêm.' }}</small>
+        <strong>{{ state.requiredDrinkCount ? 'Gói bao gồm ' + state.requiredDrinkCount + ' đồ uống' + (state.requiredPastryCount ? ' &amp; ' + state.requiredPastryCount + ' bánh ngọt' : '') + ' · tối đa 50.000đ/món nước' : 'Gói này không bao gồm đồ uống' }}</strong>
+        <small>{{ state.packageInclusionSummary }}{{ state.requiredDrinkCount ? ' · Món nước trên 50.000đ chỉ phụ thu phần chênh lệch.' : '' }}</small>
       </span>
-      <strong>{{ state.requiredDrinkCount ? 'Đã chọn: ' + selectedDrinkCount + ' / ' + state.requiredDrinkCount + ' món' : 'Đã chọn thêm: ' + selectedDrinkCount + ' món' }}</strong>
+      <strong>{{ state.requiredDrinkCount ? 'Đã chọn: ' + selectedDrinkCount + ' / ' + state.requiredDrinkCount + ' món nước' + (state.requiredPastryCount ? ' · ' + state.selectedPastryCount + ' / ' + state.requiredPastryCount + ' bánh' : '') : 'Đã chọn thêm: ' + selectedDrinkCount + ' món' }}</strong>
     </div>
   </div>
   <section class="kf-container kf-drink-catalog">
@@ -78,32 +78,60 @@
     </ng-container>
     <p *ngIf="filteredDrinks.length===0" class="kf-note">Không có đồ uống phù hợp với bộ lọc.</p>
 
-    <p class="kf-note"><img class="kf-icon" src="/images/ken-flow/icons/drink-info.svg" alt=""> Món trong gói được hỗ trợ tối đa 50.000đ/món; chỉ tính phần chênh lệch. Add-on sẽ được chọn riêng sau khi xác nhận đồ uống.</p>
+    <ng-container *ngIf="state.requiredPastryCount > 0">
+      <div class="kf-section-title" style="margin-top: 28px">
+        <div><span class="kf-overline">03 /</span><h2>Bánh ngọt đi kèm</h2></div>
+        <p>Chọn tối đa {{ state.requiredPastryCount }} bánh theo gói (0đ · đã bao gồm)</p>
+      </div>
+      <div class="kf-menu-grid">
+        <article *ngFor="let pastry of state.pastries" class="kf-product kf-drink-card" [class.selected]="state.pastryQuantity(pastry.id) > 0">
+          <img [src]="'/images/ken-flow/' + pastry.image" [alt]="pastry.name">
+          <div class="kf-product-copy">
+            <h3>{{ pastry.name }}</h3><p>{{ pastry.description }}</p><small>Giá niêm yết: {{ money(pastry.price) }}</small>
+            <div class="kf-product-bottom">
+              <strong style="color: #047857">+0đ</strong>
+              <div class="kf-quantity">
+                <button type="button" [attr.aria-label]="'Bớt ' + pastry.name" [disabled]="state.pastryQuantity(pastry.id) === 0" (click)="changePastry(pastry.id,-1)">−</button>
+                <span>{{ state.pastryQuantity(pastry.id) }}</span>
+                <button type="button" [attr.aria-label]="'Thêm ' + pastry.name" [disabled]="!canAddPastry" (click)="changePastry(pastry.id,1)">+</button>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </ng-container>
+
+    <p class="kf-note"><img class="kf-icon" src="/images/ken-flow/icons/drink-info.svg" alt=""> Món trong gói được hỗ trợ tối đa 50.000đ/món; chỉ tính phần chênh lệch. Add-on sẽ được chọn riêng sau khi xác nhận.</p>
   </section>
   <section class="kf-drink-summary">
     <div class="kf-container kf-drink-summary-grid">
       <div>
-        <p class="kf-overline">TÓM TẮT ĐỒ UỐNG</p>
+        <p class="kf-overline">TÓM TẮT MÓN TRONG GÓI</p>
         <div class="kf-drink-choice" *ngFor="let item of state.selectedDrinks">
           <img [src]="'/images/ken-flow/' + item.product.image" [alt]="item.product.name">
           <div><strong>{{ item.product.name }} × {{ item.quantity }}</strong><small>{{ money(item.product.price) }} / món<span *ngIf="state.entitlement"> · Gói hỗ trợ {{ money(state.entitlement) }}/món</span></small></div>
           <span>{{ money((item.product.price > state.entitlement ? item.product.price - state.entitlement : 0) * item.quantity) }}</span>
         </div>
-        <p *ngIf="!state.selectedDrinks.length">Chưa chọn đồ uống.</p>
+        <div class="kf-drink-choice" *ngFor="let item of state.selectedPastries">
+          <img [src]="'/images/ken-flow/' + item.product.image" [alt]="item.product.name">
+          <div><strong>{{ item.product.name }} × {{ item.quantity }}</strong><small>Bánh ngọt đi kèm · Miễn phí theo gói</small></div>
+          <span style="color: #047857">0đ</span>
+        </div>
+        <p *ngIf="!state.selectedDrinks.length && !state.selectedPastries.length">Chưa chọn món.</p>
         <div class="kf-drink-cost-box">
           <div class="kf-sum-row kf-included-row" *ngIf="state.requiredDrinkCount"><span>Đồ uống trong gói · {{ state.requiredDrinkCount }} món × {{ money(state.entitlement) }}</span><strong>Đã bao gồm</strong></div>
+          <div class="kf-sum-row kf-included-row" *ngIf="state.requiredPastryCount"><span>Bánh ngọt trong gói · {{ state.requiredPastryCount }} phần</span><strong>Đã bao gồm</strong></div>
           <div class="kf-sum-row"><span>Phụ thu đồ uống</span><strong>+{{ money(state.drinkSurcharge) }}</strong></div>
         </div>
       </div>
       <div class="kf-drink-confirm">
         <p class="kf-ok-box">
           {{ canContinue
-            ? (state.requiredDrinkCount ? '✓ Đã chọn đủ đồ uống theo số khách' : '✓ Có thể xác nhận đồ uống đã chọn')
+            ? (state.requiredDrinkCount ? '✓ Đã chọn đủ đồ uống theo gói' : '✓ Có thể xác nhận đồ uống đã chọn')
             : 'Cần chọn ' + (state.requiredDrinkCount - selectedDrinkCount) + ' món nữa' }}
         </p>
         <button type="button" class="kf-btn kf-btn-gold kf-full" [disabled]="!canContinue" (click)="back()">Xác nhận món nước &amp; quay lại chọn add-on →</button>
         <p class="kf-inline-feedback" role="alert" *ngIf="feedback">{{ feedback }}</p>
-        <small>Sau khi xác nhận, bạn sẽ quay lại bước add-on của {{ state.space.name }}.</small>
       </div>
     </div>
   </section>

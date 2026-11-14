@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { map, switchMap } from 'rxjs';
+import { catchError, forkJoin, map, of, switchMap } from 'rxjs';
 import { AuthService } from '../../../../core/auth.service';
 import { CustomerApiService } from '../../../../core/customer-api.service';
 import { KenBookingState, kenMoney } from '../booking-state';
@@ -16,15 +16,85 @@ const SPACE_CODE_MAP: Record<string, string> = {
   private: 'PS-01',
 };
 
+const PRODUCT_NAME_MAP: Record<string, string> = {
+  coffee: 'Cà phê đen',
+  americano: 'Americano',
+  'bac-xiu': 'Bạc xỉu',
+  'cold-brew': 'Cold Brew truyền thống',
+  oolong: 'Hồng trà Oolong Macchiato',
+  matcha: 'Matcha Latte',
+  water: 'Nước tinh khiết',
+  juice: 'Nước cam',
+  soda: 'Soda trái cây',
+  croissant: 'Croissant bơ',
+  mousse: 'Mousse trà xanh',
+  tiramisu: 'Tiramisu',
+  bread: 'Bánh mì que',
+};
+
+const ADDON_NAME_MAP: Record<string, string> = {
+  'extra-coffee': 'Cà phê đen',
+  'extra-americano': 'Americano',
+  'extra-matcha': 'Matcha Latte',
+  'extra-water': 'Nước tinh khiết',
+  'extra-juice': 'Nước cam',
+  'extra-croissant': 'Croissant bơ',
+  'extra-mousse': 'Mousse trà xanh',
+  'extra-sandwich': 'Sandwich',
+  'extra-fruit': 'Trái cây cắt sẵn',
+  'extra-monitor': 'Thuê màn hình rời 24 inch',
+  'extra-keyboard': 'Bàn phím và chuột rời',
+  'extra-phone': 'Cáp và sạc dự phòng',
+  'extra-stationery': 'Bộ bút và bảng nhỏ',
+  'extra-printer': 'In tài liệu dưới 20 trang A4',
+};
+
+function normName(value: string | undefined | null): string {
+  return (value || '').trim().toLocaleLowerCase('vi-VN');
+}
+
+function tryInjectCustomerApi(): CustomerApiService | null {
+  try {
+    return inject(CustomerApiService, { optional: true });
+  } catch {
+    return null;
+  }
+}
+
 @Component({ selector: 'app-ken-booking-review', standalone: false, templateUrl: './booking-review.html', styleUrl: './booking-review.css' })
 export class KenBookingReviewPage {
-  private readonly api = inject(CustomerApiService, { optional: true });
+  private readonly api = tryInjectCustomerApi();
   feedback = '';
   voucherMessage = '';
   checkingSession = false;
   submitting = false;
   readonly money = kenMoney;
   constructor(public state: KenBookingState, private router: Router, private auth: AuthService) {}
+
+  ngOnInit(): void {
+    const existing = this.auth.user;
+    if (existing) {
+      this.prefillUserContact(existing);
+      return;
+    }
+    this.auth.ensureSession().subscribe({
+      next: user => {
+        if (user) this.prefillUserContact(user);
+      },
+      error: () => {},
+    });
+  }
+
+  private prefillUserContact(user: { fullName?: string; phone?: string; email?: string | null }): void {
+    const draft = this.state.draft();
+    const patch: { fullName?: string; phone?: string; email?: string } = {};
+    if (!draft.fullName?.trim() && user.fullName) patch.fullName = user.fullName;
+    if (!draft.phone?.trim() && user.phone) patch.phone = user.phone;
+    if (!draft.email?.trim() && user.email) patch.email = user.email;
+    if (Object.keys(patch).length > 0) {
+      this.state.set(patch);
+    }
+  }
 
   get canConfirm(): boolean {
     const d = this.state.draft();
@@ -49,17 +119,135 @@ export class KenBookingReviewPage {
   private resolveRealTarget() {
     const d = this.state.draft();
     const startAt = new Date(`${d.date}T${String(d.startHour).padStart(2, '0')}:00:00+07:00`).toISOString();
-    return this.api!.getSpaces({ startAt, hours: String(d.hours), guestCount: String(d.guests) }).pipe(
-      map((spaces) => {
+    const products$ = typeof this.api!.getProducts === 'function'
+      ? this.api!.getProducts().pipe(catchError(() => of([])))
+      : of([]);
+    const addons$ = typeof this.api!.getAddons === 'function'
+      ? this.api!.getAddons().pipe(catchError(() => of([])))
+      : of([]);
+
+    return forkJoin({
+      spaces: this.api!.getSpaces({ startAt, hours: String(d.hours), guestCount: String(d.guests) }),
+      products: products$,
+      addons: addons$,
+    }).pipe(
+      map(({ spaces, products, addons }) => {
         const expectedCode = SPACE_CODE_MAP[d.spaceId];
         const sp = spaces.find((s) => s.space_code === expectedCode) || spaces[0];
         const pkgs: any[] = sp?.packages || [];
         const pkg =
-          pkgs.find((p) => p.duration_hours === d.hours) ||
+          (d.hours === 14
+            ? pkgs.find((p) => p.is_full_day || p.package_type === 'FULL_DAY')
+            : undefined) ||
+          pkgs.find(
+            (p) =>
+              (!p.package_type || p.package_type === 'FIXED') &&
+              p.duration_hours === d.hours,
+          ) ||
           pkgs.find((p) => p.package_type === 'HOURLY') ||
-          pkgs.find((p) => p.is_full_day) ||
           pkgs[0];
-        return { sp, pkg, startAt, d };
+
+        const pkgInclusions: any[] = pkg?.inclusions || [];
+        const drinkInc = pkgInclusions.find((inc) => inc.item_type === 'STANDARD_DRINK');
+        const pastryInc = pkgInclusions.find((inc) => inc.item_type === 'PASTRY');
+
+        const findProduct = (localId: string, expectedCategory: 'DRINK' | 'PASTRY') => {
+          const target = normName(PRODUCT_NAME_MAP[localId]);
+          return products.find(
+            (p: any) =>
+              normName(p.name) === target &&
+              (!p.category || p.category === expectedCategory),
+          ) || products.find((p: any) => normName(p.name) === target);
+        };
+
+        const mappedInclusions: Array<{ packageInclusionId: string; productId: string; quantity: number }> = [];
+        const extraDrinksAsAddons: Array<{ name: string; quantity: number }> = [];
+
+        if (drinkInc?._id) {
+          let remainingDrinkQuota =
+            Number(drinkInc.quantity || 0) * (drinkInc.quantity_basis === 'PER_GUEST' ? d.guests : 1);
+          for (const item of this.state.selectedDrinks) {
+            if (remainingDrinkQuota <= 0) break;
+            const take = Math.min(item.quantity, remainingDrinkQuota);
+            const matchedProd = findProduct(item.product.id, 'DRINK');
+            if (matchedProd?._id && take > 0) {
+              mappedInclusions.push({
+                packageInclusionId: String(drinkInc._id),
+                productId: String(matchedProd._id),
+                quantity: take,
+              });
+              remainingDrinkQuota -= take;
+            }
+          }
+        } else {
+          for (const item of this.state.selectedDrinks) {
+            const targetName = PRODUCT_NAME_MAP[item.product.id] || item.product.name;
+            extraDrinksAsAddons.push({ name: targetName, quantity: item.quantity });
+          }
+        }
+
+        if (pastryInc?._id) {
+          const allowedPastryQuota =
+            Number(pastryInc.quantity || 0) * (pastryInc.quantity_basis === 'PER_GUEST' ? d.guests : 1);
+          let remainingPastry = allowedPastryQuota;
+          for (const item of this.state.selectedPastries) {
+            if (remainingPastry <= 0) break;
+            const take = Math.min(item.quantity, remainingPastry);
+            const matchedProd = findProduct(item.product.id, 'PASTRY');
+            if (matchedProd?._id && take > 0) {
+              mappedInclusions.push({
+                packageInclusionId: String(pastryInc._id),
+                productId: String(matchedProd._id),
+                quantity: take,
+              });
+              remainingPastry -= take;
+            }
+          }
+          if (remainingPastry > 0) {
+            const defaultPastry =
+              findProduct('croissant', 'PASTRY') ||
+              products.find((p: any) => p.category === 'PASTRY');
+            if (defaultPastry?._id) {
+              const existingIdx = mappedInclusions.findIndex(
+                (i) => i.packageInclusionId === String(pastryInc._id) && i.productId === String(defaultPastry._id),
+              );
+              if (existingIdx >= 0) {
+                mappedInclusions[existingIdx].quantity += remainingPastry;
+              } else {
+                mappedInclusions.push({
+                  packageInclusionId: String(pastryInc._id),
+                  productId: String(defaultPastry._id),
+                  quantity: remainingPastry,
+                });
+              }
+            }
+          }
+        }
+
+        const mappedAddons: Array<{ addonId: string; quantity: number }> = [];
+        const addMappedAddon = (addonObj: any, qty: number) => {
+          if (!addonObj?._id || qty < 1) return;
+          const clampedQty = addonObj.unit === 'PER_BOOKING' ? 1 : qty;
+          const existing = mappedAddons.find((a) => a.addonId === String(addonObj._id));
+          if (existing) {
+            existing.quantity = addonObj.unit === 'PER_BOOKING' ? 1 : existing.quantity + clampedQty;
+          } else {
+            mappedAddons.push({ addonId: String(addonObj._id), quantity: clampedQty });
+          }
+        };
+
+        for (const extraItem of this.state.selectedExtrasList) {
+          const targetName = normName(ADDON_NAME_MAP[extraItem.extra.id] || extraItem.extra.title);
+          const matchedAddon = addons.find((a: any) => normName(a.name) === targetName);
+          addMappedAddon(matchedAddon, extraItem.quantity);
+        }
+
+        for (const extraDrink of extraDrinksAsAddons) {
+          const matchedAddon = addons.find((a: any) => normName(a.name) === normName(extraDrink.name));
+          addMappedAddon(matchedAddon, extraDrink.quantity);
+        }
+
+        return { sp, pkg, startAt, d, mappedInclusions, mappedAddons };
       }),
     );
   }
@@ -70,7 +258,7 @@ export class KenBookingReviewPage {
     if (!this.api) { this.voucherMessage = 'Mã khuyến mãi chưa kết nối hệ thống. Bản mô phỏng không áp dụng mã này.'; return; }
     this.voucherMessage = 'Đang kiểm tra mã…';
     this.resolveRealTarget().pipe(
-      switchMap(({ sp, pkg, startAt, d }) => {
+      switchMap(({ sp, pkg, startAt, d, mappedInclusions, mappedAddons }) => {
         if (!sp?._id || !pkg?._id) throw { error: { message: 'Không tìm thấy gói phù hợp trong hệ thống.' } };
         return this.api!.quoteBooking({
           spaceId: String(sp._id),
@@ -78,6 +266,8 @@ export class KenBookingReviewPage {
           startAt,
           hours: d.hours,
           guestCount: d.guests,
+          inclusions: mappedInclusions,
+          addons: mappedAddons,
           voucherCode: code,
         });
       }),
@@ -92,17 +282,18 @@ export class KenBookingReviewPage {
   }
   confirm(): void {
     if (this.checkingSession || this.submitting) return;
-    const draft = this.state.draft();
-    if (!draft.fullName?.trim() || !draft.phone?.trim() || !draft.email?.trim() || !draft.agreed) {
-      this.feedback = 'Vui lòng điền đầy đủ Họ và tên, Số điện thoại, Email và đồng ý với điều khoản trước khi xác nhận.';
-      return;
-    }
     this.checkingSession = true;
     this.auth.ensureSession().subscribe({
       next: user => {
         this.checkingSession = false;
         if (!user) {
           this.router.navigate(['/login'], { queryParams: { returnUrl: '/booking/review' } });
+          return;
+        }
+        this.prefillUserContact(user);
+        const draft = this.state.draft();
+        if (!draft.fullName?.trim() || !draft.phone?.trim() || !draft.email?.trim() || !draft.agreed) {
+          this.feedback = 'Vui lòng điền đầy đủ Họ và tên, Số điện thoại, Email và đồng ý với điều khoản trước khi xác nhận.';
           return;
         }
         this.confirmAuthenticated();
@@ -140,7 +331,7 @@ export class KenBookingReviewPage {
       if (this.submitting) return;
       this.submitting = true;
       this.resolveRealTarget().pipe(
-        switchMap(({ sp, pkg, startAt }) => {
+        switchMap(({ sp, pkg, startAt, mappedInclusions, mappedAddons }) => {
           if (!sp?._id || !pkg?._id) throw { error: { message: 'Không tìm thấy không gian hoặc gói phù hợp trên server.' } };
           return this.api!.createBooking({
             spaceId: String(sp._id),
@@ -148,6 +339,8 @@ export class KenBookingReviewPage {
             startAt,
             hours: d.hours,
             guestCount: d.guests,
+            inclusions: mappedInclusions,
+            addons: mappedAddons,
             voucherCode: d.voucher.trim() || undefined,
           });
         }),

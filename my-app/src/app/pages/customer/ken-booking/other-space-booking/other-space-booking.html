@@ -40,15 +40,15 @@
             (change)="changeDate($any($event.target).value)"
         /></label>
         <label
-          >Giờ bắt đầu<select [value]="startHour" (change)="changeHour(+$any($event.target).value)">
-            <option *ngFor="let hour of timeOptions" [value]="hour">
+          >Giờ bắt đầu<select [ngModel]="startHour" (ngModelChange)="changeHour(+$event)">
+            <option *ngFor="let hour of timeOptions" [ngValue]="hour">
               {{ ('0' + hour).slice(-2) }}:00
             </option>
           </select></label
         >
         <label *ngIf="item.maxGuests > item.minGuests"
-          >Số khách<select [value]="guests" (change)="changeGuests(+$any($event.target).value)">
-            <option *ngFor="let count of guestOptions" [value]="count">{{ count }} khách</option>
+          >Số khách<select [ngModel]="guests" (ngModelChange)="changeGuests(+$event)">
+            <option *ngFor="let count of guestOptions" [ngValue]="count">{{ count }} khách</option>
           </select></label
         >
         <div class="kf-date-summary">
@@ -94,21 +94,17 @@
             >
           </div>
           <small
-            >{{
-              item.id === 'work' && rate.hours === 1
-                ? 'Tự chọn từ 2 giờ · Tặng 1 chai nước suối/khách'
-                : rate.hours + ' giờ'
-            }}
-            · {{ item.perPerson ? 'Tính theo khách' : 'Giá trọn không gian' }} ·
+            >{{ packageSummaryFor(rate.hours) }} ·
+            {{ item.perPerson ? 'Tính theo khách' : 'Giá trọn không gian' }} ·
             {{ guests }} khách</small
           >
         </button>
       </div>
       <div class="kf-date-controls" *ngIf="isHourlyWork" style="margin-top: 12px">
         <label
-          >Số giờ sử dụng (từ 2 giờ trở lên)
-          <select [(ngModel)]="duration" (ngModelChange)="chooseDuration(+$event)">
-            <option *ngFor="let h of hourlyDurationOptions" [value]="h">
+          >Số giờ sử dụng (đơn vị 1 giờ)
+          <select [ngModel]="duration" (ngModelChange)="chooseDuration(+$event)">
+            <option *ngFor="let h of hourlyDurationOptions" [ngValue]="h">
               {{ h }} giờ ({{ ('0' + startHour).slice(-2) }}:00–{{
                 ('0' + (startHour + h)).slice(-2)
               }}:00)
@@ -116,6 +112,13 @@
           </select>
         </label>
       </div>
+      <p *ngIf="isHourlyWork" style="margin: 8px 0 0; font-size: 13px">
+        {{
+          duration >= 2
+            ? 'Đã đủ điều kiện tặng ' + guests + ' chai nước suối miễn phí.'
+            : 'Đặt từ 2 giờ trở lên để được tặng 1 chai nước suối/khách.'
+        }}
+      </p>
       <p class="kf-inline-feedback" *ngIf="feedback && !showAddons" role="alert">{{ feedback }}</p>
 
       <ng-container *ngIf="showAddons">
@@ -125,41 +128,51 @@
         </div>
         <section
           class="kf-drink-entry"
-          *ngIf="state.freeWaterCount > 0"
+          *ngIf="state.fixedInclusionsList.length"
           style="margin-bottom: 14px; border: 1.5px solid #dcb685; background: #fffcf7"
         >
-          <div>
-            <strong style="color: #047857">✓ Quyền lợi Inclusion</strong>
-            <p style="margin: 4px 0 0; color: #4a3a2c">
-              Gói đặt từ 2 giờ: Tự động tặng
-              <strong>{{ state.freeWaterCount }} chai nước tinh khiết</strong> (01 chai / khách).
-            </p>
+          <div style="width: 100%">
+            <strong style="color: #047857">✓ Quyền lợi Inclusion cố định theo gói</strong>
+            <p style="margin: 4px 0 0; color: #4a3a2c">{{ state.packageInclusionSummary }}</p>
             <div class="kf-drink-entry-list" style="margin-top: 8px">
-              <article class="kf-drink-entry-item">
-                <img src="/images/ken-flow/water.png" alt="Nước tinh khiết" />
+              <article class="kf-drink-entry-item" *ngFor="let fixed of state.fixedInclusionsList">
+                <img
+                  *ngIf="fixed.label === 'Nước suối'"
+                  src="/images/ken-flow/water.png"
+                  alt="Nước suối"
+                />
+                <span class="kf-fixed-badge" *ngIf="fixed.label !== 'Nước suối'">✓</span>
                 <span
-                  ><strong>Nước tinh khiết (chai)</strong
-                  ><small
-                    >{{ state.freeWaterCount }} chai · Miễn phí cứng theo gói ≥ 2h</small
-                  ></span
+                  ><strong>{{ fixed.label }}</strong
+                  ><small>Số lượng: {{ fixed.quantity }} · Miễn phí theo gói</small></span
                 >
                 <b style="color: #047857">0đ</b>
               </article>
             </div>
           </div>
         </section>
-        <section class="kf-drink-entry" *ngIf="!isHourlyWork">
+
+        <section
+          class="kf-drink-entry"
+          *ngIf="state.requiredDrinkCount > 0 || state.requiredPastryCount > 0"
+        >
           <div>
-            <strong>Đồ uống đi kèm</strong>
-            <p *ngIf="state.requiredDrinkCount; else optionalDrinkPrompt">
-              Chọn {{ state.requiredDrinkCount }} món nước theo số khách ({{ guests }} khách).
+            <strong>{{
+              state.requiredPastryCount > 0
+                ? 'Đồ uống &amp; bánh ngọt đi kèm'
+                : 'Đồ uống đi kèm'
+            }}</strong>
+            <p>
+              {{ state.packageInclusionSummary }} ({{ guests }} khách · chọn
+              {{ state.requiredDrinkCount }} món nước{{
+                state.requiredPastryCount > 0
+                  ? ' &amp; ' + state.requiredPastryCount + ' bánh ngọt'
+                  : ''
+              }}).
             </p>
-            <ng-template #optionalDrinkPrompt
-              ><p>Gói này không kèm đồ uống; bạn có thể chọn thêm nếu muốn.</p></ng-template
-            >
             <div
               class="kf-drink-entry-list"
-              *ngIf="state.selectedDrinks.length; else noSelectedDrinks"
+              *ngIf="state.selectedDrinks.length || state.selectedPastries.length; else noSelectedDrinks"
             >
               <article class="kf-drink-entry-item" *ngFor="let drink of state.selectedDrinks">
                 <img [src]="'/images/ken-flow/' + drink.product.image" [alt]="drink.product.name" />
@@ -178,13 +191,44 @@
                   )
                 }}</b>
               </article>
+              <article class="kf-drink-entry-item" *ngFor="let pastry of state.selectedPastries">
+                <img [src]="'/images/ken-flow/' + pastry.product.image" [alt]="pastry.product.name" />
+                <span
+                  ><strong>{{ pastry.product.name }}</strong
+                  ><small>{{ pastry.quantity }} bánh · Miễn phí theo gói</small></span
+                >
+                <b style="color: #047857">0đ</b>
+              </article>
             </div>
-            <ng-template #noSelectedDrinks><small>Chưa chọn món nước.</small></ng-template>
+            <ng-template #noSelectedDrinks
+              ><small>Chưa chọn món trong gói.</small></ng-template
+            >
           </div>
           <button type="button" class="kf-btn kf-btn-light" (click)="openDrinkPicker()">
-            {{ state.selectedDrinkCount ? 'Xem / đổi món nước' : 'Chọn món nước' }}
+            {{
+              state.selectedDrinkCount || state.selectedPastryCount
+                ? 'Xem / đổi món trong gói'
+                : 'Chọn món trong gói'
+            }}
             <span aria-hidden="true">→</span>
           </button>
+        </section>
+
+        <section
+          class="kf-drink-entry"
+          *ngIf="
+            !state.fixedInclusionsList.length &&
+            state.requiredDrinkCount === 0 &&
+            state.requiredPastryCount === 0
+          "
+        >
+          <div>
+            <strong>Quyền lợi Inclusion</strong>
+            <p>
+              Gói {{ state.packageName }} không bao gồm F&amp;B miễn phí. Bạn có thể chọn thêm
+              đồ uống, bánh hoặc tiện ích ở danh sách Add-on bên dưới.
+            </p>
+          </div>
         </section>
 
         <div class="kf-tabs">
@@ -236,7 +280,7 @@
                 type="button"
                 aria-label="Tăng số lượng"
                 (click)="changeExtra(extra.id, 1)"
-                [disabled]="extrasCount(extra.id) >= 9"
+                [disabled]="extrasCount(extra.id) >= state.maxExtraCount(extra.id)"
               >
                 +
               </button>
@@ -260,23 +304,62 @@
           ><strong>{{ money(state.base) }}</strong>
         </div>
         <ng-container *ngIf="showAddons">
-          <div class="kf-sum-row">
-            <span>Phụ phí Inclusion / đồ uống</span
-            ><strong>{{ money(state.drinkSurcharge) }}</strong>
+          <div class="kf-sum-group">
+            <div class="kf-sum-row">
+              <span>Phụ phí Inclusion / đồ uống</span>
+              <strong>{{ money(state.drinkSurcharge) }}</strong>
+            </div>
+            <div class="kf-sum-sublist">
+              <div class="kf-sum-subitem" *ngFor="let fixed of state.fixedInclusionsList">
+                <span>{{ fixed.label }} × {{ fixed.quantity }}</span>
+                <span>0đ</span>
+              </div>
+              <div class="kf-sum-subitem" *ngFor="let drink of state.selectedDrinks">
+                <span>{{ drink.product.name }} × {{ drink.quantity }}</span>
+                <span>{{
+                  money(
+                    drink.quantity *
+                      (drink.product.price > state.entitlement
+                        ? drink.product.price - state.entitlement
+                        : 0)
+                  )
+                }}</span>
+              </div>
+              <div class="kf-sum-subitem" *ngFor="let pastry of state.selectedPastries">
+                <span>{{ pastry.product.name }} × {{ pastry.quantity }}</span>
+                <span>0đ</span>
+              </div>
+              <div
+                class="kf-sum-subempty"
+                *ngIf="
+                  !state.fixedInclusionsList.length &&
+                  !state.selectedDrinks.length &&
+                  !state.selectedPastries.length
+                "
+              >
+                {{
+                  state.requiredDrinkCount > 0
+                    ? 'Chưa chọn món trong gói (' + state.requiredDrinkCount + ' đồ uống)'
+                    : 'Không bao gồm F&amp;B'
+                }}
+              </div>
+            </div>
           </div>
-          <div class="kf-sum-row" *ngFor="let drink of state.selectedDrinks">
-            <span>{{ drink.product.name }} × {{ drink.quantity }}</span
-            ><strong>{{
-              money(
-                drink.quantity *
-                  (drink.product.price > state.entitlement
-                    ? drink.product.price - state.entitlement
-                    : 0)
-              )
-            }}</strong>
-          </div>
-          <div class="kf-sum-row">
-            <span>Add-on</span><strong>{{ money(state.extrasTotal) }}</strong>
+
+          <div class="kf-sum-group">
+            <div class="kf-sum-row">
+              <span>Add-on</span>
+              <strong>{{ money(state.extrasTotal) }}</strong>
+            </div>
+            <div class="kf-sum-sublist">
+              <div class="kf-sum-subitem" *ngFor="let extraItem of state.selectedExtrasList">
+                <span>{{ extraItem.extra.title }} × {{ extraItem.quantity }}</span>
+                <span>{{ money(extraItem.extra.price * extraItem.quantity) }}</span>
+              </div>
+              <div class="kf-sum-subempty" *ngIf="!state.selectedExtrasList.length">
+                Chưa chọn Add-on
+              </div>
+            </div>
           </div>
           <hr />
           <div class="kf-sum-row">

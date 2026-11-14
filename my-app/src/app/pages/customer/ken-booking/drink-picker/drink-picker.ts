@@ -35,6 +35,9 @@ export class KenDrinkPickerPage {
   get canAddDrink(): boolean {
     return this.selectedDrinkCount < (this.state.requiredDrinkCount || 9);
   }
+  get canAddPastry(): boolean {
+    return this.state.selectedPastryCount < this.state.requiredPastryCount;
+  }
   select(id: string): void {
     if (this.state.drinkQuantity(id) === 0 &&
         !this.canAddDrink) return;
@@ -44,6 +47,11 @@ export class KenDrinkPickerPage {
   changeDrink(id: string, delta: number): void {
     if (delta > 0 && !this.canAddDrink) return;
     this.state.setDrinkQuantity(id, this.state.drinkQuantity(id) + delta);
+    this.feedback = '';
+  }
+  changePastry(id: string, delta: number): void {
+    if (delta > 0 && !this.canAddPastry) return;
+    this.state.setPastryQuantity(id, this.state.pastryQuantity(id) + delta);
     this.feedback = '';
   }
   back(): void {

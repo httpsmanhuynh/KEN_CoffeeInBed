@@ -7,12 +7,6 @@
         <div>
           <h1>Một góc vừa đủ,<br>cho nhịp riêng của bạn.</h1>
         </div>
-
-        <div class="ks-hero-side">
-          <a class="ks-primary-button" href="#spaces-overview">
-            Khám phá các không gian ↓
-          </a>
-        </div>
       </div>
 
       <figure class="ks-hero-visual">
@@ -23,23 +17,38 @@
       </figure>
 
       <div class="ks-zones" aria-label="Ba khu không gian KÉN">
-        <a href="#space-connect" class="ks-zone">
+        <button
+          type="button"
+          class="ks-zone"
+          [class.is-active]="activeZone === 'connect'"
+          (click)="selectZone('connect', $event)"
+        >
           <span class="ks-zone-number">01 / <span>↘</span></span>
           <h2>KÉN Kết Nối</h2>
           <p>Café mở · Ghé trực tiếp</p>
-        </a>
+        </button>
 
-        <a href="#space-cowork" class="ks-zone">
+        <button
+          type="button"
+          class="ks-zone"
+          [class.is-active]="activeZone === 'focus'"
+          (click)="selectZone('focus', $event)"
+        >
           <span class="ks-zone-number">02 / <span>↘</span></span>
           <h2>KÉN Tập Trung</h2>
           <p>Học tập · Làm việc · Họp nhóm</p>
-        </a>
+        </button>
 
-        <a href="#space-single" class="ks-zone">
+        <button
+          type="button"
+          class="ks-zone"
+          [class.is-active]="activeZone === 'rest'"
+          (click)="selectZone('rest', $event)"
+        >
           <span class="ks-zone-number">03 / <span>↘</span></span>
           <h2>KÉN Tái Tạo</h2>
           <p>Nghỉ ngơi · Không gian riêng</p>
-        </a>
+        </button>
       </div>
     </div>
   </section>
@@ -48,12 +57,28 @@
     <div class="ks-container">
       <header class="ks-section-heading">
         <h2>Chọn không gian phù hợp</h2>
+        <div class="ks-zone-filters" role="tablist" aria-label="Lọc theo phân khu không gian">
+          <button
+            type="button"
+            class="ks-zone-pill"
+            *ngFor="let f of zoneFilters"
+            [class.is-active]="activeZone === f.id"
+            (click)="setZoneFilter(f.id)"
+          >
+            {{ f.label }}
+          </button>
+        </div>
       </header>
 
-      <div class="ks-card-grid">
+      <div
+        class="ks-card-grid"
+        [class.is-filtered]="activeZone !== 'all'"
+        [class.is-single]="filteredSpaces.length === 1"
+        [class.is-two-cols]="filteredSpaces.length === 4"
+      >
         <article
           class="ks-space-card"
-          *ngFor="let space of spaces; trackBy: trackBySpace"
+          *ngFor="let space of filteredSpaces; trackBy: trackBySpace"
           [id]="'space-' + space.id"
         >
           <img class="ks-card-photo" [src]="space.image" [alt]="space.title">

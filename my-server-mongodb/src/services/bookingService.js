@@ -290,13 +290,42 @@ async function searchAvailableSpaces(
       const pkg = pkgMap.get(String(pr.package_id));
       if (!pkg || (maxP !== null && Number(pr.price) > maxP)) continue;
 
-      const tw = resolveTimeWindow({
-        space: sp,
-        pkg,
-        startAt: start,
-        endAt,
-        hours: pkg.package_type === 'HOURLY' ? hours || pkg.min_hours : undefined,
-      });
+      const hourlyDuration =
+        hours !== null && hours !== undefined ? Number(hours) : Number(pkg.min_hours || 1);
+      let tw;
+      try {
+        tw = resolveTimeWindow({
+          space: sp,
+          pkg,
+          startAt: start,
+          endAt,
+          hours: pkg.package_type === 'HOURLY' ? hourlyDuration : undefined,
+        });
+      } catch (err) {
+        if (err instanceof BookingError) {
+          compatiblePackages.push({
+            ...pkg,
+            base_price: pr.price,
+            package_price: calcBasePackagePrice(
+              pkg,
+              pr.price,
+              guests,
+              Number(pkg.duration_hours || pkg.min_hours || 1),
+            ),
+            inclusions: incByPkg.get(String(pkg._id)) || [],
+            isAvailable: false,
+            availabilityReason: err.code,
+            remainingCapacity: 0,
+            startAt: start,
+            endAt: null,
+            blockedUntil: null,
+            durationHours: pkg.duration_hours ?? null,
+          });
+          continue;
+        }
+        throw err;
+      }
+
       const pkgAvail = await evaluateSpaceAvailability(db, {
         space: sp,
         startAt: tw.startAt,
@@ -320,7 +349,10 @@ async function searchAvailableSpaces(
       });
     }
 
-    const defaultEnd = endAt ? new Date(endAt) : new Date(start.getTime() + HOUR_MS);
+    const { closeAt } = getOperatingBoundsUTC(sp, start);
+    const defaultEnd = endAt
+      ? new Date(endAt)
+      : new Date(Math.min(start.getTime() + HOUR_MS, closeAt.getTime()));
     const spaceAvail = await evaluateSpaceAvailability(db, {
       space: sp,
       startAt: start,
@@ -329,12 +361,14 @@ async function searchAvailableSpaces(
       now,
     });
     const isAvailable = compatiblePackages.some((p) => p.isAvailable);
+    const pkgFallbackReason =
+      compatiblePackages.find((p) => p.availabilityReason)?.availabilityReason || 'OVERLAP';
 
     results.push({
       ...sp,
       zone,
       isAvailable,
-      availabilityReason: isAvailable ? null : spaceAvail.reason || 'OVERLAP',
+      availabilityReason: isAvailable ? null : spaceAvail.reason || pkgFallbackReason,
       remainingCapacity: spaceAvail.remainingCapacity,
       packages: compatiblePackages,
     });
@@ -885,12 +919,7 @@ async function payBooking(db, { bookingId, user, result = 'SUCCESS', now = new D
       completed_at: now,
     };
     await db.collection('payment_transactions').insertOne(failedTxn);
-    await db.collection('bookings').updateOne(
-      { _id: bOid },
-      { $set: { status: 'CANCELLED', updated_at: now } }
-    );
-    const updatedBooking = await db.collection('bookings').findOne({ _id: bOid });
-    return { booking: updatedBooking || { ...booking, status: 'CANCELLED' }, transaction: failedTxn };
+    return { booking, transaction: failedTxn };
   }
 
   return runInTransaction(db, `booking:${String(bOid)}`, async (session) => {

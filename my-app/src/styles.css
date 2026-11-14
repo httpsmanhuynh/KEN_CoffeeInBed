@@ -139,3 +139,156 @@ button, input, select { font: inherit; }
   margin-right: 0;
   margin-left: 8px;
 }
+
+/* ==========================================================================
+   LENIS SMOOTH SCROLL + GSAP + REACT BITS INSPIRED POLISH
+   ========================================================================== */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}
+
+.lenis [data-lenis-prevent],
+.lenis [data-lenis-prevent-wheel],
+.lenis [data-lenis-prevent-touch] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+/* Top golden reading/scroll progress bar */
+.ken-scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 9999;
+  pointer-events: none;
+  transform-origin: 0% 50%;
+  transform: scaleX(var(--ken-scroll-progress, 0));
+  background: linear-gradient(90deg, #A9763F 0%, #E3A52F 55%, #F3C462 100%);
+  will-change: transform;
+}
+
+/* Sticky glassmorphism header transition */
+app-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+app-header .hd {
+  transition: background-color 0.28s ease, box-shadow 0.28s ease, backdrop-filter 0.28s ease;
+}
+
+app-header .hd.is-scrolled {
+  background: rgba(247, 239, 226, 0.86);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 10px 30px rgba(74, 49, 35, 0.08);
+}
+
+/* React Bits-inspired spotlight hover glow */
+[data-ken-spotlight] {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.32s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.28s ease;
+}
+
+[data-ken-spotlight]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.32s ease;
+  background: radial-gradient(
+    420px circle at var(--spot-x, 50%) var(--spot-y, 50%),
+    rgba(227, 165, 47, 0.14),
+    transparent 62%
+  );
+  z-index: 1;
+}
+
+[data-ken-spotlight]:hover::after {
+  opacity: 1;
+}
+
+[data-ken-spotlight]:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 34px rgba(74, 49, 35, 0.1);
+}
+
+/* Smooth image hover zoom on cards */
+.kh-mascot-card img,
+.ks-card-photo,
+.kf-listing-card-image img,
+.kf-product img,
+.about-space-image img,
+.journeys-card-image img,
+.kh-gallery-mosaic img {
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.kh-mascot-card:hover img,
+.ks-space-card:hover .ks-card-photo,
+.kf-listing-card:hover .kf-listing-card-image img,
+.kf-product:hover img,
+.about-space-card:hover .about-space-image img,
+.journeys-card:hover .journeys-card-image img,
+.kh-gallery-mosaic img:hover {
+  transform: scale(1.045);
+}
+
+/* Refined button micro-interactions */
+.kh-btn,
+.ks-primary-button,
+.ks-outline-button,
+.kf-btn,
+.ken-button,
+.about-btn,
+.about-space-button,
+.journeys-primary-button,
+.journeys-secondary-button,
+.hbtn {
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s ease, background-color 0.22s ease, border-color 0.22s ease, filter 0.22s ease;
+}
+
+.kh-btn:active:not(:disabled),
+.ks-primary-button:active,
+.ks-outline-button:active,
+.kf-btn:active:not(:disabled),
+.ken-button:active:not(:disabled),
+.about-btn:active,
+.journeys-primary-button:active,
+.hbtn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ken-scroll-progress {
+    display: none;
+  }
+
+  [data-ken-spotlight],
+  [data-ken-spotlight]::after,
+  .kh-mascot-card img,
+  .ks-card-photo,
+  .kf-listing-card-image img,
+  .kf-product img,
+  .about-space-image img,
+  .journeys-card-image img,
+  .kh-gallery-mosaic img {
+    transition: none !important;
+    transform: none !important;
+  }
+}

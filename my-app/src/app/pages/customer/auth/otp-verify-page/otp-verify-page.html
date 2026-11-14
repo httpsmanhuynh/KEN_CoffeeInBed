@@ -1,16 +1,22 @@
 <section class="otpv">
   <div class="otpv__card" role="main">
-    <button type="button" class="back" (click)="backToRegister()">
+    <button type="button" class="back" (click)="goBack()">
       <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M13 8H3m0 0 4-4M3 8l4 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Quay lại đăng ký
+      {{ isLogin2FA ? 'Quay lại đăng nhập' : 'Quay lại đăng ký' }}
     </button>
 
     <header class="otpv__head">
-      <span class="eyebrow">Hoàn tất đăng ký</span>
+      <span class="eyebrow">{{ isLogin2FA ? 'Xác thực hai bước' : 'Hoàn tất đăng ký' }}</span>
       <h1>Xác thực mã OTP</h1>
-      <p>Nhập mã 6 chữ số được gửi qua Email cho tài khoản</p>
+      <p>
+        {{ isLogin2FA
+          ? 'Nhập mã 6 chữ số để hoàn tất đăng nhập cho tài khoản'
+          : 'Nhập mã 6 chữ số được gửi qua Email cho tài khoản' }}
+      </p>
       <strong class="phone">{{ masked }}</strong>
-      <button type="button" class="link" (click)="backToRegister()">Thay đổi thông tin đăng ký</button>
+      <button type="button" class="link" (click)="goBack()">
+        {{ isLogin2FA ? 'Đổi tài khoản đăng nhập' : 'Thay đổi thông tin đăng ký' }}
+      </button>
     </header>
 
     <form class="otpv__form" (ngSubmit)="verify()">
@@ -25,9 +31,13 @@
       <div class="actions">
         <button type="submit" class="btn" [disabled]="!canSubmit">
           @if (loading) { <span class="spinner" aria-hidden="true"></span> Đang xác thực… }
-          @else { Xác thực &amp; Tạo tài khoản }
+          @else { {{ isLogin2FA ? 'Xác thực & Đăng nhập' : 'Xác thực & Tạo tài khoản' }} }
         </button>
-        <p class="note">Tài khoản chỉ được tạo sau khi xác thực OTP thành công qua email.</p>
+        <p class="note">
+          {{ isLogin2FA
+            ? 'Phiên đăng nhập sẽ được kích hoạt ngay sau khi xác thực OTP thành công.'
+            : 'Tài khoản chỉ được tạo sau khi xác thực OTP thành công qua email.' }}
+        </p>
       </div>
     </form>
 
@@ -41,7 +51,7 @@
     </div>
 
     <p class="legal">
-      Bằng cách đăng ký, bạn đồng ý với Điều khoản &amp; Điều kiện
+      {{ isLogin2FA ? 'Bằng cách đăng nhập' : 'Bằng cách đăng ký' }}, bạn đồng ý với Điều khoản &amp; Điều kiện
       của chúng tôi và bạn đã đọc Chính Sách Quyền Riêng Tư của chúng tôi.
     </p>
   </div>

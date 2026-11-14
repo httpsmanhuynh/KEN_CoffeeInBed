@@ -36,7 +36,18 @@ export class BookingList implements OnInit {
   readonly statusLabel = STATUS_LABEL;
 
   searchCode = '';
-  detailBooking: (ApiBooking & { spaceName?: string; package_name?: string; contact_name?: string; contact_phone?: string; contact_email?: string; transactions?: any[]; inclusions?: any[]; addons?: any[]; inclusions_snapshot?: any[] }) | null = null;
+  detailBooking: (ApiBooking & {
+    spaceName?: string;
+    package_name?: string;
+    contact_name?: string;
+    contact_phone?: string;
+    contact_email?: string;
+    transactions?: any[];
+    inclusions?: any[];
+    addons?: any[];
+    inclusions_snapshot?: any[];
+    fixed_inclusions_snapshot?: any[];
+  }) | null = null;
   loadingDetail = false;
   detailError = '';
 

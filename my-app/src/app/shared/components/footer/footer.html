@@ -15,21 +15,20 @@
       </section>
     </section>
 
-    <section class="ft__middle">
-      <nav class="ft__col" aria-label="Về KÉN">
-        <h2>Về KÉN</h2>
-        <ul>@for (l of about; track l.path) { <li><a [routerLink]="l.path">{{ l.label }}</a></li> }</ul>
-      </nav>
-      <section class="ft__col ft__social" aria-label="Theo dõi chúng tôi">
-        <h2>Theo dõi chúng tôi</h2>
-        <ul>
-          <li><img src="/images/facebook.png" alt="" /><span>Facebook</span></li>
-          <li><img src="/images/instagram.png" alt="" /><span>Instagram</span></li>
-          <li><img src="/images/tiktok.png" alt="" /><span>Tiktok</span></li>
-          <li><img src="/images/youtube.png" alt="" /><span>Youtube</span></li>
-          <li><img src="/images/telegram.png" alt="" /><span>Telegram</span></li>
-        </ul>
-      </section>
+    <nav class="ft__col" aria-label="Về KÉN">
+      <h2>Về KÉN</h2>
+      <ul>@for (l of about; track l.path) { <li><a [routerLink]="l.path">{{ l.label }}</a></li> }</ul>
+    </nav>
+
+    <section class="ft__col ft__social" aria-label="Theo dõi chúng tôi">
+      <h2>Theo dõi chúng tôi</h2>
+      <ul>
+        <li><img src="/images/facebook.png" alt="" /><span>Facebook</span></li>
+        <li><img src="/images/instagram.png" alt="" /><span>Instagram</span></li>
+        <li><img src="/images/tiktok.png" alt="" /><span>Tiktok</span></li>
+        <li><img src="/images/youtube.png" alt="" /><span>Youtube</span></li>
+        <li><img src="/images/telegram.png" alt="" /><span>Telegram</span></li>
+      </ul>
     </section>
 
     <section class="ft__right">
@@ -46,7 +45,7 @@
           </li>
           <li>
             <img src="/images/envelope.png" alt="" class="contact-icon">
-            <span>Email: helloken.vn</span> <!-- TODO: Figma ghi "helloken.vn" (thiếu @) – xác nhận email thật -->
+            <span>Email: helloken.vn</span>
           </li>
           <li>
             <img src="/images/geo-alt.png" alt="" class="contact-icon">

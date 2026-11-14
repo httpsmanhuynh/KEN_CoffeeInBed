@@ -179,6 +179,20 @@ router.get(
       .sort({ created_at: -1 })
       .toArray();
     const enriched = await attachReviewsToBookings(db, bookings);
+    const bookingIds = enriched.map((b) => b._id);
+    const failedTxns = bookingIds.length
+      ? await db
+          .collection('payment_transactions')
+          .find({ booking_id: { $in: bookingIds }, txn_type: 'PAYMENT', status: 'FAILED' })
+          .project({ booking_id: 1 })
+          .toArray()
+      : [];
+    const failedIdSet = new Set(failedTxns.map((t) => String(t.booking_id)));
+    for (const b of enriched) {
+      if (b.status === 'PENDING_PAYMENT' && failedIdSet.has(String(b._id))) {
+        b.has_failed_payment = true;
+      }
+    }
     res.json(enriched);
   }),
 );
@@ -205,6 +219,20 @@ router.get(
       .sort({ created_at: -1 })
       .toArray();
     const enriched = await attachReviewsToBookings(db, bookings);
+    const bookingIds = enriched.map((b) => b._id);
+    const failedTxns = bookingIds.length
+      ? await db
+          .collection('payment_transactions')
+          .find({ booking_id: { $in: bookingIds }, txn_type: 'PAYMENT', status: 'FAILED' })
+          .project({ booking_id: 1 })
+          .toArray()
+      : [];
+    const failedIdSet = new Set(failedTxns.map((t) => String(t.booking_id)));
+    for (const b of enriched) {
+      if (b.status === 'PENDING_PAYMENT' && failedIdSet.has(String(b._id))) {
+        b.has_failed_payment = true;
+      }
+    }
     res.json(enriched);
   }),
 );
@@ -265,11 +293,6 @@ router.get(
     ]);
 
     const enrichedResult = enrichBookingWithReview({ ...booking, inclusions, addons, transactions }, review);
-    if (booking.status === 'PENDING_PAYMENT' && transactions.some(t => t.txn_type === 'PAYMENT' && t.status === 'FAILED')) {
-      await db.collection('bookings').updateOne({ _id: bOid }, { $set: { status: 'CANCELLED', updated_at: new Date() } });
-      booking.status = 'CANCELLED';
-      enrichedResult.status = 'CANCELLED';
-    }
     if (bookUser) {
       enrichedResult.contact_name = booking.contact_name || bookUser.full_name;
       enrichedResult.contact_phone = booking.contact_phone || bookUser.phone;
