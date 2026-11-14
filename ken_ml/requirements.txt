@@ -2,7 +2,7 @@ pandas
 numpy
 pymongo[srv]
 python-dotenv
-scikit-learn
+scikit-learn==1.9.1
 joblib
 matplotlib
 seaborn
