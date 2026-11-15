@@ -101,7 +101,9 @@
           <tr
             *ngFor="let item of paginatedVouchers"
             [class.selected-row]="!isCreating && selectedId === item.id"
-            (click)="selectVoucher(item)"
+            tabindex="0"
+            (click)="selectVoucher(item, true)"
+            (keydown.enter)="selectVoucher(item, true)"
           >
             <td>
               <strong>{{ item.code }}</strong>
@@ -135,7 +137,7 @@
               </span>
             </td>
             <td class="actions">
-              <button type="button" (click)="selectVoucher(item); $event.stopPropagation()">
+              <button type="button" (click)="selectVoucher(item, true); $event.stopPropagation()">
                 Chỉnh sửa
               </button>
               <button type="button" (click)="toggleStatus(item, $event)">
@@ -172,7 +174,7 @@
     </div>
   </section>
 
-  <section class="voucher-card editor-card">
+  <section id="voucher-editor-panel" class="voucher-card editor-card">
     <div class="editor-heading">
       <div class="heading-label">
         <img src="/images/figma/icon-pkg.svg" alt="" />

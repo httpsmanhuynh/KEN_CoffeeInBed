@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../../core/auth.service';
 
@@ -26,6 +26,8 @@ export class PointsTierPage implements OnInit {
   private readonly auth = inject(AuthService, { optional: true });
   private readonly router = inject(Router, { optional: true });
 
+  private readonly cdr = inject(ChangeDetectorRef);
+
   tierPoints = 0;
   coinsBalance = 0;
   tierCode = 'BASIC';
@@ -50,11 +52,12 @@ export class PointsTierPage implements OnInit {
     session$.subscribe({
       next: (user) => {
         if (!user) return;
-        this.tierPoints = user.tierPoints ?? 0;
-        this.coinsBalance = user.coinsBalance ?? 0;
+        this.tierPoints = Number(user.tierPoints) || 0;
+        this.coinsBalance = Number(user.coinsBalance) || 0;
         this.tierCode = this.tierPoints >= 1000
           ? codeForPoints(this.tierPoints)
           : (user.membershipTier || 'BASIC');
+        this.cdr.markForCheck();
       },
     });
   }

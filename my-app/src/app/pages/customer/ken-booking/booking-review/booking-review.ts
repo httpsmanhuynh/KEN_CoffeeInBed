@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, forkJoin, map, of, switchMap } from 'rxjs';
 import { AuthService } from '../../../../core/auth.service';
@@ -66,6 +66,8 @@ export class KenBookingReviewPage {
   private readonly api = tryInjectCustomerApi();
   feedback = '';
   voucherMessage = '';
+  voucherSuccess = false;
+  private readonly cdr = inject(ChangeDetectorRef);
   appliedVoucherCode = '';
   appliedVoucherDiscount = 0;
   checkingSession = false;
@@ -85,11 +87,12 @@ export class KenBookingReviewPage {
     const existing = this.auth.user;
     if (existing) {
       this.prefillUserContact(existing);
+      this.autoApplyVoucher();
       return;
     }
     this.auth.ensureSession().subscribe({
       next: user => {
-        if (user) this.prefillUserContact(user);
+        if (user) { this.prefillUserContact(user); this.autoApplyVoucher(); }
       },
       error: () => {},
     });
@@ -291,11 +294,12 @@ export class KenBookingReviewPage {
     );
   }
 
-  checkVoucher(): void {
+  checkVoucher(silent = false): void {
     const code = this.state.draft().voucher.trim();
-    if (!code) { this.voucherMessage = 'Vui lòng nhập mã khuyến mãi.'; return; }
-    if (!this.api) { this.voucherMessage = 'Mã khuyến mãi chưa kết nối hệ thống.'; return; }
-    this.voucherMessage = 'Đang kiểm tra mã…';
+    if (!code) { this.voucherMessage = 'Vui lòng nhập mã khuyến mãi.'; this.voucherSuccess = false; return; }
+    if (!this.api) { this.voucherMessage = 'Mã khuyến mãi chưa kết nối hệ thống.'; this.voucherSuccess = false; return; }
+    this.voucherSuccess = false;
+    if (!silent) this.voucherMessage = 'Đang kiểm tra mã…';
     this.resolveRealTarget().pipe(
       switchMap(({ sp, pkg, startAt, d, mappedInclusions, mappedAddons }) => {
         if (!sp?._id || !pkg?._id) throw { error: { message: 'Không tìm thấy gói phù hợp trong hệ thống.' } };
@@ -314,13 +318,46 @@ export class KenBookingReviewPage {
       next: (q) => {
         this.appliedVoucherCode = q.voucherCode || code;
         this.appliedVoucherDiscount = q.pricing?.voucherDiscount || 0;
-        this.voucherMessage = `Áp dụng mã ${this.appliedVoucherCode} thành công: giảm ${this.money(this.appliedVoucherDiscount)} (tổng thanh toán: ${this.money(this.finalTotal)}).`;
+        this.voucherSuccess = true;
+        this.voucherMessage = 'Áp dụng thành công';
+        this.cdr.markForCheck();
       },
       error: (err) => {
         this.appliedVoucherCode = '';
         this.appliedVoucherDiscount = 0;
-        this.voucherMessage = err?.error?.message || 'Mã voucher không hợp lệ hoặc chưa đủ điều kiện áp dụng.';
+        this.voucherSuccess = false;
+        this.voucherMessage = silent ? '' : (err?.error?.message || 'Mã voucher không hợp lệ hoặc chưa đủ điều kiện áp dụng.');
+        if (silent) this.state.set({ voucher: '' });
+        this.cdr.markForCheck();
       },
+    });
+  }
+
+  /** Tự động áp dụng mã đã chọn từ trang đổi Coins, hoặc voucher chưa dùng mới đổi gần nhất trong ví. */
+  private autoApplyVoucher(): void {
+    if (this.state.draft().voucher?.trim()) {
+      this.checkVoucher(true);
+      return;
+    }
+    if (!this.api) return;
+    forkJoin({
+      wallet: this.api.getMyVouchers().pipe(catchError(() => of(null as any))),
+      vouchers: this.api.getVouchers().pipe(catchError(() => of([] as any[]))),
+    }).subscribe(({ wallet, vouchers }) => {
+      const list: any[] = Array.isArray(wallet) ? wallet : (wallet?.vouchers ?? []);
+      const now = Date.now();
+      for (const item of list) {
+        if (item.used_booking_id) continue;
+        const redeemedAt = new Date(item.redeemed_at).getTime();
+        if (Number.isFinite(redeemedAt) && now - redeemedAt > 30 * 24 * 3600 * 1000) continue;
+        const v = (vouchers as any[]).find((x) => String(x._id) === String(item.voucher_id));
+        if (v?.code) {
+          this.state.set({ voucher: v.code });
+          this.cdr.markForCheck();
+          this.checkVoucher(true);
+          return;
+        }
+      }
     });
   }
   confirm(): void {

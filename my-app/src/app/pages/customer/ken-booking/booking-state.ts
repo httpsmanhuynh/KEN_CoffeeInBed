@@ -351,7 +351,13 @@ export class KenBookingState {
             .map((p) => {
               const code = String(p.item_code || '').toUpperCase();
               const canonicalId = CANONICAL_PRODUCT_SLUGS[code] || code || String(p._id);
-              const variantsText = Array.isArray(p.variants) && p.variants.length ? p.variants.join(' / ') : '';
+              const variantsText = Array.isArray(p.variants) && p.variants.length
+                ? p.variants
+                    .map((v: any) => (v && typeof v === 'object' ? (v.name ?? v.label ?? v.title ?? '') : String(v ?? '')))
+                    .map((v: string) => String(v).trim())
+                    .filter(Boolean)
+                    .join(' / ')
+                : '';
               return {
                 id: canonicalId,
                 apiProductId: String(p._id),

@@ -51,46 +51,6 @@
             <input type="date" [value]="toDate" (change)="onDateChange('toDate', $event)" />
           </div>
         </label>
-
-        <div class="range-presets">
-          <span>Khoảng nhanh</span>
-          <div class="preset-row">
-            <button
-              type="button"
-              [class.active]="activeRangeDays === 7"
-              (click)="applyQuickRange(7)"
-            >
-              7 ngày
-            </button>
-            <button
-              type="button"
-              [class.active]="activeRangeDays === 14"
-              (click)="applyQuickRange(14)"
-            >
-              14 ngày
-            </button>
-            <button
-              type="button"
-              [class.active]="activeRangeDays === 30"
-              (click)="applyQuickRange(30)"
-            >
-              30 ngày
-            </button>
-            <button type="button" class="btn-refresh-inline" (click)="loadForecastBundle(true)">
-              {{ loading ? 'Đang tải...' : 'Làm mới' }}
-            </button>
-          </div>
-        </div>
-
-        <span class="update-badge" [class.fallback]="sourceMode !== 'ML_FORECAST'">
-          {{
-            sourceMode === 'ML_FORECAST'
-              ? 'Nguồn: ML Demand Forecast'
-              : sourceMode === 'HISTORICAL_FALLBACK'
-                ? 'Nguồn: Dự phóng lịch sử bán hàng'
-                : 'Chế độ dữ liệu mẫu ngoại tuyến'
-          }}
-        </span>
       </section>
 
       <div *ngIf="dateError" class="banner-error">{{ dateError }}</div>
@@ -211,7 +171,14 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let item of filteredDishes">
+              <tr
+                *ngFor="let item of paged('dish', filteredDishes)"
+                class="clickable-row"
+                [class.is-selected]="selectedDish?.itemCode === item.itemCode"
+                tabindex="0"
+                (click)="selectDish(item)"
+                (keydown.enter)="selectDish(item)"
+              >
                 <td><span class="date-pill">{{ item.itemCode }}</span></td>
                 <td>
                   <strong>{{ item.name }}</strong>
@@ -248,6 +215,42 @@
             </tfoot>
           </table>
         </div>
+
+        <div id="dish-detail" class="dish-detail-panel" *ngIf="selectedDish as sd">
+          <div class="dish-detail-head">
+            <div>
+              <span class="date-pill">{{ sd.itemCode }}</span>
+              <strong>{{ sd.name }}</strong>
+              <small>{{ categoryLabel(sd.category) }} · Giá bán {{ formatCurrency(sd.price) }}</small>
+            </div>
+            <button type="button" class="btn-close-link" (click)="selectedDish = null">Đóng</button>
+          </div>
+          <div class="dish-detail-grid">
+            <div><span>Dự báo tiêu thụ</span><strong>{{ sd.predictedQty | number }} phần</strong></div>
+            <div><span>Khoảng tin cậy</span><strong>{{ sd.lowerQty | number }} – {{ sd.upperQty | number }} phần</strong></div>
+            <div><span>Mô hình</span><strong>{{ sd.modelVersion }}</strong></div>
+            <div><span>Ngày dự báo</span><strong>{{ formatDateVi(sd.forecastDate) }}</strong></div>
+          </div>
+        </div>
+
+        <div class="admin-pagination-bar" *ngIf="filteredDishes.length > 0">
+          <span class="admin-pagination-info">
+            Hiển thị {{ pageFrom('dish', filteredDishes.length) }}–{{ pageTo('dish', filteredDishes.length) }} / {{ filteredDishes.length }} món
+          </span>
+          <div class="admin-pagination-controls" *ngIf="totalPages(filteredDishes.length) > 1">
+            <button type="button" class="btn-page-nav" [disabled]="curPage('dish', filteredDishes.length) <= 1" (click)="goPage('dish', curPage('dish', filteredDishes.length) - 1, filteredDishes.length)">‹ Trước</button>
+            <button
+              *ngFor="let p of pageNumbers('dish', filteredDishes.length)"
+              type="button"
+              class="btn-page-num"
+              [class.active]="p === curPage('dish', filteredDishes.length)"
+              (click)="goPage('dish', p, filteredDishes.length)"
+            >
+              {{ p }}
+            </button>
+            <button type="button" class="btn-page-nav" [disabled]="curPage('dish', filteredDishes.length) >= totalPages(filteredDishes.length)" (click)="goPage('dish', curPage('dish', filteredDishes.length) + 1, filteredDishes.length)">Tiếp ›</button>
+          </div>
+        </div>
       </section>
 
       <section class="forecast-card" *ngIf="alerts.length > 0">
@@ -261,7 +264,7 @@
           </div>
         </div>
         <div class="alert-list">
-          <article *ngFor="let al of alerts" class="alert-row" [class.critical]="al.severity === 'CRITICAL'">
+          <article *ngFor="let al of paged('alert', alerts)" class="alert-row" [class.critical]="al.severity === 'CRITICAL'">
             <div class="alert-main">
               <span class="sev-badge" [class.crit]="al.severity === 'CRITICAL'">{{ al.severity }}</span>
               <div>
@@ -287,6 +290,24 @@
             </div>
           </article>
         </div>
+        <div class="admin-pagination-bar" *ngIf="totalPages(alerts.length) > 1">
+          <span class="admin-pagination-info">
+            Hiển thị {{ pageFrom('alert', alerts.length) }}–{{ pageTo('alert', alerts.length) }} / {{ alerts.length }} cảnh báo
+          </span>
+          <div class="admin-pagination-controls">
+            <button type="button" class="btn-page-nav" [disabled]="curPage('alert', alerts.length) <= 1" (click)="goPage('alert', curPage('alert', alerts.length) - 1, alerts.length)">‹ Trước</button>
+            <button
+              *ngFor="let p of pageNumbers('alert', alerts.length)"
+              type="button"
+              class="btn-page-num"
+              [class.active]="p === curPage('alert', alerts.length)"
+              (click)="goPage('alert', p, alerts.length)"
+            >
+              {{ p }}
+            </button>
+            <button type="button" class="btn-page-nav" [disabled]="curPage('alert', alerts.length) >= totalPages(alerts.length)" (click)="goPage('alert', curPage('alert', alerts.length) + 1, alerts.length)">Tiếp ›</button>
+          </div>
+        </div>
       </section>
 
       <section class="forecast-card">
@@ -299,21 +320,21 @@
             <button
               type="button"
               [class.active]="ingredientFilter === 'ALL'"
-              (click)="ingredientFilter = 'ALL'"
+              (click)="setIngredientFilter('ALL')"
             >
               Tất cả ({{ ingredients.length }})
             </button>
             <button
               type="button"
               [class.active]="ingredientFilter === 'RESTOCK'"
-              (click)="ingredientFilter = 'RESTOCK'"
+              (click)="setIngredientFilter('RESTOCK')"
             >
               Cần nhập bổ sung ({{ restockNeededCount }})
             </button>
           </div>
         </div>
 
-        <div *ngIf="activeMovementIngredient" class="movement-drawer">
+        <div id="movement-drawer" *ngIf="activeMovementIngredient" class="movement-drawer">
           <div class="movement-header">
             <strong>
               Cập nhật kho: {{ activeMovementIngredient.name }}
@@ -373,7 +394,14 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let ing of filteredIngredients">
+              <tr
+                *ngFor="let ing of paged('ing', filteredIngredients)"
+                class="clickable-row"
+                [class.is-selected]="activeMovementIngredient?.id === ing.id"
+                tabindex="0"
+                (click)="openMovementForm(ing)"
+                (keydown.enter)="openMovementForm(ing)"
+              >
                 <td><span class="date-pill">{{ ing.ingredientCode }}</span></td>
                 <td>
                   <strong>{{ ing.name }}</strong>
@@ -407,7 +435,7 @@
                   </span>
                 </td>
                 <td>
-                  <button type="button" class="btn-move" (click)="openMovementForm(ing)">
+                  <button type="button" class="btn-move" (click)="openMovementForm(ing); $event.stopPropagation()">
                     Nhập / Điều chỉnh
                   </button>
                 </td>
@@ -417,6 +445,24 @@
               </tr>
             </tbody>
           </table>
+        </div>
+        <div class="admin-pagination-bar" *ngIf="filteredIngredients.length > 0">
+          <span class="admin-pagination-info">
+            Hiển thị {{ pageFrom('ing', filteredIngredients.length) }}–{{ pageTo('ing', filteredIngredients.length) }} / {{ filteredIngredients.length }} nguyên liệu
+          </span>
+          <div class="admin-pagination-controls" *ngIf="totalPages(filteredIngredients.length) > 1">
+            <button type="button" class="btn-page-nav" [disabled]="curPage('ing', filteredIngredients.length) <= 1" (click)="goPage('ing', curPage('ing', filteredIngredients.length) - 1, filteredIngredients.length)">‹ Trước</button>
+            <button
+              *ngFor="let p of pageNumbers('ing', filteredIngredients.length)"
+              type="button"
+              class="btn-page-num"
+              [class.active]="p === curPage('ing', filteredIngredients.length)"
+              (click)="goPage('ing', p, filteredIngredients.length)"
+            >
+              {{ p }}
+            </button>
+            <button type="button" class="btn-page-nav" [disabled]="curPage('ing', filteredIngredients.length) >= totalPages(filteredIngredients.length)" (click)="goPage('ing', curPage('ing', filteredIngredients.length) + 1, filteredIngredients.length)">Tiếp ›</button>
+          </div>
         </div>
       </section>
     </ng-container>
@@ -467,7 +513,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let pair of coOccurringPairs">
+              <tr *ngFor="let pair of paged('pair', coOccurringPairs)">
                 <td><span class="date-pill">#{{ pair.rank }}</span></td>
                 <td>
                   <strong>{{ pair.itemA.name }} + {{ pair.itemB.name }}</strong>
@@ -494,6 +540,24 @@
             </tbody>
           </table>
         </div>
+        <div class="admin-pagination-bar" *ngIf="totalPages(coOccurringPairs.length) > 1">
+          <span class="admin-pagination-info">
+            Hiển thị {{ pageFrom('pair', coOccurringPairs.length) }}–{{ pageTo('pair', coOccurringPairs.length) }} / {{ coOccurringPairs.length }} cặp món
+          </span>
+          <div class="admin-pagination-controls">
+            <button type="button" class="btn-page-nav" [disabled]="curPage('pair', coOccurringPairs.length) <= 1" (click)="goPage('pair', curPage('pair', coOccurringPairs.length) - 1, coOccurringPairs.length)">‹ Trước</button>
+            <button
+              *ngFor="let p of pageNumbers('pair', coOccurringPairs.length)"
+              type="button"
+              class="btn-page-num"
+              [class.active]="p === curPage('pair', coOccurringPairs.length)"
+              (click)="goPage('pair', p, coOccurringPairs.length)"
+            >
+              {{ p }}
+            </button>
+            <button type="button" class="btn-page-nav" [disabled]="curPage('pair', coOccurringPairs.length) >= totalPages(coOccurringPairs.length)" (click)="goPage('pair', curPage('pair', coOccurringPairs.length) + 1, coOccurringPairs.length)">Tiếp ›</button>
+          </div>
+        </div>
       </section>
 
       <section class="recommend-bottom-grid">
@@ -503,9 +567,9 @@
             <small>Xếp hạng theo sản lượng thực tế cho Pop-up gợi ý.</small>
           </div>
           <div class="cluster-list">
-            <div *ngFor="let t of topTrending; let idx = index" class="trending-row">
+            <div *ngFor="let t of paged('trend', topTrending); let idx = index" class="trending-row">
               <div class="trending-left">
-                <span class="rank-circle">{{ idx + 1 }}</span>
+                <span class="rank-circle">{{ pageFrom('trend', topTrending.length) + idx }}</span>
                 <div>
                   <strong>{{ t.name }}</strong>
                   <small>{{ t.code }} · {{ categoryLabel(t.category) }}</small>
@@ -517,6 +581,24 @@
               </div>
             </div>
             <div *ngIf="topTrending.length === 0" class="empty-box">Chưa có dữ liệu Top Trending.</div>
+          </div>
+          <div class="admin-pagination-bar" *ngIf="totalPages(topTrending.length) > 1">
+            <span class="admin-pagination-info">
+              Hiển thị {{ pageFrom('trend', topTrending.length) }}–{{ pageTo('trend', topTrending.length) }} / {{ topTrending.length }}
+            </span>
+            <div class="admin-pagination-controls">
+              <button type="button" class="btn-page-nav" [disabled]="curPage('trend', topTrending.length) <= 1" (click)="goPage('trend', curPage('trend', topTrending.length) - 1, topTrending.length)">‹ Trước</button>
+              <button
+                *ngFor="let p of pageNumbers('trend', topTrending.length)"
+                type="button"
+                class="btn-page-num"
+                [class.active]="p === curPage('trend', topTrending.length)"
+                (click)="goPage('trend', p, topTrending.length)"
+              >
+                {{ p }}
+              </button>
+              <button type="button" class="btn-page-nav" [disabled]="curPage('trend', topTrending.length) >= totalPages(topTrending.length)" (click)="goPage('trend', curPage('trend', topTrending.length) + 1, topTrending.length)">Tiếp ›</button>
+            </div>
           </div>
         </article>
 

@@ -61,7 +61,7 @@ export class Voucher implements OnInit, OnDestroy {
   typeFilter = 'Tất cả';
 
   currentPage = 1;
-  readonly pageSize = 8;
+  readonly pageSize = 10;
 
   isCreating = false;
   selectedId = '';
@@ -324,7 +324,7 @@ export class Voucher implements OnInit, OnDestroy {
     return v.validTo < this.todayIso();
   }
 
-  selectVoucher(item: VoucherItem): void {
+  selectVoucher(item: VoucherItem, scrollToEditor = false): void {
     this.isCreating = false;
     this.selectedId = item.id;
     this.formError = '';
@@ -343,6 +343,11 @@ export class Voucher implements OnInit, OnDestroy {
       validTo: item.validTo,
       status: item.status,
     };
+    if (scrollToEditor && typeof document !== 'undefined') {
+      setTimeout(() => {
+        document.getElementById('voucher-editor-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 40);
+    }
   }
 
   startCreate(): void {

@@ -83,23 +83,25 @@
     <div class="sidebar-spacer"></div>
 
     <!-- Bottom User Profile -->
-    <div class="sidebar-profile-wrap">
-      <div class="sidebar-profile" (click)="toggleUserMenu()" data-name="AdminProfile">
+    <div class="sidebar-footer" data-name="AdminProfile">
+      <div class="profile-card">
         <div class="profile-avatar">
-          <img src="/images/figma/user-round.svg" alt="Avatar" class="avatar-icon" />
+          <img src="/images/figma/user-round.svg" alt="" class="avatar-icon" />
         </div>
-        <span class="profile-name">{{ auth.user?.fullName ?? 'Quản trị viên' }}</span>
-        <img src="/images/figma/chevron-down.svg" alt="Dropdown" class="profile-dropdown-icon" [class.rotated]="isUserMenuOpen" />
+        <div class="profile-info">
+          <span class="profile-name" [title]="auth.user?.fullName ?? 'Quản trị viên'">{{ auth.user?.fullName ?? 'Quản trị viên KÉN' }}</span>
+          <span class="profile-role">Quản trị viên</span>
+        </div>
       </div>
-
-      <!-- Quick User Menu Dropdown -->
-      <div class="profile-dropdown-menu" *ngIf="isUserMenuOpen">
-        <button type="button" class="dropdown-item text-danger" (click)="logout(); isUserMenuOpen = false">
-          <span>Đăng xuất</span>
-        </button>
-      </div>
-    </div>
-  </aside>
+      <button type="button" class="btn-logout" (click)="logout()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+          <polyline points="16 17 21 12 16 7" />
+          <line x1="21" y1="12" x2="9" y2="12" />
+        </svg>
+        <span>Đăng xuất</span>
+      </button>
+    </div>  </aside>
 
   <!-- Main Content Area -->
   <div class="admin-main" data-name="KÉN Admin · Main">

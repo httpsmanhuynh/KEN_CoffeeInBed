@@ -192,15 +192,7 @@ export class AddonsService {
       avail = 'Không khả dụng';
     }
 
-    const imgRaw =
-      typeof (raw.image_url || raw.image) === 'string'
-        ? String(raw.image_url || raw.image).trim()
-        : '';
-    const img = imgRaw
-      ? imgRaw.startsWith('/') || imgRaw.startsWith('http') || imgRaw.startsWith('data:')
-        ? imgRaw
-        : `/${imgRaw.replace(/^\.?\//, '')}`
-      : this.defaultImage(cat);
+    const img = this.resolveProductImage(raw, cat);
 
     return {
       id,
@@ -355,6 +347,36 @@ export class AddonsService {
         : item,
     );
     this.update(next);
+  }
+
+  private resolveProductImage(raw: any, cat: ProductCategory): string {
+    const imgRaw = typeof (raw?.image_url || raw?.image) === 'string' ? String(raw.image_url || raw.image).trim() : '';
+    if (imgRaw.startsWith('/images/ken-flow/') || imgRaw.startsWith('/images/figma/') || imgRaw.startsWith('http') || imgRaw.startsWith('data:')) {
+      return imgRaw;
+    }
+    const code = String(raw?.item_code || raw?.code || '').toUpperCase();
+    const name = String(raw?.name || raw?.product_name || raw?.addon_name || '').toLocaleLowerCase('vi-VN');
+    if (code === 'CF_AMERICANO' || name.includes('americano')) return '/images/ken-flow/americano.png';
+    if (code === 'CF_BAC_XIU' || code === 'CF_SALTED_CARAMEL' || name.includes('bạc xỉu') || name.includes('caramel')) return '/images/ken-flow/bac-xiu.png';
+    if (code.includes('COLD_BREW') || name.includes('cold brew')) return '/images/ken-flow/cold-brew.png';
+    if (code.startsWith('TEA_') || name.includes('trà') || name.includes('oolong')) return '/images/ken-flow/oolong.png';
+    if (code.includes('MATCHA') && cat !== 'Bánh / Ăn nhẹ') return '/images/ken-flow/matcha.png';
+    if (code.includes('HOJICHA') || name.includes('hojicha') || name.includes('matcha')) return cat === 'Bánh / Ăn nhẹ' ? '/images/ken-flow/mousse.png' : '/images/ken-flow/matcha.png';
+    if (code === 'WATER_BOTTLE' || name.includes('tinh khiết') || name.includes('nước suối')) return '/images/ken-flow/water.png';
+    if (code.startsWith('JUICE_') || name.includes('nước cam') || name.includes('nước ép')) return '/images/ken-flow/juice.png';
+    if (code.startsWith('SODA_') || name.includes('soda')) return '/images/ken-flow/soda.png';
+    if (name.includes('croissant') || name.includes('sừng bò') || name.includes('bơ xốp') || code === 'BAKE_SCONE') return '/images/ken-flow/croissant.png';
+    if (name.includes('mousse') || code.startsWith('MOUSSE_')) return '/images/ken-flow/mousse.png';
+    if (name.includes('tiramisu') || name.includes('cheesecake') || code.startsWith('CAKE_')) return '/images/ken-flow/tiramisu.png';
+    if (name.includes('bánh mì') || name.includes('biscotti') || code === 'BREAD_QUE' || code === 'BAKE_BISCOTTI') return '/images/ken-flow/bread.png';
+    if (name.includes('sandwich')) return '/images/ken-flow/sandwich.png';
+    if (name.includes('trái cây')) return '/images/ken-flow/fruit.png';
+    if (name.includes('màn hình')) return '/images/ken-flow/monitor.png';
+    if (name.includes('bàn phím') || name.includes('chuột')) return '/images/ken-flow/keyboard.png';
+    if (name.includes('cáp') || name.includes('sạc')) return '/images/ken-flow/powerbank.png';
+    if (name.includes('bút') || name.includes('bảng')) return '/images/ken-flow/stationery.png';
+    if (name.includes('in tài liệu')) return '/images/ken-flow/printer.png';
+    return this.defaultImage(cat);
   }
 
   private generateNextId(category: ProductCategory): string {

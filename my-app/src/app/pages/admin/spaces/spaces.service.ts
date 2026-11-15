@@ -257,8 +257,10 @@ export class SpacesService {
   private normalizeImage(value: unknown, fallback: string): string {
     const raw = typeof value === 'string' ? value.trim() : '';
     if (!raw) return fallback;
-    if (raw.startsWith('http') || raw.startsWith('data:') || raw.startsWith('/')) return raw;
-    return `/${raw.replace(/^\.?\//, '')}`;
+    if (raw.startsWith('/images/ken-flow/') || raw.startsWith('/images/figma/') || raw.startsWith('http') || raw.startsWith('data:')) {
+      return raw;
+    }
+    return fallback;
   }
 
   private defaultImageForSpace(name: string, zone: string, bookingMode: BookingMode): string {

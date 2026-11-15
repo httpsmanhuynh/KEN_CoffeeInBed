@@ -679,17 +679,78 @@ export class Forecast implements OnInit, OnDestroy {
 
   onSearchInput(event: Event): void {
     this.search = (event.target as HTMLInputElement).value;
+    this.page['dish'] = 1;
+    this.page['ing'] = 1;
   }
 
   onCategoryChange(event: Event): void {
     this.category = (event.target as HTMLSelectElement).value;
+    this.page['dish'] = 1;
   }
 
   onSortChange(event: Event): void {
     this.sort = (event.target as HTMLSelectElement).value;
+    this.page['dish'] = 1;
+  }
+
+  setIngredientFilter(f: 'ALL' | 'RESTOCK'): void {
+    this.ingredientFilter = f;
+    this.page['ing'] = 1;
+  }
+
+  readonly pageSize = 10;
+  page: Record<string, number> = { dish: 1, ing: 1, pair: 1, alert: 1, trend: 1 };
+  selectedDish: DishForecastRow | null = null;
+
+  totalPages(len: number): number {
+    return Math.max(1, Math.ceil(len / this.pageSize));
+  }
+
+  curPage(key: string, len: number): number {
+    return Math.min(Math.max(1, this.page[key] || 1), this.totalPages(len));
+  }
+
+  paged<T>(key: string, list: T[]): T[] {
+    const p = this.curPage(key, list.length);
+    return list.slice((p - 1) * this.pageSize, p * this.pageSize);
+  }
+
+  pageFrom(key: string, len: number): number {
+    return len === 0 ? 0 : (this.curPage(key, len) - 1) * this.pageSize + 1;
+  }
+
+  pageTo(key: string, len: number): number {
+    return Math.min(len, this.curPage(key, len) * this.pageSize);
+  }
+
+  pageNumbers(key: string, len: number): number[] {
+    const total = this.totalPages(len);
+    const cur = this.curPage(key, len);
+    const start = Math.max(1, Math.min(cur - 2, total - 4));
+    const end = Math.min(total, start + 4);
+    const out: number[] = [];
+    for (let i = start; i <= end; i++) out.push(i);
+    return out;
+  }
+
+  goPage(key: string, p: number, len: number): void {
+    this.page[key] = Math.min(Math.max(1, p), this.totalPages(len));
+  }
+
+  selectDish(d: DishForecastRow): void {
+    this.selectedDish = this.selectedDish === d ? null : d;
+    if (this.selectedDish) this.scrollToId('dish-detail');
+  }
+
+  private scrollToId(id: string): void {
+    if (typeof document === 'undefined') return;
+    setTimeout(() => {
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 60);
   }
 
   openMovementForm(ing: IngredientForecastRow): void {
+    this.scrollToId('movement-drawer');
     this.activeMovementIngredient = ing;
     this.movementType = 'IN';
     this.movementQty = Math.max(1, Math.ceil(ing.recommendedOrderQty || 10));

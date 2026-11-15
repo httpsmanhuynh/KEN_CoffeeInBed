@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { AuthService } from '../../../../core/auth.service';
@@ -73,6 +73,8 @@ export class CoinsRewardsPage implements OnInit {
   private readonly api = inject(CustomerApiService, { optional: true });
   private readonly router = inject(Router, { optional: true });
   private readonly bookingState = inject(KenBookingState, { optional: true });
+
+  private readonly cdr = inject(ChangeDetectorRef);
 
   balance = 0;
   activeTab: HistoryTab = 'all';
@@ -206,6 +208,7 @@ export class CoinsRewardsPage implements OnInit {
     this.api.getLoyaltyHistory().subscribe({
       next: (history) => {
         this.history = this.mapHistory(history);
+        this.cdr.markForCheck();
       },
     });
   }
@@ -219,7 +222,8 @@ export class CoinsRewardsPage implements OnInit {
     session$.subscribe({
       next: (user) => {
         if (!user) return;
-        this.balance = user.coinsBalance;
+        this.balance = Number(user.coinsBalance) || 0;
+        this.cdr.markForCheck();
         forkJoin({
           vouchers: this.api!.getVouchers(),
           history: this.api!.getLoyaltyHistory(),
@@ -244,6 +248,7 @@ export class CoinsRewardsPage implements OnInit {
               });
             }
             this.history = this.mapHistory(history);
+            this.cdr.markForCheck();
           },
         });
       },
@@ -271,6 +276,7 @@ export class CoinsRewardsPage implements OnInit {
         }
         this.loadHistory();
         this.copiedCode = false;
+        setTimeout(() => this.cdr.markForCheck());
 
         const nowFormatted = new Date().toLocaleString('vi-VN');
         if (voucher) {

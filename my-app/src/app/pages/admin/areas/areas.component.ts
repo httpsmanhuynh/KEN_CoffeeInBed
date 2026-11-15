@@ -38,6 +38,8 @@ export class AreasComponent implements OnInit, OnDestroy {
   loading = false;
   saving = false;
   sortAsc = true;
+  currentPage = 1;
+  readonly pageSize = 10;
   confirmToggleTarget: ZoneItem | null = null;
 
   toast: { type: 'success' | 'error' | 'info'; text: string } | null = null;
@@ -172,8 +174,43 @@ export class AreasComponent implements OnInit, OnDestroy {
     return this.zones.reduce((sum, z) => sum + z.spacesCount, 0);
   }
 
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.zones.length / this.pageSize));
+  }
+
+  get paginatedZones(): ZoneItem[] {
+    const safePage = Math.min(this.currentPage, this.totalPages);
+    const start = (safePage - 1) * this.pageSize;
+    return this.zones.slice(start, start + this.pageSize);
+  }
+
+  get pageNumbers(): number[] {
+    const total = this.totalPages;
+    if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+    const start = Math.max(1, Math.min(this.currentPage - 3, total - 6));
+    const end = Math.min(total, start + 6);
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
+  get pageStartIndex(): number {
+    if (this.zones.length === 0) return 0;
+    const safePage = Math.min(this.currentPage, this.totalPages);
+    return (safePage - 1) * this.pageSize + 1;
+  }
+
+  get pageEndIndex(): number {
+    const safePage = Math.min(this.currentPage, this.totalPages);
+    return Math.min(this.zones.length, safePage * this.pageSize);
+  }
+
+  goToPage(p: number): void {
+    if (p < 1 || p > this.totalPages) return;
+    this.currentPage = p;
+  }
+
   toggleSort(): void {
     this.sortAsc = !this.sortAsc;
+    this.currentPage = 1;
     this.zones = [...this.zones].sort((a, b) =>
       this.sortAsc ? a.name.localeCompare(b.name, 'vi') : b.name.localeCompare(a.name, 'vi')
     );

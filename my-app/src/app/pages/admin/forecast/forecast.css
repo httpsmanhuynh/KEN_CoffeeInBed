@@ -824,3 +824,134 @@
     padding: 8px 6px;
   }
 }
+
+.clickable-row {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.clickable-row:hover td,
+.clickable-row:focus-visible td {
+  background-color: #f7efe2;
+}
+
+.clickable-row:focus-visible {
+  outline: none;
+}
+
+.clickable-row.is-selected td {
+  background-color: #f4e6d0;
+}
+
+.dish-detail-panel {
+  margin: 12px 20px 16px;
+  padding: 16px 18px;
+  border-radius: 12px;
+  border: 1px solid rgba(169, 118, 63, 0.35);
+  background: #fdf8ee;
+}
+
+.dish-detail-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.dish-detail-head > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.dish-detail-head strong {
+  font-size: 14px;
+  color: #4a3123;
+}
+
+.dish-detail-head small {
+  font-size: 12px;
+  color: #766252;
+}
+
+.dish-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+}
+
+.dish-detail-grid > div {
+  background: #fffcf7;
+  border: 1px solid rgba(216, 199, 178, 0.62);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dish-detail-grid span {
+  font-size: 11px;
+  color: #766252;
+}
+
+.dish-detail-grid strong {
+  font-size: 13px;
+  color: #4a3123;
+}
+
+.admin-pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 20px;
+  border-top: 1px solid rgba(216, 199, 178, 0.45);
+  flex-wrap: wrap;
+}
+
+.admin-pagination-info {
+  font-size: 12px;
+  color: #766252;
+  font-weight: 500;
+}
+
+.admin-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-page-nav,
+.btn-page-num {
+  min-width: 30px;
+  height: 30px;
+  padding: 0 9px;
+  border-radius: 8px;
+  border: 1px solid rgba(216, 199, 178, 0.75);
+  background: #fffcf7;
+  color: #4a3123;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-page-nav:hover:not(:disabled),
+.btn-page-num:hover:not(.active) {
+  background: #f7efe2;
+  border-color: #a9763f;
+}
+
+.btn-page-num.active {
+  background: #4a3123;
+  border-color: #4a3123;
+  color: #fffcf7;
+}
+
+.btn-page-nav:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

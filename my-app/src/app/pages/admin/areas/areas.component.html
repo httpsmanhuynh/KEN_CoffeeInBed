@@ -80,7 +80,14 @@
           Chưa có khu vực nào được cấu hình. Nhấn "Thêm khu vực" để tạo mới.
         </div>
 
-        <div *ngFor="let z of zones" class="trow-item">
+        <div
+          *ngFor="let z of paginatedZones"
+          class="trow-item"
+          [class.is-selected]="isEditing && editingZoneId === z.id"
+          tabindex="0"
+          (click)="openEditForm(z)"
+          (keydown.enter)="openEditForm(z)"
+        >
           <div class="td-col td-name">
             <span class="zone-item-title">{{ z.name }}</span>
             <span class="zone-item-slug">{{ z.code }} · {{ z.slug }}</span>
@@ -103,7 +110,7 @@
           </div>
 
           <div class="td-col td-action">
-            <button type="button" class="btn-action-text text-brand" (click)="openEditForm(z)">
+            <button type="button" class="btn-action-text text-brand" (click)="openEditForm(z); $event.stopPropagation()">
               Chỉnh sửa
             </button>
             <span class="action-sep">·</span>
@@ -112,11 +119,34 @@
               class="btn-action-text"
               [class.text-danger]="z.status === 'ACTIVE'"
               [class.text-success]="z.status === 'HIDDEN'"
-              (click)="requestToggleHide(z)"
+              (click)="requestToggleHide(z); $event.stopPropagation()"
             >
               {{ z.status === 'ACTIVE' ? 'Ẩn khu vực' : 'Kích hoạt' }}
             </button>
           </div>
+        </div>
+      </div>
+
+      <div class="admin-pagination-bar" *ngIf="zones.length > 0">
+        <p class="admin-pagination-info">
+          Hiển thị {{ pageStartIndex }}–{{ pageEndIndex }} / {{ zones.length }} khu vực
+        </p>
+        <div class="admin-pagination-controls" *ngIf="totalPages > 1">
+          <button type="button" class="btn-page-nav" [disabled]="currentPage <= 1" (click)="goToPage(currentPage - 1)">
+            ‹ Trước
+          </button>
+          <button
+            *ngFor="let page of pageNumbers"
+            type="button"
+            class="btn-page-num"
+            [class.active]="page === currentPage"
+            (click)="goToPage(page)"
+          >
+            {{ page }}
+          </button>
+          <button type="button" class="btn-page-nav" [disabled]="currentPage >= totalPages" (click)="goToPage(currentPage + 1)">
+            Tiếp ›
+          </button>
         </div>
       </div>
     </div>
