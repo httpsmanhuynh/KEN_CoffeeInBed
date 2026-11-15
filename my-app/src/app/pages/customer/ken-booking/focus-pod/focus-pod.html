@@ -38,6 +38,46 @@
 
     <ng-container *ngIf="showAddons">
     <div class="kf-booking-step-title"><span>BƯỚC 03</span><h2>Chọn món &amp; dịch vụ thêm</h2></div>
+
+    <!-- KHỐI GỢI Ý THÔNG MINH BỞI MACHINE LEARNING (ML ADD-ONS RECOMMENDATION) -->
+    <section class="kf-ml-addons-box" *ngIf="addonRecommendations.length">
+      <div class="kf-ml-header">
+        <div class="kf-ml-pill">
+          <span>🤖</span> AI RECOMMENDATION · MÔ HÌNH HỌC MÁY
+        </div>
+        <h3>Gợi ý thông minh cho phiên làm việc {{ state.timeLabel }}</h3>
+        <p>Thuật toán học máy phân tích phiên đặt chỗ {{ state.draft().hours }} giờ tại KÉN để đề xuất tiện ích &amp; đồ dùng phù hợp nhất</p>
+      </div>
+
+      <div class="kf-ml-grid">
+        <article *ngFor="let item of addonRecommendations" class="kf-ml-card" [class.is-selected]="recommendedExtraCount(item) > 0">
+          <div class="kf-ml-score-badge">{{ item.matchScore }}% Match</div>
+          <div class="kf-ml-img-wrap">
+            <img [src]="'/images/ken-flow/' + item.image" [alt]="item.name">
+            <span class="kf-ml-tag">{{ item.tag }}</span>
+          </div>
+          <div class="kf-ml-card-body">
+            <div class="kf-ml-meta">
+              <span class="kf-ml-cat">{{ item.category }}</span>
+              <strong class="kf-ml-price">+{{ money(item.price) }}</strong>
+            </div>
+            <h4>{{ item.name }}</h4>
+            <p class="kf-ml-reason">{{ item.reason }}</p>
+            <div class="kf-ml-action">
+              <button *ngIf="recommendedExtraCount(item) === 0" type="button" class="kf-ml-btn-add" (click)="addRecommendedExtra(item)">
+                + Chọn nhanh
+              </button>
+              <div *ngIf="recommendedExtraCount(item) > 0" class="kf-quantity kf-ml-qty">
+                <button type="button" (click)="changeExtra(item.id, -1)">−</button>
+                <span>{{ recommendedExtraCount(item) }}</span>
+                <button type="button" (click)="changeExtra(item.id, 1)" [disabled]="recommendedExtraCount(item) >= state.maxExtraCount(item.id)">+</button>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
     <section class="kf-drink-entry" *ngIf="state.freeWaterCount > 0" style="margin-bottom: 14px; border: 1.5px solid #dcb685; background: #fffcf7;">
       <div>
         <strong style="color: #047857;">✓ Quyền lợi Inclusion tự động</strong>

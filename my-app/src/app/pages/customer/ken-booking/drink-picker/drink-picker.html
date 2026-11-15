@@ -14,6 +14,7 @@
       </div>
     </div>
   </section>
+
   <div class="kf-entitlement-bar">
     <div class="kf-container">
       <span>
@@ -23,7 +24,81 @@
       <strong>{{ state.requiredDrinkCount ? 'Đã chọn: ' + selectedDrinkCount + ' / ' + state.requiredDrinkCount + ' món nước' + (state.requiredPastryCount ? ' · ' + state.selectedPastryCount + ' / ' + state.requiredPastryCount + ' bánh' : '') : 'Đã chọn thêm: ' + selectedDrinkCount + ' món' }}</strong>
     </div>
   </div>
+
   <section class="kf-container kf-drink-catalog">
+    <!-- KHỐI GỢI Ý THÔNG MINH BỞI MACHINE LEARNING -->
+    <div class="ml-rec-box" *ngIf="recommendations.length">
+      <div class="ml-rec-header">
+        <div class="ml-badge-pill">
+          <span class="ml-sparkle">🤖</span> AI RECOMMENDATION · MÔ HÌNH HỌC MÁY
+        </div>
+        <div class="ml-title-row">
+          <div>
+            <h2>Gợi Ý Thông Minh Cho Khung Giờ {{ state.timeLabel }}</h2>
+            <p class="ml-sub">Dựa trên dữ liệu học máy phân tích thói quen khách hàng trong phiên {{ state.draft().hours }} giờ tại KÉN</p>
+          </div>
+          <span class="ml-context-tag">Khung giờ: {{ ('0' + state.draft().startHour).slice(-2) }}:00 – {{ ('0' + (state.draft().startHour + state.draft().hours)).slice(-2) }}:00</span>
+        </div>
+      </div>
+
+      <div class="ml-rec-grid">
+        <article *ngFor="let rec of recommendations" class="ml-rec-card" [class.is-selected]="getRecommendedQty(rec) > 0">
+          <div class="ml-match-badge">
+            <span class="match-score">{{ rec.matchScore }}%</span>
+            <span class="match-label">Phù hợp</span>
+          </div>
+
+          <div class="ml-card-image-wrap">
+            <img [src]="'/images/ken-flow/' + rec.image" [alt]="rec.name">
+            <span class="ml-card-tag">{{ rec.tag }}</span>
+          </div>
+
+          <div class="ml-card-content">
+            <div class="ml-card-top">
+              <span class="ml-cat">{{ rec.category }}</span>
+              <strong class="ml-price">{{ money(rec.price) }}</strong>
+            </div>
+
+            <h3 class="ml-name">{{ rec.name }}</h3>
+
+            <div class="ml-reason-box">
+              <span class="ml-robot-icon">💡</span>
+              <p>{{ rec.reason }}</p>
+            </div>
+
+            <div class="ml-benefits" *ngIf="rec.benefits">
+              <span *ngFor="let b of rec.benefits" class="ml-benefit-chip">✓ {{ b }}</span>
+            </div>
+
+            <div class="ml-action-row">
+              <div class="ml-surcharge-info">
+                <small *ngIf="rec.type === 'drink'">
+                  Phụ thu: <b>{{ '+' + money(rec.price - state.entitlement > 0 ? rec.price - state.entitlement : 0) }}</b>
+                </small>
+                <small *ngIf="rec.type === 'pastry'">
+                  Bánh ngọt đi kèm (nếu gói có bánh)
+                </small>
+              </div>
+
+              <!-- Controls số lượng -->
+              <div *ngIf="getRecommendedQty(rec) === 0">
+                <button type="button" class="ml-btn-add" (click)="selectRecommended(rec)" [disabled]="rec.type === 'drink' ? !canAddDrink : !canAddPastry">
+                  + Chọn gợi ý
+                </button>
+              </div>
+
+              <div *ngIf="getRecommendedQty(rec) > 0" class="kf-quantity ml-quantity-control">
+                <button type="button" (click)="rec.type === 'drink' ? changeDrink(rec.id, -1) : changePastry(rec.id, -1)">−</button>
+                <span>{{ getRecommendedQty(rec) }}</span>
+                <button type="button" (click)="rec.type === 'drink' ? changeDrink(rec.id, 1) : changePastry(rec.id, 1)" [disabled]="rec.type === 'drink' ? !canAddDrink : !canAddPastry">+</button>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+
+    <!-- Thanh tìm kiếm & bộ lọc danh mục -->
     <div class="kf-filter-line">
       <label class="kf-search"><input type="search" [(ngModel)]="searchText" placeholder="Tìm đồ uống theo tên, ví dụ matcha, cold brew…"></label>
       <select [(ngModel)]="extraOnly" aria-label="Lọc phụ thu"><option [ngValue]="false">Phụ thu: Tất cả</option><option [ngValue]="true">Có phụ thu</option></select>
@@ -38,6 +113,8 @@
         <ng-container *ngIf="state.requiredDrinkCount"> · Còn cần {{ state.requiredDrinkCount - selectedDrinkCount }} món</ng-container>
       </span>
     </div>
+
+    <!-- Cà phê & trà -->
     <ng-container *ngIf="coffee.length">
       <div class="kf-section-title"><div><span class="kf-overline">01 /</span><h2>Cà phê &amp; trà</h2></div><p>Đồ uống đặc trưng của KÉN</p></div>
       <div class="kf-menu-grid">
@@ -57,6 +134,8 @@
         </article>
       </div>
     </ng-container>
+
+    <!-- Giải khát -->
     <ng-container *ngIf="refreshments.length">
       <div class="kf-section-title"><div><span class="kf-overline">02 /</span><h2>Giải khát</h2></div><p>Nước uống &amp; trái cây tươi</p></div>
       <div class="kf-menu-grid">
@@ -78,6 +157,7 @@
     </ng-container>
     <p *ngIf="filteredDrinks.length===0" class="kf-note">Không có đồ uống phù hợp với bộ lọc.</p>
 
+    <!-- Bánh ngọt đi kèm (nếu gói có bánh) -->
     <ng-container *ngIf="state.requiredPastryCount > 0">
       <div class="kf-section-title" style="margin-top: 28px">
         <div><span class="kf-overline">03 /</span><h2>Bánh ngọt đi kèm</h2></div>
@@ -103,6 +183,8 @@
 
     <p class="kf-note"><img class="kf-icon" src="/images/ken-flow/icons/drink-info.svg" alt=""> Món trong gói được hỗ trợ tối đa 50.000đ/món; chỉ tính phần chênh lệch. Add-on sẽ được chọn riêng sau khi xác nhận.</p>
   </section>
+
+  <!-- Tóm tắt & Xác nhận -->
   <section class="kf-drink-summary">
     <div class="kf-container kf-drink-summary-grid">
       <div>

@@ -1,1 +1,213 @@
 /* Shared KEN booking styles remain in ../ken-booking.css, imported from src/styles.css. Add component-specific overrides here only. */
+
+/* ============================================================ */
+/* KHỐI GỢI Ý THÔNG MINH AI/ML TRONG BƯỚC 03 FOCUS POD ADD-ONS */
+/* ============================================================ */
+.kf-ml-addons-box {
+  margin: 16px 0 28px;
+  padding: 24px;
+  background: linear-gradient(135deg, #FFFDF8 0%, #FAF3E7 100%);
+  border: 1.5px solid #DFC59B;
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(169, 118, 63, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.kf-ml-addons-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, #D4AF37, #10B981, #F59E0B);
+}
+
+.kf-ml-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.kf-ml-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  padding: 5px 12px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 999px;
+  color: #065F46;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.kf-ml-header h3 {
+  font-family: var(--ken-heading, 'Playfair Display', Georgia, serif);
+  font-size: 20px;
+  font-weight: 700;
+  color: #2F1E14;
+  margin: 0;
+}
+
+.kf-ml-header p {
+  font-size: 13px;
+  color: #7A6553;
+  margin: 0;
+}
+
+.kf-ml-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.kf-ml-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: #FFFFFF;
+  border: 1.5px solid rgba(223, 197, 155, 0.7);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(74, 49, 35, 0.04);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.kf-ml-card:hover {
+  transform: translateY(-4px);
+  border-color: #D4AF37;
+  box-shadow: 0 12px 28px rgba(212, 175, 55, 0.2);
+}
+
+.kf-ml-card.is-selected {
+  border-color: #10B981;
+  background: #FAFEF9;
+}
+
+.kf-ml-score-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 5;
+  padding: 4px 8px;
+  background: #10B981;
+  color: #FFFFFF;
+  font-size: 10px;
+  font-weight: 800;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.kf-ml-img-wrap {
+  position: relative;
+  width: 100%;
+  height: 130px;
+  background: #F3ECE1;
+  overflow: hidden;
+}
+
+.kf-ml-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.kf-ml-tag {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  padding: 3px 8px;
+  background: rgba(47, 30, 20, 0.85);
+  color: #FBBF24;
+  font-size: 9.5px;
+  font-weight: 700;
+  border-radius: 4px;
+}
+
+.kf-ml-card-body {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1 1 auto;
+}
+
+.kf-ml-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.kf-ml-cat {
+  font-size: 10px;
+  font-weight: 700;
+  color: #A9763F;
+  text-transform: uppercase;
+}
+
+.kf-ml-price {
+  font-size: 13px;
+  font-weight: 700;
+  color: #4A3123;
+}
+
+.kf-ml-card-body h4 {
+  font-family: var(--ken-heading, 'Playfair Display', Georgia, serif);
+  font-size: 15px;
+  font-weight: 600;
+  color: #2F1E14;
+  margin: 0;
+  line-height: 1.35;
+}
+
+.kf-ml-reason {
+  font-size: 11px;
+  color: #7A6553;
+  line-height: 1.5;
+  margin: 0;
+  background: #F8F3EA;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border-left: 2.5px solid #D4AF37;
+}
+
+.kf-ml-action {
+  margin-top: auto;
+  padding-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.kf-ml-btn-add {
+  padding: 6px 14px;
+  background: #4A3123;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+}
+
+.kf-ml-btn-add:hover {
+  background: #A9763F;
+  transform: translateY(-1px);
+}
+
+.kf-ml-qty {
+  border: 1.5px solid #10B981 !important;
+  background: #ECFDF5 !important;
+}
+
+@media (max-width: 720px) {
+  .kf-ml-grid {
+    grid-template-columns: 1fr;
+  }
+}

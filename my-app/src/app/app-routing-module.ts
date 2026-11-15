@@ -87,6 +87,7 @@ const routes: Routes = [
       { path: '', redirectTo: 'spaces', pathMatch: 'full' },
       { path: 'spaces', component: KenSpaceListingPage },
       { path: 'focus-pod', component: KenFocusPodPage },
+      { path: 'focus-pod-addons', component: KenFocusPodPage },
       { path: 'drinks', component: KenDrinkPickerPage },
       { path: 'review', component: KenBookingReviewPage },
       { path: 'payment', component: KenBookingPaymentPage },

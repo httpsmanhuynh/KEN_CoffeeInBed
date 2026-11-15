@@ -191,14 +191,70 @@ export class BookingsComponent implements OnInit {
       actionLabel: 'CHECK-OUT',
       actionNote: 'Đến giờ trả chỗ',
     },
+    {
+      id: 'b6',
+      code: 'BK-2310-089',
+      customerName: 'Hoàng Anh Tuấn',
+      customerEmail: 'tuan.hoang@example.com',
+      customerPhone: '•••• •• 5599',
+      tier: 'Vàng · 4.800 điểm',
+      points: '4.800',
+      discount: 'Giảm 10%',
+      spaceName: 'KÉN Tập Trung',
+      packageType: 'Nửa ngày · 4 giờ',
+      zoneName: 'Tầng 1 · Khu Tập Trung',
+      date: '23/10/2026',
+      timeSlot: '14:00–18:00',
+      guestCount: 2,
+      finalAmount: '150.000đ',
+      paymentStatus: 'Đã thanh toán',
+      paymentTime: '18:42 · 23/10/2026',
+      paymentMethod: 'Ví MoMo',
+      txnCode: 'TX-2310-164',
+      status: 'COMPLETED',
+      statusLabel: 'Hoàn thành',
+      statusBadgeClass: 'badge-completed',
+      actionType: 'NONE',
+      actionNote: 'Đã hoàn tất thanh toán',
+    },
+    {
+      id: 'b7',
+      code: 'BK-2310-088',
+      customerName: 'Trần Thu Trang',
+      customerEmail: 'trang.tran@example.com',
+      customerPhone: '•••• •• 9988',
+      tier: 'Bạc · 2.500 điểm',
+      points: '2.500',
+      discount: 'Giảm 5%',
+      spaceName: 'KÉN Tái Tạo',
+      packageType: 'Theo giờ · 3 giờ',
+      zoneName: 'Tầng 2 · Khu Tái Tạo',
+      date: '23/10/2026',
+      timeSlot: '15:00–18:00',
+      guestCount: 1,
+      finalAmount: '260.000đ',
+      paymentStatus: 'Đã thanh toán',
+      paymentTime: '18:15 · 23/10/2026',
+      paymentMethod: 'Chuyển khoản',
+      txnCode: 'TX-2310-163',
+      status: 'COMPLETED',
+      statusLabel: 'Hoàn thành',
+      statusBadgeClass: 'badge-completed',
+      actionType: 'NONE',
+      actionNote: 'Đã hoàn tất thanh toán',
+    },
   ];
 
   selectedBooking: BookingRow = this.bookings[0];
 
   ngOnInit(): void {
     this.route.queryParams.subscribe((params) => {
-      if (params['code']) {
-        const found = this.bookings.find((b) => b.code === params['code']);
+      const codeParam = params['code'] || params['search'];
+      if (codeParam) {
+        this.searchTerm = codeParam;
+        const found = this.bookings.find(
+          (b) => b.code.toLowerCase() === codeParam.toLowerCase()
+        );
         if (found) {
           this.selectedBooking = found;
         }

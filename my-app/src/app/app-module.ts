@@ -75,6 +75,7 @@ import { ServicePackages } from './pages/admin/service-packages/service-packages
 import { Addons } from './pages/admin/addons/addons';
 import { Voucher } from './pages/admin/voucher/voucher';
 import { Forecast } from './pages/admin/forecast/forecast';
+import { Revenue } from './pages/admin/revenue/revenue';
 
 @NgModule({
   declarations: [
@@ -139,6 +140,7 @@ import { Forecast } from './pages/admin/forecast/forecast';
     Addons,
     Voucher,
     Forecast,
+    Revenue,
   ],
   imports: [
     BrowserModule,

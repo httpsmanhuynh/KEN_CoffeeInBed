@@ -1,113 +1,231 @@
 <div class="crumbrow wrap">
   <nav class="crumb" aria-label="breadcrumb">
-    <a routerLink="/menu">Menu</a><span aria-hidden="true">/</span><b aria-current="page">Top Trending</b>
+    <a routerLink="/menu">Menu</a><span aria-hidden="true">/</span><b aria-current="page">Bảng Xếp Hạng Top Trending</b>
   </nav>
   <a class="back" routerLink="/menu"><img src="/images/figma/arrow-left.svg" alt="" width="18" height="18" /><span>Quay về Menu</span></a>
 </div>
 
-<!-- Lời mời buổi chiều -->
+<!-- Banner Header Vinh Danh -->
 <section class="hero wrap" aria-labelledby="tt-title">
   <div class="hero__text">
-    <h1 class="hero__title" id="tt-title">Top Trending</h1>
+    <div class="hero__badge-pill">
+      <span class="sparkle-icon">✨</span> BẢNG VINH DANH HƯƠNG VỊ KÉN COFFEE
+    </div>
+    <h1 class="hero__title" id="tt-title">Top Trending Món Được Yêu Thích</h1>
+    <p class="hero__desc">
+      Được xếp hạng tự động từ hàng ngàn lượt gọi món thực tế của khách hàng mỗi tuần. Khám phá ngay những thức uống và bánh ngọt đang dẫn đầu xu hướng tại KÉN.
+    </p>
   </div>
   <figure class="hero__photo">
-    <img src="/images/figma/dish-matcha-hojicha.png" alt="Matcha latte và hojicha latte trên bàn gỗ" />
+    <img src="/images/figma/dish-matcha-hojicha.png" alt="Đồ uống dẫn đầu xu hướng tại KÉN" />
+    <figcaption>
+      <i></i> Cập nhật theo thời gian thực từ dữ liệu bán hàng
+    </figcaption>
   </figure>
 </section>
 
-<!-- Bộ lọc + gợi ý buổi chiều -->
-<section class="explore wrap" aria-label="Khám phá gợi ý">
-  <div class="filters">
-    <div class="filters__row">
-      <label class="ctl ctl--search">
-        <img src="/images/figma/search.svg" alt="" width="18" height="18" />
-        <input type="search" name="q" placeholder="Tìm hương vị cho buổi chiều của bạn..." [(ngModel)]="query" aria-label="Tìm món" />
-      </label>
-      <label class="ctl">
-        <img src="/images/figma/filter-left.svg" alt="" width="18" height="18" />
-        <select name="price" [(ngModel)]="price" aria-label="Mức giá">
-          @for (o of priceOptions; track o.key) { <option [value]="o.key">{{ o.label }}</option> }
-        </select>
-        <img class="ctl__chev" src="/images/figma/chevron-down.svg" alt="" width="14" height="14" />
-      </label>
-      <label class="ctl">
-        <img src="/images/figma/sort-alpha-down-alt.svg" alt="" width="18" height="18" />
-        <select name="sort" [(ngModel)]="sort" aria-label="Sắp xếp">
-          @for (o of sortOptions; track o.key) { <option [value]="o.key">{{ o.label }}</option> }
-        </select>
-        <img class="ctl__chev" src="/images/figma/chevron-down.svg" alt="" width="14" height="14" />
-      </label>
+<!-- Bộ lọc danh mục -->
+<section class="explore wrap" aria-label="Bảng xếp hạng xu hướng">
+  <div class="cats-bar">
+    <div class="cats-bar__info">
+      <span class="cats-bar__title">Lọc theo nhóm món:</span>
+    </div>
+    <div class="chips" role="group" aria-label="Nhóm món">
+      @for (c of categories; track c) {
+        <button type="button" class="chip" [class.is-active]="category === c" [attr.aria-pressed]="category === c" (click)="setCategory(c)">{{ label(c) }}</button>
+      }
+    </div>
+    <span class="cats-bar__note" *ngIf="total > 0">Tổng cộng {{ total }} món</span>
+  </div>
+
+  <!-- BỤC TRAO THƯỞNG (PODIUM) CHO TOP 3 -->
+  <div class="podium-section" aria-label="Bục vinh quang Top 3 món dẫn đầu">
+    <div class="podium-head">
+      <span class="podium-eyebrow">🏆 BỤC VINH QUANG XU HƯỚNG</span>
+      <h2>Top 3 Món Đứng Đầu Bảng Xếp Hạng</h2>
+      <p class="podium-sub">Ba hương vị xuất sắc nhất nhận được nhiều sự mến mộ và lượt đánh giá cao nhất</p>
     </div>
 
-    <div class="cats">
-      <div class="chips" role="group" aria-label="Nhóm món">
-        @for (c of categories; track c) {
-          <button type="button" class="chip" [class.is-active]="category === c" [attr.aria-pressed]="category === c" (click)="setCategory(c)">{{ label(c) }}</button>
-        }
+    <div class="podium-container">
+      <!-- VỊ TRÍ HẠNG 2: BẠC (BÊN TRÁI) -->
+      <div class="podium-col podium-col--second" *ngIf="podiumTop3.second as d2">
+        <article class="podium-card podium-card--silver">
+          <div class="podium-medal podium-medal--silver">
+            <span class="medal-icon">🥈</span>
+            <span class="medal-text">HẠNG 2</span>
+          </div>
+          <div class="podium-card__img-wrap">
+            <img [src]="d2.image" [alt]="d2.name" loading="lazy" />
+            <span class="growth-tag">{{ d2.trendGrowth }}</span>
+          </div>
+          <div class="podium-card__body">
+            <span class="item-category">{{ d2.category }}</span>
+            <h3 class="item-name">{{ d2.name }}</h3>
+            <p class="item-desc">{{ d2.desc }}</p>
+            <div class="item-metrics">
+              <span class="metric-orders">🔥 {{ fmtNumber(d2.ordersCount) }} lượt gọi</span>
+              <span class="metric-rating">⭐ {{ d2.rating }}</span>
+            </div>
+            <div class="item-price-bar">
+              <span class="price-val">{{ fmt(d2.price) }}</span>
+              <span class="price-unit">/ phần</span>
+            </div>
+          </div>
+        </article>
+        <!-- Bệ đứng số 2 -->
+        <div class="pedestal pedestal--2">
+          <span class="pedestal-num">2</span>
+          <span class="pedestal-label">Á QUÂN BẠC</span>
+        </div>
+      </div>
+
+      <!-- VỊ TRÍ HẠNG 1: VÀNG (Ở GIỮA - CAO NHẤT, NỔI BẬT NHẤT) -->
+      <div class="podium-col podium-col--first" *ngIf="podiumTop3.first as d1">
+        <div class="crown-banner">
+          <span class="crown-icon">👑</span>
+          <span class="crown-title">QUÁN QUÂN XU HƯỚNG</span>
+        </div>
+        <article class="podium-card podium-card--gold">
+          <div class="gold-halo-light"></div>
+          <div class="podium-medal podium-medal--gold">
+            <span class="medal-icon">🥇</span>
+            <span class="medal-text">TOP 1</span>
+          </div>
+          <div class="podium-card__img-wrap podium-card__img-wrap--champion">
+            <img [src]="d1.image" [alt]="d1.name" loading="lazy" />
+            <span class="growth-tag growth-tag--gold">{{ d1.trendGrowth }}</span>
+          </div>
+          <div class="podium-card__body">
+            <span class="item-category item-category--gold">{{ d1.category }}</span>
+            <h3 class="item-name item-name--champion">{{ d1.name }}</h3>
+            <p class="item-desc">{{ d1.desc }}</p>
+            <div class="item-metrics">
+              <span class="metric-orders metric-orders--gold">🔥 {{ fmtNumber(d1.ordersCount) }} lượt gọi tuần</span>
+              <span class="metric-rating">⭐ {{ d1.rating }}</span>
+            </div>
+            <div class="item-price-bar item-price-bar--gold">
+              <span class="price-val price-val--gold">{{ fmt(d1.price) }}</span>
+              <span class="price-unit">/ phần</span>
+            </div>
+          </div>
+        </article>
+        <!-- Bệ đứng số 1 (Cao nhất) -->
+        <div class="pedestal pedestal--1">
+          <span class="pedestal-num">1</span>
+          <span class="pedestal-label">QUÁN QUÂN VÀNG</span>
+        </div>
+      </div>
+
+      <!-- VỊ TRÍ HẠNG 3: ĐỒNG (BÊN PHẢI) -->
+      <div class="podium-col podium-col--third" *ngIf="podiumTop3.third as d3">
+        <article class="podium-card podium-card--bronze">
+          <div class="podium-medal podium-medal--bronze">
+            <span class="medal-icon">🥉</span>
+            <span class="medal-text">HẠNG 3</span>
+          </div>
+          <div class="podium-card__img-wrap">
+            <img [src]="d3.image" [alt]="d3.name" loading="lazy" />
+            <span class="growth-tag">{{ d3.trendGrowth }}</span>
+          </div>
+          <div class="podium-card__body">
+            <span class="item-category">{{ d3.category }}</span>
+            <h3 class="item-name">{{ d3.name }}</h3>
+            <p class="item-desc">{{ d3.desc }}</p>
+            <div class="item-metrics">
+              <span class="metric-orders">🔥 {{ fmtNumber(d3.ordersCount) }} lượt gọi</span>
+              <span class="metric-rating">⭐ {{ d3.rating }}</span>
+            </div>
+            <div class="item-price-bar">
+              <span class="price-val">{{ fmt(d3.price) }}</span>
+              <span class="price-unit">/ phần</span>
+            </div>
+          </div>
+        </article>
+        <!-- Bệ đứng số 3 -->
+        <div class="pedestal pedestal--3">
+          <span class="pedestal-num">3</span>
+          <span class="pedestal-label">HẠNG BA ĐỒNG</span>
+        </div>
       </div>
     </div>
   </div>
 
-  @if (afternoonShown.length) {
-    <div class="head">
-      <div class="head__title">
-        <h2>Gợi ý cho buổi chiều</h2>
-      </div>
-    </div>
-    <div class="grid">
-      @for (d of afternoonShown; track d.id) {
-        <article class="card">
-          <img class="card__img" [src]="d.image" [alt]="d.name" loading="lazy" />
-          <div class="card__body">
-            <p class="card__tag card__tag--green">{{ d.tag }}</p>
-            <h3 class="card__name">{{ d.name }}</h3>
-            <p class="card__desc">{{ d.desc }}</p>
-            <div class="card__price"><b>{{ fmt(d.price) }}</b><span>/ phần</span></div>
-          </div>
-        </article>
-      }
-    </div>
-  }
-</section>
-
-<!-- Đang được quan tâm -->
-@if (trendingShown.length) {
-  <section class="band" aria-label="Đang được quan tâm">
-    <div class="band__inner wrap">
+  <!-- DANH SÁCH BẢNG XẾP HẠNG TOÀN BỘ THEO THỨ TỰ TỪ CAO TỚI THẤP (#01 ĐẾN #12) -->
+  @if (filteredList.length) {
+    <div class="remaining-section">
       <div class="head">
         <div class="head__title">
-          <h2>Đang được quan tâm</h2>
+          <span class="eyebrow">BẢNG XẾP HẠNG THỨ TỰ MÓN</span>
+          <h2>{{ category === 'all' ? 'Toàn Bộ Bảng Xếp Hạng (#01 – #12)' : 'Xếp Hạng Nhóm ' + category }}</h2>
         </div>
+        <p class="head__text">Sắp xếp từ cao tới thấp theo số lượt gọi và độ ưa chuộng của khách hàng</p>
       </div>
-      <div class="grid">
-        @for (d of trendingShown; track d.id) {
-          <article class="card">
-            <img class="card__img" [src]="d.image" [alt]="d.name" loading="lazy" />
-            <div class="card__body">
-              <p class="card__tag">{{ d.tag }}</p>
-              <h3 class="card__name">{{ d.name }}</h3>
-              <p class="card__desc">{{ d.desc }}</p>
-              <div class="card__price"><b>{{ fmt(d.price) }}</b><span>/ phần</span></div>
+
+      <div class="ranked-grid">
+        @for (d of filteredList; track d.id) {
+          <article class="ranked-card">
+            <!-- Rank Badge nổi bật (Hạng 1 Vàng, Hạng 2 Bạc, Hạng 3 Đồng, Hạng 4+ Thường) -->
+            <div class="rank-badge" [class.rank-badge--1]="d.rank === 1" [class.rank-badge--2]="d.rank === 2" [class.rank-badge--3]="d.rank === 3">
+              <span class="rank-badge__num">#{{ d.rank < 10 ? '0' + d.rank : d.rank }}</span>
+            </div>
+
+            <div class="ranked-card__img-wrap">
+              <img class="ranked-card__img" [src]="d.image" [alt]="d.name" loading="lazy" />
+              <span class="ranked-card__growth">{{ d.trendGrowth }}</span>
+            </div>
+
+            <div class="ranked-card__body">
+              <div class="ranked-card__meta">
+                <span class="ranked-card__cat">{{ d.category }}</span>
+                <span class="ranked-card__rating">⭐ {{ d.rating }}</span>
+              </div>
+              <h3 class="ranked-card__name">{{ d.name }}</h3>
+              <p class="ranked-card__desc">{{ d.desc }}</p>
+
+              <div class="ranked-card__stats">
+                <div class="stat-progress">
+                  <div class="stat-progress__bar" [style.width.%]="(d.ordersCount / 1840) * 100"></div>
+                </div>
+                <span class="stat-count">{{ fmtNumber(d.ordersCount) }} lượt đặt</span>
+              </div>
+
+              <div class="ranked-card__footer">
+                <div class="ranked-card__price">
+                  <b>{{ fmt(d.price) }}</b>
+                  <span>/ phần</span>
+                </div>
+                <span class="ranked-card__tag">{{ d.tag }}</span>
+              </div>
             </div>
           </article>
         }
       </div>
     </div>
-  </section>
-}
+  }
+</section>
 
+<!-- Thông báo khi danh mục trống -->
 @if (total === 0) {
   <section class="empty wrap" role="status">
-    <p class="empty__title">Chưa tìm thấy hương vị phù hợp</p>
-    <p class="empty__text">Thử đổi từ khoá, nhóm món hoặc mức giá nhé.</p>
-    <button type="button" class="btn-outline btn-outline--sm" (click)="reset()">Xoá bộ lọc</button>
+    <div class="empty__icon">☕</div>
+    <h3 class="empty__title">Chưa có món trong nhóm này</h3>
+    <p class="empty__text">Chọn nhóm món khác hoặc xem lại toàn bộ bảng xếp hạng Top Trending.</p>
+    <button type="button" class="btn-outline btn-outline--sm" (click)="reset()">
+      Xem lại toàn bộ bảng xếp hạng
+    </button>
   </section>
 }
 
-<!-- Hẹn ở quầy -->
-<section class="cta wrap" aria-label="Ghé quầy">
-  <div class="cta__text">
-    <p class="cta__title">Tìm được món cho chiều nay rồi chứ?</p>
+<!-- CTA Quay về đặt bàn & trải nghiệm -->
+<section class="cta-band wrap">
+  <div class="cta-box">
+    <div class="cta-box__text">
+      <h2>Bạn đã chọn được hương vị yêu thích?</h2>
+      <p>Đặt chỗ không gian làm việc hoặc phòng họp tại KÉN ngay hôm nay để thưởng thức những món đồ uống tuyệt hảo nhất.</p>
+    </div>
+    <div class="cta-box__actions">
+      <a routerLink="/booking/spaces" class="btn-primary">Đặt Chỗ Trải Nghiệm Ngay →</a>
+      <a routerLink="/menu" class="btn-secondary">Xem Toàn Bộ Menu</a>
+    </div>
   </div>
-  <a class="btn-outline" routerLink="/menu"><span>Xem Menu đầy đủ</span><img src="/images/figma/arrow-left.svg" alt="" width="18" height="18" /></a>
 </section>

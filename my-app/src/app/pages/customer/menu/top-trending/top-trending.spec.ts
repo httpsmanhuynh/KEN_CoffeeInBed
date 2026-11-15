@@ -1,24 +1,24 @@
-import { TestBed } from '@angular/core/testing';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { TopTrending } from './top-trending';
 
 describe('TopTrending', () => {
   let c: TopTrending;
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [FormsModule, RouterModule.forRoot([])],
-      declarations: [TopTrending],
-      schemas: [NO_ERRORS_SCHEMA],
-    }).compileComponents();
-    c = TestBed.createComponent(TopTrending).componentInstance;
+  beforeEach(() => {
+    c = new TopTrending();
   });
 
   it('shows 4 afternoon dishes and 8 trending dishes by default', () => {
     expect(c.afternoonShown.length).toBe(4);
     expect(c.trendingShown.length).toBe(8);
     expect(c.filtering).toBe(false);
+  });
+
+  it('has podium top 3 ordered by rank 1, 2, 3', () => {
+    expect(c.hasPodium).toBe(true);
+    expect(c.podiumTop3.first?.rank).toBe(1);
+    expect(c.podiumTop3.second?.rank).toBe(2);
+    expect(c.podiumTop3.third?.rank).toBe(3);
+    expect(c.podiumTop3.first?.id).toBe('coldbrew');
   });
 
   it('formats prices like the design', () => {

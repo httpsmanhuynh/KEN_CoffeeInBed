@@ -437,7 +437,7 @@ export class SmoothScrollService {
       const batchTriggers = ScrollTrigger.batch(belowFold, {
         start: 'top 90%',
         once: true,
-        onEnter: (batch) => {
+        onEnter: (batch: any[]) => {
           gsap.to(batch, {
             y: 0,
             opacity: 1,

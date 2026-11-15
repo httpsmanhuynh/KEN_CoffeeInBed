@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../../core/auth.service';
 import { KenBookingState, kenMoney, kenNextDay } from '../booking-state';
 import { KenAvailabilityService } from '../availability.service';
+import { MlRecommendationItem, MlRecommendationService } from '../../../../core/ml-recommendation.service';
 
 @Component({ selector: 'app-ken-focus-booking', standalone: false, templateUrl: './focus-pod.html', styleUrl: './focus-pod.css' })
 export class KenFocusPodPage implements OnInit {
@@ -12,8 +13,10 @@ export class KenFocusPodPage implements OnInit {
   showAddons = false;
   checkingSession = false;
   checkingAvailability = false;
+  addonRecommendations: MlRecommendationItem[] = [];
   readonly money = kenMoney;
   readonly hours = Array.from({ length: 14 }, (_, i) => i + 8);
+
   constructor(
     public state: KenBookingState,
     private router: Router,
@@ -21,19 +24,41 @@ export class KenFocusPodPage implements OnInit {
     private route: ActivatedRoute,
     private availability: KenAvailabilityService,
     private changeDetector: ChangeDetectorRef,
-  ) {}
+    private mlRecService?: MlRecommendationService,
+  ) {
+    if (!this.mlRecService) {
+      this.mlRecService = new MlRecommendationService();
+    }
+  }
+
   ngOnInit(): void {
     if (!this.state.isFocusSpace) this.state.set({ spaceId: 'focus', guests: 1 });
-    if (this.route.snapshot.queryParamMap.get('bookingStep') === 'addons') {
+    this.refreshRecommendations();
+    if (this.router.url.includes('focus-pod-addons') || this.route.snapshot.queryParamMap.get('bookingStep') === 'addons') {
       this.restoreAddonsStep();
     }
   }
+
+  refreshRecommendations(): void {
+    const draft = this.state.draft();
+    if (this.mlRecService) {
+      this.addonRecommendations = this.mlRecService.getFocusPodAddonRecommendations({
+        spaceId: 'focus',
+        date: draft.date,
+        startHour: draft.startHour,
+        hours: draft.hours,
+        guests: 1
+      });
+    }
+  }
+
   get minDate(): string { return kenNextDay(); }
   get filteredExtras() { return this.extraCategory === 'all' ? this.state.extras : this.state.extras.filter(x => x.category === this.extraCategory); }
   get hourlyDurationOptions(): number[] {
     const maxHours = Math.max(1, 22 - this.state.draft().startHour);
     return Array.from({ length: maxHours }, (_, i) => i + 1);
   }
+
   chooseHours(hours: number): void {
     this.state.set({
       hours,
@@ -43,25 +68,41 @@ export class KenFocusPodPage implements OnInit {
     });
     this.showAddons = false;
     this.feedback = '';
+    this.refreshRecommendations();
   }
+
   changeDate(date: string): void {
     this.state.set({ date, holdUntil: null });
     this.showAddons = false;
     this.feedback = '';
+    this.refreshRecommendations();
   }
+
   changeHour(hour: number): void {
     this.state.set({ startHour: hour, holdUntil: null });
     this.showAddons = false;
     this.feedback = '';
+    this.refreshRecommendations();
   }
+
   get timeOptions() { return this.hours.filter(h => h + this.state.draft().hours <= 22); }
   extrasCount(id: string): number { return this.state.draft().extras[id] || 0; }
   changeExtra(id: string, by: number): void { this.state.setExtra(id, this.extrasCount(id) + by); }
+
+  recommendedExtraCount(item: MlRecommendationItem): number {
+    return this.extrasCount(item.id);
+  }
+
+  addRecommendedExtra(item: MlRecommendationItem): void {
+    this.changeExtra(item.id, 1);
+  }
+
   openDrinkPicker(): void {
     this.router.navigate(['/booking/drinks'], {
       queryParams: { returnTo: '/booking/focus-pod?bookingStep=addons' },
     });
   }
+
   beginBooking(): void {
     if (this.checkingSession || this.checkingAvailability) return;
     if (!this.state.isSlotValid) {
@@ -71,6 +112,7 @@ export class KenFocusPodPage implements OnInit {
 
     this.verifyAvailability(() => this.requireSession());
   }
+
   toReview(): void {
     if (!this.state.isSlotValid) {
       this.feedback = 'Vui lòng chọn ngày và giờ bắt đầu trong tương lai, cách hiện tại ít nhất 30 phút, và kết thúc trước 22:00.';
@@ -85,7 +127,16 @@ export class KenFocusPodPage implements OnInit {
 
   private restoreAddonsStep(): void {
     this.auth.ensureSession().subscribe({
-      next: user => user ? this.verifyAvailability(() => this.showAddons = true) : this.goToLogin(),
+      next: user => {
+        if (user) {
+          this.verifyAvailability(() => {
+            this.showAddons = true;
+            this.refreshRecommendations();
+          });
+        } else {
+          this.goToLogin();
+        }
+      },
       error: () => {
         this.feedback = 'Không thể kiểm tra phiên đăng nhập. Vui lòng thử lại.';
         this.changeDetector.markForCheck();
@@ -105,6 +156,7 @@ export class KenFocusPodPage implements OnInit {
         this.checkingSession = false;
         if (user) {
           this.showAddons = true;
+          this.refreshRecommendations();
           this.feedback = '';
         } else {
           this.goToLogin();
