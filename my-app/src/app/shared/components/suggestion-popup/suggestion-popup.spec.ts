@@ -1,20 +1,20 @@
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterModule, Router } from '@angular/router';
 import { SuggestionPopup } from './suggestion-popup';
 import { SuggestionPopupService } from '../../services/suggestion-popup.service';
 
 describe('SuggestionPopup', () => {
+  let fixture: ComponentFixture<SuggestionPopup>;
   let c: SuggestionPopup;
   let svc: SuggestionPopupService;
 
   beforeEach(async () => {
-    sessionStorage.clear();
     await TestBed.configureTestingModule({
       imports: [RouterModule.forRoot([])],
       declarations: [SuggestionPopup],
     }).compileComponents();
-    const f = TestBed.createComponent(SuggestionPopup);
-    c = f.componentInstance;
+    fixture = TestBed.createComponent(SuggestionPopup);
+    c = fixture.componentInstance;
     svc = TestBed.inject(SuggestionPopupService);
   });
 
@@ -35,11 +35,34 @@ describe('SuggestionPopup', () => {
     expect([c.fill(0), c.fill(1)]).toEqual([100, 50]);
   });
 
-  it('close() hides the popup and remembers it was seen', () => {
+  it('close() hides the popup', () => {
     svc.show();
     c.close();
     expect(svc.isOpen()).toBe(false);
-    expect(sessionStorage.getItem('ken.afternoonPopupSeen')).toBe('1');
+  });
+
+  it('advances to the next suggestion after five seconds', () => {
+    vi.useFakeTimers();
+    svc.show();
+    fixture.detectChanges();
+    vi.advanceTimersByTime(4999);
+    expect(c.index).toBe(0);
+    vi.advanceTimersByTime(51);
+    expect(c.index).toBe(1);
+    expect(c.slideDurationMs).toBe(5000);
+    c.close();
+    fixture.destroy();
+    vi.useRealTimers();
+  });
+
+  it('restarts the popup at the first suggestion when opened again while visible', () => {
+    svc.show();
+    fixture.detectChanges();
+    c.next();
+    svc.show();
+    fixture.detectChanges();
+    expect(c.index).toBe(0);
+    expect(c.progress).toBe(0);
   });
 
   it('explore() closes and goes to /top-trending; later() goes to /menu', () => {

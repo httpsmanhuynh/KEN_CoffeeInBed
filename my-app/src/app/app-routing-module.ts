@@ -48,6 +48,7 @@ import { KenFocusPodPage } from './pages/customer/ken-booking/focus-pod/focus-po
 import { KenDrinkPickerPage } from './pages/customer/ken-booking/drink-picker/drink-picker';
 import { KenBookingReviewPage } from './pages/customer/ken-booking/booking-review/booking-review';
 import { KenBookingPaymentPage } from './pages/customer/ken-booking/booking-payment/booking-payment';
+import { KenBookingSpaceDetailPage } from './pages/customer/ken-booking/space-detail/space-detail';
 import { SupportComponent } from './pages/customer/support/support';
 import { PolicyPage } from './pages/customer/policy-page/policy-page';
 import { TermsPage } from './pages/customer/terms-page/terms-page';
@@ -62,8 +63,10 @@ import { ConnectPage } from './pages/customer/space-details/connect-page/connect
 import { CoworkPage } from './pages/customer/space-details/cowork-page/cowork-page';
 import { FocusPage } from './pages/customer/space-details/focus-page/focus-page';
 import { MeetingPage } from './pages/customer/space-details/meeting-page/meeting-page';
+import { adminRoutes } from './pages/admin/admin.routes';
 
 const routes: Routes = [
+  ...adminRoutes,
   // Home
   { path: '', component: HomeGuestPage, pathMatch: 'full' },
   { path: 'home-logged-in', component: HomeMemberPage },
@@ -99,6 +102,8 @@ const routes: Routes = [
   { path: 'menu-intro', component: MenuPage },
   { path: 'top-trending', component: TopTrending },
   { path: 'access-denied', component: AccessDenied },
+  { path: '403', component: AccessDenied },
+  { path: '404', component: NotFound },
 
   // 5-Step Booking Flow (ttrinh)
   {
@@ -107,10 +112,17 @@ const routes: Routes = [
     children: [
       { path: '', redirectTo: 'spaces', pathMatch: 'full' },
       { path: 'spaces', component: KenSpaceListingPage },
-      { path: 'space/:id', component: KenOtherSpacePage },
       { path: 'focus-pod', component: KenFocusPodPage },
       { path: 'drinks', component: KenDrinkPickerPage },
       { path: 'review', component: KenBookingReviewPage },
+      { path: 'payment', component: KenBookingPaymentPage },
+      { path: ':id', component: KenOtherSpacePage },
+    ],
+  },
+  {
+    path: 'bookings',
+    component: KenBookingShell,
+    children: [
       { path: 'payment', component: KenBookingPaymentPage },
     ],
   },
@@ -129,6 +141,7 @@ const routes: Routes = [
   { path: 'spaces/work-lounge', component: CoworkPage },
   { path: 'spaces/focus-pod', component: FocusPage },
   { path: 'spaces/small-meeting-room', component: MeetingPage },
+  { path: 'spaces/booking/:id', component: KenBookingSpaceDetailPage },
   { path: 'spaces', component: SpacesPage },
 
   // Legacy redirects

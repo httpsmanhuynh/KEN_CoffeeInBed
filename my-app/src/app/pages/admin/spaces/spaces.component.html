@@ -15,6 +15,7 @@
       <div class="heading-title-block">
         <div class="title-with-icon">
           <div class="page-title-icon-wrap">
+<<<<<<< HEAD
             <img src="images/admin/nav-sidebar-reverse.svg" alt="" class="page-title-icon" />
           </div>
           <h1 class="page-title">Quản lý không gian</h1>
@@ -28,6 +29,30 @@
         </button>
         <button type="button" class="btn-action-primary" (click)="openCreateForm()" data-name="Add space btn">
           <img src="images/admin/plus.svg" alt="" class="btn-icon" />
+=======
+            <img src="/images/ken-about/focus-icon.svg" alt="" class="page-title-icon" />
+          </div>
+          <h1 class="page-title">Quản lý không gian</h1>
+        </div>
+      </div>
+
+      <div class="heading-actions">
+        <button
+          type="button"
+          class="btn-action-outline"
+          (click)="exportList()"
+          data-name="Export btn"
+        >
+          <span>Xuất danh sách ↗</span>
+        </button>
+        <button
+          type="button"
+          class="btn-action-primary"
+          (click)="openCreateForm()"
+          data-name="Add space btn"
+        >
+          <img src="/images/figma/sparkles.svg" alt="" class="btn-icon" />
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
           <span>Thêm không gian</span>
         </button>
       </div>
@@ -67,10 +92,18 @@
       <div class="filter-bar" data-name="Filter bar">
         <!-- Search Input -->
         <div class="search-input-wrap">
+<<<<<<< HEAD
           <img src="images/admin/search-icon.svg" alt="" class="search-icon" />
           <input
             type="text"
             [(ngModel)]="searchQuery"
+=======
+          <img src="/images/figma/search.svg" alt="" class="search-icon" />
+          <input
+            type="text"
+            [(ngModel)]="searchQuery"
+            (ngModelChange)="currentPage = 1"
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
             placeholder="Tìm tên không gian..."
             class="search-input"
           />
@@ -78,27 +111,55 @@
 
         <!-- Filter Zone -->
         <div class="filter-select-wrap">
+<<<<<<< HEAD
           <select [(ngModel)]="selectedZone" class="filter-select">
             <option value="Tất cả">Zone: Tất cả</option>
             <option *ngFor="let z of zoneOptions" [value]="z">Zone: {{ z }}</option>
           </select>
           <img src="images/admin/arrow-dropdown.svg" alt="" class="select-chevron" />
+=======
+          <select
+            [(ngModel)]="selectedZone"
+            (ngModelChange)="currentPage = 1"
+            class="filter-select"
+          >
+            <option value="Tất cả">Zone: Tất cả</option>
+            <option *ngFor="let z of zoneOptions" [value]="z">Zone: {{ z }}</option>
+          </select>
+          <img src="/images/figma/chevron-down.svg" alt="" class="select-chevron" />
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
         </div>
 
         <!-- Filter Status -->
         <div class="filter-select-wrap">
+<<<<<<< HEAD
           <select [(ngModel)]="selectedStatus" class="filter-select">
+=======
+          <select
+            [(ngModel)]="selectedStatus"
+            (ngModelChange)="currentPage = 1"
+            class="filter-select"
+          >
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
             <option value="Tất cả">Trạng thái: Tất cả</option>
             <option value="Đang hoạt động">Đang hoạt động</option>
             <option value="Bảo trì">Bảo trì</option>
             <option value="Ngừng hoạt động">Ngừng hoạt động</option>
           </select>
+<<<<<<< HEAD
           <img src="images/admin/arrow-dropdown.svg" alt="" class="select-chevron" />
+=======
+          <img src="/images/figma/chevron-down.svg" alt="" class="select-chevron" />
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
         </div>
 
         <!-- Sort Button -->
         <button type="button" class="btn-sort" (click)="toggleSort()" data-name="Sort btn">
+<<<<<<< HEAD
           <img src="images/admin/sort-gold.svg" alt="" class="sort-icon" />
+=======
+          <img src="/images/figma/sort-alpha-down-alt.svg" alt="" class="sort-icon" />
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
           <span>Sắp xếp</span>
         </button>
       </div>
@@ -161,7 +222,11 @@
           </thead>
           <tbody>
             <tr
+<<<<<<< HEAD
               *ngFor="let s of filteredSpaces"
+=======
+              *ngFor="let s of paginatedSpaces"
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
               class="table-data-row"
               [class.row-inactive]="s.status === 'INACTIVE'"
               data-name="Space record"
@@ -170,7 +235,16 @@
               <td class="td-space-identity">
                 <div class="space-title-block">
                   <span class="space-name-vi">{{ s.name }}</span>
+<<<<<<< HEAD
                   <span class="space-name-en">{{ s.nameEn }}</span>
+=======
+                  <span class="space-name-en">
+                    {{ s.nameEn }} · Buffer {{ s.bufferMinutes }}p
+                    <span *ngIf="s.futureBookingCount > 0" class="future-warn-pill">
+                      · {{ s.futureBookingCount }} đơn sắp tới</span
+                    >
+                  </span>
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
                 </div>
               </td>
 
@@ -221,7 +295,17 @@
                 >
                   <span class="status-dot"></span>
                   <span class="status-text">
+<<<<<<< HEAD
                     {{ s.status === 'ACTIVE' ? 'Đang hoạt động' : s.status === 'MAINTENANCE' ? 'Bảo trì' : 'Ngừng hoạt động' }}
+=======
+                    {{
+                      s.status === 'ACTIVE'
+                        ? 'Đang hoạt động'
+                        : s.status === 'MAINTENANCE'
+                          ? 'Bảo trì'
+                          : 'Ngừng hoạt động'
+                    }}
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
                   </span>
                 </div>
               </td>
@@ -230,14 +314,42 @@
               <td class="td-actions">
                 <div class="action-buttons-group">
                   <!-- Xem -->
+<<<<<<< HEAD
                   <button type="button" class="btn-table-action" (click)="openViewModal(s)" title="Xem chi tiết">
                     <img src="images/admin/eye-muted.svg" alt="" class="action-svg" />
+=======
+                  <button
+                    type="button"
+                    class="btn-table-action"
+                    (click)="openViewModal(s)"
+                    title="Xem chi tiết"
+                  >
+                    <img src="/images/figma/eye-view-fill.svg" alt="" class="action-svg" />
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
                     <span>Xem</span>
                   </button>
 
                   <!-- Sửa -->
+<<<<<<< HEAD
                   <button type="button" class="btn-table-action" (click)="openEditForm(s)" title="Chỉnh sửa không gian">
                     <img src="images/admin/detail.svg" alt="" class="action-svg" />
+=======
+                  <button
+                    type="button"
+                    class="btn-table-action"
+                    (click)="openEditForm(s)"
+                    title="Chỉnh sửa không gian"
+                  >
+                    <svg
+                      class="action-svg"
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                    >
+                      <path d="M11.5 2.5a1.5 1.5 0 0 1 2.1 2.1L5.2 13l-2.7.6.6-2.7 8.4-8.4z" />
+                    </svg>
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
                     <span>Sửa</span>
                   </button>
 
@@ -247,11 +359,23 @@
                     class="btn-table-action"
                     [class.text-reactivate]="s.status === 'INACTIVE'"
                     [class.text-deactivate]="s.status !== 'INACTIVE'"
+<<<<<<< HEAD
                     (click)="toggleSpaceStatus(s)"
                     [title]="s.status === 'INACTIVE' ? 'Kích hoạt lại' : 'Ngừng hoạt động'"
                   >
                     <img
                       [src]="s.status === 'INACTIVE' ? 'images/admin/check-white.svg' : 'images/admin/clock-icon.svg'"
+=======
+                    (click)="requestToggleStatus(s)"
+                    [title]="s.status === 'INACTIVE' ? 'Kích hoạt lại' : 'Ngừng hoạt động'"
+                  >
+                    <img
+                      [src]="
+                        s.status === 'INACTIVE'
+                          ? '/images/figma/check.svg'
+                          : '/images/figma/clock.svg'
+                      "
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
                       alt=""
                       class="action-svg"
                     />
@@ -266,7 +390,13 @@
               <td colspan="9" class="td-empty">
                 <div class="empty-state-block">
                   <p class="empty-title">Không tìm thấy không gian phù hợp</p>
+<<<<<<< HEAD
                   <p class="empty-sub">Hãy thử đổi từ khóa tìm kiếm hoặc bỏ chọn các bộ lọc phía trên.</p>
+=======
+                  <p class="empty-sub">
+                    Hãy thử đổi từ khóa tìm kiếm hoặc bỏ chọn các bộ lọc phía trên.
+                  </p>
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
                 </div>
               </td>
             </tr>
@@ -275,10 +405,66 @@
       </div>
 
       <!-- Table Footer -->
+<<<<<<< HEAD
       <div class="table-footer-row" data-name="Table footer">
         <p class="footer-count">
           Hiển thị {{ filteredSpaces.length }} / {{ totalCount }} không gian · {{ zoneTapTrungCount }} Tập Trung · {{ zoneTaiTaoCount }} Tái Tạo
         </p>
+=======
+      <div *ngIf="confirmToggleTarget as target" class="space-confirm-banner">
+        <span>
+          {{
+            target.status === 'INACTIVE'
+              ? 'Xác nhận kích hoạt lại không gian "' + target.name + '"?'
+              : 'Xác nhận chuyển "' + target.name + '" sang Ngừng hoạt động?'
+          }}
+          <strong *ngIf="target.status !== 'INACTIVE' && target.futureBookingCount > 0">
+            Lưu ý: Đang có {{ target.futureBookingCount }} đơn đặt chỗ sắp tới!
+          </strong>
+        </span>
+        <div class="confirm-banner-actions">
+          <button type="button" class="btn-action-primary" (click)="confirmToggleStatus()">
+            Xác nhận
+          </button>
+          <button type="button" class="btn-action-outline" (click)="confirmToggleTarget = null">
+            Huỷ
+          </button>
+        </div>
+      </div>
+
+      <div class="table-footer-row admin-pagination-bar" data-name="Table footer">
+        <p class="footer-count admin-pagination-info">
+          Hiển thị {{ pageStartIndex }}–{{ pageEndIndex }} / {{ filteredSpaces.length }} không gian
+          · {{ zoneTapTrungCount }} Tập Trung · {{ zoneTaiTaoCount }} Tái Tạo
+        </p>
+        <div class="admin-pagination-controls" *ngIf="filteredSpaces.length > 0">
+          <button
+            type="button"
+            class="btn-page-nav"
+            [disabled]="currentPage <= 1"
+            (click)="goToPage(currentPage - 1)"
+          >
+            ‹ Trước
+          </button>
+          <button
+            *ngFor="let page of pageNumbers"
+            type="button"
+            class="btn-page-num"
+            [class.active]="page === currentPage"
+            (click)="goToPage(page)"
+          >
+            {{ page }}
+          </button>
+          <button
+            type="button"
+            class="btn-page-nav"
+            [disabled]="currentPage >= totalPages"
+            (click)="goToPage(currentPage + 1)"
+          >
+            Tiếp ›
+          </button>
+        </div>
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
       </div>
     </div>
   </ng-container>
@@ -291,9 +477,13 @@
     <div class="page-heading-row" data-name="Page heading">
       <div class="heading-title-block">
         <h1 class="page-title font-large">Quản lý không gian</h1>
+<<<<<<< HEAD
         <p class="page-subtitle text-regular">
           Cấu hình thông tin và đặt chỗ
         </p>
+=======
+        <p class="page-subtitle text-regular">Cấu hình thông tin và đặt chỗ</p>
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
       </div>
 
       <div class="heading-actions">
@@ -304,11 +494,24 @@
           [disabled]="!isEditing"
           data-name="Create action"
         >
+<<<<<<< HEAD
           <img src="images/admin/plus.svg" alt="" class="btn-icon" />
           <span>Thêm không gian</span>
         </button>
         <button type="button" class="btn-form-header-primary" (click)="cancelForm()" data-name="Create action primary">
           <img src="images/admin/sort-gold.svg" alt="" class="btn-icon" />
+=======
+          <img src="/images/figma/sparkles.svg" alt="" class="btn-icon" />
+          <span>Thêm không gian</span>
+        </button>
+        <button
+          type="button"
+          class="btn-form-header-primary"
+          (click)="cancelForm()"
+          data-name="Create action primary"
+        >
+          <img src="/images/figma/arrow-left.svg" alt="" class="btn-icon" />
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
           <span>Quay lại danh sách</span>
         </button>
       </div>
@@ -319,13 +522,25 @@
       <!-- Form Header -->
       <div class="form-header-row" data-name="Form header">
         <div class="form-header-left" data-name="Form title row">
+<<<<<<< HEAD
           <img src="images/admin/cursor-text.svg" alt="" class="form-title-icon" />
+=======
+          <img src="/images/figma/icon-info.svg" alt="" class="form-title-icon" />
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
           <h2 class="form-title-text">
             {{ isEditing ? 'CHỈNH SỬA KHÔNG GIAN' : 'THÔNG TIN KHÔNG GIAN' }}
           </h2>
         </div>
         <p class="form-header-right-note">
+<<<<<<< HEAD
           {{ isEditing ? 'Chỉnh sửa cấu hình & thông tin không gian' : 'Thêm mới hoặc chỉnh sửa không gian' }}
+=======
+          {{
+            isEditing
+              ? 'Chỉnh sửa cấu hình & thông tin không gian'
+              : 'Thêm mới hoặc chỉnh sửa không gian'
+          }}
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
         </p>
       </div>
 
@@ -341,7 +556,11 @@
                 <option value="">Chọn zone…</option>
                 <option *ngFor="let z of zoneOptions" [value]="z">{{ z }}</option>
               </select>
+<<<<<<< HEAD
               <img src="images/admin/arrow-dropdown.svg" alt="" class="select-chevron-icon" />
+=======
+              <img src="/images/figma/chevron-down.svg" alt="" class="select-chevron-icon" />
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
             </div>
           </div>
 
@@ -442,7 +661,11 @@
                 <option value="SHARED">Dùng chung</option>
                 <option value="PRIVATE">Dùng riêng</option>
               </select>
+<<<<<<< HEAD
               <img src="images/admin/arrow-dropdown.svg" alt="" class="select-chevron-icon" />
+=======
+              <img src="/images/figma/chevron-down.svg" alt="" class="select-chevron-icon" />
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
             </div>
           </div>
 
@@ -455,11 +678,38 @@
                 <option value="MAINTENANCE">Bảo trì</option>
                 <option value="INACTIVE">Ngừng hoạt động</option>
               </select>
+<<<<<<< HEAD
               <img src="images/admin/arrow-dropdown.svg" alt="" class="select-chevron-icon" />
+=======
+              <img src="/images/figma/chevron-down.svg" alt="" class="select-chevron-icon" />
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
             </div>
           </div>
         </div>
 
+<<<<<<< HEAD
+=======
+        <!-- Row 4: Image URL & Buffer note -->
+        <div class="form-amenities-row" data-name="Field Image">
+          <label class="field-label"
+            >URL Hình ảnh không gian · Thời gian dọn chuẩn bị tự động:
+            {{
+              formData.bookingMode === 'PRIVATE'
+                ? '15 phút (Phòng riêng)'
+                : '0 phút (Khu vực chung)'
+            }}</label
+          >
+          <div class="custom-input-wrap">
+            <input
+              type="text"
+              [(ngModel)]="formData.image"
+              placeholder="/images/ken-flow/listing-focus.png hoặc https://..."
+              class="form-input-control"
+            />
+          </div>
+        </div>
+
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
         <!-- Error Message if invalid -->
         <div *ngIf="formError" class="form-error-alert">
           <span>⚠ {{ formError }}</span>
@@ -467,11 +717,29 @@
 
         <!-- Form Actions -->
         <div class="form-actions-buttons" data-name="Form actions">
+<<<<<<< HEAD
           <button type="button" class="btn-save-space" (click)="saveSpace()" data-name="Save button">
             <img src="images/admin/check-white.svg" alt="" class="save-icon" />
             <span>{{ isEditing ? 'Lưu thay đổi' : 'Lưu Space' }}</span>
           </button>
           <button type="button" class="btn-cancel-space" (click)="cancelForm()" data-name="Cancel button">
+=======
+          <button
+            type="button"
+            class="btn-save-space"
+            (click)="saveSpace()"
+            data-name="Save button"
+          >
+            <img src="/images/figma/check.svg" alt="" class="save-icon" />
+            <span>{{ isEditing ? 'Lưu thay đổi' : 'Lưu Space' }}</span>
+          </button>
+          <button
+            type="button"
+            class="btn-cancel-space"
+            (click)="cancelForm()"
+            data-name="Cancel button"
+          >
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
             <span>Hủy</span>
           </button>
         </div>
@@ -493,8 +761,13 @@
       </div>
 
       <div class="modal-body">
+<<<<<<< HEAD
         <div class="modal-photo-wrap" *ngIf="viewingSpace.image">
           <img [src]="viewingSpace.image" alt="" class="modal-photo" />
+=======
+        <div class="modal-photo-wrap">
+          <img [src]="resolveSpaceImage(viewingSpace)" alt="" class="modal-photo" />
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
         </div>
 
         <div class="modal-grid-info">
@@ -504,6 +777,7 @@
           </div>
           <div class="modal-info-item">
             <span class="info-k">Hình thức</span>
+<<<<<<< HEAD
             <span class="info-v">{{ viewingSpace.type }} ({{ viewingSpace.bookingMode === 'SHARED' ? 'Dùng chung' : 'Dùng riêng' }})</span>
           </div>
           <div class="modal-info-item">
@@ -513,6 +787,26 @@
           <div class="modal-info-item">
             <span class="info-k">Đơn giá</span>
             <span class="info-v">{{ viewingSpace.priceLabel }}</span>
+=======
+            <span class="info-v"
+              >{{ viewingSpace.type }} ({{
+                viewingSpace.bookingMode === 'SHARED' ? 'Dùng chung' : 'Dùng riêng'
+              }})</span
+            >
+          </div>
+          <div class="modal-info-item">
+            <span class="info-k">Sức chứa</span>
+            <span class="info-v"
+              ><strong>{{ viewingSpace.capacity }}</strong> người (Min:
+              {{ viewingSpace.minGuest }} · Max: {{ viewingSpace.maxGuest }})</span
+            >
+          </div>
+          <div class="modal-info-item">
+            <span class="info-k">Đơn giá &amp; Thời gian chuẩn bị</span>
+            <span class="info-v"
+              >{{ viewingSpace.priceLabel }} · {{ viewingSpace.bufferMinutes }} phút dọn phòng</span
+            >
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
           </div>
           <div class="modal-info-item">
             <span class="info-k">Trạng thái</span>
@@ -524,7 +818,17 @@
                 [class.status-inactive]="viewingSpace.status === 'INACTIVE'"
               >
                 <span class="status-dot"></span>
+<<<<<<< HEAD
                 {{ viewingSpace.status === 'ACTIVE' ? 'Đang hoạt động' : viewingSpace.status === 'MAINTENANCE' ? 'Bảo trì' : 'Ngừng hoạt động' }}
+=======
+                {{
+                  viewingSpace.status === 'ACTIVE'
+                    ? 'Đang hoạt động'
+                    : viewingSpace.status === 'MAINTENANCE'
+                      ? 'Bảo trì'
+                      : 'Ngừng hoạt động'
+                }}
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
               </span>
             </span>
           </div>
@@ -540,15 +844,22 @@
       </div>
 
       <div class="modal-footer">
+<<<<<<< HEAD
         <button type="button" class="btn-modal-cancel" (click)="closeViewModal()">
           Đóng
         </button>
+=======
+        <button type="button" class="btn-modal-cancel" (click)="closeViewModal()">Đóng</button>
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
         <button
           type="button"
           class="btn-modal-edit"
           (click)="openEditForm(viewingSpace); closeViewModal()"
         >
+<<<<<<< HEAD
           <img src="images/admin/detail.svg" alt="" class="action-svg" />
+=======
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
           Chỉnh sửa không gian này
         </button>
       </div>

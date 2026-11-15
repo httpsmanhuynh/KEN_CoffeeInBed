@@ -103,7 +103,13 @@
 }
 
 .detail-heading .btn-back-link {
+<<<<<<< HEAD
   display: none;
+=======
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
 }
 
 .heading-title-block {

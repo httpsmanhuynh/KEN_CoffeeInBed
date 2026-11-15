@@ -1,5 +1,7 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { SuggestionPopupService } from '../../../../shared/services/suggestion-popup.service';
+import { SmoothScrollService } from '../../../../core/smooth-scroll.service';
 
 interface KenHomeSpace {
   label: string;
@@ -19,6 +21,8 @@ interface KenHomeSpace {
   styleUrl: './home-content.css'
 })
 export class KenHomeContent implements OnInit, OnDestroy {
+  private readonly suggestionPopup = inject(SuggestionPopupService);
+  private readonly smoothScroll = inject(SmoothScrollService);
   @Input() member = false;
   heroIndex = 0;
   selectedSpace = 0;
@@ -100,6 +104,7 @@ export class KenHomeContent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.suggestionPopup.showOncePerSession();
     this.slideTimer = setInterval(() => this.heroIndex = (this.heroIndex + 1) % this.slides.length, 6500);
   }
 
@@ -109,10 +114,12 @@ export class KenHomeContent implements OnInit, OnDestroy {
 
   setSlide(index: number): void {
     this.heroIndex = index;
+    this.smoothScroll.animateSlideTransition();
   }
 
   selectSpace(index: number): void {
     this.selectedSpace = index;
+    this.smoothScroll.animateSpaceSwitch('.kh-space-detail');
   }
 
   toggleFaq(index: number): void {

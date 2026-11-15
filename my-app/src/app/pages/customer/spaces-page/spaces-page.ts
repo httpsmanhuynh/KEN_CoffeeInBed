@@ -1,7 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { SmoothScrollService } from '../../../core/smooth-scroll.service';
+
+export type KenZoneFilter = 'all' | 'connect' | 'focus' | 'rest';
 
 interface SpaceCard {
   id: string;
+  zone: Exclude<KenZoneFilter, 'all'>;
   title: string;
   badge: string;
   capacity: string;
@@ -20,12 +24,29 @@ interface SpaceCard {
   styleUrl: './spaces-page.css'
 })
 export class SpacesPage {
+  private readonly smoothScroll = (() => {
+    try {
+      return inject(SmoothScrollService, { optional: true });
+    } catch {
+      return null;
+    }
+  })();
+
   bookingNotice = false;
   menuNotice = false;
+  activeZone: KenZoneFilter = 'all';
+
+  readonly zoneFilters: { id: KenZoneFilter; label: string }[] = [
+    { id: 'all', label: 'Tất cả không gian' },
+    { id: 'connect', label: 'KÉN Kết Nối' },
+    { id: 'focus', label: 'KÉN Tập Trung' },
+    { id: 'rest', label: 'KÉN Tái Tạo' },
+  ];
 
   readonly spaces: SpaceCard[] = [
     {
       id: 'connect',
+      zone: 'connect',
       title: 'KÉN Kết Nối',
       badge: 'Không đặt chỗ',
       capacity: 'Café · Ghé trực tiếp',
@@ -38,6 +59,7 @@ export class SpacesPage {
     },
     {
       id: 'cowork',
+      zone: 'focus',
       title: 'Khu làm việc chung',
       badge: 'Dùng chung',
       capacity: '1–20 khách',
@@ -50,6 +72,7 @@ export class SpacesPage {
     },
     {
       id: 'focus',
+      zone: 'focus',
       title: 'Ô tập trung cá nhân',
       badge: 'Dùng riêng',
       capacity: '1 khách',
@@ -62,6 +85,7 @@ export class SpacesPage {
     },
     {
       id: 'meeting',
+      zone: 'focus',
       title: 'Phòng họp nhỏ',
       badge: 'Dùng riêng',
       capacity: '3–6 khách',
@@ -74,6 +98,7 @@ export class SpacesPage {
     },
     {
       id: 'boardroom',
+      zone: 'focus',
       title: 'Phòng họp lớn',
       badge: 'Dùng riêng',
       capacity: '6–12 khách',
@@ -82,10 +107,11 @@ export class SpacesPage {
       recommended: 'Nên chọn khi: nhóm 6–12 người cần họp lớn, trình bày hoặc workshop.',
       caution: 'Cân nhắc: cần ít nhất 6 khách; nhóm 3–6 người có thể xem Phòng họp nhỏ.',
       image: '/images/ken-figma/spaces-meetingbig.png',
-      route: null
+      route: '/spaces/booking/meeting-large'
     },
     {
       id: 'single',
+      zone: 'rest',
       title: 'KÉN nghỉ đơn',
       badge: 'Dùng riêng',
       capacity: '1 khách',
@@ -94,10 +120,11 @@ export class SpacesPage {
       recommended: 'Nên chọn khi: cần nghỉ trưa ngắn hoặc một khoảng riêng cho 1 người.',
       caution: 'Cân nhắc: chỉ dành cho 1 khách; hai người nên xem KÉN nghỉ đôi.',
       image: '/images/ken-figma/spaces-single.png',
-      route: null
+      route: '/spaces/booking/single'
     },
     {
       id: 'double',
+      zone: 'rest',
       title: 'KÉN nghỉ đôi',
       badge: 'Dùng riêng',
       capacity: '1–2 khách',
@@ -106,10 +133,11 @@ export class SpacesPage {
       recommended: 'Nên chọn khi: cặp đôi hoặc 2 người cần nghỉ ngắn cùng lúc.',
       caution: 'Cân nhắc: nhóm 3–4 người nên dùng Private Studio để rộng rãi hơn.',
       image: '/images/ken-figma/spaces-double.png',
-      route: null
+      route: '/spaces/booking/double'
     },
     {
       id: 'private',
+      zone: 'rest',
       title: 'Phòng riêng tư',
       badge: 'Dùng riêng',
       capacity: '2–4 khách',
@@ -118,9 +146,30 @@ export class SpacesPage {
       recommended: 'Nên chọn khi: nhóm 2–4 người cần một phòng riêng để nghỉ ngơi.',
       caution: 'Cân nhắc: không nhận 1 khách; nếu cần học hoặc họp, hãy xem KÉN Tập Trung.',
       image: '/images/ken-figma/spaces-private.png',
-      route: null
+      route: '/spaces/booking/private'
     }
   ];
+
+  get filteredSpaces(): SpaceCard[] {
+    if (this.activeZone === 'all') return this.spaces;
+    return this.spaces.filter(space => space.zone === this.activeZone);
+  }
+
+  setZoneFilter(zone: KenZoneFilter): void {
+    this.activeZone = zone;
+  }
+
+  selectZone(zone: Exclude<KenZoneFilter, 'all'>, event?: Event): void {
+    event?.preventDefault();
+    this.activeZone = this.activeZone === zone ? 'all' : zone;
+    if (this.smoothScroll) {
+      this.smoothScroll.scrollTo('#spaces-overview', { offset: -88, duration: 0.9 });
+      return;
+    }
+    if (typeof document !== 'undefined') {
+      document.getElementById('spaces-overview')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
 
   trackBySpace(_: number, space: SpaceCard): string {
     return space.id;

@@ -3,28 +3,28 @@ import { SuggestionPopupService } from './suggestion-popup.service';
 
 describe('SuggestionPopupService', () => {
   let svc: SuggestionPopupService;
-  beforeEach(() => { sessionStorage.clear(); svc = TestBed.inject(SuggestionPopupService); });
-
-  it('treats 14:00–16:59 as afternoon', () => {
-    expect(svc.isAfternoon(new Date(2026, 9, 25, 14, 0))).toBe(true);
-    expect(svc.isAfternoon(new Date(2026, 9, 25, 16, 59))).toBe(true);
-    expect(svc.isAfternoon(new Date(2026, 9, 25, 13, 59))).toBe(false);
-    expect(svc.isAfternoon(new Date(2026, 9, 25, 17, 0))).toBe(false);
+  beforeEach(() => {
+    sessionStorage.clear();
+    svc = TestBed.inject(SuggestionPopupService);
   });
 
-  it('force opens the popup regardless of time', () => {
-    svc.autoShow(true);
+  it('opens the popup and emits a new open version each time', () => {
+    svc.show();
     expect(svc.isOpen()).toBe(true);
+    const firstVersion = svc.openVersion();
+    svc.show();
+    expect(svc.isOpen()).toBe(true);
+    expect(svc.openVersion()).toBe(firstVersion + 1);
   });
 
-  it('does not auto-open again once marked as seen', () => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date(2026, 9, 25, 15, 0));
-    svc.autoShow();
+  it('shows automatically only once per browser session', () => {
+    expect(svc.showOncePerSession()).toBe(true);
     expect(svc.isOpen()).toBe(true);
-    svc.markSeen(); svc.hide();
-    svc.autoShow();
+    const firstVersion = svc.openVersion();
+    svc.hide();
+
+    expect(svc.showOncePerSession()).toBe(false);
     expect(svc.isOpen()).toBe(false);
-    vi.useRealTimers();
+    expect(svc.openVersion()).toBe(firstVersion);
   });
 });

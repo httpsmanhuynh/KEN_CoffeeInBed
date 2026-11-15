@@ -8,7 +8,7 @@
     <header class="otpv__head">
       <span class="eyebrow">Khôi phục mật khẩu</span>
       <h1>Xác thực mã OTP</h1>
-      <p>Nhập mã 6 chữ số được gửi qua SMS đến</p>
+      <p>Nhập mã 6 chữ số được gửi qua Email cho tài khoản</p>
       <strong class="phone">{{ masked }}</strong>
       <button type="button" class="link" (click)="back()">Thay đổi số điện thoại</button>
     </header>
@@ -37,7 +37,7 @@
         @if (cooldown > 0) { <span class="wait">Gửi lại sau {{ cooldown }}s</span> }
         @else { <button type="button" class="link link--strong" (click)="resend()" [disabled]="resending">Gửi lại mã OTP</button> }
       </p>
-      <small>Vui lòng kiểm tra tin nhắn SMS và kết nối di động. Nếu số điện thoại chưa đúng, hãy thay đổi để nhận mã.</small>
+      <small>Vui lòng kiểm tra hộp thư đến và mục Thư rác (Spam) trên email của bạn.</small>
     </div>
   </div>
 </section>

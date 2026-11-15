@@ -147,6 +147,12 @@ adminForecastRouter.patch(
   handle((req, db) => forecastSvc.updateInventoryAlertStatus(db, req.params.id, req.body, req.user)),
 );
 
+adminForecastRouter.get(
+  '/recommend-analysis',
+  guard,
+  handle((req, db) => forecastSvc.getAdminRecommendAnalysis(db, req.query)),
+);
+
 module.exports = {
   recommendationRouter,
   adminForecastRouter,

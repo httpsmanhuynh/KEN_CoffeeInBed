@@ -8,7 +8,10 @@
       <span class="about-eyebrow">Về KÉN</span>
       <h1>Bạn cần một góc để thở, nghĩ và lớn lên theo nhịp riêng.</h1>
       <span class="about-script">Lười một chút, chill một góc</span>
-      <p>KÉN là quán cà phê kết hợp không gian làm việc và nghỉ ngơi theo giờ · ba không gian, một tâm thế: chọn nhịp của chính mình.</p>
+      <p>
+        KÉN là quán cà phê kết hợp không gian làm việc và nghỉ ngơi theo giờ · ba không gian, một
+        tâm thế: chọn nhịp của chính mình.
+      </p>
 
       <div class="about-actions">
         <a routerLink="/spaces" class="about-btn about-btn-primary">Đặt chỗ ngay</a>
@@ -20,24 +23,38 @@
   <div class="about-container">
     <section class="about-stats" aria-label="Thông tin KÉN">
       <div><strong>3</strong><span>không gian</span></div>
-      <div><strong>08:00</strong><span>– 22:00 · hằng ngày</span></div>
+      <div><strong>08:00</strong><span>- 22:00 · hằng ngày</span></div>
       <div><strong>123 Nguyễn Văn Cừ</strong><span>Phường Chợ Lớn, TPHCM</span></div>
       <div><strong>45.000đ</strong><span>/ người / giờ từ</span></div>
     </section>
 
     <section class="about-what" id="ken-la-gi">
       <h2>KÉN là gì?</h2>
-      <p>Trong tự nhiên, kén là nơi sâu non trú ẩn · để chuyển hoá và trưởng thành. KÉN mang triết lý đó vào cuộc sống hiện đại: một không gian ấm áp, thân mật, nơi bạn kết nối, tập trung, hoặc thực sự nghỉ ngơi mà không cảm thấy lãng phí thời gian.</p>
+      <p>
+        Trong tự nhiên, kén là nơi sâu non trú ẩn · để chuyển hoá và trưởng thành. KÉN mang triết lý
+        đó vào cuộc sống hiện đại: một không gian ấm áp, thân mật, nơi bạn kết nối, tập trung, hoặc
+        thực sự nghỉ ngơi mà không cảm thấy lãng phí thời gian.
+      </p>
     </section>
   </div>
 
   <section class="about-spaces about-section-rule" id="ba-hanh-trinh">
     <div class="about-container">
       <h2>Ba Hành Trình Của Kén</h2>
-      <p class="about-section-sub">Mỗi người đến KÉN với một nhu cầu khác nhau · cả ba không gian đều đón bạn theo cách riêng.</p>
+      <p class="about-section-sub">
+        Mỗi người đến KÉN với một nhu cầu khác nhau · cả ba không gian đều đón bạn theo cách riêng.
+      </p>
 
       <div class="about-spaces-grid">
-        <article class="about-space-card connect" [class.is-selected]="selectedSpace === 'connect'" (click)="selectSpace('connect')" (keydown.enter)="selectSpace('connect')" (keydown.space)="$event.preventDefault(); selectSpace('connect')" tabindex="0" role="button">
+        <article
+          class="about-space-card connect"
+          [class.is-selected]="selectedSpace === 'connect'"
+          (click)="selectSpace('connect')"
+          (keydown.enter)="selectSpace('connect')"
+          (keydown.space)="$event.preventDefault(); selectSpace('connect')"
+          tabindex="0"
+          role="button"
+        >
           <div class="about-space-image">
             <img src="/images/ken-about/connect.jpg" alt="Không gian KÉN Kết Nối" />
             <span *ngIf="selectedSpace === 'connect'" class="about-selected">Đang chọn</span>
@@ -45,18 +62,39 @@
           <div class="about-space-content">
             <h3><img src="/images/ken-about/connect-icon.svg" alt="" />KÉN Kết Nối</h3>
             <p class="about-space-type">ghé trực tiếp · Không cần đặt</p>
-            <p>Không gian mở cho cà phê, trò chuyện và những cuộc gặp gỡ tự nhiên nhất. Đến bất cứ lúc nào, không cần lịch.</p>
+            <p>
+              Không gian mở cho cà phê, trò chuyện và những cuộc gặp gỡ tự nhiên nhất. Đến bất cứ
+              lúc nào, không cần lịch.
+            </p>
             <ul>
-              <li><img src="/images/ken-about/connect-check.svg" alt="" />Menu đồ uống &amp; bánh ngọt</li>
-              <li><img src="/images/ken-about/connect-check.svg" alt="" />Bàn chung &amp; ghế sofa ấm cúng</li>
-              <li><img src="/images/ken-about/connect-check.svg" alt="" />WiFi · Không giới hạn thời gian</li>
-              <li><img src="/images/ken-about/connect-check.svg" alt="" />Sự kiện cộng đồng định kỳ</li>
+              <li>
+                <img src="/images/ken-about/connect-check.svg" alt="" />Menu đồ uống &amp; bánh ngọt
+              </li>
+              <li>
+                <img src="/images/ken-about/connect-check.svg" alt="" />Bàn chung &amp; ghế sofa ấm
+                cúng
+              </li>
+              <li>
+                <img src="/images/ken-about/connect-check.svg" alt="" />WiFi · Không giới hạn thời
+                gian
+              </li>
+              <li>
+                <img src="/images/ken-about/connect-check.svg" alt="" />Sự kiện cộng đồng định kỳ
+              </li>
             </ul>
             <a routerLink="/spaces/connect" class="about-space-button">ghé trực tiếp tự do →</a>
           </div>
         </article>
 
-        <article class="about-space-card focus" [class.is-selected]="selectedSpace === 'focus'" (click)="selectSpace('focus')" (keydown.enter)="selectSpace('focus')" (keydown.space)="$event.preventDefault(); selectSpace('focus')" tabindex="0" role="button">
+        <article
+          class="about-space-card focus"
+          [class.is-selected]="selectedSpace === 'focus'"
+          (click)="selectSpace('focus')"
+          (keydown.enter)="selectSpace('focus')"
+          (keydown.space)="$event.preventDefault(); selectSpace('focus')"
+          tabindex="0"
+          role="button"
+        >
           <div class="about-space-image">
             <img src="/images/ken-about/focus.jpg" alt="Không gian KÉN Tập Trung" />
             <span *ngIf="selectedSpace === 'focus'" class="about-selected">Đang chọn</span>
@@ -64,18 +102,37 @@
           <div class="about-space-content">
             <h3><img src="/images/ken-about/focus-icon.svg" alt="" />KÉN Tập Trung</h3>
             <p class="about-space-type">Đặt chỗ · Work Lounge · Pod · Phòng họp</p>
-            <p>Không gian yên tĩnh để dệt từng sợi ý tưởng. Bàn riêng tư, ánh sáng tập trung, không ồn ào.</p>
+            <p>
+              Không gian yên tĩnh để dệt từng sợi ý tưởng. Bàn riêng tư, ánh sáng tập trung, không
+              ồn ào.
+            </p>
             <ul>
-              <li><img src="/images/ken-about/focus-check.svg" alt="" />Work Lounge · bàn mở theo giờ</li>
-              <li><img src="/images/ken-about/focus-check.svg" alt="" />Focus Pod · ô làm việc cá nhân</li>
-              <li><img src="/images/ken-about/focus-check.svg" alt="" />Phòng họp nhóm · Máy chiếu</li>
-              <li><img src="/images/ken-about/focus-check.svg" alt="" />Whiteboard · Màn hình chiếu</li>
+              <li>
+                <img src="/images/ken-about/focus-check.svg" alt="" />Work Lounge · bàn mở theo giờ
+              </li>
+              <li>
+                <img src="/images/ken-about/focus-check.svg" alt="" />Focus Pod · ô làm việc cá nhân
+              </li>
+              <li>
+                <img src="/images/ken-about/focus-check.svg" alt="" />Phòng họp nhóm · Máy chiếu
+              </li>
+              <li>
+                <img src="/images/ken-about/focus-check.svg" alt="" />Whiteboard · Màn hình chiếu
+              </li>
             </ul>
             <a routerLink="/spaces/work-lounge" class="about-space-button">Đặt chỗ ngay →</a>
           </div>
         </article>
 
-        <article class="about-space-card rest" [class.is-selected]="selectedSpace === 'rest'" (click)="selectSpace('rest')" (keydown.enter)="selectSpace('rest')" (keydown.space)="$event.preventDefault(); selectSpace('rest')" tabindex="0" role="button">
+        <article
+          class="about-space-card rest"
+          [class.is-selected]="selectedSpace === 'rest'"
+          (click)="selectSpace('rest')"
+          (keydown.enter)="selectSpace('rest')"
+          (keydown.space)="$event.preventDefault(); selectSpace('rest')"
+          tabindex="0"
+          role="button"
+        >
           <div class="about-space-image">
             <img src="/images/ken-about/rest.jpg" alt="Không gian KÉN Tái Tạo" />
             <span *ngIf="selectedSpace === 'rest'" class="about-selected">Đang chọn</span>
@@ -83,12 +140,24 @@
           <div class="about-space-content">
             <h3><img src="/images/ken-about/rest-icon.svg" alt="" />KÉN Tái Tạo</h3>
             <p class="about-space-type">Đặt chỗ · Bed Pod · Private Studio</p>
-            <p>Đôi khi bạn chỉ cần chui vào kén và nghỉ ngơi thật sự. Phòng nghỉ theo giờ riêng tư, yên tĩnh.</p>
+            <p>
+              Đôi khi bạn chỉ cần chui vào kén và nghỉ ngơi thật sự. Phòng nghỉ theo giờ riêng tư,
+              yên tĩnh.
+            </p>
             <ul>
-              <li><img src="/images/ken-about/rest-check.svg" alt="" />Single Bed Pod · nghỉ cá nhân</li>
-              <li><img src="/images/ken-about/rest-check.svg" alt="" />Double Bed Pod · nghỉ đôi</li>
-              <li><img src="/images/ken-about/rest-check.svg" alt="" />Private Studio · phòng riêng trọn gói</li>
-              <li><img src="/images/ken-about/rest-check.svg" alt="" />Chăn êm · Ánh sáng mờ · Im lặng</li>
+              <li>
+                <img src="/images/ken-about/rest-check.svg" alt="" />Single Bed Pod · nghỉ cá nhân
+              </li>
+              <li>
+                <img src="/images/ken-about/rest-check.svg" alt="" />Double Bed Pod · nghỉ đôi
+              </li>
+              <li>
+                <img src="/images/ken-about/rest-check.svg" alt="" />Private Studio · phòng riêng
+                trọn gói
+              </li>
+              <li>
+                <img src="/images/ken-about/rest-check.svg" alt="" />Chăn êm · Ánh sáng mờ · Im lặng
+              </li>
             </ul>
             <a routerLink="/spaces" class="about-space-button">Đặt chỗ ngay →</a>
           </div>
@@ -106,7 +175,10 @@
           <img src="/images/ken-about/vision.svg" alt="" />
           <div>
             <h3>Tầm nhìn</h3>
-            <p>Trở thành không gian quen thuộc của người trẻ đô thị · nơi mỗi giờ ghé thăm đều mang lại giá trị thực sự.</p>
+            <p>
+              Trở thành không gian quen thuộc của người trẻ đô thị · nơi mỗi giờ ghé thăm đều mang
+              lại giá trị thực sự.
+            </p>
           </div>
         </div>
 
@@ -114,7 +186,10 @@
           <img src="/images/ken-about/vision.svg" alt="" />
           <div>
             <h3>Sứ mệnh</h3>
-            <p>Tạo ra những góc nhỏ ấm áp, linh hoạt · để mỗi người đều tìm được nhịp thở của mình giữa guồng quay hối hả.</p>
+            <p>
+              Tạo ra những góc nhỏ ấm áp, linh hoạt · để mỗi người đều tìm được nhịp thở của mình
+              giữa guồng quay hối hả.
+            </p>
           </div>
         </div>
       </div>
@@ -142,7 +217,9 @@
           <img src="/images/ken-about/value-flex.svg" alt="" />
           <div>
             <h3>Không gian linh hoạt</h3>
-            <p>Ba hành trình độc lập, mỗi không gian có nhịp điệu riêng cho từng thời điểm của ngày.</p>
+            <p>
+              Ba hành trình độc lập, mỗi không gian có nhịp điệu riêng cho từng thời điểm của ngày.
+            </p>
           </div>
         </article>
 
@@ -150,7 +227,10 @@
           <img src="/images/ken-about/value-price.svg" alt="" />
           <div>
             <h3>Giá cả hợp lý</h3>
-            <p>Tính theo giờ thực tế · không lãng phí, không áp lực tối thiểu, phù hợp nhiều túi tiền.</p>
+            <p>
+              Tính theo giờ thực tế · không lãng phí, không áp lực tối thiểu, phù hợp nhiều túi
+              tiền.
+            </p>
           </div>
         </article>
       </div>
@@ -160,14 +240,20 @@
   <section class="about-timeline about-section-rule">
     <div class="about-container">
       <h2>Hành Trình Định Hình KÉN</h2>
-      <p class="about-section-sub">Từ một ý tưởng về chiếc kén đến không gian thực sự · đây là những chặng đường đã tạo nên KÉN.</p>
+      <p class="about-section-sub">
+        Từ một ý tưởng về chiếc kén đến không gian thực sự · đây là những chặng đường đã tạo nên
+        KÉN.
+      </p>
 
       <div class="about-timeline-list">
         <article>
           <strong>Giai đoạn 1</strong>
           <div>
             <h3>Hạt mầm ý tưởng</h3>
-            <p>Nhóm sáng lập nhận ra người trẻ đô thị thiếu một "góc thở" thực sự · vừa gặp gỡ, vừa làm việc, vừa nghỉ ngơi. Câu chuyện về chiếc kén bắt đầu từ đây.</p>
+            <p>
+              Nhóm sáng lập nhận ra người trẻ đô thị thiếu một "góc thở" thực sự · vừa gặp gỡ, vừa
+              làm việc, vừa nghỉ ngơi. Câu chuyện về chiếc kén bắt đầu từ đây.
+            </p>
           </div>
         </article>
 
@@ -175,7 +261,10 @@
           <strong>Giai đoạn 2</strong>
           <div>
             <h3>Tìm thấy cái tên</h3>
-            <p>"KÉN" · từ tiếng Việt mang hình ảnh chuyển hoá · được chọn làm tên thương hiệu. Slogan "Lười một chút, chill một góc" ra đời, định vị KÉN là nơi bạn được phép chậm lại.</p>
+            <p>
+              "KÉN" · từ tiếng Việt mang hình ảnh chuyển hoá · được chọn làm tên thương hiệu. Slogan
+              "Lười một chút, chill một góc" ra đời, định vị KÉN là nơi bạn được phép chậm lại.
+            </p>
           </div>
         </article>
 
@@ -183,7 +272,10 @@
           <strong>Giai đoạn 3</strong>
           <div>
             <h3>Định hình Ba Hành Trình</h3>
-            <p>Từ quan sát thực tế, ba không gian được hệ thống hoá: Kết Nối, Tập Trung, Tái Tạo. Bước ngoặt biến ý tưởng trừu tượng thành mô hình dịch vụ rõ ràng.</p>
+            <p>
+              Từ quan sát thực tế, ba không gian được hệ thống hoá: Kết Nối, Tập Trung, Tái Tạo.
+              Bước ngoặt biến ý tưởng trừu tượng thành mô hình dịch vụ rõ ràng.
+            </p>
           </div>
         </article>
 
@@ -191,7 +283,10 @@
           <strong>Giai đoạn 4</strong>
           <div>
             <h3>Xây dựng nhận diện thương hiệu</h3>
-            <p>Bảng màu kem · nâu · vàng caramel gợi cảm giác ấm áp. Font Inter cho sự hiện đại; Lavishly Yours cho chất thơ. Chữ KÉN viền vàng trở thành logo chủ đạo.</p>
+            <p>
+              Bảng màu kem · nâu · vàng caramel gợi cảm giác ấm áp. Font Inter cho sự hiện đại;
+              Lavishly Yours cho chất thơ. Chữ KÉN viền vàng trở thành logo chủ đạo.
+            </p>
           </div>
         </article>
 
@@ -199,7 +294,11 @@
           <strong>Hiện tại</strong>
           <div>
             <h3>Hoàn thiện không gian &amp; vận hành</h3>
-            <p>Từng chi tiết nội thất, quy trình đặt chỗ, menu và chính sách theo giờ được thiết kế tỉ mỉ. Đội ngũ phục vụ hiểu rằng mỗi khách đang ở một hành trình riêng · nhiệm vụ là không cản trở.</p>
+            <p>
+              Từng chi tiết nội thất, quy trình đặt chỗ, menu và chính sách theo giờ được thiết kế
+              tỉ mỉ. Đội ngũ phục vụ hiểu rằng mỗi khách đang ở một hành trình riêng · nhiệm vụ là
+              không cản trở.
+            </p>
           </div>
         </article>
       </div>
@@ -216,7 +315,10 @@
         </div>
 
         <h2>Bạn đã sẵn sàng tìm góc của mình chưa?</h2>
-        <p>Dù bạn cần một buổi cà phê, một ngày tập trung hay một giấc nghỉ ngắn · KÉN luôn có một chiếc kén vừa vặn đang chờ.</p>
+        <p>
+          Dù bạn cần một buổi cà phê, một ngày tập trung hay một giấc nghỉ ngắn · KÉN luôn có một
+          chiếc kén vừa vặn đang chờ.
+        </p>
 
         <div class="about-actions about-ending-actions">
           <a routerLink="/spaces" class="about-btn about-btn-primary">

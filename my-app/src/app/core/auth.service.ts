@@ -1,6 +1,7 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Injectable, signal } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, of, throwError } from 'rxjs';
+import { catchError, finalize, map, shareReplay, tap } from 'rxjs/operators';
 
 export interface RegisterPayload {
   fullName: string;
@@ -10,28 +11,145 @@ export interface RegisterPayload {
   password: string;
 }
 
-/** Kết quả đăng nhập. TODO: đối chiếu tên trường 2FA với backend (giả định twoFactorRequired). */
+export interface AuthenticatedUser {
+  id: string;
+  fullName: string;
+  phone: string;
+  email: string | null;
+  role: string;
+  twoFactorEnabled: boolean;
+  membershipTier: string;
+  tierPoints: number;
+  coinsBalance: number;
+}
+
 export interface LoginResult {
-  twoFactorRequired?: boolean;
-  [key: string]: unknown;
+  requires2FA?: boolean;
+  user?: AuthenticatedUser;
 }
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   // Server: http://localhost:3002 (đặt proxy.conf.json để /api chuyển sang cổng này)
   private readonly base = '/api/auth';
+  private readonly currentUser = signal<AuthenticatedUser | null>(null);
+  readonly avatarUrl = signal<string | null>(null);
+  private sessionChecked = false;
+  private sessionRequest?: Observable<AuthenticatedUser | null>;
 
   constructor(private http: HttpClient) {}
+
+  get user(): AuthenticatedUser | null {
+    return this.currentUser();
+  }
+
+  get isAuthenticated(): boolean {
+    return this.currentUser() !== null;
+  }
+
+  private normalizeUser(user: AuthenticatedUser | null): AuthenticatedUser | null {
+    if (!user) return null;
+    const pts = Number(user.tierPoints || 0);
+    if (pts >= 10000) return { ...user, membershipTier: 'DIAMOND' };
+    if (pts >= 5000) return { ...user, membershipTier: 'GOLD' };
+    if (pts >= 1000) return { ...user, membershipTier: 'SILVER' };
+    return user;
+  }
+
+  /** Tải danh tính từ phiên cookie hiện tại; 401 chỉ có nghĩa là khách vãng lai. */
+  loadSession(force = false): Observable<AuthenticatedUser | null> {
+    if (!force && this.sessionChecked) return of(this.currentUser());
+    if (!force && this.sessionRequest) return this.sessionRequest;
+
+    this.sessionRequest = this.http.get<AuthenticatedUser>(`${this.base}/me`, { withCredentials: true }).pipe(
+      map(user => this.normalizeUser(user)),
+      tap(user => {
+        this.setUser(user);
+      }),
+      catchError((error: HttpErrorResponse) => {
+        if (error.status === 401) {
+          this.setUser(null);
+          return of(null);
+        }
+        return throwError(() => error);
+      }),
+      finalize(() => {
+        this.sessionRequest = undefined;
+      }),
+      shareReplay({ bufferSize: 1, refCount: false }),
+    );
+    return this.sessionRequest;
+  }
+
+  /** Kiểm tra phiên trước các thao tác yêu cầu tài khoản. */
+  ensureSession(): Observable<AuthenticatedUser | null> {
+    return this.sessionChecked ? of(this.currentUser()) : this.loadSession();
+  }
+
+  setUser(user: AuthenticatedUser | null): void {
+    const normalized = this.normalizeUser(user);
+    const prevId = this.currentUser()?.id ?? null;
+    this.currentUser.set(normalized);
+    this.sessionChecked = true;
+    try {
+      if (normalized) {
+        if (prevId && prevId !== normalized.id) localStorage.removeItem('ken-figma-booking-demo-v1');
+        this.avatarUrl.set(localStorage.getItem(`ken-avatar-${normalized.id}`));
+      } else {
+        this.avatarUrl.set(null);
+      }
+    } catch {
+      this.avatarUrl.set(null);
+    }
+  }
+
+  setAvatar(dataUrl: string | null): void {
+    this.avatarUrl.set(dataUrl);
+    const id = this.currentUser()?.id;
+    if (!id) return;
+    try {
+      if (dataUrl) localStorage.setItem(`ken-avatar-${id}`, dataUrl);
+      else localStorage.removeItem(`ken-avatar-${id}`);
+    } catch {
+      // ignore storage quota errors
+    }
+  }
 
   /** 201 = đã gửi OTP · 409 = trùng SĐT/email · 422 = dữ liệu sai · 429 = quá hạn mức gửi OTP */
   register(body: RegisterPayload): Observable<unknown> {
     return this.http.post(`${this.base}/register`, body, { withCredentials: true });
   }
 
-  /** Xác minh OTP đăng ký. 200/201 = tạo tài khoản · 422 = sai/hết hạn · 429 = nhập sai quá 5 lần · 409 = trùng email */
   /** Đăng nhập. 200 = ok · 401 INVALID_CREDENTIALS · 403 = tài khoản bị khóa/không ACTIVE · 429 = thử quá nhiều */
   login(body: { identifier: string; password: string }): Observable<LoginResult> {
-    return this.http.post<LoginResult>(`${this.base}/login`, body, { withCredentials: true });
+    return this.http.post<LoginResult>(`${this.base}/login`, body, { withCredentials: true }).pipe(
+      tap(result => {
+        if (!result.requires2FA && result.user) this.setUser(result.user);
+      }),
+    );
+  }
+
+  /** Xác thực OTP bước 2 khi tài khoản bật 2FA. */
+  verifyLogin2FA(code: string): Observable<LoginResult> {
+    return this.http.post<LoginResult>(`${this.base}/login/2fa`, { code }, { withCredentials: true }).pipe(
+      tap(result => {
+        if (result.user) this.setUser(result.user);
+      }),
+    );
+  }
+
+  /** Gửi lại OTP cho bước xác thực 2FA khi đăng nhập. */
+  resendLogin2FAOtp(): Observable<unknown> {
+    return this.http.post(`${this.base}/login/2fa/resend`, {}, { withCredentials: true });
+  }
+
+  logout(): Observable<void> {
+    return this.http.post<void>(`${this.base}/logout`, {}, { withCredentials: true }).pipe(
+      tap(() => {
+        try { localStorage.removeItem('ken-figma-booking-demo-v1'); } catch {}
+        this.setUser(null);
+      }),
+    );
   }
 
   verifyOtp(body: { phone: string; code: string }): Observable<unknown> {

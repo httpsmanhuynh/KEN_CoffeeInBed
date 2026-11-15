@@ -49,33 +49,69 @@ router.post(
     const fullName = str(req.body.fullName),
       phone = str(req.body.phone),
       email = str(req.body.email).toLowerCase();
-    const dob = new Date(str(req.body.dateOfBirth)),
-      password = typeof req.body.password === 'string' ? req.body.password : '';
+    const dobRaw = str(req.body.dateOfBirth);
+    const dob = dobRaw ? new Date(dobRaw) : null;
+    const password = typeof req.body.password === 'string' ? req.body.password : '';
+    const hasValidContact = (phone ? PHONE_RE.test(phone) : Boolean(email));
     if (
       fullName.length < 2 ||
       fullName.length > 100 ||
-      !PHONE_RE.test(phone) ||
-      Number.isNaN(dob.getTime()) ||
-      dob > new Date() ||
+      !hasValidContact ||
+      (dob && (Number.isNaN(dob.getTime()) || dob > new Date())) ||
       !validNewPassword(password) ||
       (email && (!EMAIL_RE.test(email) || email.length > 100))
     )
       return fail(res, 422, 'VALIDATION_ERROR', 'Thông tin đăng ký không hợp lệ');
 
     const users = db.collection('users');
-    if (await users.findOne({ phone }))
+    if (phone && (await users.findOne({ phone })))
       return fail(res, 409, 'PHONE_EXISTS', 'Số điện thoại đã được đăng ký');
     if (email && (await users.findOne({ email })))
       return fail(res, 409, 'EMAIL_EXISTS', 'Email đã được sử dụng');
 
+    const otpIdentifier = phone || email;
     const pendingData = {
       full_name: fullName,
-      date_of_birth: dob,
       password_hash: await bcrypt.hash(password, 10),
     };
+    if (dob) pendingData.date_of_birth = dob;
+    if (phone) pendingData.phone = phone;
     if (email) pendingData.email = email;
-    await issueOtp(db, { userId: null, purpose: 'REGISTER', phone, email, pendingData });
+    await issueOtp(db, { userId: null, purpose: 'REGISTER', phone: otpIdentifier, email, pendingData });
     res.status(201).json({ message: 'Đã gửi OTP xác minh' });
+  }),
+);
+
+// Gửi lại OTP đăng ký dựa trên pending_data đã lưu ở bước /register
+router.post(
+  '/resend-otp',
+  ipLimiter,
+  phoneOtpLimiter,
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    const phone = str(req.body.phone);
+    if (!PHONE_RE.test(phone) && !EMAIL_RE.test(phone.toLowerCase()))
+      return fail(res, 422, 'VALIDATION_ERROR', 'Thông tin liên hệ không hợp lệ');
+    const lookupKey = PHONE_RE.test(phone) ? phone : phone.toLowerCase();
+    if (PHONE_RE.test(phone) && (await db.collection('users').findOne({ phone })))
+      return fail(res, 409, 'PHONE_EXISTS', 'Số điện thoại đã được đăng ký');
+    if (!PHONE_RE.test(phone) && (await db.collection('users').findOne({ email: lookupKey })))
+      return fail(res, 409, 'EMAIL_EXISTS', 'Email đã được sử dụng');
+
+    const latest = await db
+      .collection('otp_codes')
+      .findOne({ phone: lookupKey, purpose: 'REGISTER', is_used: false }, { sort: { created_at: -1 } });
+    if (!latest || !latest.pending_data)
+      return fail(res, 404, 'REGISTER_SESSION_NOT_FOUND', 'Không tìm thấy phiên đăng ký đang chờ xác minh');
+
+    await issueOtp(db, {
+      userId: null,
+      purpose: 'REGISTER',
+      phone: lookupKey,
+      email: latest.pending_data.email || null,
+      pendingData: latest.pending_data,
+    });
+    res.json({ message: 'Đã gửi lại OTP xác minh' });
   }),
 );
 
@@ -85,7 +121,8 @@ router.post(
   ipLimiter,
   wrap(async (req, res) => {
     const db = req.app.locals.db;
-    const phone = str(req.body.phone);
+    const rawPhone = str(req.body.phone);
+    const phone = PHONE_RE.test(rawPhone) ? rawPhone : rawPhone.toLowerCase();
     const { status, otp } = await verifyOtp(db, {
       phone,
       purpose: 'REGISTER',
@@ -102,9 +139,8 @@ router.post(
       now = new Date();
     const doc = {
       full_name: p.full_name,
-      phone,
       password_hash: p.password_hash,
-      date_of_birth: p.date_of_birth,
+      date_of_birth: p.date_of_birth ? new Date(p.date_of_birth) : null,
       role: 'CUSTOMER',
       status: 'ACTIVE',
       two_factor_enabled: false,
@@ -114,6 +150,7 @@ router.post(
       created_at: now,
       updated_at: now,
     };
+    if (p.phone || PHONE_RE.test(phone)) doc.phone = p.phone || phone;
     if (p.email) doc.email = p.email;
     try {
       await db.collection('users').insertOne(doc);
@@ -147,11 +184,12 @@ router.post(
     if (user.status !== 'ACTIVE') return fail(res, 403, 'ACCOUNT_LOCKED', 'Tài khoản đã bị khóa');
 
     if (user.two_factor_enabled) {
+      const contactPhone = user.phone || user.email;
       // SĐT chỉ biết sau khi tra DB nên gọi hit() trực tiếp; dùng chung key với phoneOtpLimiter (BR-A08).
-      if (!phoneOtpLimiter.hit(otpKey(user.phone)))
+      if (!phoneOtpLimiter.hit(otpKey(contactPhone)))
         return fail(res, 429, 'TOO_MANY_REQUESTS', 'Thử lại sau ít phút');
       req.session.pending2FA = { userId: String(user._id) }; // KHÔNG gán session.user ở bước này
-      await issueOtp(db, { userId: user._id, purpose: '2FA_LOGIN', phone: user.phone, email: user.email });
+      await issueOtp(db, { userId: user._id, purpose: '2FA_LOGIN', phone: contactPhone, email: user.email });
       return res.json({ requires2FA: true });
     }
     await startSession(req, user);
@@ -169,8 +207,9 @@ router.post(
     const user = await db.collection('users').findOne({ _id: new ObjectId(pending.userId) });
     if (!user || user.status !== 'ACTIVE')
       return fail(res, 403, 'ACCOUNT_LOCKED', 'Tài khoản đã bị khóa');
+    const contactPhone = user.phone || user.email;
     const { status } = await verifyOtp(db, {
-      phone: user.phone,
+      phone: contactPhone,
       purpose: '2FA_LOGIN',
       code: str(req.body.code),
     });
@@ -181,6 +220,29 @@ router.post(
     if (status !== 'OK') return otpError(res, status);
     await startSession(req, user);
     res.json({ user: publicUser(user, await tierOf(db, user)) });
+  }),
+);
+
+router.post(
+  '/login/2fa/resend',
+  ipLimiter,
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    const pending = req.session.pending2FA;
+    if (!pending) return fail(res, 401, 'UNAUTHENTICATED', 'Chưa đăng nhập bước 1');
+    const user = await db.collection('users').findOne({ _id: new ObjectId(pending.userId) });
+    if (!user || user.status !== 'ACTIVE')
+      return fail(res, 403, 'ACCOUNT_LOCKED', 'Tài khoản đã bị khóa');
+    const contactPhone = user.phone || user.email;
+    if (!phoneOtpLimiter.hit(otpKey(contactPhone)))
+      return fail(res, 429, 'TOO_MANY_REQUESTS', 'Thử lại sau ít phút');
+    await issueOtp(db, {
+      userId: user._id,
+      purpose: '2FA_LOGIN',
+      phone: contactPhone,
+      email: user.email,
+    });
+    res.json({ ok: true, resend: true });
   }),
 );
 

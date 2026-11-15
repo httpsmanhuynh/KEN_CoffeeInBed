@@ -318,12 +318,61 @@ async function getBookingMenuRecommendations(db, query = {}, user = null) {
 async function listIngredientForecasts(db, query = {}, now = new Date()) {
   const range = parseForecastDateRange(query, now, 'forecast');
 
-  const [ingredients, products, recipes, forecasts] = await Promise.all([
+  const [ingredients, products, recipes, rawForecasts] = await Promise.all([
     db.collection('ingredients').find({}).sort({ ingredient_code: 1 }).toArray(),
     db.collection('products').find({}).toArray(),
     db.collection('recipes').find({}).toArray(),
     db.collection('demand_forecasts').find({}).toArray(),
   ]);
+
+  let forecasts = rawForecasts;
+  let fallbackUsed = false;
+
+  if (forecasts.length === 0 && String(query.fallback || '').toLowerCase() === 'true') {
+    const salesDaily = await db.collection('sales_history_daily').find({}).toArray();
+    if (salesDaily.length > 0) {
+      fallbackUsed = true;
+      const distinctDays = new Set();
+      const byItem = new Map();
+      for (const row of salesDaily) {
+        if (!row || (!row.item_id && !row.item_code)) continue;
+        const dayKey = row.sale_date || row.date || row.day;
+        if (dayKey) distinctDays.add(String(dayKey).slice(0, 10));
+        const key = row.item_id ? `id:${String(row.item_id)}` : `code:${String(row.item_code)}`;
+        const cur = byItem.get(key) || {
+          item_id: row.item_id || null,
+          item_code: row.item_code || null,
+          totalQty: 0,
+          days: 0,
+        };
+        cur.totalQty += Math.max(0, Number(row.qty) || 0);
+        cur.days += 1;
+        byItem.set(key, cur);
+      }
+
+      const dayDenominator = Math.max(1, distinctDays.size || 30);
+      const dayMs = 24 * 60 * 60 * 1000;
+      const synthetic = [];
+      for (const item of byItem.values()) {
+        const avgDaily = item.totalQty / Math.max(dayDenominator, item.days || 1);
+        const predicted = Math.max(1, Math.round(avgDaily));
+        const lower = Math.max(0, Math.round(predicted * 0.8));
+        const upper = Math.max(predicted + 1, Math.round(predicted * 1.25));
+        for (let d = 0; d < range.days; d += 1) {
+          synthetic.push({
+            item_id: item.item_id,
+            item_code: item.item_code,
+            forecast_date: new Date(range.from.getTime() + d * dayMs),
+            predicted_qty: predicted,
+            lower_qty: lower,
+            upper_qty: upper,
+            model_version: 'HIST_SEASONAL_V1',
+          });
+        }
+      }
+      forecasts = synthetic;
+    }
+  }
 
   const result = computeIngredientForecasts({
     ingredients,
@@ -342,6 +391,8 @@ async function listIngredientForecasts(db, query = {}, now = new Date()) {
     totalIngredients: result.totalIngredients,
     forecastRecordsCount: result.forecastRecordsCount,
     skippedMalformedCount: result.skippedMalformedCount,
+    fallbackUsed,
+    source: fallbackUsed ? 'HISTORICAL_FALLBACK' : 'ML_FORECAST',
     filters: { from: range.fromDate, to: range.toDate, days: range.days },
     message: result.message,
   };
@@ -608,6 +659,215 @@ async function updateInventoryAlertStatus(db, id, body = {}, actor = null, now =
   return { alert: updated };
 }
 
+/**
+ * UC-35: Phân tích gợi ý bán kèm (Co-occurring items, Top trending & ML Clusters cho Admin).
+ */
+async function getAdminRecommendAnalysis(db, query = {}) {
+  const limit = parseLimitParam(query.limit, 12, 50);
+
+  const [
+    products,
+    addons,
+    bookingInclusions,
+    bookingAddons,
+    mlClusters,
+    mlGlobal,
+    salesDaily,
+  ] = await Promise.all([
+    db.collection('products').find({}).toArray(),
+    db.collection('addons').find({}).toArray(),
+    db.collection('booking_inclusions').find({}).toArray(),
+    db.collection('booking_addons').find({}).toArray(),
+    db.collection('ml_cluster_recommendations').find({}).toArray(),
+    db.collection('ml_global_trending').find({}).toArray(),
+    db.collection('sales_history_daily').find({}).toArray(),
+  ]);
+
+  const catalogByKey = new Map();
+  for (const p of products) {
+    if (!p) continue;
+    const entry = {
+      id: p._id ? String(p._id) : null,
+      code: p.code || p.item_code || null,
+      name: p.name || p.product_name || 'Sản phẩm',
+      category: p.category || p.type || 'PRODUCT',
+      price: Number(p.price ?? p.base_price ?? 0) || 0,
+    };
+    if (entry.id) catalogByKey.set(`p:${entry.id}`, entry);
+    if (entry.code) catalogByKey.set(`c:${String(entry.code)}`, entry);
+  }
+  for (const a of addons) {
+    if (!a) continue;
+    const linked = a.product_id ? catalogByKey.get(`p:${String(a.product_id)}`) : null;
+    const entry = {
+      id: a._id ? String(a._id) : null,
+      productId: a.product_id ? String(a.product_id) : null,
+      code: a.code || a.addon_code || linked?.code || null,
+      name: a.name || a.addon_name || linked?.name || 'Add-on',
+      category: a.category || a.type || linked?.category || 'ADDON',
+      price: Number(a.price ?? a.unit_price ?? linked?.price ?? 0) || 0,
+    };
+    if (entry.id) catalogByKey.set(`a:${entry.id}`, entry);
+    if (entry.code && !catalogByKey.has(`c:${String(entry.code)}`)) {
+      catalogByKey.set(`c:${String(entry.code)}`, entry);
+    }
+  }
+
+  const resolveItemMeta = (row, fallbackKind) => {
+    const pid = row.product_id ? String(row.product_id) : null;
+    const aid = row.addon_id ? String(row.addon_id) : null;
+    const iid = row.item_id ? String(row.item_id) : null;
+    const code = row.item_code || row.product_code || row.addon_code || row.code || null;
+
+    const meta =
+      (pid && catalogByKey.get(`p:${pid}`)) ||
+      (aid && catalogByKey.get(`a:${aid}`)) ||
+      (iid && (catalogByKey.get(`p:${iid}`) || catalogByKey.get(`a:${iid}`))) ||
+      (code && catalogByKey.get(`c:${String(code)}`)) ||
+      null;
+
+    const key =
+      (meta?.productId || meta?.id || pid || aid || iid || code)
+        ? String(meta?.productId || meta?.id || pid || aid || iid || code)
+        : null;
+    if (!key) return null;
+
+    return {
+      key,
+      code: meta?.code || code || key.slice(-6).toUpperCase(),
+      name: row.item_name || row.product_name || row.addon_name || row.name || meta?.name || 'Món KÉN',
+      category: meta?.category || row.item_type || fallbackKind,
+      price: Number(row.unit_price ?? row.price ?? meta?.price ?? 0) || 0,
+      qty: Math.max(1, Number(row.qty ?? row.quantity ?? 1) || 1),
+    };
+  };
+
+  const bookingsMap = new Map();
+  const itemFreq = new Map();
+
+  const ingestRows = (rows, kind) => {
+    for (const row of rows) {
+      if (!row || !row.booking_id) continue;
+      const meta = resolveItemMeta(row, kind);
+      if (!meta) continue;
+      const bKey = String(row.booking_id);
+      let basket = bookingsMap.get(bKey);
+      if (!basket) {
+        basket = new Map();
+        bookingsMap.set(bKey, basket);
+      }
+      if (!basket.has(meta.key)) {
+        basket.set(meta.key, meta);
+        const freq = itemFreq.get(meta.key) || { ...meta, orderCount: 0, totalQty: 0 };
+        freq.orderCount += 1;
+        itemFreq.set(meta.key, freq);
+      }
+      const freqRef = itemFreq.get(meta.key);
+      if (freqRef) freqRef.totalQty += meta.qty;
+    }
+  };
+
+  ingestRows(bookingInclusions, 'INCLUSION');
+  ingestRows(bookingAddons, 'ADDON');
+
+  const pairCounts = new Map();
+  let multiItemBookings = 0;
+  let totalBasketItems = 0;
+
+  for (const basket of bookingsMap.values()) {
+    const items = Array.from(basket.values());
+    totalBasketItems += items.length;
+    if (items.length < 2) continue;
+    multiItemBookings += 1;
+    items.sort((a, b) => a.key.localeCompare(b.key));
+    for (let i = 0; i < items.length; i += 1) {
+      for (let j = i + 1; j < items.length; j += 1) {
+        const a = items[i];
+        const b = items[j];
+        const pairKey = `${a.key}::${b.key}`;
+        const cur = pairCounts.get(pairKey) || {
+          itemA: a,
+          itemB: b,
+          pairCount: 0,
+        };
+        cur.pairCount += 1;
+        pairCounts.set(pairKey, cur);
+      }
+    }
+  }
+
+  const totalBookingsAnalyzed = bookingsMap.size;
+  const coOccurringPairs = Array.from(pairCounts.values())
+    .sort((x, y) => y.pairCount - x.pairCount)
+    .slice(0, limit)
+    .map((p, idx) => {
+      const countA = itemFreq.get(p.itemA.key)?.orderCount || p.pairCount;
+      const countB = itemFreq.get(p.itemB.key)?.orderCount || p.pairCount;
+      const supportPct =
+        totalBookingsAnalyzed > 0 ? Number(((p.pairCount / totalBookingsAnalyzed) * 100).toFixed(1)) : 0;
+      const confidencePct = countA > 0 ? Number(((p.pairCount / countA) * 100).toFixed(1)) : 0;
+      const lift =
+        totalBookingsAnalyzed > 0 && countA > 0 && countB > 0
+          ? Number(((p.pairCount * totalBookingsAnalyzed) / (countA * countB)).toFixed(2))
+          : 1;
+      return {
+        rank: idx + 1,
+        itemA: { id: p.itemA.key, code: p.itemA.code, name: p.itemA.name, category: p.itemA.category },
+        itemB: { id: p.itemB.key, code: p.itemB.code, name: p.itemB.name, category: p.itemB.category },
+        pairCount: p.pairCount,
+        supportPct,
+        confidencePct,
+        lift,
+      };
+    });
+
+  const trendingResult = buildTopTrendingRecommendations({
+    addons,
+    products,
+    salesDaily,
+    limit,
+  });
+
+  const clusters = mlClusters.map((c, idx) => {
+    const rawItems = Array.isArray(c.recommended_items)
+      ? c.recommended_items
+      : Array.isArray(c.items)
+        ? c.items
+        : [];
+    const mappedItems = rawItems.slice(0, 5).map((ri) => {
+      const m = resolveItemMeta(ri || {}, 'ADDON');
+      return {
+        name: ri?.name || ri?.item_name || m?.name || ri?.item_code || 'Món gợi ý',
+        code: ri?.item_code || ri?.code || m?.code || '',
+        score: Number(ri?.score ?? ri?.weight ?? 0) || 0,
+      };
+    });
+    return {
+      clusterId: c.cluster_id ?? c._id ?? `CLUSTER_${idx + 1}`,
+      name: c.cluster_name || c.persona || c.description || `Nhóm khách hàng #${idx + 1}`,
+      size: Number(c.user_count ?? c.customer_count ?? c.size ?? 0) || 0,
+      items: mappedItems,
+    };
+  });
+
+  return {
+    summary: {
+      totalBookingsAnalyzed,
+      multiItemBookings,
+      multiItemRate:
+        totalBookingsAnalyzed > 0 ? Number(((multiItemBookings / totalBookingsAnalyzed) * 100).toFixed(1)) : 0,
+      totalPairsFound: pairCounts.size,
+      avgBasketItems:
+        totalBookingsAnalyzed > 0 ? Number((totalBasketItems / totalBookingsAnalyzed).toFixed(2)) : 0,
+      mlGlobalCount: mlGlobal.length,
+      mlClusterCount: clusters.length,
+    },
+    coOccurringPairs,
+    topTrending: trendingResult.items || [],
+    clusters,
+  };
+}
+
 module.exports = {
   getTopTrendingRecommendations,
   getBookingMenuRecommendations,
@@ -617,4 +877,5 @@ module.exports = {
   getForecastTrends,
   listInventoryAlerts,
   updateInventoryAlertStatus,
+  getAdminRecommendAnalysis,
 };

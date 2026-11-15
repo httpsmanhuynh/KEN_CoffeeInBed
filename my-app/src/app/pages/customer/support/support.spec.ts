@@ -1,14 +1,7 @@
-﻿import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+﻿import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SupportComponent } from './support';
-
-@NgModule({
-  declarations: [SupportComponent],
-  imports: [CommonModule, ReactiveFormsModule],
-})
-class SupportTestModule {}
 
 describe('SupportComponent', () => {
   let component: SupportComponent;
@@ -16,7 +9,8 @@ describe('SupportComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SupportTestModule],
+      declarations: [SupportComponent],
+      imports: [CommonModule, ReactiveFormsModule],
     }).compileComponents();
 
     fixture = TestBed.createComponent(SupportComponent);

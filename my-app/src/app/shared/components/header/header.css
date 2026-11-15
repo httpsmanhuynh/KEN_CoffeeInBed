@@ -37,8 +37,10 @@
   min-width: 190px; padding: 8px !important; border: 1px solid rgba(216,199,178,.8);
   border-radius: 12px; background: #FFFCF7; box-shadow: 0 12px 28px rgba(53, 34, 24, .12);
 }
-.sub a { display: block; padding: 9px 11px; border-radius: 7px; color: #4A3123; font-size: 13px; text-decoration: none; white-space: nowrap; }
-.sub a:hover, .sub a.is-active { background: #F7EFE2; color: #9A672B; }
+.sub a, .sub button { display: block; width: 100%; padding: 9px 11px; border: 0; border-radius: 7px; background: transparent; color: #4A3123; font: inherit; font-size: 13px; text-align: left; text-decoration: none; white-space: nowrap; cursor: pointer; }
+.sub a:hover, .sub a.is-active, .sub button:hover:not(:disabled) { background: #F7EFE2; color: #9A672B; }
+.sub button:disabled { cursor: wait; opacity: .7; }
+.hd__error { position: absolute; right: 24px; top: 100%; z-index: 30; margin: 8px 0; padding: 8px 12px; border-radius: 8px; background: #fff1f0; color: #8a1f11; font-size: 13px; }
 .actions { display: flex; align-items: center; gap: 20px; flex: 0 0 auto; }
 .hbtn { display: inline-flex; justify-content: center; align-items: center; min-height: 39px; padding: 0 20px; border: 1px solid transparent; border-radius: 999px; text-decoration: none; font-size: 14px; font-weight: 600; line-height: 21px; white-space: nowrap; transition: .18s ease; }
 .hbtn--outline { border-color: rgba(169, 118, 63, .45); color: #4A3123; background: #FFFCF7; }

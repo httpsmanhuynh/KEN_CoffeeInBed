@@ -15,7 +15,11 @@
       <div class="heading-title-block">
         <div class="title-with-icon">
           <div class="page-title-icon-wrap">
+<<<<<<< HEAD
             <img src="images/admin/figma-package-table.svg" alt="" class="page-title-icon" />
+=======
+            <img src="/images/figma/table.svg" alt="" class="page-title-icon" />
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
           </div>
           <h1 class="page-title">Quản lý gói dịch vụ</h1>
         </div>
@@ -25,8 +29,16 @@
       </div>
 
       <div class="heading-actions">
+<<<<<<< HEAD
         <button type="button" class="btn-action-primary" (click)="openCreateForm()" data-name="Add package btn">
           <img src="images/admin/plus.svg" alt="" class="btn-icon" />
+=======
+        <button type="button" class="btn-back-link" (click)="exportCsv()" style="border:1px solid rgba(216,199,178,.7);padding:8px 16px;border-radius:999px;margin:0">
+          Xuất CSV ↗
+        </button>
+        <button type="button" class="btn-action-primary" (click)="openCreateForm()" data-name="Add package btn">
+          <img src="/images/figma/sparkles.svg" alt="" class="btn-icon" />
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
           <span>Thêm gói</span>
         </button>
       </div>
@@ -37,7 +49,11 @@
       <!-- Card Heading -->
       <div class="card-heading-row" data-name="Card heading">
         <div class="card-heading-left">
+<<<<<<< HEAD
           <img src="images/admin/figma-package-table.svg" alt="" class="card-heading-icon" />
+=======
+          <img src="/images/figma/table.svg" alt="" class="card-heading-icon" />
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
           <h2 class="card-heading-title">Các gói đang phục vụ</h2>
         </div>
         <span class="card-heading-right-info">
@@ -49,7 +65,11 @@
       <div class="filters-bar" data-name="Filters">
         <!-- Search Input -->
         <div class="search-input-wrap">
+<<<<<<< HEAD
           <img src="images/admin/search-icon.svg" alt="" class="search-icon" />
+=======
+          <img src="/images/figma/search.svg" alt="" class="search-icon" />
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
           <input
             type="text"
             [(ngModel)]="query"
@@ -65,6 +85,7 @@
             <option value="KÉN Tập Trung">KÉN Tập Trung</option>
             <option value="KÉN Tái Tạo">KÉN Tái Tạo</option>
           </select>
+<<<<<<< HEAD
           <img src="images/admin/arrow-dropdown.svg" alt="" class="select-chevron" />
         </div>
 
@@ -75,16 +96,36 @@
             <option *ngFor="let s of spaceOptions" [value]="s">{{ s }}</option>
           </select>
           <img src="images/admin/arrow-dropdown.svg" alt="" class="select-chevron" />
+=======
+          <img src="/images/figma/chevron-down.svg" alt="" class="select-chevron" />
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
         </div>
 
         <!-- Filter Loại gói -->
         <div class="filter-select-wrap filter-sm">
           <select [(ngModel)]="selectedType" class="filter-select">
             <option value="Tất cả">Loại gói: Tất cả</option>
+<<<<<<< HEAD
             <option value="FIXED">FIXED</option>
             <option value="HOURLY">HOURLY</option>
           </select>
           <img src="images/admin/arrow-dropdown.svg" alt="" class="select-chevron" />
+=======
+            <option value="FIXED">Theo gói cố định</option>
+            <option value="HOURLY">Theo giờ lẻ</option>
+          </select>
+          <img src="/images/figma/chevron-down.svg" alt="" class="select-chevron" />
+        </div>
+
+        <!-- Filter Đơn vị giá -->
+        <div class="filter-select-wrap filter-sm">
+          <select [(ngModel)]="selectedUnit" class="filter-select">
+            <option value="Tất cả">Đơn vị: Tất cả</option>
+            <option value="PER_SPACE">Theo không gian / phòng</option>
+            <option value="PER_PERSON">Theo đầu người</option>
+          </select>
+          <img src="/images/figma/chevron-down.svg" alt="" class="select-chevron" />
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
         </div>
 
         <!-- Filter Trạng thái -->
@@ -94,9 +135,19 @@
             <option value="ACTIVE">Hoạt động</option>
             <option value="INACTIVE">Ngừng hoạt động</option>
           </select>
+<<<<<<< HEAD
           <img src="images/admin/arrow-dropdown.svg" alt="" class="select-chevron" />
         </div>
 
+=======
+          <img src="/images/figma/chevron-down.svg" alt="" class="select-chevron" />
+        </div>
+
+        <button type="button" class="btn-back-link" (click)="toggleSort('price')" style="border:1px solid rgba(216,199,178,.7);padding:7px 14px;border-radius:999px;margin:0;white-space:nowrap">
+          Sắp xếp Giá {{ sortKey === 'price' ? (sortAsc ? '↑' : '↓') : '↕' }}
+        </button>
+
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
       </div>
 
       <!-- Packages Table -->
@@ -104,7 +155,11 @@
         <table class="packages-table">
           <thead>
             <tr class="table-heading-row">
+<<<<<<< HEAD
               <th class="th-check"><input type="checkbox" title="Chọn tất cả" /></th>
+=======
+              <th class="th-check">#</th>
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
               <th class="th-name">Tên Package</th>
               <th class="th-type">Loại</th>
               <th class="th-unit">Đơn vị giá</th>
@@ -120,7 +175,11 @@
               <tr class="group-header-row" *ngIf="groupItems(group).length > 0">
                 <td colspan="8">
                   <div class="group-title-content">
+<<<<<<< HEAD
                     <img src="images/admin/figma-package-detail-icon.svg" alt="" class="group-icon" />
+=======
+                    <img src="/images/figma/icon-pkg.svg" alt="" class="group-icon" />
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
                     <span class="group-name">{{ group }}</span>
                     <span class="group-sep">·</span>
                     <span class="group-count">{{ groupItems(group).length }} nhóm gói</span>
@@ -130,20 +189,34 @@
 
               <!-- Package Items in this Group -->
               <tr
+<<<<<<< HEAD
                 *ngFor="let item of groupItems(group)"
+=======
+                *ngFor="let item of groupItems(group); let idx = index"
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
                 class="package-data-row"
                 [class.row-inactive]="item.status === 'INACTIVE'"
                 (click)="openDetail(item)"
               >
+<<<<<<< HEAD
                 <!-- Checkbox -->
                 <td class="td-check" (click)="$event.stopPropagation()">
                   <input type="checkbox" />
+=======
+                <!-- Index -->
+                <td class="td-check" (click)="$event.stopPropagation()">
+                  <span>{{ idx + 1 }}</span>
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
                 </td>
 
                 <!-- ID & Tên Package -->
                 <td class="td-name">
                   <div class="package-name-block">
+<<<<<<< HEAD
                     <span class="package-id">{{ item.id }}</span>
+=======
+                    <span class="package-id">{{ item.code || item.id }}</span>
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
                     <span class="package-name">{{ item.name }}</span>
                     <span class="package-space">{{ item.shortName }}</span>
                   </div>
@@ -171,7 +244,11 @@
                 <!-- Giá & Inclusion -->
                 <td class="td-price">
                   <div class="price-cell-block">
+<<<<<<< HEAD
                     <ng-container *ngIf="item.id.startsWith('TT-'); else standardPrice">
+=======
+                    <ng-container *ngIf="(item.code || item.id).startsWith('TT-') && item.inclusion.includes('Single'); else standardPrice">
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
                       <span *ngFor="let line of priceLines(item)" class="price-val">{{ line }}</span>
                     </ng-container>
                     <ng-template #standardPrice>
@@ -246,7 +323,11 @@
           ‹ Quay lại danh sách gói
         </button>
         <div class="title-with-icon">
+<<<<<<< HEAD
           <img src="images/admin/figma-package-detail-icon.svg" alt="" class="detail-page-icon" />
+=======
+          <img src="/images/figma/icon-pkg.svg" alt="" class="detail-page-icon" />
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
           <h1 class="page-title">Chi tiết gói {{ item.id }}</h1>
         </div>
         <p class="page-subtitle">
@@ -271,7 +352,11 @@
       <!-- Card Header -->
       <div class="card-heading-row">
         <div class="card-heading-left">
+<<<<<<< HEAD
           <img src="images/admin/figma-package-calendar-date.svg" alt="" class="card-heading-icon" />
+=======
+          <img src="/images/figma/calendar-date.svg" alt="" class="card-heading-icon" />
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
           <h2 class="card-heading-title">{{ item.id }} · {{ item.name }}</h2>
         </div>
         <span class="card-heading-right-info">Giá và quyền lợi hiện hành</span>
@@ -333,7 +418,11 @@
         <div class="detail-benefits-col">
           <div class="benefit-box">
             <div class="benefit-head">
+<<<<<<< HEAD
               <img src="images/admin/loyalty.svg" alt="" class="benefit-icon" />
+=======
+              <img src="/images/figma/gem-kim.svg" alt="" class="benefit-icon" />
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
               <h4 class="benefit-title">{{ benefitTitle(item) }}</h4>
             </div>
             <p class="benefit-description">
@@ -387,7 +476,11 @@
 
       <div class="heading-actions">
         <a routerLink="/admin/spaces" class="btn-action-outline link-pill" title="Mở danh sách không gian">
+<<<<<<< HEAD
           <img src="images/admin/nav-sidebar-reverse.svg" alt="" class="btn-sub-icon" />
+=======
+          <img src="/images/ken-about/focus-icon.svg" alt="" class="btn-sub-icon" />
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
           <span>Quản lý không gian ↗</span>
         </a>
         <button type="button" class="btn-action-outline" (click)="cancelForm()">
@@ -401,7 +494,11 @@
       <!-- Form Header -->
       <div class="card-heading-row">
         <div class="card-heading-left">
+<<<<<<< HEAD
           <img src="images/admin/cursor-text.svg" alt="" class="card-heading-icon" />
+=======
+          <img src="/images/figma/icon-info.svg" alt="" class="card-heading-icon" />
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
           <h2 class="card-heading-title">
             {{ editingId ? 'CHỈNH SỬA PACKAGE · ' + editingId : 'THÔNG TIN GÓI DỊCH VỤ' }}
           </h2>
@@ -423,7 +520,11 @@
                 <option value="KÉN Tập Trung">KÉN Tập Trung</option>
                 <option value="KÉN Tái Tạo">KÉN Tái Tạo</option>
               </select>
+<<<<<<< HEAD
               <img src="images/admin/arrow-dropdown.svg" alt="" class="select-arrow-icon" />
+=======
+              <img src="/images/figma/chevron-down.svg" alt="" class="select-arrow-icon" />
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
             </div>
           </div>
 
@@ -449,7 +550,11 @@
                 <option value="">Chọn không gian...</option>
                 <option *ngFor="let s of spaceOptions" [value]="s">{{ s }}</option>
               </select>
+<<<<<<< HEAD
               <img src="images/admin/arrow-dropdown.svg" alt="" class="select-arrow-icon" />
+=======
+              <img src="/images/figma/chevron-down.svg" alt="" class="select-arrow-icon" />
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
             </div>
           </div>
 
@@ -488,7 +593,11 @@
                 <option value="FIXED">FIXED (Cố định khung giờ)</option>
                 <option value="HOURLY">HOURLY (Tính theo giờ)</option>
               </select>
+<<<<<<< HEAD
               <img src="images/admin/arrow-dropdown.svg" alt="" class="select-arrow-icon" />
+=======
+              <img src="/images/figma/chevron-down.svg" alt="" class="select-arrow-icon" />
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
             </div>
           </div>
 
@@ -500,7 +609,11 @@
                 <option value="PER_SPACE">PER_SPACE (Theo không gian)</option>
                 <option value="PER_PERSON">PER_PERSON (Theo người)</option>
               </select>
+<<<<<<< HEAD
               <img src="images/admin/arrow-dropdown.svg" alt="" class="select-arrow-icon" />
+=======
+              <img src="/images/figma/chevron-down.svg" alt="" class="select-arrow-icon" />
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
             </div>
           </div>
 
@@ -512,7 +625,11 @@
                 <option value="ACTIVE">Đang hoạt động</option>
                 <option value="INACTIVE">Tạm ngưng hoạt động</option>
               </select>
+<<<<<<< HEAD
               <img src="images/admin/arrow-dropdown.svg" alt="" class="select-arrow-icon" />
+=======
+              <img src="/images/figma/chevron-down.svg" alt="" class="select-arrow-icon" />
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
             </div>
           </div>
         </div>
@@ -536,7 +653,11 @@
         <!-- Form Buttons -->
         <div class="form-actions-row">
           <button type="button" class="btn-save-package" (click)="savePackage()">
+<<<<<<< HEAD
             <img src="images/admin/check-white.svg" alt="" class="btn-save-icon" />
+=======
+            <img src="/images/figma/check.svg" alt="" class="btn-save-icon" />
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
             <span>Lưu {{ editingId ? 'thay đổi' : 'gói' }}</span>
           </button>
           <button type="button" class="btn-cancel-package" (click)="cancelForm()">

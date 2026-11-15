@@ -1,8 +1,6 @@
 @if (popup.isOpen()) {
   <div class="overlay" (click)="onBackdrop($event)">
-    <div #dialog class="dialog" role="dialog" aria-modal="true" aria-labelledby="sg-title" tabindex="-1"
-         (mouseenter)="paused = true" (mouseleave)="paused = false"
-         (focusin)="paused = true" (focusout)="paused = false">
+    <div #dialog class="dialog" role="dialog" aria-modal="true" aria-labelledby="sg-title" tabindex="-1">
       @for (s of current; track s.id) {
         <div class="content">
           <div class="media">

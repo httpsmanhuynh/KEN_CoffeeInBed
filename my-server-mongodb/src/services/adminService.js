@@ -21,11 +21,12 @@ const {
 const PAYMENT_TX = Object.freeze({
   collection: 'payment_transactions',
   typeField: 'type',
+  typeFields: ['txn_type', 'type'],
   statusField: 'status',
   successStatus: 'SUCCESS',
   bookingField: 'booking_id',
   amountField: 'amount',
-  dateFields: ['processed_at', 'paid_at', 'created_at'],
+  dateFields: ['completed_at', 'processed_at', 'paid_at', 'created_at'],
 });
 
 /**
@@ -211,19 +212,22 @@ async function resolveZone(db, zoneParam) {
  */
 async function revenueTransactions(db, range) {
   const snap = (fields) => coalesce(fields.map((f) => `__b.${f}`), 0);
+  const typeKeys = Object.keys(REVENUE_TX_TYPES);
   return db.collection(PAYMENT_TX.collection).aggregate([
     { $match: {
       [PAYMENT_TX.statusField]: PAYMENT_TX.successStatus,
-      [PAYMENT_TX.typeField]: { $in: Object.keys(REVENUE_TX_TYPES) },
-      $or: PAYMENT_TX.dateFields.map((f) => ({ [f]: { $gte: range.from, $lt: range.to } })),
+      $and: [
+        { $or: PAYMENT_TX.typeFields.map((f) => ({ [f]: { $in: typeKeys } })) },
+        { $or: PAYMENT_TX.dateFields.map((f) => ({ [f]: { $gte: range.from, $lt: range.to } })) },
+      ],
     } },
-    { $addFields: { __at: coalesce(PAYMENT_TX.dateFields) } },
+    { $addFields: { __at: coalesce(PAYMENT_TX.dateFields), __type: coalesce(PAYMENT_TX.typeFields) } },
     { $match: { __at: { $gte: range.from, $lt: range.to } } },
     { $lookup: { from: 'bookings', localField: PAYMENT_TX.bookingField, foreignField: '_id', as: '__b' } },
     { $unwind: { path: '$__b', preserveNullAndEmptyArrays: true } },
     { $project: {
       _id: 0,
-      type: `$${PAYMENT_TX.typeField}`,
+      type: '$__type',
       amount: `$${PAYMENT_TX.amountField}`,
       at: '$__at',
       spaceId: '$__b.space_id',
@@ -270,7 +274,7 @@ async function getDashboard(db, query = {}, now = new Date()) {
     { $replaceRoot: { newRoot: '$addons' } },
   ];
 
-  const [bookingGroups, addonLines, addonCatalog, txRows] = await Promise.all([
+  const [bookingGroups, addonLines, addonCatalog, txRows, pendingRefundsCount] = await Promise.all([
     db.collection('bookings').aggregate([
       { $match: bookingMatch },
       { $group: {
@@ -283,6 +287,10 @@ async function getDashboard(db, query = {}, now = new Date()) {
     db.collection('bookings').aggregate(addonPipeline).toArray(),
     db.collection('addons').find({}, { projection: { name: 1 } }).toArray(),
     revenueTransactions(db, range),
+    db.collection('bookings').countDocuments({
+      status: 'CANCELLED',
+      refund_status: { $in: ['FAILED', 'PROCESSING'] },
+    }),
   ]);
 
   const revenue = buildRevenue({
@@ -305,6 +313,7 @@ async function getDashboard(db, query = {}, now = new Date()) {
       collected: revenue.collected,
       refunded: revenue.refunded,
     },
+    pendingRefundsCount,
     topAddons: rankTopAddons(addonLines, { names, limit: topLimit }),
     zones: stats.zones,
   };

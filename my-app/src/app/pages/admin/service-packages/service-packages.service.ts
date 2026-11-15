@@ -1,5 +1,12 @@
+<<<<<<< HEAD
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+=======
+import { HttpClient } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { BehaviorSubject, forkJoin, Observable, of } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
 
 export type PackageType = 'FIXED' | 'HOURLY';
 export type PackageUnit = 'PER_SPACE' | 'PER_PERSON';
@@ -7,12 +14,20 @@ export type PackageStatus = 'ACTIVE' | 'INACTIVE';
 
 export interface ServicePackage {
   id: string;
+<<<<<<< HEAD
+=======
+  code?: string;
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
   name: string;
   shortName: string;
   group: 'KÉN Tập Trung' | 'KÉN Tái Tạo';
   type: PackageType;
   unit: PackageUnit;
   duration: string;
+<<<<<<< HEAD
+=======
+  durationMinutes?: number;
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
   price: number;
   space: string;
   inclusion: string;
@@ -31,6 +46,10 @@ const INITIAL_PACKAGES: ServicePackage[] = [
     type: 'HOURLY',
     unit: 'PER_PERSON',
     duration: 'Từ 1 giờ',
+<<<<<<< HEAD
+=======
+    durationMinutes: 60,
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
     price: 30000,
     space: 'Work Lounge',
     spaceId: 's1',
@@ -45,6 +64,10 @@ const INITIAL_PACKAGES: ServicePackage[] = [
     type: 'FIXED',
     unit: 'PER_PERSON',
     duration: '4 giờ',
+<<<<<<< HEAD
+=======
+    durationMinutes: 240,
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
     price: 90000,
     space: 'Work Lounge',
     spaceId: 's1',
@@ -59,6 +82,10 @@ const INITIAL_PACKAGES: ServicePackage[] = [
     type: 'FIXED',
     unit: 'PER_PERSON',
     duration: '08:00–22:00',
+<<<<<<< HEAD
+=======
+    durationMinutes: 840,
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
     price: 150000,
     space: 'Work Lounge',
     spaceId: 's1',
@@ -73,6 +100,10 @@ const INITIAL_PACKAGES: ServicePackage[] = [
     type: 'HOURLY',
     unit: 'PER_SPACE',
     duration: 'Từ 1 giờ',
+<<<<<<< HEAD
+=======
+    durationMinutes: 60,
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
     price: 45000,
     space: 'Focus Pod',
     spaceId: 's2',
@@ -87,6 +118,10 @@ const INITIAL_PACKAGES: ServicePackage[] = [
     type: 'FIXED',
     unit: 'PER_SPACE',
     duration: '4 giờ',
+<<<<<<< HEAD
+=======
+    durationMinutes: 240,
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
     price: 140000,
     space: 'Focus Pod',
     spaceId: 's2',
@@ -101,6 +136,10 @@ const INITIAL_PACKAGES: ServicePackage[] = [
     type: 'FIXED',
     unit: 'PER_SPACE',
     duration: '3 giờ',
+<<<<<<< HEAD
+=======
+    durationMinutes: 180,
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
     price: 250000,
     space: 'Small Meeting Room',
     spaceId: 's3',
@@ -115,6 +154,10 @@ const INITIAL_PACKAGES: ServicePackage[] = [
     type: 'FIXED',
     unit: 'PER_SPACE',
     duration: '3 giờ',
+<<<<<<< HEAD
+=======
+    durationMinutes: 180,
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
     price: 450000,
     space: 'Boardroom',
     spaceId: 's4',
@@ -129,6 +172,10 @@ const INITIAL_PACKAGES: ServicePackage[] = [
     type: 'FIXED',
     unit: 'PER_SPACE',
     duration: '1 giờ',
+<<<<<<< HEAD
+=======
+    durationMinutes: 60,
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
     price: 70000,
     space: 'Single / Double / Studio',
     spaceId: 's5',
@@ -143,6 +190,10 @@ const INITIAL_PACKAGES: ServicePackage[] = [
     type: 'FIXED',
     unit: 'PER_SPACE',
     duration: '2 giờ',
+<<<<<<< HEAD
+=======
+    durationMinutes: 120,
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
     price: 130000,
     space: 'Single / Double / Studio',
     spaceId: 's6',
@@ -157,6 +208,10 @@ const INITIAL_PACKAGES: ServicePackage[] = [
     type: 'FIXED',
     unit: 'PER_SPACE',
     duration: '4 giờ',
+<<<<<<< HEAD
+=======
+    durationMinutes: 240,
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
     price: 220000,
     space: 'Single / Double / Studio',
     spaceId: 's7',
@@ -171,6 +226,10 @@ const INITIAL_PACKAGES: ServicePackage[] = [
     type: 'FIXED',
     unit: 'PER_SPACE',
     duration: '8 giờ',
+<<<<<<< HEAD
+=======
+    durationMinutes: 480,
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
     price: 350000,
     space: 'Single / Double / Studio',
     spaceId: 's5',
@@ -181,17 +240,194 @@ const INITIAL_PACKAGES: ServicePackage[] = [
 
 @Injectable({ providedIn: 'root' })
 export class ServicePackagesService {
+<<<<<<< HEAD
   private readonly packagesSubject = new BehaviorSubject<ServicePackage[]>(this.loadPackages());
   readonly packages$ = this.packagesSubject.asObservable();
 
+=======
+  private readonly http = inject(HttpClient, { optional: true });
+  private readonly packagesSubject = new BehaviorSubject<ServicePackage[]>(this.loadPackages());
+  readonly packages$ = this.packagesSubject.asObservable();
+
+  private spaceLookup = new Map<string, { name: string; zoneName: string; type: string }>();
+
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
   get packages(): ServicePackage[] {
     return this.packagesSubject.value;
   }
 
+<<<<<<< HEAD
+=======
+  loadFromApi(): Observable<ServicePackage[]> {
+    if (!this.http) return of(this.packages);
+    return forkJoin({
+      packages: this.http.get<any>('/api/packages?all=true').pipe(catchError(() => of(null))),
+      spaces: this.http.get<any>('/api/spaces?all=true').pipe(catchError(() => of(null))),
+      zones: this.http.get<any>('/api/zones?all=true').pipe(catchError(() => of(null))),
+      pricing: this.http.get<any>('/api/pricing').pipe(catchError(() => of(null))),
+    }).pipe(
+      map((res) => {
+        const rawZones = this.extractList(res.zones);
+        const zoneById = new Map<string, string>();
+        for (const z of rawZones) {
+          zoneById.set(String(z._id || z.id), z.name || z.code || 'KÉN Tập Trung');
+        }
+
+        const rawSpaces = this.extractList(res.spaces);
+        this.spaceLookup.clear();
+        for (const s of rawSpaces) {
+          const zName = zoneById.get(String(s.zone_id || '')) || s.zone_name || 'KÉN Tập Trung';
+          this.spaceLookup.set(String(s._id || s.id), {
+            name: s.name_en || s.name || 'Không gian',
+            zoneName: zName,
+            type: String(s.type || s.booking_mode || 'EXCLUSIVE').toUpperCase(),
+          });
+        }
+
+        const rawPricing = this.extractList(res.pricing);
+        const priceByPkgSpace = new Map<string, number>();
+        for (const pr of rawPricing) {
+          const pid = String(pr.package_id || '');
+          if (pid && pr.price != null && !priceByPkgSpace.has(pid)) {
+            priceByPkgSpace.set(pid, Number(pr.price));
+          }
+        }
+
+        const rawPackages = this.extractList(res.packages);
+        if (rawPackages.length === 0 && res.packages === null) {
+          return this.packages;
+        }
+
+        const mapped = rawPackages.map((p: any) => this.mapApiPackage(p, priceByPkgSpace));
+        this.update(mapped);
+        return mapped;
+      })
+    );
+  }
+
+  private extractList(payload: any): any[] {
+    if (!payload) return [];
+    if (Array.isArray(payload)) return payload;
+    return payload.items || payload.data || [];
+  }
+
+  private mapApiPackage(p: any, priceByPkg: Map<string, number>): ServicePackage {
+    const id = String(p._id || p.id);
+    const spId = p.space_id ? String(p.space_id) : undefined;
+    const spRef = spId ? this.spaceLookup.get(spId) : undefined;
+
+    const rawGroup = String(spRef?.zoneName || p.zone_name || p.group || '').includes('Tái Tạo')
+      ? 'KÉN Tái Tạo'
+      : 'KÉN Tập Trung';
+
+    const rawType = String(p.pricing_type || p.type || 'FIXED').toUpperCase();
+    const pkgType: PackageType = rawType === 'HOURLY' ? 'HOURLY' : 'FIXED';
+    const rawUnit = String(p.unit || (spRef?.type === 'SHARED' ? 'PER_PERSON' : 'PER_SPACE')).toUpperCase();
+    const pkgUnit: PackageUnit = rawUnit === 'PER_PERSON' ? 'PER_PERSON' : 'PER_SPACE';
+
+    const mins = Number(p.duration_minutes ?? 60);
+    const hours = mins >= 60 ? Math.round((mins / 60) * 10) / 10 : mins;
+    const duration =
+      p.duration_label ||
+      (mins >= 60 ? `${hours} giờ` : `${mins} phút`);
+
+    const price = Number(p.price ?? p.base_price ?? priceByPkg.get(id) ?? 0);
+    const isActive = p.is_active !== false && String(p.status || 'ACTIVE').toUpperCase() === 'ACTIVE';
+
+    return {
+      id,
+      code: p.code || id.slice(-6).toUpperCase(),
+      name: p.name || 'Gói dịch vụ',
+      shortName: spRef?.name || p.space_name || p.short_name || 'Không gian KÉN',
+      group: rawGroup,
+      type: pkgType,
+      unit: pkgUnit,
+      duration,
+      durationMinutes: mins,
+      price,
+      space: spRef?.name || p.space_name || 'Work Lounge',
+      spaceId: spId,
+      inclusion: p.description || p.inclusion || '01 đồ uống chuẩn gói (hỗ trợ tối đa 50.000đ)',
+      status: isActive ? 'ACTIVE' : 'INACTIVE',
+    };
+  }
+
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
   findById(id: string): ServicePackage | undefined {
     return this.packagesSubject.value.find((item) => item.id === id);
   }
 
+<<<<<<< HEAD
+=======
+  savePackageApi(data: Omit<ServicePackage, 'id'>, id?: string): Observable<ServicePackage> {
+    if (!this.http || (id && !/^[a-f0-9]{24}$/i.test(id))) {
+      return of(this.save(data, id));
+    }
+
+    const durationMatch = String(data.duration).match(/(\d+(?:\.\d+)?)/);
+    const hours = durationMatch ? Number(durationMatch[1]) : 1;
+    const durationMinutes = data.durationMinutes || Math.max(30, Math.round(hours * 60));
+
+    let matchedSpaceId = data.spaceId;
+    if (!matchedSpaceId) {
+      for (const [sid, info] of this.spaceLookup.entries()) {
+        if (info.name === data.space || data.space.includes(info.name)) {
+          matchedSpaceId = sid;
+          break;
+        }
+      }
+    }
+
+    const payload: Record<string, any> = {
+      name: data.name,
+      space_id: matchedSpaceId,
+      pricing_type: data.type,
+      type: data.type,
+      unit: data.unit,
+      duration_minutes: durationMinutes,
+      duration_label: data.duration,
+      price: Number(data.price),
+      description: data.inclusion,
+      inclusion: data.inclusion,
+      is_active: data.status === 'ACTIVE',
+      status: data.status,
+    };
+
+    const req$ = id
+      ? this.http.patch<any>(`/api/packages/${id}`, payload)
+      : this.http.post<any>('/api/packages', payload);
+
+    return req$.pipe(
+      map((res) => {
+        const doc = res?.item || res?.package || res;
+        return doc?._id
+          ? this.mapApiPackage(doc, new Map())
+          : this.save(data, id);
+      }),
+      tap(() => {
+        this.loadFromApi().subscribe();
+      })
+    );
+  }
+
+  toggleStatusApi(item: ServicePackage): Observable<any> {
+    const nextActive = item.status !== 'ACTIVE';
+    if (!this.http || !/^[a-f0-9]{24}$/i.test(item.id)) {
+      this.toggleStatus(item.id);
+      return of({ status: nextActive ? 'ACTIVE' : 'INACTIVE' });
+    }
+    const req$ = nextActive
+      ? this.http.patch<any>(`/api/packages/${item.id}`, { is_active: true, status: 'ACTIVE' })
+      : this.http.delete<any>(`/api/packages/${item.id}`);
+
+    return req$.pipe(
+      tap(() => {
+        this.loadFromApi().subscribe();
+      })
+    );
+  }
+
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
   save(data: Omit<ServicePackage, 'id'>, id?: string): ServicePackage {
     const packages = this.packagesSubject.value;
     const saved: ServicePackage = {
@@ -207,11 +443,22 @@ export class ServicePackagesService {
 
   duplicate(item: ServicePackage): ServicePackage {
     const newId = this.nextId(item.group, item.space);
+<<<<<<< HEAD
     return this.save({
       ...item,
       name: `${item.name} (Bản sao)`,
       status: 'ACTIVE',
     }, newId);
+=======
+    return this.save(
+      {
+        ...item,
+        name: `${item.name} (Bản sao)`,
+        status: 'ACTIVE',
+      },
+      newId
+    );
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
   }
 
   toggleStatus(id: string): void {
@@ -236,7 +483,11 @@ export class ServicePackagesService {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
     } catch {
+<<<<<<< HEAD
       // Ignore if localStorage unavailable
+=======
+      // Ignore
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
     }
   }
 
@@ -246,6 +497,7 @@ export class ServicePackagesService {
       if (!stored) return INITIAL_PACKAGES;
       const parsed = JSON.parse(stored) as unknown;
       if (!Array.isArray(parsed) || parsed.length === 0) return INITIAL_PACKAGES;
+<<<<<<< HEAD
 
       const corrected = (parsed as ServicePackage[]).map((item) => {
         if (item.id === 'TT-01' && item.name === 'Ngủ nhanh') {
@@ -261,6 +513,9 @@ export class ServicePackagesService {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(corrected));
       }
       return corrected;
+=======
+      return parsed as ServicePackage[];
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
     } catch {
       return INITIAL_PACKAGES;
     }

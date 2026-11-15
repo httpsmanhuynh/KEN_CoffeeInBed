@@ -11,7 +11,7 @@ const express = require('express');
 const { ObjectId } = require('mongodb');
 const { requireRole } = require('../middleware/auth');
 const { rateLimit } = require('../middleware/rateLimit');
-const { wrap, fail, str } = require('../utils/http');
+const { wrap, fail, str, isDup } = require('../utils/http');
 const {
   BookingError,
   resolveTimeWindow,
@@ -179,7 +179,13 @@ router.get(
         return res.json(enriched);
       }
 
-      const filter = { status: str(req.query.status) || 'ACTIVE' };
+      const adminAll = (req.session?.user?.role === 'ADMIN' || req.user?.role === 'ADMIN') && req.query.all === 'true';
+      const filter = {};
+      if (str(req.query.status)) {
+        filter.status = str(req.query.status);
+      } else if (!adminAll) {
+        filter.status = 'ACTIVE';
+      }
       const zoneId = str(req.query.zoneId);
       if (zoneId && ObjectId.isValid(zoneId)) filter.zone_id = new ObjectId(zoneId);
       const spaceType = str(req.query.spaceType);
@@ -190,6 +196,28 @@ router.get(
       if (Number.isInteger(minCap) && minCap > 0) filter.capacity = { $gte: minCap };
 
       const spaces = await db.collection('spaces').find(filter).toArray();
+      if (adminAll && spaces.length) {
+        const spaceIds = spaces.map((s) => s._id);
+        const futureBookings = await db
+          .collection('bookings')
+          .find({
+            space_id: { $in: spaceIds },
+            status: { $in: ['PENDING_PAYMENT', 'CONFIRMED'] },
+            end_at: { $gt: new Date() },
+          })
+          .toArray();
+        const countBySpace = new Map();
+        for (const b of futureBookings) {
+          const k = String(b.space_id);
+          countBySpace.set(k, (countBySpace.get(k) || 0) + 1);
+        }
+        return res.json(
+          spaces.map((s) => ({
+            ...s,
+            futureBookingCount: countBySpace.get(String(s._id)) || 0,
+          })),
+        );
+      }
       res.json(spaces);
     } catch (err) {
       return handleErr(res, err);
@@ -947,8 +975,17 @@ router.post(
       created_at: now,
       updated_at: now,
     };
-    const { insertedId } = await req.app.locals.db.collection('vouchers').insertOne(doc);
-    res.status(201).json({ id: String(insertedId), voucher: doc });
+    const existing = await req.app.locals.db.collection('vouchers').findOne({ code: code.slice(0, 30) });
+    if (existing) {
+      return fail(res, 409, 'CODE_EXISTS', 'Mã Voucher đã tồn tại');
+    }
+    try {
+      const { insertedId } = await req.app.locals.db.collection('vouchers').insertOne(doc);
+      res.status(201).json({ id: String(insertedId), voucher: doc });
+    } catch (e) {
+      if (isDup(e)) return fail(res, 409, 'CODE_EXISTS', 'Mã Voucher đã tồn tại');
+      throw e;
+    }
   }),
 );
 
@@ -961,10 +998,66 @@ router.patch(
     if (!validId(id)) return badId(res);
     const set = pick(req.body, [
       'description',
+      'discount_type',
+      'discountType',
+      'discount_value',
+      'discountValue',
       'min_order_value',
+      'minOrderValue',
+      'valid_from',
+      'validFrom',
+      'valid_to',
+      'validTo',
       'usage_limit',
+      'usageLimit',
+      'redeem_limit',
+      'redeemLimit',
+      'coins_cost',
+      'coinsCost',
       'status',
     ]);
+    if ('discountType' in set) {
+      set.discount_type = str(set.discountType).toUpperCase();
+      delete set.discountType;
+    }
+    if ('discountValue' in set) {
+      set.discount_value = Number(set.discountValue);
+      delete set.discountValue;
+    }
+    if ('minOrderValue' in set) {
+      set.min_order_value = Number(set.minOrderValue);
+      delete set.minOrderValue;
+    }
+    if ('validFrom' in set) {
+      set.valid_from = new Date(set.validFrom);
+      delete set.validFrom;
+    } else if ('valid_from' in set) {
+      set.valid_from = new Date(set.valid_from);
+    }
+    if ('validTo' in set) {
+      set.valid_to = new Date(set.validTo);
+      delete set.validTo;
+    } else if ('valid_to' in set) {
+      set.valid_to = new Date(set.valid_to);
+    }
+    if ('usageLimit' in set) {
+      set.usage_limit = Number(set.usageLimit);
+      delete set.usageLimit;
+    }
+    if ('redeemLimit' in set) {
+      set.redeem_limit = Number(set.redeemLimit);
+      delete set.redeemLimit;
+    }
+    if ('coinsCost' in set) {
+      set.coins_cost = Number(set.coinsCost);
+      delete set.coinsCost;
+    }
+    if ('discount_type' in set && !['PERCENT', 'FIXED_AMOUNT'].includes(set.discount_type)) {
+      return fail(res, 422, 'VALIDATION_ERROR', 'discountType phải là PERCENT hoặc FIXED_AMOUNT');
+    }
+    if ('status' in set && !['ACTIVE', 'INACTIVE'].includes(set.status)) {
+      return fail(res, 422, 'VALIDATION_ERROR', 'status phải là ACTIVE hoặc INACTIVE');
+    }
     if (!Object.keys(set).length) return fail(res, 422, 'VALIDATION_ERROR', 'Không có gì để cập nhật');
     set.updated_at = new Date();
     const r = await req.app.locals.db.collection('vouchers').updateOne({ _id: oid(id) }, { $set: set });

@@ -8,7 +8,7 @@
 const express = require('express');
 const { ObjectId } = require('mongodb');
 const { requireAuth, requireRole } = require('../middleware/auth');
-const { wrap, fail } = require('../utils/http');
+const { wrap, fail, str } = require('../utils/http');
 const {
   BookingError,
   selectSpaceAndPackage,
@@ -179,6 +179,20 @@ router.get(
       .sort({ created_at: -1 })
       .toArray();
     const enriched = await attachReviewsToBookings(db, bookings);
+    const bookingIds = enriched.map((b) => b._id);
+    const failedTxns = bookingIds.length
+      ? await db
+          .collection('payment_transactions')
+          .find({ booking_id: { $in: bookingIds }, txn_type: 'PAYMENT', status: 'FAILED' })
+          .project({ booking_id: 1 })
+          .toArray()
+      : [];
+    const failedIdSet = new Set(failedTxns.map((t) => String(t.booking_id)));
+    for (const b of enriched) {
+      if (b.status === 'PENDING_PAYMENT' && failedIdSet.has(String(b._id))) {
+        b.has_failed_payment = true;
+      }
+    }
     res.json(enriched);
   }),
 );
@@ -196,15 +210,113 @@ router.get(
     if (req.query.spaceId && ObjectId.isValid(req.query.spaceId)) {
       filter.space_id = new ObjectId(req.query.spaceId);
     }
+    if (req.query.zoneId && ObjectId.isValid(req.query.zoneId)) {
+      filter.zone_id = new ObjectId(req.query.zoneId);
+    }
     if (req.query.userId && ObjectId.isValid(req.query.userId)) {
       filter.user_id = new ObjectId(req.query.userId);
     }
-    const bookings = await db
-      .collection('bookings')
-      .find(filter)
-      .sort({ created_at: -1 })
-      .toArray();
+    const refundStatus = str(req.query.refundStatus).toUpperCase();
+    if (refundStatus === 'NEEDS_RECONCILE') {
+      filter.status = 'CANCELLED';
+      filter.refund_status = { $in: ['FAILED', 'PROCESSING'] };
+    } else if (refundStatus) {
+      filter.refund_status = refundStatus;
+    }
+
+    const vnOffsetMs = 7 * 60 * 60 * 1000;
+    const parseVnDayStart = (ymd) => {
+      const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(ymd || '').trim());
+      if (!m) return null;
+      return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]) - vnOffsetMs);
+    };
+    const dateParam = str(req.query.date);
+    const fromParam = str(req.query.from);
+    const toParam = str(req.query.to);
+    if (dateParam) {
+      const dStart = parseVnDayStart(dateParam);
+      if (dStart) {
+        filter.start_at = { $gte: dStart, $lt: new Date(dStart.getTime() + 86400000) };
+      }
+    } else if (fromParam || toParam) {
+      const range = {};
+      const fStart = fromParam ? parseVnDayStart(fromParam) : null;
+      const tStart = toParam ? parseVnDayStart(toParam) : null;
+      if (fStart) range.$gte = fStart;
+      if (tStart) range.$lt = new Date(tStart.getTime() + 86400000);
+      if (Object.keys(range).length) filter.start_at = range;
+    }
+
+    const q = str(req.query.q);
+    if (q) {
+      const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const rx = new RegExp(escaped, 'i');
+      const matchingUsers = await db
+        .collection('users')
+        .find({ $or: [{ full_name: rx }, { phone: rx }, { email: rx }] })
+        .project({ _id: 1 })
+        .limit(50)
+        .toArray();
+      const orConds = [
+        { booking_code: rx },
+        { space_name: rx },
+        { zone_name: rx },
+        { package_name: rx },
+        { contact_name: rx },
+        { contact_phone: rx },
+        { contact_email: rx },
+      ];
+      if (matchingUsers.length) {
+        orConds.push({ user_id: { $in: matchingUsers.map((u) => u._id) } });
+      }
+      filter.$or = orConds;
+    }
+
+    const rawLimit = Number(req.query.limit || 200);
+    const limit = Number.isInteger(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, 500) : 200;
+
+    let bookingsCursor = db.collection('bookings').find(filter).sort({ created_at: -1 });
+    if (typeof bookingsCursor.limit === 'function') {
+      bookingsCursor = bookingsCursor.limit(limit);
+    }
+    const rawBookings = await bookingsCursor.toArray();
+    const bookings = rawBookings.slice(0, limit);
+
     const enriched = await attachReviewsToBookings(db, bookings);
+    const bookingIds = enriched.map((b) => b._id);
+    const userIds = [
+      ...new Set(enriched.map((b) => b.user_id).filter((id) => id && ObjectId.isValid(String(id))).map(String)),
+    ].map((id) => new ObjectId(id));
+
+    const [failedTxns, users] = await Promise.all([
+      bookingIds.length
+        ? db
+            .collection('payment_transactions')
+            .find({ booking_id: { $in: bookingIds }, txn_type: 'PAYMENT', status: 'FAILED' })
+            .toArray()
+        : [],
+      userIds.length
+        ? db
+            .collection('users')
+            .find({ _id: { $in: userIds } })
+            .toArray()
+        : [],
+    ]);
+
+    const failedIdSet = new Set(failedTxns.map((t) => String(t.booking_id)));
+    const userById = new Map(users.map((u) => [String(u._id), u]));
+
+    for (const b of enriched) {
+      if (b.status === 'PENDING_PAYMENT' && failedIdSet.has(String(b._id))) {
+        b.has_failed_payment = true;
+      }
+      const u = b.user_id ? userById.get(String(b.user_id)) : null;
+      if (u) {
+        b.customer_name = b.contact_name || u.full_name || null;
+        b.customer_phone = b.contact_phone || u.phone || null;
+        b.customer_email = b.contact_email || u.email || null;
+      }
+    }
     res.json(enriched);
   }),
 );
@@ -252,7 +364,7 @@ router.get(
       return fail(res, 403, 'FORBIDDEN', 'Bạn không có quyền xem đơn này');
     }
 
-    const [inclusions, addons, transactions, review] = await Promise.all([
+    const [inclusions, addons, transactions, review, bookUser] = await Promise.all([
       db.collection('booking_inclusions').find({ booking_id: bOid }).toArray(),
       db.collection('booking_addons').find({ booking_id: bOid }).toArray(),
       db
@@ -261,9 +373,16 @@ router.get(
         .sort({ created_at: 1 })
         .toArray(),
       db.collection('reviews').findOne({ booking_id: bOid }),
+      db.collection('users').findOne({ _id: booking.user_id }, { projection: { full_name: 1, email: 1, phone: 1 } }),
     ]);
 
-    res.json(enrichBookingWithReview({ ...booking, inclusions, addons, transactions }, review));
+    const enrichedResult = enrichBookingWithReview({ ...booking, inclusions, addons, transactions }, review);
+    if (bookUser) {
+      enrichedResult.contact_name = booking.contact_name || bookUser.full_name;
+      enrichedResult.contact_phone = booking.contact_phone || bookUser.phone;
+      enrichedResult.contact_email = booking.contact_email || bookUser.email;
+    }
+    res.json(enrichedResult);
   }),
 );
 
@@ -407,13 +526,42 @@ router.post(
   }),
 );
 
-// POST /api/bookings/:id/refund-reconcile — Admin xử lý hoàn tiền lỗi (UC-28)
+// POST /api/bookings/:id/refund-reconcile — Admin xử lý hoàn tiền lỗi hoặc báo chênh lệch (UC-28)
 router.post(
   '/:id/refund-reconcile',
   requireRole('ADMIN'),
   wrap(async (req, res) => {
     const db = req.app.locals.db;
     try {
+      if (str(req.body.action).toUpperCase() === 'REPORT_DISCREPANCY') {
+        const id = req.params.id;
+        if (!ObjectId.isValid(id) || id.length !== 24) {
+          return fail(res, 400, 'INVALID_BOOKING_ID', 'Mã đơn đặt chỗ không hợp lệ');
+        }
+        const note = str(req.body.note);
+        if (!note) {
+          return fail(res, 422, 'VALIDATION_ERROR', 'Vui lòng nhập ghi chú chênh lệch');
+        }
+        const bOid = new ObjectId(id);
+        const booking = await db.collection('bookings').findOne({ _id: bOid });
+        if (!booking) return fail(res, 404, 'BOOKING_NOT_FOUND', 'Không tìm thấy đơn đặt chỗ');
+        if (booking.status !== 'CANCELLED' || !['FAILED', 'PROCESSING'].includes(booking.refund_status)) {
+          return fail(
+            res,
+            409,
+            'INVALID_REFUND_STATE',
+            'Chỉ đơn đã hủy có trạng thái hoàn tiền FAILED hoặc PROCESSING mới được báo chênh lệch',
+          );
+        }
+        const now = new Date();
+        await db.collection('bookings').updateOne(
+          { _id: bOid },
+          { $set: { refund_note: note, updated_at: now } },
+        );
+        const updated = await db.collection('bookings').findOne({ _id: bOid });
+        return res.json(updated);
+      }
+
       const updated = await reconcileRefund(db, {
         bookingId: req.params.id,
         adminUser: req.user,

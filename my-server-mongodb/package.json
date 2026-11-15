@@ -12,7 +12,15 @@
         "test:unit": "node --test tests/unit/*.test.js",
         "test:realdb": "node --test tests/realdb/admin.realdb.js",
         "start:prod": "node index.js",
-        "setup": "node -e \"require('dotenv').config();const{MongoClient}=require('mongodb');const{ensureIndexes}=require('./src/config/indexes');(async()=>{const c=new MongoClient(process.env.MONGODB_URI||'mongodb://127.0.0.1:27017');await c.connect();await ensureIndexes(c.db('ken_space_booking'));await c.close();console.log('Indexes OK')})().catch(e=>{console.error(e);process.exit(1)})\""
+        "setup": "node -e \"require('dotenv').config();const{MongoClient}=require('mongodb');const{ensureIndexes}=require('./src/config/indexes');(async()=>{const c=new MongoClient(process.env.MONGODB_URI||'mongodb://127.0.0.1:27017');await c.connect();await ensureIndexes(c.db('ken_space_booking'));await c.close();console.log('Indexes OK')})().catch(e=>{console.error(e);process.exit(1)})\"",
+        "ml:check": "node ../ken_ml/run.js check",
+        "ml:prep": "node ../ken_ml/run.js prep",
+        "ml:test": "node ../ken_ml/run.js test",
+        "ml:trending": "node ../ken_ml/run.js trending --write",
+        "ml:forecast": "node ../ken_ml/run.js forecast --write",
+        "ml:cluster": "node ../ken_ml/run.js cluster --write",
+        "ml:all": "node ../ken_ml/run.js all --write",
+        "ml:dry": "node ../ken_ml/run.js all"
     },
     "dependencies": {
         "bcryptjs": "^3.0.3",

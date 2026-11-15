@@ -21,7 +21,7 @@ describe('CoinsRewardsPage', () => {
   it('should create', () => expect(component).toBeTruthy());
 
   it('computes missing coins like the design (150 and 250)', () => {
-    expect(component.enough(450)).toBeTrue();
+    expect(component.enough(450)).toBe(true);
     expect(component.missing(800)).toBe(150);
     expect(component.missing(900)).toBe(250);
   });

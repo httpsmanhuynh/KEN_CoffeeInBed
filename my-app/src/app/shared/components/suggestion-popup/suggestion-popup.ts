@@ -1,12 +1,32 @@
-import { Component, ElementRef, HostListener, OnDestroy, ViewChild, effect, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, effect, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { CustomerApiService } from '../../../core/customer-api.service';
 import { SuggestionPopupService } from '../../services/suggestion-popup.service';
 
 interface Slide { id: string; name: string; price: string; desc: string; image: string; }
 
-const SLIDE_MS = 7000;   // Figma: tự chuyển 7 giây mỗi món
+const SLIDE_MS = 5000;
 const TICK_MS = 50;
 const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+function mapPopupImage(item: any): string {
+  const url = typeof item?.imageUrl === 'string' ? item.imageUrl : '';
+  if (url.startsWith('/images/figma/') || url.startsWith('/images/ken-flow/') || url.startsWith('http')) {
+    return url;
+  }
+  const code = String(item?.itemCode || '').toUpperCase();
+  const name = String(item?.name || '').toLocaleLowerCase('vi-VN');
+  if (code.includes('MATCHA') && !name.includes('mousse')) return '/images/figma/popup-matcha.png';
+  if (code === 'CF_BAC_XIU' || name.includes('bạc xỉu')) return '/images/figma/popup-bac-xiu.png';
+  if (code.includes('COLD_BREW') || name.includes('cold brew')) return '/images/figma/dish-cold-brew.png';
+  if (code.includes('OOLONG') || name.includes('oolong') || code.startsWith('TEA_')) return '/images/figma/dish-oolong.png';
+  if (code === 'BAKE_CROISSANT' || name.includes('croissant')) return '/images/figma/dish-croissant.png';
+  if (code.startsWith('CAKE_') || name.includes('tiramisu') || name.includes('cheese')) return '/images/figma/dish-tiramisu.png';
+  if (code.startsWith('JUICE_') || name.includes('cam') || name.includes('chanh')) return '/images/figma/dish-nuoc-cam.png';
+  if (code === 'CF_AMERICANO' || name.includes('americano')) return '/images/figma/dish-americano.png';
+  if (code.startsWith('MOUSSE_') || name.includes('mousse')) return '/images/figma/dish-mousse.png';
+  return '/images/figma/dish-ca-phe-den-sua.png';
+}
 
 @Component({
   selector: 'app-suggestion-popup',
@@ -14,33 +34,58 @@ const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1
   templateUrl: './suggestion-popup.html',
   styleUrl: './suggestion-popup.css',
 })
-export class SuggestionPopup implements OnDestroy {
+export class SuggestionPopup implements OnInit, OnDestroy {
   protected readonly popup = inject(SuggestionPopupService);
   private readonly router = inject(Router);
+  private readonly api = inject(CustomerApiService, { optional: true });
+  private readonly cdr = inject(ChangeDetectorRef, { optional: true });
 
   @ViewChild('dialog') dialog?: ElementRef<HTMLElement>;
 
-  // TODO: lấy từ API gợi ý theo khung giờ. Nội dung theo Figma 632:10877 và 632:11325.
-  readonly slides: Slide[] = [
+  slides: Slide[] = [
     { id: 'matcha', name: 'Matcha Latte / Hojicha Latte', price: '55.000đ', image: '/images/figma/popup-matcha.png',
       desc: 'Một chút trà thơm quyện cùng sữa dịu nhẹ. Vừa hay cho lúc bạn muốn chậm lại giữa buổi chiều.' },
     { id: 'bacxiu', name: 'Bạc Xỉu / Salted Caramel Coffee', price: '45.000đ', image: '/images/figma/popup-bac-xiu.png',
       desc: 'Cà phê quyện sữa, ngọt dịu vừa đủ. Một lựa chọn để nhâm nhi cùng câu chuyện còn đang dang dở.' },
   ];
 
+  ngOnInit(): void {
+    if (!this.api) return;
+    this.api.getRecommendations({ daypart: 'AFTERNOON', limit: '4' }).subscribe({
+      next: (res) => {
+        const items: any[] = Array.isArray(res?.items) ? res.items.filter((it: any) => it && it.unit !== 'PER_BOOKING') : [];
+        if (items.length === 0) return;
+        this.slides = items.map((it, idx) => ({
+          id: String(it.itemCode || it.productId || idx),
+          name: String(it.name || 'Món gợi ý KÉN'),
+          price: `${Number(it.price ?? it.listedPrice ?? 0).toLocaleString('vi-VN')}đ`,
+          desc: String(it.reason || 'Gợi ý phù hợp cho khung giờ này tại KÉN.'),
+          image: mapPopupImage(it),
+        }));
+        this.index = 0;
+        this.current = [this.slides[0]];
+        this.cdr?.markForCheck();
+      },
+      error: () => {},
+    });
+  }
+
   index = 0;
   progress = 0;          // 0..1 của slide hiện tại
-  paused = false;
+  readonly slideDurationMs = SLIDE_MS;
   private timer?: ReturnType<typeof setInterval>;
   private lastFocus: Element | null = null;
   private wasOpen = false;
+  private lastOpenVersion = 0;
 
   constructor() {
     effect(() => {
       const open = this.popup.isOpen();
-      if (open && !this.wasOpen) this.onOpen();
+      const version = this.popup.openVersion();
+      if (open && (!this.wasOpen || version !== this.lastOpenVersion)) this.onOpen();
       else if (!open && this.wasOpen) this.onClose();
       this.wasOpen = open;
+      this.lastOpenVersion = version;
     });
   }
 
@@ -59,7 +104,7 @@ export class SuggestionPopup implements OnDestroy {
   prev(): void { this.go((this.index - 1 + this.slides.length) % this.slides.length); }
   private go(i: number): void { this.index = i; this.progress = 0; this.current = [this.slides[i]]; }
 
-  close(): void { this.popup.markSeen(); this.popup.hide(); }
+  close(): void { this.popup.hide(); }
   explore(): void { this.close(); this.router.navigateByUrl('/top-trending'); }
   later(): void { this.close(); this.router.navigateByUrl('/menu'); }
   onBackdrop(ev: MouseEvent): void { if (ev.target === ev.currentTarget) this.close(); }
@@ -85,13 +130,13 @@ export class SuggestionPopup implements OnDestroy {
   }
 
   private onOpen(): void {
-    this.go(0); this.paused = false;
+    clearInterval(this.timer);
+    this.go(0);
     this.lastFocus = document.activeElement;
     document.body.style.overflow = 'hidden';
     const reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (!reduced) {
       this.timer = setInterval(() => {
-        if (this.paused) return;
         this.progress += TICK_MS / SLIDE_MS;
         if (this.progress >= 1) this.next();
       }, TICK_MS);
@@ -105,5 +150,8 @@ export class SuggestionPopup implements OnDestroy {
     (this.lastFocus as HTMLElement | null)?.focus?.();
   }
 
-  ngOnDestroy(): void { clearInterval(this.timer); document.body.style.overflow = ''; }
+  ngOnDestroy(): void {
+    clearInterval(this.timer);
+    document.body.style.overflow = '';
+  }
 }

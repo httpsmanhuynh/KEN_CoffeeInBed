@@ -1,63 +1,107 @@
-# KÉN ML – Học máy cho hệ thống KÉN
+# KÉN Machine Learning Pipeline (ken_ml)
 
-`ken_ml` là một thư mục nằm trong project KÉN lớn hơn. Pipeline gồm 3 bài toán, chạy trên dữ liệu bán hàng F&B từ 01/04/2026 đến 27/10/2026 (67.375 dòng).
+Hệ thống Học máy phục vụ cho nền tảng KÉN Coffee & Workspace Booking, bao gồm 3 bài toán chính:
 
-| Bài | Bài toán | Kỹ thuật | Kết quả ghi vào MongoDB |
-|---|---|---|---|
-| 1 | Gợi ý xu hướng chung (Global Trending) | Popularity + Time Decay | `ml_global_trending` |
-| 2 | Dự báo nhu cầu bán F&B theo ngày | Random Forest (so sánh với Baseline 4 tuần và MLR) | `demand_forecasts` |
-| 3 | Phân nhóm khách hàng và gợi ý món theo cụm | K-Means trên RFM | `ml_cluster_recommendations`, trường `ml_cluster_id` của `users` |
+1. **Bài toán 1 - Global Trending (Popularity-based & Time Decay)**: Gợi ý các món F&B xu hướng toàn hệ thống cho Pop-up và trang `/top-trending`.
+2. **Bài toán 2 - Demand Forecasting**: Dự báo số lượng món F&B tiêu thụ cho ngày tiếp theo (mô hình Random Forest), từ đó quy đổi nhu cầu nguyên vật liệu và cảnh báo tồn kho.
+3. **Bài toán 3 - Customer Clustering (RFM + K-Means)**: Gom cụm hành vi khách hàng theo Recency, Frequency, Monetary để cá nhân hóa menu gợi ý (Inclusion & Add-ons) trong luồng đặt chỗ (Booking).
 
-## Cài đặt
+---
 
-Cần Python 3.12.
+## 1. Cấu trúc thư mục
 
-```bash
-cd ken_ml
-python -m venv .venv
-source .venv/bin/activate            # Windows: .venv\Scripts\Activate.ps1
-pip install -r requirements.txt
+```
+ken_ml/
+├── data/
+│   └── master_ken_data.csv             # Tập dữ liệu F&B và booking sau tiền xử lý
+├── models/
+│   ├── kmeans_cluster.joblib           # Model bundle gom cụm khách hàng (K-Means)
+│   └── rf_forecast.joblib              # Model bundle dự báo nhu cầu F&B (Random Forest)
+├── notebooks/
+│   └── EDA_Analysis.ipynb              # Phân tích khám phá dữ liệu (EDA)
+├── outputs/
+│   ├── figures/                        # Các biểu đồ trực quan hóa (Elbow, Scatter3D, ACF,...)
+│   ├── clustering_*.csv                # Kết quả phân tích cụm, profile, hit rate
+│   └── demand_forecast_*.csv           # Kết quả dự báo nhu cầu chi tiết 31 món
+├── src/
+│   ├── 01_Trending.py                  # Pipeline tính điểm và xếp hạng Trending
+│   ├── 02_Forecasting_train.py         # Huấn luyện mô hình Random Forest
+│   ├── 02_Forecasting_run.py           # Chạy dự báo và cập nhật demand_forecasts
+│   ├── 03_Clustering_train.py          # Huấn luyện mô hình K-Means
+│   ├── 03_Clustering_run.py            # Gán nhãn cụm và cập nhật ml_cluster_recommendations, users
+│   ├── Common.py                       # Hàm tiện ích dùng chung (RFM, đặc trưng, metrics)
+│   ├── Preparation.py                  # Trích xuất dữ liệu từ MongoDB sang CSV
+│   ├── _check_connection.py            # Kiểm tra kết nối và tính toàn vẹn dữ liệu
+│   ├── database.py                     # Quản lý kết nối MongoDB Atlas (đọc chuỗi từ .env)
+│   └── safe_write.py                   # Cơ chế ghi an toàn (mặc định dry-run, yêu cầu --write)
+├── tests/
+│   ├── trending_test.py                # Kiểm thử tự động bài toán 1
+│   ├── forecasting_test.py             # Kiểm thử tự động bài toán 2
+│   └── clustering_test.py              # Kiểm thử tự động bài toán 3
+├── .env.example                        # Mẫu biến môi trường
+├── requirements.txt                    # Thư viện Python phụ thuộc
+└── run.js                              # Cross-platform runner tích hợp vào npm scripts
 ```
 
-### Lưu ý về thư mục
+---
 
-- Đặt `ken_ml` cùng cấp với `my-server-mongodb` và `database` trong project lớn. `src/database.py` đọc file `.env` ở `../my-server-mongodb/.env` (cũng có thể đặt `ken_ml/.env` nếu muốn ghi đè).
-- `data/master_ken_data.csv` và `models/*.joblib` đã có sẵn. Chỉ cần chúng là chạy được train, test và dry-run mà không cần MongoDB.
-- Khi cần ghi vào MongoDB, database phải được dựng sẵn từ thư mục `database/` (`npm install` rồi `npm run setup`). Kiểm tra bằng `python src/_check_connection.py`.
-- Hai file `.joblib` được train bằng scikit-learn 1.9.1. Nếu cài bản khác và nạp lỗi, chạy lại 2 lệnh train bên dưới.
-- Chỉ khi dữ liệu trong DB thay đổi mới cần tạo lại CSV: `python src/Preparation.py` (hoặc `python src/Preparation.py --json-dir ../database/data` để đọc từ file dump JSON).
-- Windows: nếu terminal lỗi tiếng Việt, đặt `PYTHONUTF8=1` trước khi chạy.
+## 2. Cài đặt môi trường
 
-## Các bước chạy
+Yêu cầu Python version >= 3.10. Cài đặt các thư viện cần thiết:
 
-Luôn chạy từ thư mục `ken_ml`. Các lệnh `run` mặc định chỉ chạy thử (dry-run), chỉ ghi vào MongoDB khi thêm `--write`.
-
-**Bước 1. Kiểm thử (không đụng DB)**
 ```bash
+pip install -r ken_ml/requirements.txt
+```
+
+---
+
+## 3. Cách chạy học máy trong hệ thống KÉN
+
+Bạn có thể chạy trực tiếp từ thư mục gốc dự án hoặc thư mục `my-server-mongodb` thông qua các lệnh npm đã được tích hợp sẵn:
+
+### Các lệnh nhanh qua npm
+
+| Lệnh npm              | Mô tả                                                                       |
+| :-------------------- | :-------------------------------------------------------------------------- |
+| `npm run ml:check`    | Kiểm tra kết nối MongoDB Atlas và các collection cần thiết                  |
+| `npm run ml:prep`     | Chạy pipeline trích xuất dữ liệu từ MongoDB Atlas ra `master_ken_data.csv`  |
+| `npm run ml:test`     | Chạy toàn bộ 3 bài test tự động cho Trending, Forecasting, Clustering       |
+| `npm run ml:trending` | Chạy bài toán 1 và ghi kết quả vào collection `ml_global_trending`          |
+| `npm run ml:forecast` | Chạy bài toán 2 và ghi kết quả vào collection `demand_forecasts`            |
+| `npm run ml:cluster`  | Chạy bài toán 3 và ghi nhãn cụm vào `users` và `ml_cluster_recommendations` |
+| `npm run ml:all`      | Chạy tuần tự cả 3 bài toán và ghi dữ liệu cập nhật vào MongoDB              |
+| `npm run ml:dry`      | Chạy thử nghiệm cả 3 bài toán ở chế độ an toàn (Dry-run, không ghi DB)      |
+
+### Chạy trực tiếp bằng Python
+
+Từ thư mục `ken_ml/`:
+
+```bash
+# Kiểm tra kết nối
+python src/_check_connection.py
+
+# Chạy test
 python tests/trending_test.py
 python tests/forecasting_test.py
 python tests/clustering_test.py
-```
 
-**Bước 2. Train mô hình**
-```bash
-python src/02_Forecasting_train.py     # Bài 2 -> models/rf_forecast.joblib, outputs/forecasting_metrics.csv
-python src/03_Clustering_train.py      # Bài 3 -> models/kmeans_cluster.joblib (tùy chọn: --k 4, --log)
-```
-Bài 1 không cần train.
-
-**Bước 3. Chạy thử (dry-run)**
-```bash
+# Chạy pipeline ở chế độ Dry-run (chỉ in, không đụng DB)
 python src/01_Trending.py
 python src/02_Forecasting_run.py
 python src/03_Clustering_run.py
-```
 
-**Bước 4. Ghi thật vào MongoDB** (sau khi test đạt và đã xem kết quả dry-run)
-```bash
+# Chạy pipeline ghi thật vào MongoDB
 python src/01_Trending.py --write
 python src/02_Forecasting_run.py --write
 python src/03_Clustering_run.py --write
 ```
 
-Kết quả (csv, json, hình) nằm trong `outputs/`. Phân tích khám phá dữ liệu: `jupyter notebook notebooks/EDA_Analysis.ipynb`.
+---
+
+## 4. Tích hợp với hệ thống Backend (`my-server-mongodb`)
+
+Backend Kén sử dụng dữ liệu từ ML pipeline thông qua các endpoint:
+
+- `GET /api/recommendations` & `/api/recommendations/top-trending`: Lấy danh sách Top Trending từ `ml_global_trending`.
+- `GET /api/recommendations/booking` & `/api/bookings/recommendations`: Gợi ý món Inclusion & Add-on theo cụm khách hàng `ml_cluster_id` từ `ml_cluster_recommendations`.
+- `GET /api/admin/forecast`: Lấy dự báo nhu cầu món F&B từ `demand_forecasts` và tính toán nguyên vật liệu tiêu thụ tương ứng.

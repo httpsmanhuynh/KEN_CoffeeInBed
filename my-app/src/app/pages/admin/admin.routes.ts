@@ -9,11 +9,20 @@ import { ServicePackages } from './service-packages/service-packages';
 import { Addons } from './addons/addons';
 import { Voucher } from './voucher/voucher';
 import { Forecast } from './forecast/forecast';
+<<<<<<< HEAD
+=======
+import { adminGuard } from './admin.guard';
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
 
 export const adminRoutes: Routes = [
   {
     path: 'admin',
     component: AdminLayoutComponent,
+<<<<<<< HEAD
+=======
+    canActivate: [adminGuard],
+    canActivateChild: [adminGuard],
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: DashboardComponent },
@@ -33,7 +42,10 @@ export const adminRoutes: Routes = [
       { path: 'addons', component: Addons },
       { path: 'vouchers', component: Voucher },
       { path: 'forecast', component: Forecast },
+<<<<<<< HEAD
 
+=======
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
     ],
   },
 ];

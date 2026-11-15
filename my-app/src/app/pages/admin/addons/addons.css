@@ -966,3 +966,36 @@
     width: 100%;
   }
 }
+<<<<<<< HEAD
+=======
+
+.page-subtitle {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: rgba(74, 49, 35, 0.65);
+}
+
+.btn-link-native {
+  border: none;
+  background: transparent;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+}
+
+.config-explain {
+  margin: 0 0 14px;
+  font-size: 13px;
+  color: #5a4232;
+  line-height: 1.5;
+  padding: 12px 14px;
+  background-color: #faf4ea;
+  border-radius: 10px;
+}
+
+.heading-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12

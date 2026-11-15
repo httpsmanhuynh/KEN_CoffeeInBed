@@ -249,7 +249,8 @@
 }
 
 .km-advice {
-  border: 1px solid var(--km-border);
+  background: #fffdf9;
+  border: 1px solid #dcc5a7;
   border-radius: 24px;
   padding: 24px;
 }
@@ -275,9 +276,11 @@
 /* Package card */
 
 .km-pricing {
-  border: 1px solid var(--km-border);
+  background: #fffcf7;
+  border: 1px solid #dcc5a7;
   border-radius: 24px;
   padding: 24px;
+  box-shadow: 0 12px 30px rgba(74, 49, 35, 0.08);
 }
 
 .km-pricing-heading {
@@ -300,9 +303,11 @@
 }
 
 .km-package {
-  padding-bottom: 18px;
-  margin-bottom: 18px;
-  border-bottom: 1px solid var(--km-border);
+  background: #f3e5d0;
+  border: 1px solid #dcc2a1;
+  border-radius: 16px;
+  padding: 16px 18px;
+  margin-bottom: 14px;
 }
 
 .km-package-top {

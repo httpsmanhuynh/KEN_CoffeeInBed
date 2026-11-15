@@ -1,4 +1,5 @@
 <div class="areas-page" data-name="04 · Khu vực">
+<<<<<<< HEAD
   <!-- ==================== VIEW 1: DANH SÁCH KHU VỰC (125:2) ==================== -->
   <ng-container *ngIf="viewMode === 'list'">
     <!-- Page Title Row -->
@@ -9,19 +10,44 @@
           <h1 class="page-title">Quản lý khu vực</h1>
         </div>
 
+=======
+  <!-- Inline Toast -->
+  <div *ngIf="toast" class="admin-toast" [class.toast-error]="toast.type === 'error'" [class.toast-success]="toast.type === 'success'">
+    <span>{{ toast.text }}</span>
+    <button type="button" class="toast-close" (click)="toast = null">×</button>
+  </div>
+
+  <!-- ==================== VIEW 1: DANH SÁCH KHU VỰC ==================== -->
+  <ng-container *ngIf="viewMode === 'list'">
+    <div class="page-title-row" data-name="Page title row">
+      <div class="title-block" data-name="Title block">
+        <div class="title-with-icon" data-name="Title with icon">
+          <img src="/images/ken-home/icons/branch-pin.svg" alt="" class="title-icon" />
+          <h1 class="page-title">Quản lý khu vực (Zones)</h1>
+        </div>
+        <p class="page-subtitle">Cấu hình 3 khu vực vận hành tại KÉN · Tổng {{ totalSpaces }} không gian đang quản lý</p>
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
       </div>
 
       <div class="title-actions">
         <button type="button" class="btn-export" (click)="exportList()" data-name="Export btn">
+<<<<<<< HEAD
           Xuất danh sách ↗
         </button>
         <button type="button" class="btn-add-zone" (click)="openCreateForm()" data-name="Add zone btn">
           <img src="images/admin/plus.svg" alt="" class="plus-icon" />
+=======
+          Xuất danh sách CSV ↗
+        </button>
+        <button type="button" class="btn-add-zone" (click)="openCreateForm()" data-name="Add zone btn">
+          <img src="/images/figma/sparkles.svg" alt="" class="plus-icon" />
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
           <span>Thêm khu vực</span>
         </button>
       </div>
     </div>
 
+<<<<<<< HEAD
     <!-- 3 Zone Cards Row -->
     <div class="zone-cards-row" data-name="Zone cards">
       <!-- Card KÉN Kết Nối -->
@@ -49,6 +75,31 @@
         </div>
         <h2 class="card-space-count">3 không gian</h2>
         <p class="card-space-sub">2 đang hoạt động</p>
+=======
+    <!-- Dynamic Zone Summary Cards -->
+    <div class="zone-cards-row" data-name="Zone cards">
+      <div *ngFor="let z of zones" class="zone-summary-card" [class.card-hidden]="z.status === 'HIDDEN'">
+        <div class="card-badge-wrap">
+          <span class="card-zone-tag" [ngClass]="z.tagColorClass">{{ z.name }}</span>
+        </div>
+        <h2 class="card-space-count">{{ z.spacesCount }} không gian</h2>
+        <p class="card-space-sub">
+          {{ z.canBook ? (z.activeSpacesCount + ' đang hoạt động') : 'Không nhận đặt chỗ trực tuyến' }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Inline Soft-Delete Confirm Bar -->
+    <div *ngIf="confirmToggleTarget as target" class="inline-confirm-bar">
+      <span>
+        {{ target.status === 'ACTIVE'
+          ? 'Xác nhận TẠM ẨN khu vực "' + target.name + '"? Lịch sử đặt chỗ cũ vẫn được bảo toàn.'
+          : 'Xác nhận KÍCH HOẠT LẠI khu vực "' + target.name + '"?' }}
+      </span>
+      <div class="confirm-bar-actions">
+        <button type="button" class="btn-save" (click)="confirmToggleHide()">Xác nhận</button>
+        <button type="button" class="btn-cancel" (click)="confirmToggleTarget = null">Huỷ</button>
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
       </div>
     </div>
 
@@ -56,6 +107,7 @@
     <div class="zone-table-block" data-name="Zone Table">
       <div class="table-header-bar" data-name="Table header">
         <div class="table-header-left">
+<<<<<<< HEAD
           <img src="images/admin/building-gold.svg" alt="" class="bar-icon" />
           <h3 class="table-bar-title">Danh sách Zone</h3>
         </div>
@@ -63,6 +115,16 @@
           <img src="images/admin/sort-gold.svg" alt="" class="sort-icon" />
           <span class="sort-label">Sắp xếp</span>
         </div>
+=======
+          <img src="/images/ken-home/icons/branch-pin.svg" alt="" class="bar-icon" />
+          <h3 class="table-bar-title">Danh sách Zone ({{ zones.length }})</h3>
+          <span *ngIf="loading" class="loading-text">Đang tải...</span>
+        </div>
+        <button type="button" class="table-header-right btn-sort-zones" (click)="toggleSort()">
+          <img src="/images/figma/sort-alpha-down-alt.svg" alt="" class="sort-icon" />
+          <span class="sort-label">Sắp xếp {{ sortAsc ? 'A→Z' : 'Z→A' }}</span>
+        </button>
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
       </div>
 
       <div class="zone-table" data-name="thead">
@@ -74,6 +136,7 @@
           <div class="th-col th-action">Hành động</div>
         </div>
 
+<<<<<<< HEAD
         <div
           *ngFor="let z of zones"
           class="trow-item"
@@ -81,6 +144,16 @@
           <div class="td-col td-name">
             <span class="zone-item-title">{{ z.name }}</span>
             <span class="zone-item-slug">{{ z.slug }}</span>
+=======
+        <div *ngIf="zones.length === 0" class="empty-zone-row">
+          Chưa có khu vực nào được cấu hình. Nhấn "Thêm khu vực" để tạo mới.
+        </div>
+
+        <div *ngFor="let z of zones" class="trow-item">
+          <div class="td-col td-name">
+            <span class="zone-item-title">{{ z.name }}</span>
+            <span class="zone-item-slug">{{ z.code }} · {{ z.slug }}</span>
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
           </div>
 
           <div class="td-col td-desc">
@@ -89,7 +162,11 @@
 
           <div class="td-col td-book">
             <span class="badge-pill" [class.badge-no-book]="!z.canBook" [class.badge-can-book]="z.canBook">
+<<<<<<< HEAD
               {{ z.canBookLabel }}
+=======
+              {{ z.canBookLabel }} ({{ z.spacesCount }} ô)
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
             </span>
           </div>
 
@@ -109,7 +186,11 @@
               class="btn-action-text"
               [class.text-danger]="z.status === 'ACTIVE'"
               [class.text-success]="z.status === 'HIDDEN'"
+<<<<<<< HEAD
               (click)="toggleHideZone(z)"
+=======
+              (click)="requestToggleHide(z)"
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
             >
               {{ z.status === 'ACTIVE' ? 'Ẩn khu vực' : 'Kích hoạt' }}
             </button>
@@ -117,6 +198,7 @@
         </div>
       </div>
     </div>
+<<<<<<< HEAD
 
 
   </ng-container>
@@ -140,11 +222,33 @@
     <div class="form-zone-card" data-name="Form Zone">
       <div class="form-header-bar">
         <img src="images/admin/cursor-text.svg" alt="" class="cursor-icon" />
+=======
+  </ng-container>
+
+  <!-- ==================== VIEW 2: THÊM / CHỈNH SỬA KHU VỰC ==================== -->
+  <ng-container *ngIf="viewMode === 'form'">
+    <div class="page-title-row" data-name="Page title row">
+      <div class="title-block" data-name="Title block">
+        <div class="title-with-icon" data-name="Title with icon">
+          <img src="/images/ken-home/icons/branch-pin.svg" alt="" class="title-icon" />
+          <h1 class="page-title">{{ formTitle }}</h1>
+        </div>
+        <p class="page-subtitle">Cập nhật thông tin định danh và trạng thái nhận đặt chỗ trước khi lưu.</p>
+      </div>
+    </div>
+
+    <div class="form-zone-card" data-name="Form Zone">
+      <div class="form-header-bar">
+        <img src="/images/figma/icon-info.svg" alt="" class="cursor-icon" />
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
         <h3 class="form-header-title">THÔNG TIN KHU VỰC</h3>
       </div>
       <div class="form-divider"></div>
 
+<<<<<<< HEAD
       <!-- 2 Inputs in columns: Tên Zone & Mô Tả -->
+=======
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
       <div class="form-row-2col">
         <div class="form-group">
           <label class="form-label">TÊN ZONE</label>
@@ -152,25 +256,39 @@
             <input
               type="text"
               [(ngModel)]="formData.name"
+<<<<<<< HEAD
               placeholder="Nhập tên zone…"
+=======
+              placeholder="Ví dụ: KÉN Tập Trung"
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
               class="form-control-input"
             />
           </div>
         </div>
 
         <div class="form-group">
+<<<<<<< HEAD
           <label class="form-label">MÔ TẢ</label>
           <div class="form-input-wrap">
             <input
               type="text"
               [(ngModel)]="formData.description"
               placeholder="Nhập mô tả zone…"
+=======
+          <label class="form-label">MÃ ZONE (CODE)</label>
+          <div class="form-input-wrap">
+            <input
+              type="text"
+              [(ngModel)]="formData.code"
+              placeholder="Ví dụ: KEN_TAP_TRUNG (tự sinh nếu bỏ trống)"
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
               class="form-control-input"
             />
           </div>
         </div>
       </div>
 
+<<<<<<< HEAD
       <!-- Trạng thái -->
       <div class="form-group full-width">
         <label class="form-label">TRẠNG THÁI</label>
@@ -192,10 +310,46 @@
             <option [ngValue]="false">Không nhận</option>
           </select>
           <img src="images/admin/arrow-dropdown.svg" alt="" class="select-arrow" />
+=======
+      <div class="form-group full-width">
+        <label class="form-label">MÔ TẢ KHU VỰC</label>
+        <div class="form-input-wrap">
+          <input
+            type="text"
+            [(ngModel)]="formData.description"
+            placeholder="Nhập mô tả mục đích sử dụng..."
+            class="form-control-input"
+          />
+        </div>
+      </div>
+
+      <div class="form-row-2col">
+        <div class="form-group">
+          <label class="form-label">TRẠNG THÁI</label>
+          <div class="form-select-wrap">
+            <select [(ngModel)]="formData.status" class="form-control-select">
+              <option value="ACTIVE">Hoạt động</option>
+              <option value="HIDDEN">Tạm ẩn</option>
+            </select>
+            <img src="/images/figma/chevron-down.svg" alt="" class="select-arrow" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">NHẬN ĐẶT CHỖ</label>
+          <div class="form-select-wrap">
+            <select [(ngModel)]="formData.canBook" class="form-control-select">
+              <option [ngValue]="true">Có thể đặt trực tuyến</option>
+              <option [ngValue]="false">Không nhận đặt chỗ</option>
+            </select>
+            <img src="/images/figma/chevron-down.svg" alt="" class="select-arrow" />
+          </div>
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
         </div>
       </div>
 
       <p class="soft-delete-hint">
+<<<<<<< HEAD
         * Soft Delete: Zone sẽ bị ẩn thay vì xóa cứng để đảm bảo lịch sử dữ liệu.
       </p>
 
@@ -206,6 +360,15 @@
         </button>
         <button type="button" class="btn-save" (click)="saveZone()">
           Lưu
+=======
+        * Lưu ý: Khu vực tạm ẩn sẽ ngừng nhận đặt chỗ mới nhưng vẫn bảo toàn toàn bộ lịch sử không gian và đơn đặt trước đó.
+      </p>
+
+      <div class="form-actions-row">
+        <button type="button" class="btn-cancel" (click)="cancelForm()" [disabled]="saving">Hủy</button>
+        <button type="button" class="btn-save" (click)="saveZone()" [disabled]="saving">
+          {{ saving ? 'Đang lưu...' : 'Lưu khu vực' }}
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
         </button>
       </div>
     </div>

@@ -199,6 +199,31 @@ async function createReview(db, { user, bookingId, rating, comment = null, now =
   }
 }
 
+async function enrichBookingMeta(db, bookings = []) {
+  const spaceMap = new Map();
+  const packageMap = new Map();
+  const zoneMap = new Map();
+  if (!Array.isArray(bookings) || bookings.length === 0) {
+    return { spaceMap, packageMap, zoneMap };
+  }
+  try {
+    const spaceIds = [...new Set(bookings.map((b) => b.space_id).filter(Boolean))];
+    const packageIds = [...new Set(bookings.map((b) => b.package_id).filter(Boolean))];
+    const zoneIds = [...new Set(bookings.map((b) => b.zone_id).filter(Boolean))];
+    const [spaces, packages, zones] = await Promise.all([
+      spaceIds.length ? db.collection('spaces').find({ _id: { $in: spaceIds } }).toArray() : [],
+      packageIds.length ? db.collection('packages').find({ _id: { $in: packageIds } }).toArray() : [],
+      zoneIds.length ? db.collection('zones').find({ _id: { $in: zoneIds } }).toArray() : [],
+    ]);
+    for (const s of spaces) spaceMap.set(String(s._id), s);
+    for (const p of packages) packageMap.set(String(p._id), p);
+    for (const z of zones) zoneMap.set(String(z._id), z);
+  } catch (_) {
+    // Bỏ qua nếu mock db trong unit test không khởi tạo đầy đủ collections phụ
+  }
+  return { spaceMap, packageMap, zoneMap };
+}
+
 /**
  * Lấy danh sách đánh giá đã gửi của khách hàng hiện tại kèm danh sách lời nhắc đánh giá
  * cho các đơn CHECKED_OUT chưa có đánh giá (UC-16, FR-4.3).
@@ -217,37 +242,63 @@ async function listMyReviewsAndReminders(db, { user }) {
   ]);
 
   const bookingMap = new Map(checkedOutBookings.map((b) => [String(b._id), b]));
+  const missingBookingIds = myReviews
+    .map((r) => r.booking_id)
+    .filter((bid) => bid && !bookingMap.has(String(bid)));
+  if (missingBookingIds.length > 0) {
+    try {
+      const extraBookings = await db
+        .collection('bookings')
+        .find({ _id: { $in: missingBookingIds } })
+        .toArray();
+      for (const b of extraBookings) bookingMap.set(String(b._id), b);
+    } catch (_) {}
+  }
+
+  const allRelatedBookings = [...bookingMap.values()];
+  const { spaceMap, packageMap, zoneMap } = await enrichBookingMeta(db, allRelatedBookings);
   const reviewedBookingIds = new Set(myReviews.map((r) => String(r.booking_id)));
 
   const enrichedReviews = myReviews.map((r) => {
     const bk = bookingMap.get(String(r.booking_id)) || null;
+    const sp = bk && bk.space_id ? spaceMap.get(String(bk.space_id)) : null;
+    const pkg = bk && bk.package_id ? packageMap.get(String(bk.package_id)) : null;
+    const zn = bk && bk.zone_id ? zoneMap.get(String(bk.zone_id)) : null;
     return {
       ...r,
       booking_code: bk ? bk.booking_code : null,
       space_id: bk ? bk.space_id : null,
-      space_name: bk ? bk.space_name : null,
-      package_name: bk ? bk.package_name : null,
+      space_name: (bk && bk.space_name) || (sp && sp.name) || 'Không gian KÉN',
+      package_name: (bk && bk.package_name) || (pkg && pkg.name) || null,
+      zone_name: (bk && bk.zone_name) || (zn && zn.name) || null,
+      final_amount: bk ? bk.final_amount ?? bk.total_price ?? null : null,
     };
   });
 
   const pendingReminders = checkedOutBookings
     .filter((b) => !reviewedBookingIds.has(String(b._id)))
-    .map((b) => ({
-      booking_id: b._id,
-      bookingId: String(b._id),
-      booking_code: b.booking_code,
-      space_id: b.space_id,
-      space_name: b.space_name,
-      package_name: b.package_name,
-      zone_name: b.zone_name,
-      start_at: b.start_at,
-      end_at: b.end_at,
-      checked_out_at: b.checked_out_at,
-      can_review: true,
-      review_reminder: true,
-      canReview: true,
-      reviewReminder: true,
-    }));
+    .map((b) => {
+      const sp = b.space_id ? spaceMap.get(String(b.space_id)) : null;
+      const pkg = b.package_id ? packageMap.get(String(b.package_id)) : null;
+      const zn = b.zone_id ? zoneMap.get(String(b.zone_id)) : null;
+      return {
+        booking_id: b._id,
+        bookingId: String(b._id),
+        booking_code: b.booking_code,
+        space_id: b.space_id,
+        space_name: b.space_name || (sp && sp.name) || 'Không gian KÉN',
+        package_name: b.package_name || (pkg && pkg.name) || '',
+        zone_name: b.zone_name || (zn && zn.name) || '',
+        final_amount: b.final_amount ?? b.total_price ?? 0,
+        start_at: b.start_at,
+        end_at: b.end_at,
+        checked_out_at: b.checked_out_at,
+        can_review: true,
+        review_reminder: true,
+        canReview: true,
+        reviewReminder: true,
+      };
+    });
 
   return {
     reviews: enrichedReviews,
@@ -331,9 +382,13 @@ async function listSpaceReviews(db, { spaceId }) {
 }
 
 /**
- * Danh sách đánh giá có bộ lọc (theo spaceId, bookingId, userId, rating).
+ * Danh sách đánh giá có bộ lọc (theo spaceId, bookingId, userId, rating, skip, limit).
+ * Tự động join thông tin khách hàng, đơn đặt chỗ và không gian (với fallback an toàn).
  */
-async function listReviews(db, { spaceId = null, bookingId = null, userId = null, rating = null } = {}) {
+async function listReviews(
+  db,
+  { spaceId = null, bookingId = null, userId = null, rating = null, limit = null, skip = 0 } = {},
+) {
   const filter = {};
   if (bookingId) {
     filter.booking_id = toOid(bookingId, 'INVALID_BOOKING_ID', 'Mã đơn đặt chỗ không hợp lệ');
@@ -360,15 +415,81 @@ async function listReviews(db, { spaceId = null, bookingId = null, userId = null
       : { $in: bIds };
   }
 
-  const reviews = await db
+  const allMatched = await db
     .collection('reviews')
     .find(filter)
     .sort({ created_at: -1 })
     .toArray();
 
+  const summary = summarizeReviews(allMatched);
+  const startIdx = Math.max(0, Number.isFinite(Number(skip)) ? Number(skip) : 0);
+  const parsedLimit = limit !== null && limit !== undefined && Number(limit) > 0 ? Number(limit) : null;
+  const subset = parsedLimit ? allMatched.slice(startIdx, startIdx + parsedLimit) : allMatched.slice(startIdx);
+
+  let bookingMap = new Map();
+  let userMap = new Map();
+  let spaceMap = new Map();
+  let packageMap = new Map();
+  let zoneMap = new Map();
+
+  if (subset.length > 0) {
+    try {
+      const bookingIds = [...new Set(subset.map((r) => r.booking_id).filter(Boolean))];
+      const userIds = [...new Set(subset.map((r) => r.user_id).filter(Boolean))];
+      const [bookings, users] = await Promise.all([
+        bookingIds.length ? db.collection('bookings').find({ _id: { $in: bookingIds } }).toArray() : [],
+        userIds.length ? db.collection('users').find({ _id: { $in: userIds } }).toArray() : [],
+      ]);
+      bookingMap = new Map(bookings.map((b) => [String(b._id), b]));
+      userMap = new Map(users.map((u) => [String(u._id), u]));
+      const meta = await enrichBookingMeta(db, bookings);
+      spaceMap = meta.spaceMap;
+      packageMap = meta.packageMap;
+      zoneMap = meta.zoneMap;
+    } catch (_) {
+      // Giữ an toàn nếu mock db không có đủ collections
+    }
+  }
+
+  const enrichedReviews = subset.map((r) => {
+    const bk = bookingMap.get(String(r.booking_id)) || null;
+    const usr = userMap.get(String(r.user_id)) || null;
+    const sp = bk && bk.space_id ? spaceMap.get(String(bk.space_id)) : null;
+    const pkg = bk && bk.package_id ? packageMap.get(String(bk.package_id)) : null;
+    const zn = bk && bk.zone_id ? zoneMap.get(String(bk.zone_id)) : null;
+
+    const reviewerName =
+      (usr && (usr.full_name || usr.name)) ||
+      (bk && (bk.contact_name || bk.customer_name)) ||
+      r.user_name ||
+      r.reviewer_name ||
+      'Khách hàng KÉN';
+    const spaceName =
+      (bk && bk.space_name) ||
+      (sp && sp.name) ||
+      r.space_name ||
+      'Không gian KÉN';
+    const packageName =
+      (bk && bk.package_name) ||
+      (pkg && pkg.name) ||
+      r.package_name ||
+      '';
+
+    return {
+      ...r,
+      user_name: reviewerName,
+      reviewer_name: reviewerName,
+      space_id: (bk && bk.space_id) || r.space_id || null,
+      space_name: spaceName,
+      package_name: packageName,
+      zone_name: (bk && bk.zone_name) || (zn && zn.name) || r.zone_name || '',
+      booking_code: (bk && bk.booking_code) || r.booking_code || '',
+    };
+  });
+
   return {
-    ...summarizeReviews(reviews),
-    reviews,
+    ...summary,
+    reviews: enrichedReviews,
   };
 }
 

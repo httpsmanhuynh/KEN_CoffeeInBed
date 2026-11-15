@@ -1,8 +1,18 @@
 <div class="customers-page" data-name="03 · Khách hàng">
+<<<<<<< HEAD
+=======
+  <!-- Inline Toast -->
+  <div *ngIf="toast" class="admin-toast" [class.toast-error]="toast.type === 'error'" [class.toast-success]="toast.type === 'success'">
+    <span>{{ toast.text }}</span>
+    <button type="button" class="toast-close" (click)="toast = null">×</button>
+  </div>
+
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
   <!-- Page Title Row -->
   <div class="page-title-row" data-name="Page title row">
     <div class="title-block" data-name="Title block">
       <div class="title-with-icon" data-name="Title with icon">
+<<<<<<< HEAD
         <img src="images/admin/people-fill.svg" alt="" class="title-icon" />
         <h1 class="page-title">Khách hàng & Thành viên</h1>
       </div>
@@ -10,6 +20,15 @@
     </div>
     <button type="button" class="btn-export" (click)="exportList()" data-name="Export btn">
       Xuất danh sách ↗
+=======
+        <img src="/images/figma/nguoi-dung.svg" alt="" class="title-icon" />
+        <h1 class="page-title">Khách hàng &amp; Thành viên</h1>
+      </div>
+      <p class="page-subtitle">Quản lý hồ sơ khách hàng, trạng thái tài khoản và hạng thành viên KÉN. Nhấp vào một dòng khách hàng để xem chi tiết.</p>
+    </div>
+    <button type="button" class="btn-export" (click)="exportList()" data-name="Export btn">
+      Xuất danh sách CSV ↗
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
     </button>
   </div>
 
@@ -18,16 +37,26 @@
     <!-- Filter Row -->
     <div class="filters-row" data-name="Filters">
       <div class="search-input-box">
+<<<<<<< HEAD
         <img src="images/admin/search-icon.svg" alt="" class="search-icon" />
         <input
           type="text"
           [(ngModel)]="searchTerm"
           placeholder="Tìm tên, email hoặc mã khách hàng..."
+=======
+        <img src="/images/figma/search.svg" alt="" class="search-icon" />
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="currentPage = 1"
+          placeholder="Tìm tên, email, SĐT hoặc mã khách hàng..."
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
           class="search-input"
         />
       </div>
 
       <div class="select-dropdown">
+<<<<<<< HEAD
         <select [(ngModel)]="selectedTierFilter" class="custom-select">
           <option value="ALL">Hạng thành viên (Tất cả)</option>
           <option value="NONE">Chưa đạt hạng</option>
@@ -41,21 +70,44 @@
 
       <div class="select-dropdown">
         <select [(ngModel)]="selectedStatusFilter" class="custom-select">
+=======
+        <select [(ngModel)]="selectedTierFilter" (ngModelChange)="currentPage = 1" class="custom-select">
+          <option value="ALL">Hạng thành viên (Tất cả)</option>
+          <option value="CHUA_DAT_HANG">Chưa đạt hạng (&lt; 1.000 điểm)</option>
+          <option value="BAC">Bạc (1.000 – 4.999 điểm · Giảm 5%)</option>
+          <option value="VANG">Vàng (5.000 – 9.999 điểm · Giảm 10%)</option>
+          <option value="KIM_CUONG">Kim Cương (Từ 10.000 điểm · Giảm 15%)</option>
+        </select>
+        <img src="/images/figma/chevron-down.svg" alt="" class="select-arrow" />
+      </div>
+
+      <div class="select-dropdown">
+        <select [(ngModel)]="selectedStatusFilter" (ngModelChange)="currentPage = 1" class="custom-select">
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
           <option value="ALL">Trạng thái (Tất cả)</option>
           <option value="ACTIVE">Hoạt động</option>
           <option value="LOCKED">Tạm khoá</option>
         </select>
+<<<<<<< HEAD
         <img src="images/admin/arrow-dropdown.svg" alt="" class="select-arrow" />
       </div>
 
       <button type="button" class="btn-filter-action">
         <img src="images/admin/filter-icon.svg" alt="" class="filter-icon" />
         <span>Lọc</span>
+=======
+        <img src="/images/figma/chevron-down.svg" alt="" class="select-arrow" />
+      </div>
+
+      <button type="button" class="btn-filter-action" (click)="resetFilters()">
+        <span>Đặt lại</span>
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
       </button>
     </div>
 
     <!-- Tab Pills -->
     <div class="tab-pills" data-name="Tab pills">
+<<<<<<< HEAD
       <button
         type="button"
         class="tab-pill"
@@ -80,11 +132,24 @@
       >
         Tạm khoá · {{ counts.locked }}
       </button>
+=======
+      <button type="button" class="tab-pill" [class.active]="activeTab === 'ALL'" (click)="setTab('ALL')">
+        Tất cả · {{ counts.all }}
+      </button>
+      <button type="button" class="tab-pill" [class.active]="activeTab === 'ACTIVE'" (click)="setTab('ACTIVE')">
+        Hoạt động · {{ counts.active }}
+      </button>
+      <button type="button" class="tab-pill" [class.active]="activeTab === 'LOCKED'" (click)="setTab('LOCKED')">
+        Tạm khoá · {{ counts.locked }}
+      </button>
+      <span *ngIf="loading" class="loading-pill">Đang tải danh sách...</span>
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
     </div>
 
     <!-- Table -->
     <div class="customer-table" data-name="Table">
       <div class="table-header" data-name="Table header">
+<<<<<<< HEAD
         <div class="col-sel">
           <div class="checkbox-indicator"></div>
         </div>
@@ -116,10 +181,44 @@
 
         <div class="col-phone">
           <span class="cust-phone">{{ c.phone }}</span>
+=======
+        <div class="col-name">Khách hàng</div>
+        <div class="col-contact">Liên hệ</div>
+        <div class="col-tier">Hạng thành viên</div>
+        <div class="col-points">KÉN Điểm</div>
+        <div class="col-coins">KÉN Coins</div>
+        <div class="col-orders">Đặt chỗ &amp; Chi tiêu</div>
+        <div class="col-status">Trạng thái</div>
+        <div class="col-action">Thao tác</div>
+      </div>
+
+      <div *ngIf="paginatedCustomers.length === 0" class="empty-history-row">
+        Không có khách hàng nào khớp điều kiện lọc.
+      </div>
+
+      <div
+        *ngFor="let c of paginatedCustomers"
+        class="table-row"
+        [class.selected]="selectedCustomer?.id === c.id"
+        (click)="selectCustomer(c)"
+      >
+        <div class="col-name">
+          <span class="cust-title">{{ c.name }}</span>
+          <span class="cust-subcode">{{ c.code }} · {{ c.role }} · Tham gia {{ c.joinDate }}</span>
+        </div>
+
+        <div class="col-contact">
+          <span class="cust-phone">{{ c.phone }}</span>
+          <span class="cust-email">{{ c.email }}</span>
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
         </div>
 
         <div class="col-tier">
           <span class="badge-tier" [ngClass]="c.tierBadgeClass">{{ c.tier }}</span>
+<<<<<<< HEAD
+=======
+          <span class="cust-subcode">{{ c.tierDiscount }}</span>
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
         </div>
 
         <div class="col-points">
@@ -130,16 +229,63 @@
           <span class="coins-val">{{ c.coinsFormatted }}</span>
         </div>
 
+<<<<<<< HEAD
+=======
+        <div class="col-orders">
+          <span class="points-val">{{ c.totalOrders }} đơn</span>
+          <span class="cust-subcode">{{ c.totalSpendFormatted }}</span>
+        </div>
+
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
         <div class="col-status">
           <span class="badge-status" [ngClass]="c.statusBadgeClass">{{ c.statusLabel }}</span>
         </div>
 
         <div class="col-action">
+<<<<<<< HEAD
           <span class="action-link">Chi tiết →</span>
+=======
+          <ng-container *ngIf="pendingLockTarget?.id === c.id; else normalCustActions">
+            <button
+              type="button"
+              class="btn-inline-confirm"
+              (click)="confirmToggleLock(); $event.stopPropagation()"
+              [disabled]="actionLoading"
+            >
+              Xác nhận
+            </button>
+            <button
+              type="button"
+              class="btn-inline-cancel"
+              (click)="pendingLockTarget = null; $event.stopPropagation()"
+            >
+              Huỷ
+            </button>
+          </ng-container>
+          <ng-template #normalCustActions>
+            <button
+              type="button"
+              class="btn-row-link"
+              (click)="viewCustomerBookings(c, $event)"
+            >
+              Đơn đặt
+            </button>
+            <button
+              type="button"
+              class="btn-row-lock"
+              [class.is-unlock]="c.status === 'LOCKED'"
+              [disabled]="c.role === 'ADMIN' || actionLoading"
+              (click)="requestToggleLock(c); $event.stopPropagation()"
+            >
+              {{ c.role === 'ADMIN' ? 'ADMIN' : (c.status === 'ACTIVE' ? 'Khoá TK' : 'Mở khoá') }}
+            </button>
+          </ng-template>
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
         </div>
       </div>
     </div>
 
+<<<<<<< HEAD
     <!-- Pagination -->
     <div class="table-pagination">
       <span class="pagination-info">
@@ -150,10 +296,30 @@
         <button type="button" class="btn-page-num active">1</button>
         <button type="button" class="btn-page-num">2</button>
         <button type="button" class="btn-page-arrow">›</button>
+=======
+    <!-- Working Pagination -->
+    <div class="table-pagination">
+      <span class="pagination-info">
+        Hiển thị {{ pageStartIndex }}–{{ pageEndIndex }} / {{ filteredCustomers.length }} tài khoản · Trang {{ currentPage }} / {{ totalPages }}
+      </span>
+      <div class="pagination-controls">
+        <button type="button" class="btn-page-arrow" [disabled]="currentPage <= 1" (click)="goToPage(currentPage - 1)">‹ Trước</button>
+        <button
+          *ngFor="let p of pageNumbers"
+          type="button"
+          class="btn-page-num"
+          [class.active]="p === currentPage"
+          (click)="goToPage(p)"
+        >
+          {{ p }}
+        </button>
+        <button type="button" class="btn-page-arrow" [disabled]="currentPage >= totalPages" (click)="goToPage(currentPage + 1)">Tiếp ›</button>
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
       </div>
     </div>
   </div>
 
+<<<<<<< HEAD
   <!-- Detail Section: Customer Details & Loyalty -->
   <div class="customer-detail-section" data-name="Section: Chi tiết Customer">
     <div class="detail-section-header">
@@ -169,11 +335,30 @@
         <div class="panel-header">
           <img src="images/admin/person.svg" alt="" class="panel-icon" />
           <h3 class="panel-title">THÔNG TIN TÀI KHOẢN</h3>
+=======
+  <!-- Interactive Customer Detail Section (Revealed on Row Click) -->
+  <div id="customer-detail-anchor" class="customer-detail-section" *ngIf="selectedCustomer as sel" data-name="Customer detail section">
+    <div class="detail-section-header">
+      <img src="/images/figma/eye-view-fill.svg" alt="" class="detail-icon" />
+      <span class="detail-section-title">HỒ SƠ CHI TIẾT KHÁCH HÀNG · {{ sel.name }} ({{ sel.code }})</span>
+      <button type="button" class="admin-detail-close-btn" (click)="closeCustomerDetail()">
+        Đóng chi tiết ✕
+      </button>
+    </div>
+
+    <div class="detail-top-panels">
+      <!-- Left Panel: Account Info & Lock/Unlock -->
+      <div class="detail-panel">
+        <div class="panel-header">
+          <img src="/images/figma/user-round.svg" alt="" class="panel-icon" />
+          <h3 class="panel-title">Thông tin tài khoản</h3>
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
         </div>
         <div class="panel-divider"></div>
 
         <div class="info-rows-list">
           <div class="info-row">
+<<<<<<< HEAD
             <span class="info-label">Họ tên</span>
             <span class="info-val font-bold text-brand">{{ selectedCustomer.name }}</span>
           </div>
@@ -205,12 +390,42 @@
             <span class="info-label">Đơn / Chi tiêu</span>
             <span class="info-val font-bold text-brand">
               {{ selectedCustomer.totalOrders }} đơn · {{ selectedCustomer.totalSpendFormatted }}
+=======
+            <span class="info-label">Mã khách hàng</span>
+            <span class="info-val font-bold text-brand">{{ sel.code }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Họ &amp; Tên</span>
+            <span class="info-val font-semibold">{{ sel.name }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Số điện thoại</span>
+            <span class="info-val">{{ sel.phone }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Email</span>
+            <span class="info-val">{{ sel.email }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Ngày tham gia</span>
+            <span class="info-val">{{ sel.joinDate }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Tổng chi tiêu</span>
+            <span class="info-val font-bold text-brand">{{ sel.totalOrders }} đơn · {{ sel.totalSpendFormatted }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Trạng thái</span>
+            <span class="info-val">
+              <span class="badge-status" [ngClass]="sel.statusBadgeClass">{{ sel.statusLabel }}</span>
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
             </span>
           </div>
         </div>
 
         <div class="panel-divider"></div>
 
+<<<<<<< HEAD
         <div class="lock-action-row">
           <button
             type="button"
@@ -273,21 +488,95 @@
           <div class="spec-line">
             <span class="spec-label">Quy đổi</span>
             <span class="spec-val">10.000đ = 1 KÉN Điểm · Coins độc lập</span>
+=======
+        <div class="lock-action-row" *ngIf="sel.role !== 'ADMIN'">
+          <button
+            type="button"
+            class="btn-lock"
+            [class.btn-unlock]="sel.status === 'LOCKED'"
+            [disabled]="actionLoading"
+            (click)="requestToggleLock(sel)"
+          >
+            {{ sel.status === 'ACTIVE' ? 'Tạm khoá tài khoản' : 'Mở khoá tài khoản' }}
+          </button>
+          <p class="lock-note">
+            Tài khoản tạm khoá không thể đăng nhập hoặc đặt chỗ mới; lịch sử đơn cũ vẫn được lưu trữ.
+          </p>
+        </div>
+
+        <div *ngIf="pendingLockTarget?.id === sel.id" class="inline-lock-confirm">
+          <p class="confirm-text">
+            {{ sel.status === 'ACTIVE' ? 'Xác nhận tạm khoá tài khoản ' + sel.name + '?' : 'Xác nhận mở khoá tài khoản ' + sel.name + '?' }}
+          </p>
+          <div class="confirm-btn-row">
+            <button type="button" class="btn-confirm-ok" (click)="confirmToggleLock()" [disabled]="actionLoading">Xác nhận</button>
+            <button type="button" class="btn-confirm-cancel" (click)="pendingLockTarget = null">Huỷ</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Loyalty Card & Benefits -->
+      <div class="detail-panel">
+        <div class="panel-header">
+          <img src="/images/figma/sparkles.svg" alt="" class="panel-icon" />
+          <h3 class="panel-title">Thẻ thành viên &amp; KÉN Xu</h3>
+        </div>
+
+        <div class="loyalty-card">
+          <div class="loyalty-card-top">
+            <span class="loyalty-owner">{{ sel.name }} · {{ sel.code }}</span>
+            <span class="loyalty-badge">{{ sel.tier }}</span>
+          </div>
+          <div class="loyalty-metrics-row">
+            <div class="loyalty-metric-col">
+              <span class="metric-num">{{ sel.pointsFormatted }}</span>
+              <span class="metric-sub">KÉN Điểm tích luỹ</span>
+            </div>
+            <div class="loyalty-metric-col">
+              <span class="metric-num">{{ sel.coinsFormatted }}</span>
+              <span class="metric-sub">KÉN Coins khả dụng</span>
+            </div>
+          </div>
+          <div class="loyalty-progress-track">
+            <div class="loyalty-progress-fill" [style.width.%]="sel.progressPercent"></div>
+          </div>
+          <p class="loyalty-progress-note">{{ sel.progressText }}</p>
+        </div>
+
+        <div class="loyalty-specs-list">
+          <div class="spec-line">
+            <span class="spec-label">Phân hạng hiện tại</span>
+            <span class="spec-val font-semibold">{{ sel.tierRange }}</span>
+          </div>
+          <div class="spec-line">
+            <span class="spec-label">Ưu đãi tự động</span>
+            <span class="spec-val font-semibold text-brand">{{ sel.tierDiscount }}</span>
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
           </div>
         </div>
       </div>
     </div>
 
+<<<<<<< HEAD
     <!-- Bottom Block: Booking History -->
     <div class="booking-history-block" data-name="Block: Lịch sử Booking">
       <div class="history-header">
         <img src="images/admin/history.svg" alt="" class="history-icon" />
         <h3 class="history-title">Lịch sử Booking</h3>
         <span class="history-count">{{ selectedCustomer.totalOrders }} đơn · Dữ liệu minh hoạ</span>
+=======
+    <!-- Booking History of Selected Customer -->
+    <div class="booking-history-block">
+      <div class="history-header">
+        <img src="/images/figma/lich-dat-cho.svg" alt="" class="history-icon" />
+        <h3 class="history-title">Lịch sử đặt chỗ của {{ sel.name }}</h3>
+        <span class="history-count">{{ sel.bookingHistory.length }} đơn gần nhất</span>
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
       </div>
 
       <div class="history-table">
         <div class="hist-thead">
+<<<<<<< HEAD
           <div class="hist-col-code">Mã Booking</div>
           <div class="hist-col-space">Không gian</div>
           <div class="hist-col-date">Ngày</div>
@@ -313,6 +602,30 @@
           <div class="hist-col-amt font-semibold text-brand">{{ h.totalAmount }}</div>
           <div class="hist-col-act">
             <a class="action-link">Xem đơn →</a>
+=======
+          <div class="hist-col-code">Mã đơn</div>
+          <div class="hist-col-space">Không gian</div>
+          <div class="hist-col-date">Ngày đặt</div>
+          <div class="hist-col-status">Trạng thái</div>
+          <div class="hist-col-amt">Tổng thanh toán</div>
+          <div class="hist-col-act">Thao tác</div>
+        </div>
+
+        <div *ngIf="sel.bookingHistory.length === 0" class="empty-history-row">
+          {{ sel.historyLoaded ? 'Khách hàng này chưa có đơn đặt chỗ nào.' : 'Đang tải lịch sử đặt chỗ...' }}
+        </div>
+
+        <div *ngFor="let b of sel.bookingHistory" class="hist-trow">
+          <div class="hist-col-code font-bold text-brand">{{ b.code }}</div>
+          <div class="hist-col-space">{{ b.spaceName }}</div>
+          <div class="hist-col-date">{{ b.date }}</div>
+          <div class="hist-col-status">
+            <span class="badge-status" [ngClass]="b.statusClass">{{ b.status }}</span>
+          </div>
+          <div class="hist-col-amt font-semibold">{{ formatMoney(b.totalAmount) }}</div>
+          <div class="hist-col-act">
+            <button type="button" class="btn-row-link action-link" (click)="viewBooking(b.code)">Xem đơn →</button>
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
           </div>
         </div>
       </div>

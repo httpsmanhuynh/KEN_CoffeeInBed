@@ -108,7 +108,7 @@ router.post(
     const db = req.app.locals.db;
     const user = req.user;
     const voucherIdRaw = str(req.body.voucherId);
-    let cost = req.body.cost;
+    let cost = req.body.cost !== undefined ? Number(req.body.cost) : undefined;
     let voucher = null;
 
     const now = new Date();
@@ -140,15 +140,15 @@ router.post(
     }
 
     const vOid = voucher ? voucher._id : new ObjectId();
-    const note = str(req.body.description) || (voucher ? `Đổi mã ${voucher.code}` : 'Đổi Coins');
+    const note = str(req.body.description) || (voucher ? `Đổi mã ${voucher.code}` : 'Đổi quà');
 
     if (voucher) {
+      const voucherFilter = { _id: voucher._id, status: 'ACTIVE' };
+      if (voucher.redeem_limit > 0) {
+        voucherFilter.redeem_count = { $lt: voucher.redeem_limit };
+      }
       const upd = await db.collection('vouchers').updateOne(
-        {
-          _id: voucher._id,
-          status: 'ACTIVE',
-          redeem_count: { $lt: voucher.redeem_limit },
-        },
+        voucherFilter,
         { $inc: { redeem_count: 1 }, $set: { updated_at: now } },
       );
       if (upd.modifiedCount !== 1) {
@@ -184,7 +184,21 @@ router.post(
     res.json({
       coins: result.coins,
       redeemed: cost,
-      ...(voucher ? { voucherCode: voucher.code, voucherId: String(voucher._id) } : {}),
+      ...(voucher
+        ? {
+            voucherCode: voucher.code,
+            voucherId: String(voucher._id),
+            voucher: {
+              id: String(voucher._id),
+              code: voucher.code,
+              description: voucher.description || null,
+              discountType: voucher.discount_type,
+              discountValue: voucher.discount_value,
+              minOrderValue: voucher.min_order_value || 0,
+              maxDiscount: voucher.max_discount || null,
+            },
+          }
+        : {}),
     });
   }),
 );
@@ -226,7 +240,34 @@ router.get(
       db.collection('loyalty_transactions').countDocuments({ user_id: userId }),
     ]);
 
-    res.json({ transactions, total, page, limit });
+    const voucherMap = new Map();
+    try {
+      const voucherIds = transactions
+        .filter((tx) => tx.voucher_id && ObjectId.isValid(String(tx.voucher_id)))
+        .map((tx) => (tx.voucher_id instanceof ObjectId ? tx.voucher_id : new ObjectId(String(tx.voucher_id))));
+      if (voucherIds.length) {
+        const vouchers = await db.collection('vouchers').find({ _id: { $in: voucherIds } }).toArray();
+        for (const v of vouchers) {
+          voucherMap.set(String(v._id), {
+            _id: String(v._id),
+            code: v.code,
+            description: v.description || null,
+            discount_type: v.discount_type,
+            discount_value: v.discount_value,
+            min_order_value: v.min_order_value || 0,
+            max_discount: v.max_discount || null,
+            coins_cost: v.coins_cost || 0,
+          });
+        }
+      }
+    } catch (_) {}
+
+    const enriched = transactions.map((tx) => {
+      const v = tx.voucher_id ? voucherMap.get(String(tx.voucher_id)) || null : null;
+      return v ? { ...tx, voucher: v } : tx;
+    });
+
+    res.json({ transactions: enriched, total, page, limit });
   }),
 );
 

@@ -29,3 +29,386 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 button, input, select { font: inherit; }
+
+/* FIGMA POLICY + TERMS SVG ICONS */
+.policy-only .policy-draft::before,
+.policy-only .policy-meta > span:last-child::before,
+.policy-only .policy-warning::before,
+.policy-only .policy-callout::before,
+.policy-only .policy-contact a::before,
+.policy-only .policy-contact p::before,
+.policy-only .policy-sidebar-help a::before,
+.terms-page .terms-meta > span:last-child::before,
+.terms-page .terms-warning::before,
+.terms-page .terms-toc h2::before,
+.terms-page .terms-feature strong::before,
+.terms-page .terms-contact strong::before,
+.terms-page .terms-help a::before,
+.terms-page .terms-pagination a small::before,
+.terms-page .terms-pagination > div small::after {
+  content: "";
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin-right: 8px;
+  vertical-align: middle;
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+/* Policy */
+.policy-only .policy-draft::before {
+  background-image: url('/images/figma/policy/draft.svg');
+  width: 14px;
+  height: 14px;
+}
+
+.policy-only .policy-meta > span:last-child::before {
+  background-image: url('/images/figma/policy/update.svg');
+  width: 14px;
+  height: 14px;
+}
+
+.policy-only .policy-warning::before {
+  background-image: url('/images/figma/policy/notice.svg');
+  width: 18px;
+  height: 18px;
+}
+
+.policy-only .policy-callout::before {
+  background-image: url('/images/figma/policy/info.svg');
+}
+
+.policy-only .policy-contact a::before,
+.policy-only .policy-contact p::before {
+  background-image: url('/images/figma/policy/contact.svg');
+  width: 22px;
+  height: 22px;
+}
+
+.policy-only .policy-sidebar-help a::before {
+  background-image: url('/images/figma/policy/help.svg');
+  width: 20px;
+  height: 20px;
+}
+
+/* Terms */
+.terms-page .terms-meta > span:last-child::before {
+  background-image: url('/images/figma/terms/version.svg');
+  width: 14px;
+  height: 14px;
+}
+
+.terms-page .terms-warning::before {
+  background-image: url('/images/figma/terms/notice.svg');
+}
+
+.terms-page .terms-toc h2::before,
+.terms-page .terms-feature strong::before {
+  background-image: url('/images/figma/terms/receipt.svg');
+  width: 18px;
+  height: 18px;
+}
+
+.terms-page .terms-contact strong::before {
+  background-image: url('/images/figma/terms/contact.svg');
+}
+
+.terms-page .terms-help a::before {
+  background-image: url('/images/figma/terms/info.svg');
+  width: 14px;
+  height: 14px;
+}
+
+.terms-page .terms-pagination a small::before {
+  background-image: url('/images/figma/terms/prev.svg');
+  width: 24px;
+  height: 24px;
+}
+
+.terms-page .terms-pagination > div small::after {
+  background-image: url('/images/figma/terms/next.svg');
+  width: 24px;
+  height: 24px;
+  margin-right: 0;
+  margin-left: 8px;
+}
+
+/* ==========================================================================
+   LENIS SMOOTH SCROLL + GSAP + REACT BITS INSPIRED POLISH
+   ========================================================================== */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}
+
+.lenis [data-lenis-prevent],
+.lenis [data-lenis-prevent-wheel],
+.lenis [data-lenis-prevent-touch] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+/* Top golden reading/scroll progress bar */
+.ken-scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 9999;
+  pointer-events: none;
+  transform-origin: 0% 50%;
+  transform: scaleX(var(--ken-scroll-progress, 0));
+  background: linear-gradient(90deg, #A9763F 0%, #E3A52F 55%, #F3C462 100%);
+  will-change: transform;
+}
+
+/* Sticky glassmorphism header transition */
+app-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+app-header .hd {
+  transition: background-color 0.28s ease, box-shadow 0.28s ease, backdrop-filter 0.28s ease;
+}
+
+app-header .hd.is-scrolled {
+  background: rgba(247, 239, 226, 0.86);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 10px 30px rgba(74, 49, 35, 0.08);
+}
+
+.admin-topbar {
+  transition: background-color 0.28s ease, box-shadow 0.28s ease, backdrop-filter 0.28s ease;
+}
+
+.admin-topbar.is-scrolled {
+  background: rgba(255, 252, 247, 0.88) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 8px 24px rgba(74, 49, 35, 0.08);
+}
+
+/* React Bits-inspired spotlight hover glow */
+[data-ken-spotlight] {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.32s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.28s ease;
+}
+
+[data-ken-spotlight]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.32s ease;
+  background: radial-gradient(
+    420px circle at var(--spot-x, 50%) var(--spot-y, 50%),
+    rgba(227, 165, 47, 0.14),
+    transparent 62%
+  );
+  z-index: 1;
+}
+
+[data-ken-spotlight]:hover::after {
+  opacity: 1;
+}
+
+[data-ken-spotlight]:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 34px rgba(74, 49, 35, 0.1);
+}
+
+/* Smooth image hover zoom on cards */
+.kh-mascot-card img,
+.ks-card-photo,
+.kf-listing-card-image img,
+.kf-product img,
+.about-space-image img,
+.journeys-card-image img,
+.kh-gallery-mosaic img {
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.kh-mascot-card:hover img,
+.ks-space-card:hover .ks-card-photo,
+.kf-listing-card:hover .kf-listing-card-image img,
+.kf-product:hover img,
+.about-space-card:hover .about-space-image img,
+.journeys-card:hover .journeys-card-image img,
+.kh-gallery-mosaic img:hover {
+  transform: scale(1.045);
+}
+
+/* Refined button micro-interactions */
+.kh-btn,
+.ks-primary-button,
+.ks-outline-button,
+.kf-btn,
+.ken-button,
+.about-btn,
+.about-space-button,
+.journeys-primary-button,
+.journeys-secondary-button,
+.hbtn,
+.admin-wrapper .btn-primary,
+.admin-wrapper .btn-action-primary,
+.admin-wrapper .btn-export,
+.admin-wrapper .btn-filter-action,
+.admin-wrapper .period-pill,
+.admin-wrapper .tab-pill,
+.admin-wrapper .tab-switch button,
+.admin-wrapper .actions button,
+.admin-wrapper .btn-row-link,
+.admin-wrapper .btn-row-lock {
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s ease, background-color 0.22s ease, border-color 0.22s ease, filter 0.22s ease;
+}
+
+.kh-btn:active:not(:disabled),
+.ks-primary-button:active,
+.ks-outline-button:active,
+.kf-btn:active:not(:disabled),
+.ken-button:active:not(:disabled),
+.about-btn:active,
+.journeys-primary-button:active,
+.hbtn:active,
+.admin-wrapper .btn-primary:active:not(:disabled),
+.admin-wrapper .btn-action-primary:active:not(:disabled),
+.admin-wrapper .btn-export:active:not(:disabled),
+.admin-wrapper .btn-filter-action:active:not(:disabled),
+.admin-wrapper .period-pill:active,
+.admin-wrapper .tab-pill:active,
+  .admin-wrapper .btn-row-link:active,
+  .admin-wrapper .btn-row-lock:active:not(:disabled),
+  .admin-wrapper .btn-page-nav:active:not(:disabled),
+  .admin-wrapper .btn-page-num:active:not(:disabled),
+  .admin-wrapper .btn-topbar-nav:active:not(:disabled) {
+    transform: translateY(0) scale(0.98);
+  }
+
+  /* Shared Admin Flexible Pagination Bar & Interactive Rows */
+  .admin-pagination-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 20px;
+    border-top: 1px solid rgba(216, 199, 178, 0.62);
+    background-color: #fffcf7;
+  }
+
+  .admin-pagination-info {
+    font-size: 12px;
+    color: #8c7a6b;
+  }
+
+  .admin-pagination-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-page-nav,
+  .admin-wrapper .btn-page-arrow,
+  .admin-wrapper .btn-page-num {
+    height: 30px;
+    min-width: 30px;
+    padding: 0 11px;
+    border-radius: 999px;
+    border: 1px solid rgba(216, 199, 178, 0.78);
+    background-color: #fffcf7;
+    color: #4a3123;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    white-space: nowrap;
+    transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  }
+
+  .btn-page-nav:hover:not(:disabled),
+  .admin-wrapper .btn-page-arrow:hover:not(:disabled),
+  .admin-wrapper .btn-page-num:hover:not(:disabled):not(.active) {
+    background-color: #f3e7d4;
+    border-color: rgba(169, 118, 63, 0.55);
+    transform: translateY(-1px);
+  }
+
+  .btn-page-nav:disabled,
+  .admin-wrapper .btn-page-arrow:disabled {
+    opacity: 0.42;
+    cursor: not-allowed;
+  }
+
+  .admin-wrapper .btn-page-num.active {
+    background-color: #4a3123;
+    color: #f7efe2;
+    border-color: #4a3123;
+    box-shadow: 0 4px 10px -4px rgba(74, 49, 35, 0.45);
+  }
+
+  .admin-detail-close-btn {
+    margin-left: auto;
+    height: 30px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(216, 199, 178, 0.85);
+    background-color: #fffcf7;
+    color: #4a3123;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+  }
+
+  .admin-detail-close-btn:hover {
+    background-color: #f3e7d4;
+    transform: translateY(-1px);
+  }
+
+  .customer-table .table-row,
+  .addons-table .trow-item,
+  .voucher-card tbody tr {
+    cursor: pointer;
+    transition: background-color 0.18s ease, box-shadow 0.18s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+  .ken-scroll-progress {
+    display: none;
+  }
+
+  [data-ken-spotlight],
+  [data-ken-spotlight]::after,
+  .kh-mascot-card img,
+  .ks-card-photo,
+  .kf-listing-card-image img,
+  .kf-product img,
+  .about-space-image img,
+  .journeys-card-image img,
+  .kh-gallery-mosaic img {
+    transition: none !important;
+    transform: none !important;
+  }
+}

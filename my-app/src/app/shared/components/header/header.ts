@@ -1,5 +1,6 @@
 import { Component, ElementRef, HostListener, Input } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthService } from '../../../core/auth.service';
 import { MAIN_NAV, NavItem } from '../../../core/nav-links';
 
 @Component({
@@ -17,12 +18,31 @@ export class Header {
 
   /** true = giao diện đã đăng nhập (avatar + tên thay cho nút Đăng nhập/Đăng ký). */
   @Input() member = false;
+<<<<<<< HEAD
   // TODO: lấy từ AuthService khi có API hồ sơ
   @Input() userName = 'Thầy Thanh đẹp trai';
+=======
+
+  @Input()
+  set isLoggedIn(value: boolean) {
+    this.member = value;
+  }
+  get isLoggedIn(): boolean {
+    return this.member;
+  }
+
+  @Input() userName = 'Khách hàng';
+  logoutError = '';
+  loggingOut = false;
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
 
   constructor(
     private host: ElementRef<HTMLElement>,
     private router: Router,
+<<<<<<< HEAD
+=======
+    private auth: AuthService,
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
   ) {}
 
   /** Mục nav đang xem (gạch chân như Figma). */
@@ -33,6 +53,7 @@ export class Header {
   }
 
   // Chuột: hover mở/đóng. Cảm ứng: bỏ qua hover, chỉ dùng click (tránh mở rồi đóng ngay).
+<<<<<<< HEAD
   enter(e: PointerEvent, key: string): void {
     if (e.pointerType === 'mouse') this.open = key;
   }
@@ -46,6 +67,32 @@ export class Header {
     this.open = null;
     this.mobileOpen = false;
     this.accountOpen = false;
+  }
+=======
+  enter(e: PointerEvent, key: string): void { if (e.pointerType === 'mouse') this.open = key; }
+  leave(e: PointerEvent, key: string): void { if (e.pointerType === 'mouse' && this.open === key) this.open = null; }
+  toggle(key: string): void { this.open = this.open === key ? null : key; }
+  onNavClick(item: NavItem): void {
+    this.closeAll();
+  }
+  closeAll(): void { this.open = null; this.mobileOpen = false; this.accountOpen = false; }
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
+
+  logout(): void {
+    if (this.loggingOut) return;
+    this.loggingOut = true;
+    this.logoutError = '';
+    this.auth.logout().subscribe({
+      next: () => {
+        this.loggingOut = false;
+        this.closeAll();
+        this.router.navigateByUrl('/');
+      },
+      error: () => {
+        this.loggingOut = false;
+        this.logoutError = 'Không thể đăng xuất. Vui lòng thử lại.';
+      },
+    });
   }
 
   @HostListener('document:click', ['$event'])

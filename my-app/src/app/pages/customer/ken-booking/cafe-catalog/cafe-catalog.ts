@@ -1,15 +1,33 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { SuggestionPopupService } from '../../../../shared/services/suggestion-popup.service';
-import { KEN_MENU, kenMoney } from '../booking-state';
+import { SmoothScrollService } from '../../../../core/smooth-scroll.service';
+import { KEN_MENU, KenBookingState, kenMoney } from '../booking-state';
 import type { KenDrinkCategory, KenProduct } from '../booking-state';
 
 @Component({ selector: 'app-ken-cafe-catalog', standalone: false, templateUrl: './cafe-catalog.html', styleUrl: './cafe-catalog.css' })
 export class KenCafeCatalogPage implements OnInit {
-  private readonly popup = inject(SuggestionPopupService);
-  private readonly route = inject(ActivatedRoute);
+  private readonly smoothScroll = (() => {
+    try {
+      return inject(SmoothScrollService, { optional: true });
+    } catch {
+      return null;
+    }
+  })();
 
-  readonly products = KEN_MENU;
+  private readonly state = (() => {
+    try {
+      return inject(KenBookingState, { optional: true });
+    } catch {
+      return null;
+    }
+  })();
+
+  ngOnInit(): void {
+    this.state?.syncCatalogFromApi();
+  }
+
+  get products(): KenProduct[] {
+    return this.state ? this.state.menuProducts : KEN_MENU;
+  }
   category: 'all' | KenDrinkCategory = 'all';
   searchText = '';
   priceFilter: 'all' | 'under50' | 'from50' = 'all';
@@ -25,14 +43,6 @@ export class KenCafeCatalogPage implements OnInit {
     { id: 'bakery' as KenDrinkCategory, no: '03', title: 'Bánh & ăn nhẹ', subtitle: 'Nhâm nhi cùng cà phê, hoặc lót dạ một chút.' }
   ];
 
-  ngOnInit(): void {
-    this.popup.autoShow(this.route.snapshot.queryParamMap.get('popup') === '1');
-  }
-
-  openSuggestion(): void {
-    this.popup.show();
-  }
-
   get shownSections() {
     return this.sections.filter(s => this.category === 'all' || this.category === s.id).filter(s => this.forSection(s.id).length > 0);
   }
@@ -44,5 +54,21 @@ export class KenCafeCatalogPage implements OnInit {
     return items;
   }
   get resultCount(): number { return this.sections.reduce((n, s) => n + this.forSection(s.id).length, 0); }
-  image = (p: KenProduct) => '/images/ken-flow/' + p.image;
+  image = (p: KenProduct) => {
+    if (!p?.image) return '/images/ken-flow/coffee.png';
+    if (p.image.startsWith('/') || p.image.startsWith('http')) return p.image;
+    return '/images/ken-flow/' + p.image;
+  };
+
+  scrollToMenu(event?: Event): void {
+    event?.preventDefault();
+    if (this.smoothScroll) {
+      this.smoothScroll.scrollTo('#ken-cafe-menu', { offset: -88, duration: 0.9 });
+      return;
+    }
+    if (typeof document !== 'undefined') {
+      const target = document.getElementById('ken-cafe-menu') || document.getElementById('ken-menu-catalog');
+      target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
 }

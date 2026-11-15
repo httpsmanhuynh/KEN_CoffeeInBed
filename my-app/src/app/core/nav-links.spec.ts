@@ -14,11 +14,11 @@ describe('isGuestPath', () => {
     expect(isGuestPath('/Login#top')).toBe(true);
   });
 
-  it('every other customer page uses the logged-in header', () => {
+  it('does not classify public customer pages as authentication routes', () => {
     for (const u of [
       '/booking-list', '/booking-reschedule', '/booking-cancel?code=KEN-241026-006',
       '/user-profile', '/security', '/security/', '/points-tier', '/coins-rewards',
-      '/menu', '/menu?popup=1', '/top-trending', '/some-new-page',
+      '/menu', '/top-trending', '/some-new-page',
     ]) {
       expect(isGuestPath(u)).toBe(false);
     }

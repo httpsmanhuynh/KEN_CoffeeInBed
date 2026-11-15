@@ -1,6 +1,11 @@
 import { NgModule, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
+<<<<<<< HEAD
+=======
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { httpErrorInterceptor } from './core/http-error.interceptor';
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
 
 import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
@@ -28,12 +33,50 @@ import { AccountSidebar } from './shared/components/account-sidebar/account-side
 import { SuggestionPopup } from './shared/components/suggestion-popup/suggestion-popup';
 import { TopTrending } from './pages/customer/menu/top-trending/top-trending';
 import { MenuPage } from './pages/customer/menu/menu-page/menu-page';
+<<<<<<< HEAD
 import { AdminLayout } from './pages/admin/admin-layout/admin-layout';
 import { Dashboard } from './pages/admin/dashboard/dashboard';
 import { Bookings } from './pages/admin/bookings/bookings';
 import { Customers } from './pages/admin/customers/customers';
 import { Areas } from './pages/admin/areas/areas';
 import { Spaces } from './pages/admin/spaces/spaces.component';
+=======
+
+// Home, Booking Flow, Spaces & Info Pages (ttrinh)
+import { KenHomeContent } from './pages/customer/home-page/home-content/home-content';
+import { HomeGuestPage } from './pages/customer/home-page/home-guest/home-guest';
+import { HomeMemberPage } from './pages/customer/home-page/home-member/home-member';
+import { KenBookingShell } from './pages/customer/ken-booking/booking-shell/booking-shell';
+import { KenCafeCatalogPage } from './pages/customer/ken-booking/cafe-catalog/cafe-catalog';
+import { KenSpaceListingPage } from './pages/customer/ken-booking/space-listing/space-listing';
+import { KenOtherSpacePage } from './pages/customer/ken-booking/other-space-booking/other-space-booking';
+import { KenFocusPodPage } from './pages/customer/ken-booking/focus-pod/focus-pod';
+import { KenDrinkPickerPage } from './pages/customer/ken-booking/drink-picker/drink-picker';
+import { KenBookingReviewPage } from './pages/customer/ken-booking/booking-review/booking-review';
+import { KenBookingPaymentPage } from './pages/customer/ken-booking/booking-payment/booking-payment';
+import { KenBookingSpaceDetailPage } from './pages/customer/ken-booking/space-detail/space-detail';
+import { KenDrinkSelectionComponent } from './pages/customer/ken-booking/drink-selection/drink-selection';
+import { SupportComponent } from './pages/customer/support/support';
+import { PolicyPage } from './pages/customer/policy-page/policy-page';
+import { TermsPage } from './pages/customer/terms-page/terms-page';
+import { ReviewPage } from './pages/customer/review-page/review-page';
+import { StoryPage } from './pages/customer/story-page/story-page';
+import { PointsPage } from './pages/customer/points-page/points-page';
+import { CoinsPage } from './pages/customer/coins-page/coins-page';
+import { JourneysPage } from './pages/customer/journeys-page/journeys-page';
+import { AboutPage } from './pages/customer/about-page/about-page';
+import { SpacesPage } from './pages/customer/spaces-page/spaces-page';
+import { ConnectPage } from './pages/customer/space-details/connect-page/connect-page';
+import { CoworkPage } from './pages/customer/space-details/cowork-page/cowork-page';
+import { FocusPage } from './pages/customer/space-details/focus-page/focus-page';
+import { MeetingPage } from './pages/customer/space-details/meeting-page/meeting-page';
+import { AdminLayoutComponent } from './pages/admin/admin-layout/admin-layout.component';
+import { DashboardComponent } from './pages/admin/dashboard/dashboard.component';
+import { BookingsComponent } from './pages/admin/bookings/bookings.component';
+import { CustomersComponent } from './pages/admin/customers/customers.component';
+import { AreasComponent } from './pages/admin/areas/areas.component';
+import { SpacesComponent } from './pages/admin/spaces/spaces.component';
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
 import { ServicePackages } from './pages/admin/service-packages/service-packages';
 import { Addons } from './pages/admin/addons/addons';
 import { Voucher } from './pages/admin/voucher/voucher';
@@ -63,25 +106,72 @@ import { Forecast } from './pages/admin/forecast/forecast';
     SuggestionPopup,
     TopTrending,
     MenuPage,
+<<<<<<< HEAD
     AdminLayout,
     Dashboard,
     Bookings,
     Customers,
     Areas,
     Spaces,
+=======
+    KenHomeContent,
+    HomeGuestPage,
+    HomeMemberPage,
+    KenBookingShell,
+    KenCafeCatalogPage,
+    KenSpaceListingPage,
+    KenOtherSpacePage,
+    KenFocusPodPage,
+    KenDrinkPickerPage,
+    KenBookingReviewPage,
+    KenBookingPaymentPage,
+    KenBookingSpaceDetailPage,
+    KenDrinkSelectionComponent,
+    SupportComponent,
+    PolicyPage,
+    TermsPage,
+    ReviewPage,
+    StoryPage,
+    PointsPage,
+    CoinsPage,
+    JourneysPage,
+    AboutPage,
+    SpacesPage,
+    ConnectPage,
+    CoworkPage,
+    FocusPage,
+    MeetingPage,
+    AdminLayoutComponent,
+    DashboardComponent,
+    BookingsComponent,
+    CustomersComponent,
+    AreasComponent,
+    SpacesComponent,
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
     ServicePackages,
     Addons,
     Voucher,
     Forecast,
+<<<<<<< HEAD
 
     // Remove ConfirmDialog from declarations
+=======
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     ReactiveFormsModule,
     FormsModule,
+<<<<<<< HEAD
     ConfirmDialog, // Import ConfirmDialog here
+=======
+    ConfirmDialog,
+  ],
+  providers: [
+    provideBrowserGlobalErrorListeners(),
+    provideHttpClient(withInterceptors([httpErrorInterceptor])),
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
   ],
   providers: [provideHttpClient()],
   bootstrap: [App],

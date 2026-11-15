@@ -9,33 +9,54 @@
   <!-- Page Header -->
   <div class="page-heading-row" data-name="Tiêu đề trang">
     <div class="heading-title-block" data-name="Giới thiệu">
+<<<<<<< HEAD
       <h1 class="page-title">Add-on &amp; Sản phẩm</h1>
 
     </div>
 
     <div class="heading-actions" data-name="Hành động">
+=======
+      <h1 class="page-title">Sản phẩm &amp; Add-on</h1>
+      <p class="page-subtitle">Quản lý danh mục đồ uống, bánh ngọt, tiện ích bán kèm và chính sách hỗ trợ đồ uống theo gói</p>
+    </div>
+
+    <div class="heading-actions" data-name="Hành động">
+      <button type="button" class="btn-outline-status" (click)="exportCsv()">
+        Xuất CSV ↗
+      </button>
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
       <button type="button" class="btn-add-product" (click)="openCreateForm()">
         + Thêm sản phẩm
       </button>
     </div>
   </div>
 
+<<<<<<< HEAD
   <!-- Tabs Navigation -->
+=======
+  <!-- Functional Tabs Navigation -->
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
   <div class="page-tabs-bar" data-name="Tabs">
     <button
       type="button"
       class="tab-btn"
       [class.active]="mainTab === 'MENU'"
       (click)="mainTab = 'MENU'"
+<<<<<<< HEAD
       data-name="Tab Active"
     >
       Sản phẩm &amp; tiện ích
+=======
+    >
+      Sản phẩm &amp; tiện ích ({{ totalCount }})
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
     </button>
     <button
       type="button"
       class="tab-btn"
       [class.active]="mainTab === 'CONFIG'"
       (click)="mainTab = 'CONFIG'"
+<<<<<<< HEAD
       data-name="Tab Inactive"
     >
       Cấu hình Add-on
@@ -378,10 +399,85 @@
             (click)="cancelForm()"
           >
             Hủy
+=======
+    >
+      Cấu hình hỗ trợ đồ uống 50.000đ &amp; Gói đi kèm
+    </button>
+  </div>
+
+  <!-- ==================== TAB 1: DANH MỤC SẢN PHẨM & ADD-ON ==================== -->
+  <ng-container *ngIf="mainTab === 'MENU'">
+    <div class="addons-card" data-name="Khối nội dung">
+      <div class="card-header-row" data-name="Tiêu đề khối">
+        <div class="header-left">
+          <img src="/images/figma/table.svg" alt="" class="card-icon" />
+          <h2 class="card-title">Danh mục thực đơn &amp; Add-on</h2>
+        </div>
+        <span class="card-subtitle-info">
+          {{ loading ? 'Đang tải...' : (totalCount + ' mục · ' + (doUongCount + banhCount) + ' món & ' + tienIchCount + ' tiện ích') }}
+        </span>
+      </div>
+
+      <!-- Filters Section (Native Bindings without ngModel dependency) -->
+      <div class="card-filters-section" data-name="Bộ lọc sản phẩm">
+        <div class="filter-inputs-row" data-name="Tìm kiếm sản phẩm">
+          <div class="search-wrap" data-name="Tìm kiếm">
+            <img src="/images/figma/search.svg" alt="" class="search-icon" />
+            <input
+              type="text"
+              [value]="searchQuery"
+              (input)="searchQuery = $any($event.target).value; currentPage = 1"
+              placeholder="Tìm mã hoặc tên sản phẩm..."
+              class="search-field"
+            />
+          </div>
+
+          <div class="select-wrap select-status" data-name="Bộ lọc trạng thái">
+            <img src="/images/figma/filter.svg" alt="" class="filter-icon" />
+            <select
+              [value]="selectedStatusFilter"
+              (change)="selectedStatusFilter = $any($event.target).value; currentPage = 1"
+              class="select-field"
+            >
+              <option value="Tất cả">Trạng thái: Tất cả</option>
+              <option value="Đang bán">Đang bán</option>
+              <option value="Tạm ngưng">Tạm ngưng</option>
+              <option value="Hết hàng">Hết hàng</option>
+            </select>
+            <img src="/images/figma/chevron-down.svg" alt="" class="select-arrow" />
+          </div>
+
+          <div class="select-wrap select-category" data-name="Bộ lọc nhóm">
+            <select
+              [value]="selectedCategoryFilter"
+              (change)="selectedCategoryFilter = $any($event.target).value; currentPage = 1"
+              class="select-field"
+            >
+              <option value="Tất cả">Nhóm: Tất cả</option>
+              <option *ngFor="let cat of categoryOptions" [value]="cat">{{ cat }}</option>
+            </select>
+            <img src="/images/figma/chevron-down.svg" alt="" class="select-arrow" />
+          </div>
+        </div>
+
+        <div class="category-pills-row" data-name="Danh mục">
+          <button type="button" class="cat-pill" [class.active]="categoryFilterTab === 'ALL'" (click)="setCategoryTab('ALL')">
+            Tất cả · {{ totalCount }}
+          </button>
+          <button type="button" class="cat-pill" [class.active]="categoryFilterTab === 'DO_UONG'" (click)="setCategoryTab('DO_UONG')">
+            Đồ uống · {{ doUongCount }}
+          </button>
+          <button type="button" class="cat-pill" [class.active]="categoryFilterTab === 'BANH'" (click)="setCategoryTab('BANH')">
+            Bánh / Ăn nhẹ · {{ banhCount }}
+          </button>
+          <button type="button" class="cat-pill" [class.active]="categoryFilterTab === 'TIEN_ICH'" (click)="setCategoryTab('TIEN_ICH')">
+            Tiện ích · {{ tienIchCount }}
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
           </button>
         </div>
       </div>
 
+<<<<<<< HEAD
       <!-- Col 3: Package Link Card -->
       <div class="col-package-link-section" data-name="Liên kết gói">
         <div class="package-link-box">
@@ -417,4 +513,405 @@
       </div>
     </div>
   </div>
+=======
+      <!-- Data Table -->
+      <div class="table-responsive" data-name="Bảng dữ liệu">
+        <table class="addons-table">
+          <thead>
+            <tr class="thead-row">
+              <th class="col-id">Mã SP</th>
+              <th class="col-name">Tên sản phẩm</th>
+              <th class="col-category">Nhóm</th>
+              <th class="col-price">Giá bán</th>
+              <th class="col-catalog">Catalog</th>
+              <th class="col-avail">Khả dụng</th>
+              <th class="col-status">Trạng thái</th>
+              <th class="col-actions">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let p of paginatedProducts"
+              class="trow-item"
+              [class.row-selected]="selectedProduct?.id === p.id && !isCreating"
+              (click)="selectProduct(p)"
+            >
+              <td class="col-id">
+                <span class="product-code">{{ p.code }}</span>
+              </td>
+
+              <td class="col-name">
+                <div class="name-block">
+                  <span class="product-title">{{ p.name }}</span>
+                  <span *ngIf="selectedProduct?.id === p.id && !isCreating" class="selecting-tag">Đang chọn</span>
+                </div>
+              </td>
+
+              <td class="col-category">
+                <span class="category-text">{{ p.category }}</span>
+              </td>
+
+              <td class="col-price">
+                <span class="price-text">{{ formatPrice(p.price) }}</span>
+              </td>
+
+              <td class="col-catalog">
+                <span class="badge-catalog" [class.badge-visible]="p.catalogVisible" [class.badge-hidden]="!p.catalogVisible">
+                  {{ p.catalogVisible ? 'Hiển thị' : 'Ẩn' }}
+                </span>
+              </td>
+
+              <td class="col-avail">
+                <span
+                  class="badge-avail"
+                  [class.avail-yes]="p.addonAvailable === 'Khả dụng'"
+                  [class.avail-out]="p.addonAvailable === 'Hết hàng'"
+                  [class.avail-no]="p.addonAvailable === 'Không khả dụng'"
+                >
+                  {{ p.addonAvailable }}
+                </span>
+              </td>
+
+              <td class="col-status">
+                <span class="badge-status" [class.status-active]="p.status === 'ACTIVE'" [class.status-paused]="p.status === 'PAUSED'">
+                  {{ p.status === 'ACTIVE' ? 'Đang bán' : 'Tạm ngưng' }}
+                </span>
+              </td>
+
+              <td class="col-actions" (click)="$event.stopPropagation()">
+                <div class="actions-flex">
+                  <button type="button" class="btn-action-edit" (click)="selectProduct(p)">Sửa</button>
+                  <button
+                    type="button"
+                    class="btn-action-toggle"
+                    [class.text-danger]="p.status === 'ACTIVE'"
+                    [class.text-reopen]="p.status === 'PAUSED'"
+                    (click)="toggleProductStatus(p, $event)"
+                  >
+                    {{ p.status === 'ACTIVE' ? 'Ngưng' : 'Mở bán lại' }}
+                  </button>
+                </div>
+              </td>
+            </tr>
+
+            <tr *ngIf="filteredProducts.length === 0">
+              <td colspan="8" class="td-empty">
+                <p class="empty-txt">Không tìm thấy sản phẩm nào phù hợp với bộ lọc.</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card-pagination-row admin-pagination-bar" data-name="Phân trang">
+        <span class="pagination-info admin-pagination-info">
+          Hiển thị {{ pageStartIndex }}–{{ pageEndIndex }} / {{ filteredProducts.length }} sản phẩm · Trang {{ currentPage }} / {{ totalPages }} ({{ pageSize }} sản phẩm/trang)
+        </span>
+        <div class="admin-pagination-controls" *ngIf="filteredProducts.length > 0">
+          <button
+            type="button"
+            class="btn-page-nav"
+            [disabled]="currentPage <= 1"
+            (click)="goToPage(currentPage - 1)"
+          >
+            ‹ Trước
+          </button>
+          <button
+            *ngFor="let page of pageNumbers"
+            type="button"
+            class="btn-page-num"
+            [class.active]="page === currentPage"
+            (click)="goToPage(page)"
+          >
+            {{ page }}
+          </button>
+          <button
+            type="button"
+            class="btn-page-nav"
+            [disabled]="currentPage >= totalPages"
+            (click)="goToPage(currentPage + 1)"
+          >
+            Tiếp ›
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail / Edit / Create Form Block -->
+    <div class="addons-card product-form-card" data-name="Form sản phẩm">
+      <div class="card-header-row">
+        <div class="header-left">
+          <img src="/images/figma/icon-info.svg" alt="" class="card-icon" />
+          <h2 class="card-title">
+            {{ isCreating ? 'Thêm mới sản phẩm & Add-on' : 'Chi tiết sản phẩm · ' + (selectedProduct?.code || '') }}
+          </h2>
+        </div>
+        <span class="card-subtitle-info" *ngIf="selectedProduct && !isCreating">
+          {{ selectedProduct.name }} · Giá gốc {{ formatPrice(selectedProduct.price) }}
+        </span>
+        <span class="card-subtitle-info" *ngIf="isCreating">
+          Nhập mã, tên và cấu hình hiển thị sản phẩm mới
+        </span>
+      </div>
+
+      <div class="form-body-grid" data-name="Form body">
+        <!-- Col 1: Product Photo -->
+        <div class="col-photo-section">
+          <div class="product-photo-box">
+            <img
+              [src]="formData.image || '/images/figma/dish-ca-phe-den-sua.png'"
+              [alt]="formData.name"
+              class="product-photo-img"
+            />
+          </div>
+          <span class="photo-caption">Ảnh trong menu KÉN</span>
+        </div>
+
+        <!-- Col 2: Sales Configuration (Now includes Name, Code & Image URL!) -->
+        <div class="col-config-section">
+          <div class="form-row-pair">
+            <div class="form-group flex-1">
+              <label class="form-label">Tên sản phẩm / tiện ích *</label>
+              <div class="input-with-icon">
+                <input
+                  type="text"
+                  [value]="formData.name"
+                  (input)="formData.name = $any($event.target).value"
+                  placeholder="Ví dụ: Matcha Latte Đá"
+                  class="form-input-box"
+                />
+              </div>
+            </div>
+
+            <div class="form-group w-unit">
+              <label class="form-label">Mã SP</label>
+              <div class="input-with-icon">
+                <input
+                  type="text"
+                  [value]="formData.code"
+                  (input)="formData.code = $any($event.target).value"
+                  placeholder="DU-09"
+                  class="form-input-box"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row-pair">
+            <div class="form-group flex-1">
+              <label class="form-label">Giá niêm yết (VND)</label>
+              <div class="input-with-icon">
+                <input
+                  type="number"
+                  min="0"
+                  step="1000"
+                  [value]="formData.price"
+                  (input)="formData.price = +$any($event.target).value"
+                  class="form-input-box"
+                />
+              </div>
+            </div>
+
+            <div class="form-group w-unit">
+              <label class="form-label">Đơn vị</label>
+              <div class="select-box-wrap">
+                <select
+                  [value]="formData.unit"
+                  (change)="formData.unit = $any($event.target).value"
+                  class="form-select-box"
+                >
+                  <option *ngFor="let u of unitOptions" [value]="u">{{ u }}</option>
+                </select>
+                <img src="/images/figma/chevron-down.svg" alt="" class="field-arrow" />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row-pair">
+            <div class="form-group flex-1">
+              <label class="form-label">Nhóm sản phẩm</label>
+              <div class="select-box-wrap">
+                <select
+                  [value]="formData.category"
+                  (change)="formData.category = $any($event.target).value"
+                  class="form-select-box"
+                >
+                  <option *ngFor="let c of categoryOptions" [value]="c">{{ c }}</option>
+                </select>
+                <img src="/images/figma/chevron-down.svg" alt="" class="field-arrow" />
+              </div>
+            </div>
+
+            <div class="form-group flex-1">
+              <label class="form-label">URL Ảnh minh hoạ</label>
+              <div class="input-with-icon">
+                <input
+                  type="text"
+                  [value]="formData.image"
+                  (input)="formData.image = $any($event.target).value"
+                  placeholder="/images/figma/..."
+                  class="form-input-box"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row-pair">
+            <div class="form-group flex-1">
+              <label class="form-label">Hiển thị catalog</label>
+              <div class="select-box-wrap">
+                <select
+                  [value]="formData.catalogVisible ? 'true' : 'false'"
+                  (change)="formData.catalogVisible = $any($event.target).value === 'true'"
+                  class="form-select-box"
+                >
+                  <option value="true">Có · Hiển thị</option>
+                  <option value="false">Không · Ẩn</option>
+                </select>
+                <img src="/images/figma/chevron-down.svg" alt="" class="field-arrow" />
+              </div>
+            </div>
+
+            <div class="form-group flex-1">
+              <label class="form-label">Add-on khả dụng</label>
+              <div class="select-box-wrap">
+                <select
+                  [value]="formData.addonAvailable"
+                  (change)="formData.addonAvailable = $any($event.target).value"
+                  class="form-select-box"
+                >
+                  <option *ngFor="let a of availabilityOptions" [value]="a">{{ a }}</option>
+                </select>
+                <img src="/images/figma/chevron-down.svg" alt="" class="field-arrow" />
+              </div>
+            </div>
+          </div>
+
+          <div class="status-summary-row">
+            <span class="status-k">Trạng thái</span>
+            <span class="status-v font-bold">
+              {{ formData.status === 'ACTIVE' ? 'Đang bán · Có sẵn' : 'Tạm ngưng phục vụ' }}
+            </span>
+          </div>
+
+          <div *ngIf="formError" class="form-alert-error">
+            ⚠ {{ formError }}
+          </div>
+
+          <div class="form-buttons-row">
+            <button type="button" class="btn-primary-save" (click)="saveProduct()" [disabled]="saving">
+              {{ saving ? 'Đang lưu...' : (isCreating ? 'Tạo sản phẩm' : 'Lưu thay đổi') }}
+            </button>
+            <button
+              *ngIf="selectedProduct && !isCreating"
+              type="button"
+              class="btn-outline-status"
+              (click)="toggleProductStatus(selectedProduct)"
+            >
+              {{ selectedProduct.status === 'ACTIVE' ? 'Tạm ngưng' : 'Mở bán lại' }}
+            </button>
+            <button
+              *ngIf="isCreating"
+              type="button"
+              class="btn-outline-status"
+              (click)="cancelForm()"
+            >
+              Hủy
+            </button>
+          </div>
+        </div>
+
+        <!-- Col 3: Dynamic Package Link & Subsidy Preview -->
+        <div class="col-package-link-section">
+          <div class="package-link-box" *ngIf="formData.category === 'Đồ uống'; else nonDrinkAddonBox">
+            <h4 class="package-link-title">Liên kết chuẩn gói Focus / Lounge</h4>
+            <div class="link-breakdown-row">
+              <span class="breakdown-k">Giá niêm yết</span>
+              <span class="breakdown-v font-bold">{{ formatPrice(formData.price) }}</span>
+            </div>
+            <div class="link-breakdown-row">
+              <span class="breakdown-k">Mức hỗ trợ chuẩn gói</span>
+              <span class="breakdown-v font-bold text-green">−{{ formatPrice(drinkSubsidy) }}</span>
+            </div>
+            <div class="link-breakdown-row highlight-row">
+              <span class="breakdown-k font-bold">Phụ thu khách trả</span>
+              <span class="breakdown-v font-bold">{{ formatPrice(drinkSurcharge(formData.price)) }}</span>
+            </div>
+            <div class="link-divider"></div>
+            <button type="button" class="btn-goto-packages btn-link-native" (click)="goToPackages()">
+              Xem cấu hình gói dịch vụ liên kết ↗
+            </button>
+          </div>
+
+          <ng-template #nonDrinkAddonBox>
+            <div class="package-link-box">
+              <h4 class="package-link-title">Chính sách Add-on ({{ formData.category }})</h4>
+              <div class="link-breakdown-row">
+                <span class="breakdown-k">Giá bán kèm</span>
+                <span class="breakdown-v font-bold">{{ formatPrice(formData.price) }} / {{ formData.unit }}</span>
+              </div>
+              <div class="link-breakdown-row">
+                <span class="breakdown-k">Hỗ trợ đồ uống 50k</span>
+                <span class="breakdown-v">Không áp dụng (Tính 100% giá bán kèm)</span>
+              </div>
+              <div class="link-divider"></div>
+              <button type="button" class="btn-goto-packages btn-link-native" (click)="goToPackages()">
+                Quản lý Gói dịch vụ ↗
+              </button>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ==================== TAB 2: CẤU HÌNH HỖ TRỢ ĐỒ UỐNG 50.000đ & GÓI ĐI KÈM ==================== -->
+  <ng-container *ngIf="mainTab === 'CONFIG'">
+    <div class="addons-card">
+      <div class="card-header-row">
+        <div class="header-left">
+          <img src="/images/figma/icon-info.svg" alt="" class="card-icon" />
+          <h2 class="card-title">Bảng tính hỗ trợ đồ uống 50.000đ theo gói dịch vụ</h2>
+        </div>
+        <button type="button" class="btn-outline-status" (click)="goToPackages()">Mở Gói dịch vụ ↗</button>
+      </div>
+
+      <p class="config-explain">
+        Khi khách đặt gói có bao gồm đồ uống tiêu chuẩn, hệ thống hỗ trợ tối đa <strong>50.000đ/món</strong>.
+        Nếu khách chọn đồ uống có giá cao hơn, phần chênh lệch được cộng tự động vào phụ thu gói và giữ cố định trong đơn đặt chỗ.
+      </p>
+
+      <div class="table-responsive">
+        <table class="addons-table">
+          <thead>
+            <tr class="thead-row">
+              <th>Mã món</th>
+              <th>Đồ uống</th>
+              <th>Giá bán lẻ</th>
+              <th>Hỗ trợ từ gói</th>
+              <th>Phụ thu (Surcharge)</th>
+              <th>Trạng thái</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let d of drinkProducts" class="trow-item" (click)="mainTab = 'MENU'; selectProduct(d)">
+              <td><span class="product-code">{{ d.code }}</span></td>
+              <td><span class="product-title">{{ d.name }}</span></td>
+              <td>{{ formatPrice(d.price) }}</td>
+              <td class="text-green font-bold">−{{ formatPrice(Math.min(d.price, drinkSubsidy)) }}</td>
+              <td class="font-bold">
+                {{ drinkSurcharge(d.price) > 0 ? '+' + formatPrice(drinkSurcharge(d.price)) : '0đ (Miễn phụ thu)' }}
+              </td>
+              <td>
+                <span class="badge-status" [class.status-active]="d.status === 'ACTIVE'" [class.status-paused]="d.status === 'PAUSED'">
+                  {{ d.status === 'ACTIVE' ? 'Đang áp dụng' : 'Tạm ngưng' }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </ng-container>
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
 </div>

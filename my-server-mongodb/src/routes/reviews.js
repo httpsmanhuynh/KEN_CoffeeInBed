@@ -89,11 +89,17 @@ router.get(
   wrap(async (req, res) => {
     const db = req.app.locals.db;
     try {
+      const rawLimit = req.query.limit !== undefined ? Number(req.query.limit) : 100;
+      const limit = Number.isFinite(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, 200) : 100;
+      const rawSkip = req.query.skip !== undefined ? Number(req.query.skip) : 0;
+      const skip = Number.isFinite(rawSkip) && rawSkip >= 0 ? rawSkip : 0;
       const result = await listReviews(db, {
         spaceId: str(req.query.spaceId) || null,
         bookingId: str(req.query.bookingId) || null,
         userId: str(req.query.userId) || null,
         rating: req.query.rating !== undefined ? req.query.rating : null,
+        limit,
+        skip,
       });
       res.json(result);
     } catch (err) {

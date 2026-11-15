@@ -18,18 +18,52 @@ const otpError = (res, status) =>
       ? fail(res, 429, 'OTP_TOO_MANY_ATTEMPTS', 'Nhập sai quá số lần cho phép')
       : fail(res, 422, 'OTP_INVALID', 'Mã OTP không đúng');
 
-const publicUser = (u, tier) => ({
-  id: String(u._id),
-  fullName: u.full_name,
-  phone: u.phone,
-  email: u.email || null,
-  role: u.role,
-  twoFactorEnabled: !!u.two_factor_enabled,
-  membershipTier: tier ? tier.code : 'BASIC',
-  tierPoints: u.tier_points,
-  coinsBalance: u.coin_balance,
-});
-const tierOf = (db, user) => db.collection('membership_tiers').findOne({ _id: user.tier_id });
+const { tierForPoints, tierIndex } = require('../domain/loyalty');
+
+const publicUser = (u, tier) => {
+  let tierCode = tier ? tier.code : 'BASIC';
+  if (u.tier_points !== undefined) {
+    const pts = Number(u.tier_points) || 0;
+    const expected = tierForPoints(pts);
+    try {
+      if (!tier || tierIndex(expected.code) > tierIndex(tierCode) || (pts > 0 && tierCode !== expected.code)) {
+        tierCode = expected.code;
+      }
+    } catch (_) {
+      tierCode = expected.code;
+    }
+  }
+  return {
+    id: String(u._id),
+    fullName: u.full_name,
+    phone: u.phone,
+    email: u.email || null,
+    role: u.role,
+    twoFactorEnabled: !!u.two_factor_enabled,
+    membershipTier: tierCode,
+    tierPoints: u.tier_points,
+    coinsBalance: u.coin_balance,
+  };
+};
+
+const tierOf = async (db, user) => {
+  if (!user) return null;
+  let tier = user.tier_id ? await db.collection('membership_tiers').findOne({ _id: user.tier_id }) : null;
+  const pts = Number(user.tier_points || 0);
+  const expected = tierForPoints(pts);
+  try {
+    if (!tier || tierIndex(expected.code) > tierIndex(tier.code) || (pts > 0 && tier.code !== expected.code)) {
+      const match = await db.collection('membership_tiers').findOne({ code: expected.code });
+      if (match) {
+        tier = match;
+        if (user._id) {
+          db.collection('users').updateOne({ _id: user._id }, { $set: { tier_id: match._id } }).catch(() => {});
+        }
+      }
+    }
+  } catch (_) {}
+  return tier;
+};
 
 module.exports = {
   PHONE_RE,

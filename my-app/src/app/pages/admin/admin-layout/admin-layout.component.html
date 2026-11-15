@@ -1,10 +1,18 @@
 <div class="admin-wrapper" data-name="KÉN Admin · Container">
   <!-- Sidebar -->
+<<<<<<< HEAD
   <aside class="admin-sidebar" data-name="KÉN Admin · Sidebar">
     <!-- Brand Logo -->
     <a routerLink="/admin/dashboard" class="sidebar-brand" data-name="Logo">
       <div class="brand-avatar">
         <img src="images/Logo.png" alt="KÉN Logo" class="brand-avatar-img" />
+=======
+  <aside class="admin-sidebar" data-name="KÉN Admin · Sidebar" data-lenis-prevent>
+    <!-- Brand Logo -->
+    <a routerLink="/admin/dashboard" class="sidebar-brand" data-name="Logo">
+      <div class="brand-avatar">
+        <img src="/images/Logo.png" alt="KÉN Logo" class="brand-avatar-img" />
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
       </div>
       <div class="brand-text">
         <span class="brand-title">KÉN</span>
@@ -23,8 +31,63 @@
         [class.active]="isItemActive(item)"
         [attr.data-name]="item.id"
       >
+<<<<<<< HEAD
         <span class="nav-icon-wrap">
           <img [src]="item.icon" [alt]="item.label" class="nav-icon" />
+=======
+        <span class="nav-icon-wrap" [ngSwitch]="item.id" aria-hidden="true">
+          <svg *ngSwitchCase="'nav-dashboard'" class="nav-icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7" rx="1.5" />
+            <rect x="14" y="3" width="7" height="7" rx="1.5" />
+            <rect x="14" y="14" width="7" height="7" rx="1.5" />
+            <rect x="3" y="14" width="7" height="7" rx="1.5" />
+          </svg>
+          <svg *ngSwitchCase="'nav-booking'" class="nav-icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+            <path d="m9 16 2 2 4-4" />
+          </svg>
+          <svg *ngSwitchCase="'nav-cust'" class="nav-icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+          <svg *ngSwitchCase="'nav-zone'" class="nav-icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+            <circle cx="12" cy="10" r="3" />
+          </svg>
+          <svg *ngSwitchCase="'nav-space'" class="nav-icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+            <path d="M3 9h18" />
+            <path d="M9 21V9" />
+          </svg>
+          <svg *ngSwitchCase="'nav-pkg'" class="nav-icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m7.5 4.27 9 5.15" />
+            <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+            <path d="m3.3 7 8.7 5 8.7-5" />
+            <path d="M12 22V12" />
+          </svg>
+          <svg *ngSwitchCase="'nav-addon'" class="nav-icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 8h1a4 4 0 1 1 0 8h-1" />
+            <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" />
+            <line x1="6" y1="2" x2="6" y2="4" />
+            <line x1="10" y1="2" x2="10" y2="4" />
+            <line x1="14" y1="2" x2="14" y2="4" />
+          </svg>
+          <svg *ngSwitchCase="'nav-voucher'" class="nav-icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" />
+            <path d="M13 5v2" />
+            <path d="M13 17v2" />
+            <path d="M13 11v2" />
+          </svg>
+          <svg *ngSwitchDefault class="nav-icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+            <polyline points="16 7 22 7 22 13" />
+          </svg>
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
         </span>
         <span class="nav-label">{{ item.label }}</span>
       </a>
@@ -36,20 +99,33 @@
     <div class="sidebar-profile-wrap">
       <div class="sidebar-profile" (click)="toggleUserMenu()" data-name="AdminProfile">
         <div class="profile-avatar">
+<<<<<<< HEAD
           <img src="images/admin/user-avatar-icon.svg" alt="Avatar" class="avatar-icon" />
         </div>
         <span class="profile-name">Quản trị viên</span>
         <img src="images/admin/chevron-down.svg" alt="Dropdown" class="profile-dropdown-icon" [class.rotated]="isUserMenuOpen" />
+=======
+          <img src="/images/figma/user-round.svg" alt="Avatar" class="avatar-icon" />
+        </div>
+        <span class="profile-name">{{ auth.user?.fullName ?? 'Quản trị viên' }}</span>
+        <img src="/images/figma/chevron-down.svg" alt="Dropdown" class="profile-dropdown-icon" [class.rotated]="isUserMenuOpen" />
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
       </div>
 
       <!-- Quick User Menu Dropdown -->
       <div class="profile-dropdown-menu" *ngIf="isUserMenuOpen">
+<<<<<<< HEAD
         <a routerLink="/" class="dropdown-item" (click)="isUserMenuOpen = false">
           <span>Trang khách hàng</span>
         </a>
         <a routerLink="/login" class="dropdown-item text-danger" (click)="isUserMenuOpen = false">
           <span>Đăng xuất</span>
         </a>
+=======
+        <button type="button" class="dropdown-item text-danger" (click)="logout(); isUserMenuOpen = false">
+          <span>Đăng xuất</span>
+        </button>
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
       </div>
     </div>
   </aside>
@@ -57,6 +133,7 @@
   <!-- Main Content Area -->
   <div class="admin-main" data-name="KÉN Admin · Main">
     <!-- Topbar / Header -->
+<<<<<<< HEAD
     <header class="admin-topbar" data-name="Topbar" *ngIf="!isForecastPage()">
       <!-- Breadcrumb -->
       <div class="breadcrumb" data-name="Breadcrumb">
@@ -65,10 +142,47 @@
         <span class="crumb-link">Admin</span>
         <span class="crumb-sep">/</span>
         <span class="crumb-current">{{ getCurrentPageTitle() }}</span>
+=======
+    <header class="admin-topbar" data-name="Topbar">
+      <div class="topbar-left">
+        <div class="topbar-nav-group" role="group" aria-label="Điều hướng nhanh các trang quản trị">
+          <button
+            type="button"
+            class="btn-topbar-nav"
+            [disabled]="!prevNavItem"
+            (click)="goPrevPage()"
+            [title]="prevNavItem ? 'Lùi về: ' + prevNavItem.label : 'Đang ở trang đầu'"
+          >
+            <span>‹ Trước</span>
+          </button>
+          <button
+            type="button"
+            class="btn-topbar-nav"
+            [disabled]="!nextNavItem"
+            (click)="goNextPage()"
+            [title]="nextNavItem ? 'Tiếp theo: ' + nextNavItem.label : 'Đang ở trang cuối'"
+          >
+            <span>Tiếp ›</span>
+          </button>
+        </div>
+
+        <!-- Breadcrumb -->
+        <div class="breadcrumb" data-name="Breadcrumb">
+          <span class="crumb-link">KÉN</span>
+          <span class="crumb-sep">/</span>
+          <span class="crumb-link">Admin</span>
+          <span class="crumb-sep">/</span>
+          <span class="crumb-current">{{ getCurrentPageTitle() }}</span>
+        </div>
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
       </div>
 
       <!-- Topbar Right -->
       <div class="topbar-right" data-name="TopbarRight">
+<<<<<<< HEAD
+=======
+        <span class="topbar-step-indicator">{{ activeModuleIndex + 1 }} / {{ navItems.length }}</span>
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
         <button
           type="button"
           class="btn-refresh"
@@ -76,7 +190,11 @@
           title="Làm mới dữ liệu"
           [class.spinning]="isRefreshing"
         >
+<<<<<<< HEAD
           <img src="images/admin/refresh.svg" alt="Refresh" class="refresh-icon" />
+=======
+          <img src="/images/figma/btn-refresh.svg" alt="Refresh" class="refresh-icon" />
+>>>>>>> a79e6f8a04dfd3fb248b0a1ecdbdd22df5bd1d12
         </button>
       </div>
     </header>
