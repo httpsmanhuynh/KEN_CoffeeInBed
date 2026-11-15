@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
-import { catchError, finalize, shareReplay, tap } from 'rxjs/operators';
+import { catchError, finalize, map, shareReplay, tap } from 'rxjs/operators';
 
 export interface RegisterPayload {
   fullName: string;
@@ -47,12 +47,22 @@ export class AuthService {
     return this.currentUser() !== null;
   }
 
+  private normalizeUser(user: AuthenticatedUser | null): AuthenticatedUser | null {
+    if (!user) return null;
+    const pts = Number(user.tierPoints || 0);
+    if (pts >= 10000) return { ...user, membershipTier: 'DIAMOND' };
+    if (pts >= 5000) return { ...user, membershipTier: 'GOLD' };
+    if (pts >= 1000) return { ...user, membershipTier: 'SILVER' };
+    return user;
+  }
+
   /** Tải danh tính từ phiên cookie hiện tại; 401 chỉ có nghĩa là khách vãng lai. */
-  loadSession(): Observable<AuthenticatedUser | null> {
-    if (this.sessionChecked) return of(this.currentUser());
-    if (this.sessionRequest) return this.sessionRequest;
+  loadSession(force = false): Observable<AuthenticatedUser | null> {
+    if (!force && this.sessionChecked) return of(this.currentUser());
+    if (!force && this.sessionRequest) return this.sessionRequest;
 
     this.sessionRequest = this.http.get<AuthenticatedUser>(`${this.base}/me`, { withCredentials: true }).pipe(
+      map(user => this.normalizeUser(user)),
       tap(user => {
         this.setUser(user);
       }),
@@ -77,13 +87,14 @@ export class AuthService {
   }
 
   setUser(user: AuthenticatedUser | null): void {
+    const normalized = this.normalizeUser(user);
     const prevId = this.currentUser()?.id ?? null;
-    this.currentUser.set(user);
+    this.currentUser.set(normalized);
     this.sessionChecked = true;
     try {
-      if (user) {
-        if (prevId && prevId !== user.id) localStorage.removeItem('ken-figma-booking-demo-v1');
-        this.avatarUrl.set(localStorage.getItem(`ken-avatar-${user.id}`));
+      if (normalized) {
+        if (prevId && prevId !== normalized.id) localStorage.removeItem('ken-figma-booking-demo-v1');
+        this.avatarUrl.set(localStorage.getItem(`ken-avatar-${normalized.id}`));
       } else {
         this.avatarUrl.set(null);
       }

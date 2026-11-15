@@ -512,6 +512,45 @@
   font-size: 13px;
 }
 
+.review-filters {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.review-filter-stars {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.review-filter-stars button {
+  padding: 6px 12px;
+  border-radius: 16px;
+  border: 1px solid #d9c4a5;
+  background: #fffaf2;
+  color: var(--brown);
+  font: 600 12px Inter, Arial, sans-serif;
+  cursor: pointer;
+}
+
+.review-filter-stars button.active {
+  background: var(--gold);
+  border-color: var(--gold);
+}
+
+.review-filter-select {
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 1px solid #d9c4a5;
+  background: #fffaf2;
+  color: var(--brown);
+  font: 13px Inter, Arial, sans-serif;
+}
+
 .review-page button:focus-visible,
 .review-page textarea:focus-visible {
   outline: 2px solid #b77a16;

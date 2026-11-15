@@ -63,7 +63,7 @@ p, h1, h2, h3, hr { margin: 0; }
 .tier__line { height: 1px; border: 0; background: #E6D3B5; }
 .tier__perk { font-size: 13px; line-height: 1.5; }
 .tier__next { font-size: 10px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; white-space: nowrap; }
-.badge-here { padding: 4px 10px; border-radius: 999px; background: #F7EFE2; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.badge-here { padding: 4px 10px; border-radius: 999px; background: #F7EFE2; color: #4A3123; font-size: 11px; font-weight: 600; white-space: nowrap; }
 .tier--silver { background: #D9E1E8; border-color: #253647; color: #253647; }
 .tier--gold { background: #E3A52F; border-color: #4A3123; color: #4A3123; }
 .tier--diamond { background: #315E66; border-color: #fff; color: #fff; }

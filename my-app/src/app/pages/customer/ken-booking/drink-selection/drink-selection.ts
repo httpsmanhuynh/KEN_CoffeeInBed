@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { KenBookingState, KEN_MENU, kenMoney } from '../booking-state';
+import { KenBookingState, kenMoney } from '../booking-state';
 
 @Component({
   selector: 'app-ken-drink-selection',
@@ -8,10 +8,13 @@ import { KenBookingState, KEN_MENU, kenMoney } from '../booking-state';
   styleUrl: './drink-selection.css',
 })
 export class KenDrinkSelectionComponent {
-  readonly drinks = KEN_MENU.filter(item => item.category !== 'bakery');
   readonly money = kenMoney;
 
   constructor(public state: KenBookingState) {}
+
+  get drinks() {
+    return this.state.drinks;
+  }
 
   get canAddDrink(): boolean {
     return this.state.selectedDrinkCount <

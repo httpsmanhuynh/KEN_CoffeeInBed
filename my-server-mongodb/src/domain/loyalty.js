@@ -60,6 +60,7 @@ function redeemCoins(account, cost) {
 
 module.exports = {
   TIERS,
+  tierIndex,
   tierByCode,
   tierForPoints,
   earnFromAmount,

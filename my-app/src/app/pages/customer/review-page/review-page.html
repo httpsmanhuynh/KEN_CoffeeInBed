@@ -10,8 +10,16 @@
       <aside class="review-bookings">
         <h2><img class="review-inline-icon" src="/images/review-icons/receipt-heading.svg" alt="" /> Chọn đặt chỗ để đánh giá</h2>
 
-        <p *ngIf="bookings.length === 0" style="color: #776659; font-size: 14px; line-height: 1.5; padding: 12px 0;">
+        <p *ngIf="!loadingMyReviews && bookings.length === 0 && isLoggedIn" style="color: #776659; font-size: 14px; line-height: 1.5; padding: 12px 0;">
           Bạn chưa có đặt chỗ nào đã hoàn tất (Check-out) chờ đánh giá.
+        </p>
+
+        <p *ngIf="!loadingMyReviews && !isLoggedIn" style="color: #776659; font-size: 14px; line-height: 1.5; padding: 12px 0;">
+          Vui lòng <a routerLink="/login" [queryParams]="{ returnUrl: '/reviews' }" style="color: #8f5c10; font-weight: 700; text-decoration: underline;">đăng nhập</a> để xem các đặt chỗ đã hoàn tất của bạn và gửi đánh giá.
+        </p>
+
+        <p *ngIf="loadingMyReviews" style="color: #776659; font-size: 14px; padding: 12px 0;">
+          Đang tải danh sách đặt chỗ…
         </p>
 
         <button
@@ -94,18 +102,18 @@
 
           <div class="review-field">
             <label for="ken-review-text">
-              Nhận xét của bạn <em>*</em>
+              Nhận xét của bạn
             </label>
 
             <textarea
               id="ken-review-text"
               [(ngModel)]="reviewText"
               rows="5"
-              maxlength="2000"
-              placeholder="Chia sẻ trải nghiệm tại KÉN (ít nhất 20 ký tự)"
+              maxlength="500"
+              placeholder="Chia sẻ trải nghiệm tại KÉN (không bắt buộc, tối đa 500 ký tự)"
             ></textarea>
 
-            <small>{{ reviewText.length }} ký tự · tối thiểu 20</small>
+            <small>{{ reviewText.length }} / 500 ký tự</small>
           </div>
 
           <div class="review-field">
@@ -151,8 +159,9 @@
             Cho phép hiển thị đánh giá công khai
           </label>
 
-          <button type="button" class="review-submit" (click)="submit()" [disabled]="checkingSession">
-            <img src="/images/review-icons/submit-arrow.svg" alt="" /> {{ checkingSession ? 'Đang kiểm tra…' : 'Gửi đánh giá' }}
+          <button type="button" class="review-submit" (click)="submit()" [disabled]="checkingSession || submittingReview">
+            <img src="/images/review-icons/submit-arrow.svg" alt="" />
+            {{ checkingSession ? 'Đang kiểm tra…' : submittingReview ? 'Đang gửi…' : 'Gửi đánh giá' }}
           </button>
 
           <p class="review-hint">
@@ -166,21 +175,83 @@
         </div>
         <ng-template #noBookingToReview>
           <div class="review-form-content" style="text-align: center; padding: 40px 20px; color: #776659;">
-            <p style="font-size: 15px; margin-bottom: 8px;">Hiện tại bạn không có lịch đặt nào cần đánh giá.</p>
-            <p style="font-size: 13px; color: #9a887a;">Khi bạn hoàn tất buổi đặt chỗ (Check-out) tại KÉN, bạn có thể quay lại đây để chia sẻ trải nghiệm.</p>
+            <p style="font-size: 15px; margin-bottom: 8px;">
+              {{ isLoggedIn ? 'Hiện tại bạn không có lịch đặt nào cần đánh giá.' : 'Đăng nhập để viết đánh giá trải nghiệm tại KÉN.' }}
+            </p>
+            <p style="font-size: 13px; color: #9a887a;">
+              Khi bạn hoàn tất buổi đặt chỗ (Check-out) tại KÉN, đơn đặt sẽ xuất hiện ở cột bên trái để bạn chia sẻ đánh giá.
+            </p>
+            <p class="review-notice" *ngIf="notice" role="status" style="text-align: left;">
+              {{ notice }}
+            </p>
           </div>
         </ng-template>
       </section>
     </div>
 
-    <section class="review-recent" aria-label="Đánh giá gần đây">
+    <section class="review-recent" aria-label="Đánh giá bạn đã gửi" *ngIf="isLoggedIn && mySubmittedReviews.length > 0">
       <div class="review-recent-heading">
-        <h2><img class="review-inline-icon" src="/images/review-icons/recent-info.svg" alt="" /> Đánh giá gần đây</h2>
-        <span>Đánh giá minh họa</span>
+        <h2><img class="review-inline-icon" src="/images/review-icons/receipt-heading.svg" alt="" /> Đánh giá bạn đã gửi</h2>
+        <span>{{ mySubmittedReviews.length }} đánh giá</span>
       </div>
 
       <div class="review-recent-content">
         <div class="review-recent-grid">
+          <article *ngFor="let mr of mySubmittedReviews" class="review-recent-card">
+            <div class="review-recent-card-top">
+              <strong>{{ mr.spaceName }}</strong>
+              <span>
+                <ng-container *ngFor="let star of stars"><img class="review-recent-star" [src]="star <= mr.rating ? '/images/review-icons/star-filled.svg' : '/images/review-icons/star-empty-small.svg'" alt="" /></ng-container>
+                <small>{{ mr.rating }}/5</small>
+              </span>
+            </div>
+
+            <p class="review-recent-meta">
+              <ng-container *ngIf="mr.bookingCode">{{ mr.bookingCode }} · </ng-container>
+              <ng-container *ngIf="mr.packageName">{{ mr.packageName }} · </ng-container>
+              {{ mr.date }}
+            </p>
+            <p class="review-recent-text">{{ mr.comment }}</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="review-recent" aria-label="Đánh giá gần đây">
+      <div class="review-recent-heading">
+        <h2><img class="review-inline-icon" src="/images/review-icons/recent-info.svg" alt="" /> Đánh giá từ khách hàng KÉN</h2>
+        <span *ngIf="totalReviews > 0">★ {{ formattedAverage }}/5 · {{ formattedTotalReviews }} đánh giá</span>
+        <span *ngIf="totalReviews === 0 && !loadingReviews">Chưa có đánh giá phù hợp</span>
+      </div>
+
+      <div class="review-recent-content">
+        <div class="review-filters" *ngIf="spaceOptions.length > 0 || totalReviews > 0">
+          <div class="review-filter-stars" role="group" aria-label="Lọc theo số sao">
+            <button type="button" [class.active]="filterRating === 'all'" (click)="setRatingFilter('all')">Tất cả</button>
+            <button type="button" *ngFor="let s of [5, 4, 3, 2, 1]" [class.active]="filterRating === s" (click)="setRatingFilter(s)">{{ s }} ★</button>
+          </div>
+
+          <select
+            *ngIf="spaceOptions.length > 0"
+            class="review-filter-select"
+            aria-label="Lọc theo không gian"
+            [(ngModel)]="filterSpaceId"
+            (change)="onSpaceFilterChange()"
+          >
+            <option value="all">Tất cả không gian</option>
+            <option *ngFor="let sp of spaceOptions" [value]="sp.id">{{ sp.name }}</option>
+          </select>
+        </div>
+
+        <p *ngIf="loadingReviews" style="color: #776659; font-size: 14px; padding: 12px 0;">
+          Đang tải đánh giá từ hệ thống…
+        </p>
+
+        <p *ngIf="!loadingReviews && recentReviews.length === 0" style="color: #776659; font-size: 14px; padding: 12px 0;">
+          Không tìm thấy đánh giá nào phù hợp với bộ lọc hiện tại.
+        </p>
+
+        <div class="review-recent-grid" *ngIf="!loadingReviews && recentReviews.length > 0">
           <article *ngFor="let r of recentReviews" class="review-recent-card">
             <div class="review-recent-card-top">
               <strong>{{ r.name }}</strong>
@@ -190,23 +261,18 @@
               </span>
             </div>
 
-            <p class="review-recent-meta">{{ r.place }} · {{ r.date }}</p>
+            <p class="review-recent-meta">{{ r.place }}<ng-container *ngIf="r.date"> · {{ r.date }}</ng-container></p>
             <p class="review-recent-text">{{ r.content }}</p>
           </article>
         </div>
 
-        <div class="review-recent-bottom">
-          <button type="button" class="review-more" (click)="showMoreReviews()">
+        <div class="review-recent-bottom" *ngIf="hasMoreReviews || canCollapseReviews">
+          <button type="button" class="review-more" (click)="showMoreReviews()" [disabled]="loadingMore">
             <img src="/images/review-icons/arrow-left.svg" alt="" />
-            Xem thêm đánh giá
+            {{ loadingMore ? 'Đang tải thêm…' : hasMoreReviews ? 'Xem thêm đánh giá (' + recentReviews.length + '/' + formattedTotalReviews + ')' : 'Thu gọn danh sách' }}
             <img src="/images/review-icons/arrow-right.svg" alt="" />
           </button>
         </div>
-
-        <p class="review-more-message" *ngIf="moreNotice">
-          Hiện chỉ có ba đánh giá minh họa.
-          Danh sách đánh giá thật sẽ được tải khi tích hợp API.
-        </p>
       </div>
     </section>
   </main>

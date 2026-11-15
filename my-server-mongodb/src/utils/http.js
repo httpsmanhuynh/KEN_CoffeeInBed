@@ -23,12 +23,15 @@ const { tierForPoints, tierIndex } = require('../domain/loyalty');
 const publicUser = (u, tier) => {
   let tierCode = tier ? tier.code : 'BASIC';
   if (u.tier_points !== undefined) {
-    const expected = tierForPoints(Number(u.tier_points) || 0);
+    const pts = Number(u.tier_points) || 0;
+    const expected = tierForPoints(pts);
     try {
-      if (!tier || tierIndex(expected.code) > tierIndex(tierCode)) {
+      if (!tier || tierIndex(expected.code) > tierIndex(tierCode) || (pts > 0 && tierCode !== expected.code)) {
         tierCode = expected.code;
       }
-    } catch (_) {}
+    } catch (_) {
+      tierCode = expected.code;
+    }
   }
   return {
     id: String(u._id),
@@ -49,7 +52,7 @@ const tierOf = async (db, user) => {
   const pts = Number(user.tier_points || 0);
   const expected = tierForPoints(pts);
   try {
-    if (!tier || tierIndex(expected.code) > tierIndex(tier.code)) {
+    if (!tier || tierIndex(expected.code) > tierIndex(tier.code) || (pts > 0 && tier.code !== expected.code)) {
       const match = await db.collection('membership_tiers').findOne({ code: expected.code });
       if (match) {
         tier = match;

@@ -1,11 +1,16 @@
 import { Injectable, effect, inject, signal } from '@angular/core';
+import { catchError, forkJoin, of } from 'rxjs';
 import { AuthService } from '../../../core/auth.service';
+import { CustomerApiService } from '../../../core/customer-api.service';
 
 export type KenZone = 'focus' | 'rest';
 export type KenDrinkCategory = 'coffee' | 'refreshment' | 'bakery';
 
 export interface KenProduct {
   id: string;
+  apiProductId?: string;
+  itemCode?: string;
+  rawCategory?: string;
   name: string;
   price: number;
   image: string;
@@ -100,6 +105,7 @@ export const KEN_MENU: KenProduct[] = [
 
 export interface KenExtra {
   id: string;
+  apiAddonId?: string;
   title: string;
   price: number;
   image: string;
@@ -165,16 +171,158 @@ function tryInjectAuth(): AuthService | null {
   }
 }
 
+function tryInjectCustomerApi(): CustomerApiService | null {
+  try {
+    return inject(CustomerApiService, { optional: true });
+  } catch {
+    return null;
+  }
+}
+
+const CANONICAL_PRODUCT_SLUGS: Record<string, string> = {
+  CF_DEN: 'coffee',
+  CF_AMERICANO: 'americano',
+  CF_BAC_XIU: 'bac-xiu',
+  CF_COLD_BREW: 'cold-brew',
+  TEA_OOLONG_MACCHIATO: 'oolong',
+  MATCHA_LATTE: 'matcha',
+  WATER_BOTTLE: 'water',
+  JUICE_CAM: 'juice',
+  SODA_TRAI_CAY: 'soda',
+  BAKE_CROISSANT: 'croissant',
+  MOUSSE_MATCHA: 'mousse',
+  CAKE_TIRAMISU: 'tiramisu',
+  BREAD_QUE: 'bread',
+  SNACK_SANDWICH: 'sandwich',
+  SNACK_FRUIT: 'fruit',
+};
+
+const CANONICAL_ADDON_SLUGS: Record<string, string> = {
+  'cà phê đen': 'extra-coffee',
+  americano: 'extra-americano',
+  'matcha latte': 'extra-matcha',
+  'nước tinh khiết': 'extra-water',
+  'nước suối': 'extra-water',
+  'nước cam': 'extra-juice',
+  'croissant bơ': 'extra-croissant',
+  'bánh sừng bò (croissant)': 'extra-croissant',
+  'mousse trà xanh': 'extra-mousse',
+  'bánh mousse': 'extra-mousse',
+  sandwich: 'extra-sandwich',
+  'trái cây cắt sẵn': 'extra-fruit',
+  'thuê màn hình rời 24 inch': 'extra-monitor',
+  'bàn phím và chuột rời': 'extra-keyboard',
+  'cáp và sạc dự phòng': 'extra-phone',
+  'bộ bút và bảng nhỏ': 'extra-stationery',
+  'in tài liệu dưới 20 trang a4': 'extra-printer',
+};
+
+const SPACE_CODE_TO_LOCAL: Record<string, string> = {
+  'FP-01': 'focus',
+  'WL-01': 'work',
+  'SMR-01': 'meeting-small',
+  'BR-01': 'meeting-large',
+  'SBP-01': 'single',
+  'DBP-01': 'double',
+  'PS-01': 'private',
+};
+
+function resolveProductImage(raw: any): string {
+  const code = String(raw?.item_code || '').toUpperCase();
+  const sub = String(raw?.sub_category || '').toUpperCase();
+  const cat = String(raw?.category || '').toUpperCase();
+  const name = String(raw?.name || raw?.title || '').toLocaleLowerCase('vi-VN');
+
+  const url = typeof raw?.image_url === 'string' ? raw.image_url : '';
+  if (url.startsWith('/images/ken-flow/') || url.startsWith('/images/figma/') || url.startsWith('http')) {
+    return url;
+  }
+
+  if (code === 'CF_AMERICANO' || name.includes('americano')) return 'americano.png';
+  if (code === 'CF_BAC_XIU' || code === 'CF_SALTED_CARAMEL' || name.includes('bạc xỉu') || name.includes('caramel')) return 'bac-xiu.png';
+  if (code.includes('COLD_BREW') || name.includes('cold brew')) return 'cold-brew.png';
+  if (code.startsWith('TEA_') || sub.includes('TEA') || name.includes('trà') || name.includes('oolong')) return 'oolong.png';
+  if (code.includes('MATCHA') && cat !== 'PASTRY') return 'matcha.png';
+  if (code.includes('HOJICHA') || name.includes('hojicha') || name.includes('matcha')) return cat === 'PASTRY' ? 'mousse.png' : 'matcha.png';
+  if (code === 'WATER_BOTTLE' || sub === 'BOTTLED_WATER' || name.includes('tinh khiết') || name.includes('nước suối')) return 'water.png';
+  if (sub === 'JUICE' || code.startsWith('JUICE_') || name.includes('nước cam') || name.includes('nước ép')) return 'juice.png';
+  if (sub === 'SODA' || code.startsWith('SODA_') || name.includes('soda')) return 'soda.png';
+  if (name.includes('croissant') || name.includes('sừng bò') || name.includes('bơ xốp') || code === 'BAKE_SCONE') return 'croissant.png';
+  if (name.includes('mousse') || code.startsWith('MOUSSE_')) return 'mousse.png';
+  if (name.includes('tiramisu') || name.includes('cheesecake') || code.startsWith('CAKE_')) return 'tiramisu.png';
+  if (name.includes('bánh mì') || name.includes('biscotti') || code === 'BREAD_QUE' || code === 'BAKE_BISCOTTI') return 'bread.png';
+  if (name.includes('sandwich')) return 'sandwich.png';
+  if (name.includes('trái cây')) return 'fruit.png';
+  if (name.includes('màn hình')) return 'monitor.png';
+  if (name.includes('bàn phím') || name.includes('chuột')) return 'keyboard.png';
+  if (name.includes('cáp') || name.includes('sạc')) return 'powerbank.png';
+  if (name.includes('bút') || name.includes('bảng')) return 'stationery.png';
+  if (name.includes('in tài liệu')) return 'printer.png';
+  if (cat === 'PASTRY') return 'croissant.png';
+  if (cat === 'SNACK') return 'sandwich.png';
+  return 'coffee.png';
+}
+
+function mapProductCategory(raw: any): KenDrinkCategory {
+  const cat = String(raw?.category || '').toUpperCase();
+  const sub = String(raw?.sub_category || '').toUpperCase();
+  if (cat === 'PASTRY' || cat === 'SNACK') return 'bakery';
+  if (['FRUIT_TEA', 'JUICE', 'SODA', 'BOTTLED_WATER'].includes(sub)) return 'refreshment';
+  return 'coffee';
+}
+
+function mapAddonCategory(raw: any): 'drink' | 'food' | 'equipment' {
+  const note = String(raw?.operation_note || '').toLocaleLowerCase('vi-VN');
+  const name = String(raw?.name || '').toLocaleLowerCase('vi-VN');
+  if (
+    raw?.unit === 'PER_BOOKING' ||
+    note.includes('check-in') && (name.includes('màn hình') || name.includes('bàn phím') || name.includes('sạc') || name.includes('bút') || name.includes('in ') || name.includes('khăn') || name.includes('bộ nghỉ') || name.includes('chăn'))
+  ) {
+    return 'equipment';
+  }
+  if (name.includes('bánh') || name.includes('croissant') || name.includes('mousse') || name.includes('tiramisu') || name.includes('cheese') || name.includes('sandwich') || name.includes('trái cây') || name.includes('biscotti') || name.includes('bơ xốp')) {
+    return 'food';
+  }
+  if (name.includes('màn hình') || name.includes('bàn phím') || name.includes('cáp') || name.includes('bút') || name.includes('in tài liệu')) {
+    return 'equipment';
+  }
+  return 'drink';
+}
+
 @Injectable({ providedIn: 'root' })
 export class KenBookingState {
   private readonly auth = tryInjectAuth();
+  private readonly api = tryInjectCustomerApi();
   private readonly storageKey = 'ken-figma-booking-demo-v1';
   readonly draft = signal<KenBookingDraft>(this.load());
-  readonly drinks = KEN_MENU.filter(item => item.category !== 'bakery');
-  readonly pastries = KEN_MENU.filter(item => ['croissant', 'mousse', 'tiramisu', 'bread'].includes(item.id));
-  readonly extras = KEN_EXTRAS;
+  readonly menuProductsSignal = signal<KenProduct[]>([...KEN_MENU]);
+  readonly extrasSignal = signal<KenExtra[]>([...KEN_EXTRAS]);
+  readonly spacesSignal = signal<KenBookingSpace[]>([...KEN_BOOKING_SPACES]);
+  private catalogSynced = false;
+
+  get menuProducts(): KenProduct[] {
+    return this.menuProductsSignal();
+  }
+  get drinks(): KenProduct[] {
+    return this.menuProductsSignal().filter(item => item.category !== 'bakery');
+  }
+  get pastries(): KenProduct[] {
+    return this.menuProductsSignal().filter(
+      item =>
+        item.category === 'bakery' &&
+        item.rawCategory !== 'SNACK' &&
+        !['sandwich', 'fruit', 'SNACK_SANDWICH', 'SNACK_FRUIT'].includes(item.id),
+    );
+  }
+  get extras(): KenExtra[] {
+    return this.extrasSignal();
+  }
+  get spaces(): KenBookingSpace[] {
+    return this.spacesSignal();
+  }
 
   constructor() {
+    this.syncCatalogFromApi();
     if (this.auth) {
       effect(() => {
         const uid = this.auth!.user?.id ?? null;
@@ -186,6 +334,82 @@ export class KenBookingState {
         }
       });
     }
+  }
+
+  syncCatalogFromApi(force = false): void {
+    if (!this.api || (this.catalogSynced && !force)) return;
+    this.catalogSynced = true;
+    forkJoin({
+      products: this.api.getProducts().pipe(catchError(() => of([]))),
+      addons: this.api.getAddons().pipe(catchError(() => of([]))),
+      spaces: this.api.getSpaces().pipe(catchError(() => of([]))),
+    }).subscribe({
+      next: ({ products, addons, spaces }) => {
+        if (Array.isArray(products) && products.length > 0) {
+          const mappedProducts: KenProduct[] = products
+            .filter((p) => p && p.is_active !== false)
+            .map((p) => {
+              const code = String(p.item_code || '').toUpperCase();
+              const canonicalId = CANONICAL_PRODUCT_SLUGS[code] || code || String(p._id);
+              const variantsText = Array.isArray(p.variants) && p.variants.length ? p.variants.join(' / ') : '';
+              return {
+                id: canonicalId,
+                apiProductId: String(p._id),
+                itemCode: code || undefined,
+                rawCategory: String(p.category || 'DRINK').toUpperCase(),
+                name: String(p.name || 'Sản phẩm KÉN'),
+                price: Number(p.price ?? 0),
+                image: resolveProductImage(p),
+                category: mapProductCategory(p),
+                description: String(p.description || variantsText || 'Món phục vụ tại KÉN'),
+              };
+            });
+          if (mappedProducts.length > 0) {
+            this.menuProductsSignal.set(mappedProducts);
+          }
+        }
+
+        if (Array.isArray(addons) && addons.length > 0) {
+          const mappedAddons: KenExtra[] = addons
+            .filter((a) => a && a.is_active !== false)
+            .map((a) => {
+              const lowerName = String(a.name || '').trim().toLocaleLowerCase('vi-VN');
+              const canonicalId = CANONICAL_ADDON_SLUGS[lowerName] || String(a._id);
+              return {
+                id: canonicalId,
+                apiAddonId: String(a._id),
+                title: String(a.name || 'Dịch vụ cộng thêm'),
+                price: Number(a.price ?? 0),
+                image: resolveProductImage(a),
+                category: mapAddonCategory(a),
+                unit: a.unit === 'PER_BOOKING' ? 'PER_BOOKING' : 'PER_ITEM',
+              };
+            });
+          if (mappedAddons.length > 0) {
+            this.extrasSignal.set(mappedAddons);
+          }
+        }
+
+        if (Array.isArray(spaces) && spaces.length > 0) {
+          const updatedSpaces = this.spacesSignal().map((base) => {
+            const match = spaces.find((s) => SPACE_CODE_TO_LOCAL[String(s.space_code || '').toUpperCase()] === base.id);
+            if (!match) return base;
+            return {
+              ...base,
+              name: match.name || base.name,
+              description: match.description || base.description,
+              minGuests: Number(match.min_guests ?? base.minGuests),
+              maxGuests: Number(match.max_guests ?? base.maxGuests),
+              perPerson: match.booking_mode === 'SHARED',
+            };
+          });
+          this.spacesSignal.set(updatedSpaces);
+        }
+      },
+      error: () => {
+        this.catalogSynced = false;
+      },
+    });
   }
 
   private resetForUser(ownerUserId: string | null): void {
@@ -335,9 +559,11 @@ export class KenBookingState {
     this.set({ pastryQuantities });
   }
 
-  get space(): KenBookingSpace { return kenBookingSpace(this.draft().spaceId); }
+  get space(): KenBookingSpace {
+    return this.getSpace(this.draft().spaceId) || kenBookingSpace(this.draft().spaceId);
+  }
   getSpace(id: string): KenBookingSpace | undefined {
-    return KEN_BOOKING_SPACES.find(space => space.id === id);
+    return this.spacesSignal().find(space => space.id === id);
   }
   get isFocusSpace(): boolean { return this.draft().spaceId === 'focus'; }
   get isHourlyWork(): boolean {
@@ -537,5 +763,9 @@ export class KenBookingState {
   }
   get holdRemainingSeconds(): number { return Math.max(0, Math.ceil(((this.draft().holdUntil || 0) - Date.now()) / 1000)); }
   money = kenMoney;
-  image(file: string): string { return '/images/ken-flow/' + file; }
+  image(file: string): string {
+    if (!file) return '/images/ken-flow/coffee.png';
+    if (file.startsWith('/') || file.startsWith('http')) return file;
+    return '/images/ken-flow/' + file;
+  }
 }

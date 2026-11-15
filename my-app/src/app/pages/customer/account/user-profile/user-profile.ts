@@ -68,13 +68,10 @@ export class UserProfile implements OnInit, OnDestroy {
         this.form = { ...this.saved };
         this.phoneMasked = user.phone.length >= 4 ? `•••• •• ${user.phone.slice(-4)}` : user.phone;
         const pts = user.tierPoints ?? 0;
-        let code = user.membershipTier;
-        if (!code || code === 'BASIC') {
-          if (pts >= 10000) code = 'DIAMOND';
-          else if (pts >= 5000) code = 'GOLD';
-          else if (pts >= 1000) code = 'SILVER';
-          else code = 'BASIC';
-        }
+        let code = user.membershipTier || 'BASIC';
+        if (pts >= 10000) code = 'DIAMOND';
+        else if (pts >= 5000) code = 'GOLD';
+        else if (pts >= 1000) code = 'SILVER';
         this.tierCode = code;
         this.tier = TIER_LABEL[code] ?? code;
         this.points = pts.toLocaleString('vi-VN');

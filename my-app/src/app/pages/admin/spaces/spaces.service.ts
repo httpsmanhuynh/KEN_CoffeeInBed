@@ -184,7 +184,9 @@ export class SpacesService {
       zones: this.http.get<any>('/api/zones?all=true').pipe(catchError(() => of(null))),
     }).pipe(
       map((res) => {
-        const rawZones = Array.isArray(res.zones) ? res.zones : res.zones?.items || res.zones?.data || [];
+        const rawZones = Array.isArray(res.zones)
+          ? res.zones
+          : res.zones?.items || res.zones?.data || [];
         const zoneMap = new Map<string, ZoneRef>();
         if (rawZones.length > 0) {
           const refs: ZoneRef[] = rawZones.map((z: any) => ({
@@ -196,7 +198,9 @@ export class SpacesService {
           this.zonesSubject.next(refs);
         }
 
-        const rawSpaces = Array.isArray(res.spaces) ? res.spaces : res.spaces?.items || res.spaces?.data || [];
+        const rawSpaces = Array.isArray(res.spaces)
+          ? res.spaces
+          : res.spaces?.items || res.spaces?.data || [];
         if (rawSpaces.length === 0 && res.spaces === null) {
           return this.spaces;
         }
@@ -204,24 +208,36 @@ export class SpacesService {
         const mapped = rawSpaces.map((s: any) => this.mapApiSpace(s, zoneMap));
         this.update(mapped);
         return mapped;
-      })
+      }),
     );
   }
 
   private mapApiSpace(s: any, zoneMap: Map<string, ZoneRef>): SpaceItem {
-    const zId = s.zone_id ? String(s.zone_id) : (s.zone?._id ? String(s.zone._id) : '');
+    const zId = s.zone_id ? String(s.zone_id) : s.zone?._id ? String(s.zone._id) : '';
     const zRef = zId ? zoneMap.get(zId) : undefined;
     const rawType = String(s.booking_mode || s.type || 'EXCLUSIVE').toUpperCase();
     const isShared = rawType === 'SHARED';
-    const rawStatus = String(s.status || (s.is_active === false ? 'INACTIVE' : 'ACTIVE')).toUpperCase();
+    const rawStatus = String(
+      s.status || (s.is_active === false ? 'INACTIVE' : 'ACTIVE'),
+    ).toUpperCase();
     const status: SpaceStatus =
-      rawStatus === 'MAINTENANCE' ? 'MAINTENANCE' : rawStatus === 'INACTIVE' || s.is_active === false ? 'INACTIVE' : 'ACTIVE';
+      rawStatus === 'MAINTENANCE'
+        ? 'MAINTENANCE'
+        : rawStatus === 'INACTIVE' || s.is_active === false
+          ? 'INACTIVE'
+          : 'ACTIVE';
+    const zoneName = zRef?.name || s.zone_name || s.zone?.name || 'KÉN Tập Trung';
+    const fallbackImage = this.defaultImageForSpace(
+      s.name || s.name_vi || zoneName,
+      zoneName,
+      isShared ? 'SHARED' : 'PRIVATE',
+    );
 
     return {
       id: String(s._id || s.id),
       code: s.code || '',
       zoneId: zId,
-      zone: zRef?.name || s.zone_name || s.zone?.name || 'KÉN Tập Trung',
+      zone: zoneName,
       name: s.name || s.name_vi || 'Không gian KÉN',
       nameEn: s.name_en || s.english_name || s.code || '',
       type: isShared ? 'Dùng chung' : 'Dùng riêng',
@@ -234,15 +250,43 @@ export class SpacesService {
       bookingMode: isShared ? 'SHARED' : 'PRIVATE',
       bufferMinutes: Number(s.buffer_minutes ?? (isShared ? 0 : 15)),
       futureBookingCount: Number(s.futureBookingCount ?? 0),
-      image: s.image_url || s.image || '',
+      image: this.normalizeImage(s.image_url || s.image || s.imageUrl, fallbackImage),
     };
+  }
+
+  private normalizeImage(value: unknown, fallback: string): string {
+    const raw = typeof value === 'string' ? value.trim() : '';
+    if (!raw) return fallback;
+    if (raw.startsWith('http') || raw.startsWith('data:') || raw.startsWith('/')) return raw;
+    return `/${raw.replace(/^\.?\//, '')}`;
+  }
+
+  private defaultImageForSpace(name: string, zone: string, bookingMode: BookingMode): string {
+    const text = `${name} ${zone} ${bookingMode}`.toLowerCase();
+    if (text.includes('focus') || text.includes('pod') || text.includes('tập trung cá nhân'))
+      return '/images/ken-flow/listing-focus.png';
+    if (text.includes('work') || text.includes('cowork') || text.includes('làm việc chung'))
+      return '/images/ken-flow/listing-work.png';
+    if (text.includes('họp') || text.includes('meeting') || text.includes('boardroom'))
+      return '/images/ken-flow/listing-meeting-small.png';
+    if (
+      text.includes('nghỉ') ||
+      text.includes('single') ||
+      text.includes('double') ||
+      text.includes('private')
+    )
+      return '/images/ken-flow/listing-single.png';
+    return '/images/ken-flow/listing-focus.png';
   }
 
   findById(id: string): SpaceItem | undefined {
     return this.spaces.find((space) => space.id === id);
   }
 
-  saveSpace(space: Omit<SpaceItem, 'id' | 'bufferMinutes' | 'futureBookingCount'>, id?: string): Observable<SpaceItem> {
+  saveSpace(
+    space: Omit<SpaceItem, 'id' | 'bufferMinutes' | 'futureBookingCount'>,
+    id?: string,
+  ): Observable<SpaceItem> {
     const bufferMinutes = space.bookingMode === 'SHARED' ? 0 : 15;
     if (!this.http || (id && !/^[a-f0-9]{24}$/i.test(id))) {
       return of(this.save({ ...space, bufferMinutes, futureBookingCount: 0 }, id));
@@ -278,7 +322,7 @@ export class SpacesService {
       }),
       tap(() => {
         this.loadFromApi().subscribe();
-      })
+      }),
     );
   }
 
@@ -296,7 +340,7 @@ export class SpacesService {
     return req$.pipe(
       tap(() => {
         this.loadFromApi().subscribe();
-      })
+      }),
     );
   }
 
@@ -323,7 +367,7 @@ export class SpacesService {
           return { ...space, status: nextStatus };
         }
         return space;
-      })
+      }),
     );
   }
 

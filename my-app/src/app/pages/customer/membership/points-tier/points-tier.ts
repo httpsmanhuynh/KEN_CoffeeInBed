@@ -44,15 +44,17 @@ export class PointsTierPage implements OnInit {
 
   ngOnInit(): void {
     if (!this.auth) return;
-    this.auth.ensureSession().subscribe({
+    const session$ = typeof this.auth.loadSession === 'function'
+      ? this.auth.loadSession(true)
+      : this.auth.ensureSession();
+    session$.subscribe({
       next: (user) => {
         if (!user) return;
         this.tierPoints = user.tierPoints ?? 0;
         this.coinsBalance = user.coinsBalance ?? 0;
-        const codeFromPts = codeForPoints(this.tierPoints);
-        this.tierCode = user.membershipTier && user.membershipTier !== 'BASIC'
-          ? user.membershipTier
-          : codeFromPts;
+        this.tierCode = this.tierPoints >= 1000
+          ? codeForPoints(this.tierPoints)
+          : (user.membershipTier || 'BASIC');
       },
     });
   }

@@ -35,14 +35,11 @@ export class AccountSidebar {
   get displayTier(): string {
     if (this.tier) return this.tier;
     const pts = this.auth?.user?.tierPoints ?? 0;
-    let code = this.auth?.user?.membershipTier;
-    if (!code || code === 'BASIC') {
-      if (pts >= 10000) code = 'DIAMOND';
-      else if (pts >= 5000) code = 'GOLD';
-      else if (pts >= 1000) code = 'SILVER';
-      else code = 'BASIC';
-    }
-    return code ? (TIER_LABEL[code] ?? code) : 'Bạc';
+    let code = this.auth?.user?.membershipTier || 'BASIC';
+    if (pts >= 10000) code = 'DIAMOND';
+    else if (pts >= 5000) code = 'GOLD';
+    else if (pts >= 1000) code = 'SILVER';
+    return TIER_LABEL[code] ?? code;
   }
 
   get displayPoints(): string {

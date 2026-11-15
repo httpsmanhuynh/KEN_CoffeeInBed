@@ -74,14 +74,14 @@ export class SpacesComponent implements OnInit, OnDestroy {
       this.spacesService.spaces$.subscribe((spaces) => {
         this.spaces = spaces;
         this.cdr?.markForCheck();
-      })
+      }),
     );
     this.subs.add(
       this.spacesService.zones$.subscribe((zones) => {
         if (zones.length > 0) {
           this.zoneOptions = zones.map((z) => z.name);
         }
-      })
+      }),
     );
 
     this.loadData();
@@ -103,7 +103,7 @@ export class SpacesComponent implements OnInit, OnDestroy {
           } else {
             this.viewMode = 'list';
           }
-        })
+        }),
       );
     }
   }
@@ -171,7 +171,8 @@ export class SpacesComponent implements OnInit, OnDestroy {
         if (this.selectedStatus !== 'Tất cả') {
           if (this.selectedStatus === 'Đang hoạt động') matchesStatus = s.status === 'ACTIVE';
           else if (this.selectedStatus === 'Bảo trì') matchesStatus = s.status === 'MAINTENANCE';
-          else if (this.selectedStatus === 'Ngừng hoạt động') matchesStatus = s.status === 'INACTIVE';
+          else if (this.selectedStatus === 'Ngừng hoạt động')
+            matchesStatus = s.status === 'INACTIVE';
         }
 
         let matchesTab = true;
@@ -258,7 +259,7 @@ export class SpacesComponent implements OnInit, OnDestroy {
       bookingMode: space.bookingMode,
       status: space.status,
       amenities: [...space.amenities],
-      image: space.image || '',
+      image: this.resolveSpaceImage(space),
     };
     this.formError = '';
     const targetUrl = `/admin/spaces/${space.id}/edit`;
@@ -343,7 +344,7 @@ export class SpacesComponent implements OnInit, OnDestroy {
           amenities: [...this.formData.amenities],
           image: this.formData.image.trim() || undefined,
         },
-        this.editingId ?? undefined
+        this.editingId ?? undefined,
       )
       .subscribe({
         next: () => {
@@ -374,7 +375,10 @@ export class SpacesComponent implements OnInit, OnDestroy {
         if (willActivate) {
           this.showToast(`Đã kích hoạt lại không gian "${space.name}".`);
         } else {
-          this.showToast(`Đã chuyển "${space.name}" sang Ngừng hoạt động (bảo toàn lịch sử đặt chỗ).`, 'info');
+          this.showToast(
+            `Đã chuyển "${space.name}" sang Ngừng hoạt động (bảo toàn lịch sử đặt chỗ).`,
+            'info',
+          );
         }
       },
       error: (err) => {
@@ -385,7 +389,19 @@ export class SpacesComponent implements OnInit, OnDestroy {
 
   exportList(): void {
     if (typeof document === 'undefined') return;
-    const headers = ['ID', 'Tên không gian', 'Tên tiếng Anh', 'Zone', 'Hình thức', 'Buffer (phút)', 'Sức chứa', 'Min', 'Max', 'Đơn giá', 'Trạng thái'];
+    const headers = [
+      'ID',
+      'Tên không gian',
+      'Tên tiếng Anh',
+      'Zone',
+      'Hình thức',
+      'Buffer (phút)',
+      'Sức chứa',
+      'Min',
+      'Max',
+      'Đơn giá',
+      'Trạng thái',
+    ];
     const rows = this.spaces.map((s) => [
       s.id,
       `"${s.name}"`,
@@ -397,7 +413,11 @@ export class SpacesComponent implements OnInit, OnDestroy {
       s.minGuest,
       s.maxGuest,
       `"${s.priceLabel}"`,
-      s.status === 'ACTIVE' ? 'Đang hoạt động' : s.status === 'MAINTENANCE' ? 'Bảo trì' : 'Ngừng hoạt động',
+      s.status === 'ACTIVE'
+        ? 'Đang hoạt động'
+        : s.status === 'MAINTENANCE'
+          ? 'Bảo trì'
+          : 'Ngừng hoạt động',
     ]);
 
     const csvContent = '\uFEFF' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
@@ -405,7 +425,10 @@ export class SpacesComponent implements OnInit, OnDestroy {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `ken-danh-sach-khong-gian-${new Date().toISOString().slice(0, 10)}.csv`);
+    link.setAttribute(
+      'download',
+      `ken-danh-sach-khong-gian-${new Date().toISOString().slice(0, 10)}.csv`,
+    );
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -423,6 +446,26 @@ export class SpacesComponent implements OnInit, OnDestroy {
     }, 3500);
   }
 
+  resolveSpaceImage(space?: Partial<SpaceItem> | null): string {
+    const raw = space?.image?.trim();
+    if (raw) return raw;
+    const text = `${space?.name || ''} ${space?.nameEn || ''} ${space?.zone || ''}`.toLowerCase();
+    if (text.includes('focus') || text.includes('pod') || text.includes('tập trung cá nhân'))
+      return '/images/ken-flow/listing-focus.png';
+    if (text.includes('work') || text.includes('cowork') || text.includes('làm việc chung'))
+      return '/images/ken-flow/listing-work.png';
+    if (text.includes('họp') || text.includes('meeting') || text.includes('boardroom'))
+      return '/images/ken-flow/listing-meeting-small.png';
+    if (
+      text.includes('nghỉ') ||
+      text.includes('single') ||
+      text.includes('double') ||
+      text.includes('private')
+    )
+      return '/images/ken-flow/listing-single.png';
+    return '/images/ken-flow/listing-focus.png';
+  }
+
   private getEmptyForm(): SpaceFormData {
     return {
       zone: this.zoneOptions[0] || 'KÉN Tập Trung',
@@ -434,7 +477,7 @@ export class SpacesComponent implements OnInit, OnDestroy {
       bookingMode: 'SHARED',
       status: 'ACTIVE',
       amenities: ['WiFi', 'Ổ cắm điện', 'Đặt chỗ trực tuyến'],
-      image: '',
+      image: this.resolveSpaceImage({ zone: this.zoneOptions[0] || 'KÉN Tập Trung' }),
     };
   }
 }

@@ -166,8 +166,23 @@ export class KenBookingReviewPage {
         const drinkInc = pkgInclusions.find((inc) => inc.item_type === 'STANDARD_DRINK');
         const pastryInc = pkgInclusions.find((inc) => inc.item_type === 'PASTRY');
 
-        const findProduct = (localId: string, expectedCategory: 'DRINK' | 'PASTRY') => {
-          const target = normName(PRODUCT_NAME_MAP[localId]);
+        const findProduct = (itemProduct: { id: string; apiProductId?: string; itemCode?: string; name?: string }, expectedCategory: 'DRINK' | 'PASTRY') => {
+          if (itemProduct.apiProductId) {
+            const byId = products.find((p: any) => String(p._id) === itemProduct.apiProductId);
+            if (byId) return byId;
+          }
+          if (itemProduct.itemCode) {
+            const byCode = products.find((p: any) => String(p.item_code || '').toUpperCase() === itemProduct.itemCode!.toUpperCase());
+            if (byCode) return byCode;
+          }
+          const byLocalIdOrName = products.find(
+            (p: any) =>
+              String(p._id) === itemProduct.id ||
+              normName(p.item_code) === normName(itemProduct.id) ||
+              (itemProduct.name && normName(p.name) === normName(itemProduct.name) && (!p.category || p.category === expectedCategory)),
+          );
+          if (byLocalIdOrName) return byLocalIdOrName;
+          const target = normName(PRODUCT_NAME_MAP[itemProduct.id] || itemProduct.name);
           return products.find(
             (p: any) =>
               normName(p.name) === target &&
@@ -184,7 +199,7 @@ export class KenBookingReviewPage {
           for (const item of this.state.selectedDrinks) {
             if (remainingDrinkQuota <= 0) break;
             const take = Math.min(item.quantity, remainingDrinkQuota);
-            const matchedProd = findProduct(item.product.id, 'DRINK');
+            const matchedProd = findProduct(item.product, 'DRINK');
             if (matchedProd?._id && take > 0) {
               mappedInclusions.push({
                 packageInclusionId: String(drinkInc._id),
@@ -208,7 +223,7 @@ export class KenBookingReviewPage {
           for (const item of this.state.selectedPastries) {
             if (remainingPastry <= 0) break;
             const take = Math.min(item.quantity, remainingPastry);
-            const matchedProd = findProduct(item.product.id, 'PASTRY');
+            const matchedProd = findProduct(item.product, 'PASTRY');
             if (matchedProd?._id && take > 0) {
               mappedInclusions.push({
                 packageInclusionId: String(pastryInc._id),
@@ -220,7 +235,7 @@ export class KenBookingReviewPage {
           }
           if (remainingPastry > 0) {
             const defaultPastry =
-              findProduct('croissant', 'PASTRY') ||
+              findProduct({ id: 'croissant' }, 'PASTRY') ||
               products.find((p: any) => p.category === 'PASTRY');
             if (defaultPastry?._id) {
               const existingIdx = mappedInclusions.findIndex(
@@ -253,7 +268,16 @@ export class KenBookingReviewPage {
 
         for (const extraItem of this.state.selectedExtrasList) {
           const targetName = normName(ADDON_NAME_MAP[extraItem.extra.id] || extraItem.extra.title);
-          const matchedAddon = addons.find((a: any) => normName(a.name) === targetName);
+          const matchedAddon =
+            (extraItem.extra.apiAddonId
+              ? addons.find((a: any) => String(a._id) === extraItem.extra.apiAddonId)
+              : undefined) ||
+            addons.find(
+              (a: any) =>
+                String(a._id) === extraItem.extra.id ||
+                normName(a.name) === normName(extraItem.extra.title) ||
+                normName(a.name) === targetName,
+            );
           addMappedAddon(matchedAddon, extraItem.quantity);
         }
 

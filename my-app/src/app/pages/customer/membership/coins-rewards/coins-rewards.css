@@ -84,9 +84,13 @@ p, h1, h2 { margin: 0; }
 .tab:hover { color: #4A3123; }
 .tab.is-active { border-bottom-color: rgba(216,199,178,.62); color: #4A3123; font-weight: 600; line-height: 21px; }
 .hist__list { display: flex; flex-direction: column; }
-.hrow { display: flex; align-items: center; gap: 16px; padding: 10px 0; border-bottom: 1px solid rgba(216,199,178,.62); }
+.hrow { display: flex; align-items: center; gap: 16px; padding: 12px 10px; margin: 0 -10px; border-bottom: 1px solid rgba(216,199,178,.62); border-radius: 10px; transition: background .15s ease; }
+.hrow--clickable { cursor: pointer; }
+.hrow--clickable:hover, .hrow--clickable:focus-visible { background: #F7EFE2; outline: none; }
 .hrow__date { flex: 0 0 100px; color: #7A6553; font-size: 12px; line-height: 1.6; }
-.hrow__detail { flex: 1 1 0; min-width: 0; font-size: 14px; line-height: 22.4px; }
+.hrow__main { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.hrow__detail { font-size: 14px; line-height: 22.4px; }
+.hrow__hint { color: #A9763F; font-size: 12px; font-weight: 600; }
 .hrow__amount { flex: 0 0 90px; font-size: 14px; font-weight: 600; line-height: 21px; white-space: nowrap; }
 .hrow__amount.pos { color: #49634C; }
 .pill { padding: 5px 11px; border-radius: 999px; font-size: 12px; font-weight: 600; line-height: 1.6; white-space: nowrap; }
@@ -94,6 +98,32 @@ p, h1, h2 { margin: 0; }
 .pill--spent { background: #F7EFE2; color: #7A6553; }
 .pill--earned { background: #EDF2E9; color: #49634C; }
 .empty { padding: 24px 0; color: #7A6553; font-size: 13px; text-align: center; }
+
+/* Popup chi tiết Voucher / Quà lưu niệm */
+.reward-modal-backdrop { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 20px; background: rgba(45, 29, 20, .54); backdrop-filter: blur(2px); }
+.reward-modal { position: relative; width: min(100%, 480px); max-height: calc(100vh - 40px); overflow-y: auto; display: flex; flex-direction: column; gap: 16px; padding: 26px; background: #FFFCF7; border: 1px solid rgba(216,199,178,.8); border-radius: 18px; box-shadow: 0 20px 48px rgba(45,29,20,.24); color: #4A3123; }
+.reward-modal__close { position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; border: 0; border-radius: 999px; background: #F7EFE2; color: #4A3123; font-size: 14px; font-weight: 700; cursor: pointer; display: grid; place-items: center; }
+.reward-modal__close:hover { background: #E6D3B5; }
+.reward-modal__eyebrow { padding-right: 36px; font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: #A9763F; }
+.reward-modal__title { font-family: var(--ken-heading); font-size: 24px; font-weight: 400; line-height: 1.3; padding-right: 28px; }
+.reward-modal__photo { height: 170px; border-radius: 12px; overflow: hidden; background: #E6D3B5; }
+.reward-modal__photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.reward-modal__codebox { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border: 1.5px dashed #A9763F; border-radius: 12px; background: #F7EFE2; }
+.reward-modal__codeinfo { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.reward-modal__codelabel { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; color: #7A6553; }
+.reward-modal__code { font-family: monospace; font-size: 20px; font-weight: 700; letter-spacing: 1px; color: #4A3123; word-break: break-all; }
+.reward-modal__copy { flex: 0 0 auto; padding: 8px 14px; border: 0; border-radius: 999px; background: #4A3123; color: #F7EFE2; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.reward-modal__copy:hover { background: #634331; }
+.reward-modal__meta { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border-radius: 12px; background: #fff; border: 1px solid rgba(216,199,178,.55); }
+.reward-modal__row { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; line-height: 1.5; }
+.reward-modal__row span { color: #7A6553; }
+.reward-modal__row b { text-align: right; font-weight: 600; }
+.reward-modal__guide { padding: 12px 14px; border-radius: 12px; background: #F7EFE2; font-size: 12px; line-height: 1.6; color: #5C4332; }
+.reward-modal__guide-title { font-weight: 700; margin-bottom: 4px; color: #4A3123; }
+.reward-modal__guide ul { margin: 0; padding-left: 18px; }
+.reward-modal__actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+.btn-outline { padding: 9px 18px; border: 1px solid rgba(74,49,35,.3); border-radius: 999px; background: transparent; color: #4A3123; font-size: 13px; font-weight: 600; cursor: pointer; }
+.btn-outline:hover { background: #F7EFE2; }
 
 @media (max-width: 1100px) {
   .wrap { width: min(100% - 48px, 1280px); }
@@ -111,5 +141,5 @@ p, h1, h2 { margin: 0; }
   .intro__title { font-size: 28px; }
   .wallet__balance { flex-basis: 100%; }
   .hrow { flex-wrap: wrap; row-gap: 4px; }
-  .hrow__detail { flex-basis: 100%; order: 3; }
+  .hrow__main { flex-basis: 100%; order: 3; }
 }

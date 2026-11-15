@@ -133,7 +133,12 @@ export class AddonsService {
       map((res) => {
         const rawProducts = this.extractList(res.products);
         const rawAddons = this.extractList(res.addons);
-        if (rawProducts.length === 0 && rawAddons.length === 0 && res.products === null && res.addons === null) {
+        if (
+          rawProducts.length === 0 &&
+          rawAddons.length === 0 &&
+          res.products === null &&
+          res.addons === null
+        ) {
           return this.addons;
         }
 
@@ -160,7 +165,7 @@ export class AddonsService {
 
         this.update(result);
         return result;
-      })
+      }),
     );
   }
 
@@ -173,30 +178,47 @@ export class AddonsService {
   private mapRawItem(raw: any, source: 'PRODUCT' | 'ADDON', linkedAddon?: any): ProductAddon {
     const id = String(raw._id || raw.id);
     const cat = this.resolveCategory(raw.category || raw.type);
-    const isActive = raw.is_active !== false && String(raw.status || 'ACTIVE').toUpperCase() !== 'PAUSED' && String(raw.status || 'ACTIVE').toUpperCase() !== 'INACTIVE';
+    const isActive =
+      raw.is_active !== false &&
+      String(raw.status || 'ACTIVE').toUpperCase() !== 'PAUSED' &&
+      String(raw.status || 'ACTIVE').toUpperCase() !== 'INACTIVE';
 
     let avail: AddonAvailability = 'Khả dụng';
     if (linkedAddon) {
-      if (linkedAddon.in_stock === false || linkedAddon.is_out_of_stock === true) avail = 'Hết hàng';
+      if (linkedAddon.in_stock === false || linkedAddon.is_out_of_stock === true)
+        avail = 'Hết hàng';
       else if (linkedAddon.is_active === false) avail = 'Không khả dụng';
     } else if (raw.addon_available === false) {
       avail = 'Không khả dụng';
     }
 
-    const imgRaw = raw.image_url || raw.image || '';
-    const img = imgRaw && !imgRaw.startsWith('/') && !imgRaw.startsWith('http') ? `/${imgRaw}` : (imgRaw || this.defaultImage(cat));
+    const imgRaw =
+      typeof (raw.image_url || raw.image) === 'string'
+        ? String(raw.image_url || raw.image).trim()
+        : '';
+    const img = imgRaw
+      ? imgRaw.startsWith('/') || imgRaw.startsWith('http') || imgRaw.startsWith('data:')
+        ? imgRaw
+        : `/${imgRaw.replace(/^\.?\//, '')}`
+      : this.defaultImage(cat);
 
     return {
       id,
       code: raw.code || raw.item_code || raw.addon_code || id.slice(-6).toUpperCase(),
       source,
-      linkedProductId: source === 'PRODUCT' ? id : (raw.product_id ? String(raw.product_id) : undefined),
-      linkedAddonId: linkedAddon?._id ? String(linkedAddon._id) : (source === 'ADDON' ? id : undefined),
+      linkedProductId:
+        source === 'PRODUCT' ? id : raw.product_id ? String(raw.product_id) : undefined,
+      linkedAddonId: linkedAddon?._id
+        ? String(linkedAddon._id)
+        : source === 'ADDON'
+          ? id
+          : undefined,
       name: raw.name || raw.product_name || raw.addon_name || 'Sản phẩm KÉN',
       category: cat,
       price: Number(raw.price ?? raw.unit_price ?? raw.base_price ?? 0),
       unit: raw.unit || (cat === 'Đồ uống' ? 'Ly' : cat === 'Tiện ích' ? 'Lượt' : 'Phần'),
-      catalogVisible: raw.catalog_visible !== undefined ? Boolean(raw.catalog_visible) : source === 'PRODUCT',
+      catalogVisible:
+        raw.catalog_visible !== undefined ? Boolean(raw.catalog_visible) : source === 'PRODUCT',
       addonAvailable: avail,
       status: isActive ? 'ACTIVE' : 'PAUSED',
       image: img,
@@ -209,10 +231,20 @@ export class AddonsService {
 
   private resolveCategory(raw: any): ProductCategory {
     const val = String(raw || '').toUpperCase();
-    if (val.includes('UTILITY') || val.includes('EQUIPMENT') || val.includes('TIỆN ÍCH') || val.includes('TIEN_ICH')) {
+    if (
+      val.includes('UTILITY') ||
+      val.includes('EQUIPMENT') ||
+      val.includes('TIỆN ÍCH') ||
+      val.includes('TIEN_ICH')
+    ) {
       return 'Tiện ích';
     }
-    if (val.includes('PASTRY') || val.includes('FOOD') || val.includes('SNACK') || val.includes('BÁNH')) {
+    if (
+      val.includes('PASTRY') ||
+      val.includes('FOOD') ||
+      val.includes('SNACK') ||
+      val.includes('BÁNH')
+    ) {
       return 'Bánh / Ăn nhẹ';
     }
     return 'Đồ uống';
@@ -234,7 +266,10 @@ export class AddonsService {
     return this.addonsSubject.value.find((item) => item.id === id);
   }
 
-  saveApi(data: Omit<ProductAddon, 'id' | 'source'>, existing?: ProductAddon): Observable<ProductAddon> {
+  saveApi(
+    data: Omit<ProductAddon, 'id' | 'source'>,
+    existing?: ProductAddon,
+  ): Observable<ProductAddon> {
     if (!this.http || (existing && !/^[a-f0-9]{24}$/i.test(existing.id))) {
       return of(this.save({ ...data, source: existing?.source || 'PRODUCT' }, existing?.id));
     }
@@ -256,17 +291,17 @@ export class AddonsService {
 
     if (existing) {
       const targetEndpoint =
-        existing.source === 'ADDON'
-          ? `/api/addons/${existing.id}`
-          : `/api/products/${existing.id}`;
+        existing.source === 'ADDON' ? `/api/addons/${existing.id}` : `/api/products/${existing.id}`;
       return this.http.patch<any>(targetEndpoint, apiPayload).pipe(
         map((res) => {
           const doc = res?.item || res?.product || res?.addon || res;
-          return doc?._id ? this.mapRawItem(doc, existing.source) : this.save({ ...data, source: existing.source }, existing.id);
+          return doc?._id
+            ? this.mapRawItem(doc, existing.source)
+            : this.save({ ...data, source: existing.source }, existing.id);
         }),
         tap(() => {
           this.loadFromApi().subscribe();
-        })
+        }),
       );
     }
 
@@ -279,7 +314,7 @@ export class AddonsService {
       }),
       tap(() => {
         this.loadFromApi().subscribe();
-      })
+      }),
     );
   }
 
@@ -289,7 +324,8 @@ export class AddonsService {
       this.toggleStatus(product.id);
       return of({ status: nextActive ? 'ACTIVE' : 'PAUSED' });
     }
-    const base = product.source === 'ADDON' ? `/api/addons/${product.id}` : `/api/products/${product.id}`;
+    const base =
+      product.source === 'ADDON' ? `/api/addons/${product.id}` : `/api/products/${product.id}`;
     const req$ = nextActive
       ? this.http.patch<any>(base, { is_active: true, status: 'ACTIVE' })
       : this.http.delete<any>(base);
@@ -297,7 +333,7 @@ export class AddonsService {
     return req$.pipe(
       tap(() => {
         this.loadFromApi().subscribe();
-      })
+      }),
     );
   }
 
@@ -316,7 +352,7 @@ export class AddonsService {
     const next = this.addonsSubject.value.map((item) =>
       item.id === id
         ? { ...item, status: (item.status === 'ACTIVE' ? 'PAUSED' : 'ACTIVE') as ProductStatus }
-        : item
+        : item,
     );
     this.update(next);
   }

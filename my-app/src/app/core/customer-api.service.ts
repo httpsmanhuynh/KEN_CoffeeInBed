@@ -69,12 +69,23 @@ export interface ApiLoyaltyHistory {
   transactions: Array<{
     _id: string;
     type: 'EARN' | 'REDEEM' | 'YEAR_RESET';
+    voucher_id?: string;
     points_delta: number;
     coins_delta: number;
     points_after: number;
     coins_after: number;
     note?: string;
     created_at: string;
+    voucher?: {
+      _id: string;
+      code: string;
+      description?: string | null;
+      discount_type: 'PERCENT' | 'FIXED_AMOUNT';
+      discount_value: number;
+      min_order_value?: number;
+      max_discount?: number | null;
+      coins_cost?: number;
+    } | null;
   }>;
 }
 
@@ -122,6 +133,46 @@ export class CustomerApiService {
 
   getVouchers(): Observable<ApiVoucher[]> {
     return this.http.get<ApiVoucher[]>('/api/vouchers', { withCredentials: true });
+  }
+
+  getPackages(query?: Record<string, string>): Observable<any[]> {
+    let params = new HttpParams();
+    for (const [k, v] of Object.entries(query || {})) {
+      if (v) params = params.set(k, v);
+    }
+    return this.http.get<any[]>('/api/packages', { params, withCredentials: true });
+  }
+
+  getPricing(query?: Record<string, string>): Observable<any[]> {
+    let params = new HttpParams();
+    for (const [k, v] of Object.entries(query || {})) {
+      if (v) params = params.set(k, v);
+    }
+    return this.http.get<any[]>('/api/pricing', { params, withCredentials: true });
+  }
+
+  getRecommendations(query?: Record<string, string>): Observable<any> {
+    let params = new HttpParams();
+    for (const [k, v] of Object.entries(query || {})) {
+      if (v) params = params.set(k, v);
+    }
+    return this.http.get<any>('/api/recommendations', { params, withCredentials: true });
+  }
+
+  getTopTrendingRecommendations(query?: Record<string, string>): Observable<any> {
+    let params = new HttpParams();
+    for (const [k, v] of Object.entries(query || {})) {
+      if (v) params = params.set(k, v);
+    }
+    return this.http.get<any>('/api/recommendations/top-trending', { params, withCredentials: true });
+  }
+
+  getBookingRecommendations(query?: Record<string, string>): Observable<any> {
+    let params = new HttpParams();
+    for (const [k, v] of Object.entries(query || {})) {
+      if (v) params = params.set(k, v);
+    }
+    return this.http.get<any>('/api/recommendations/booking', { params, withCredentials: true });
   }
 
   // ─── Bookings ───

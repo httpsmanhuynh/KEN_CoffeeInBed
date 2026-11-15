@@ -97,10 +97,22 @@
         </div>
 
         <div class="hist__list">
-          @for (h of filteredHistory; track h.date + h.detail) {
-            <div class="hrow">
+          @for (h of filteredHistory; track h.id) {
+            <div
+              class="hrow hrow--clickable"
+              role="button"
+              tabindex="0"
+              (click)="openHistoryDetail(h)"
+              (keydown.enter)="openHistoryDetail(h)"
+              (keydown.space)="openHistoryDetail(h); $event.preventDefault()"
+            >
               <time class="hrow__date">{{ h.date }}</time>
-              <span class="hrow__detail">{{ h.detail }}</span>
+              <div class="hrow__main">
+                <span class="hrow__detail">{{ h.detail }}</span>
+                @if (!h.plus) {
+                  <span class="hrow__hint">Nhấp để xem mã &amp; chi tiết →</span>
+                }
+              </div>
               <b class="hrow__amount" [class.pos]="h.plus">{{ h.amount }}</b>
               <span class="pill pill--{{ h.kind }}">{{ h.state }}</span>
             </div>
@@ -112,3 +124,91 @@
     </main>
   </div>
 </div>
+
+@if (rewardModal; as m) {
+  <div class="reward-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="reward-modal-title" (click)="closeRewardModal()">
+    <div class="reward-modal" (click)="$event.stopPropagation()">
+      <button type="button" class="reward-modal__close" aria-label="Đóng" (click)="closeRewardModal()">✕</button>
+
+      <p class="reward-modal__eyebrow">{{ m.subtitle }}</p>
+      <h3 id="reward-modal-title" class="reward-modal__title">{{ m.title }}</h3>
+
+      @if (m.image) {
+        <div class="reward-modal__photo">
+          <img [src]="m.image" [alt]="m.title" />
+        </div>
+      }
+
+      @if (m.code) {
+        <div class="reward-modal__codebox">
+          <div class="reward-modal__codeinfo">
+            <span class="reward-modal__codelabel">
+              {{ m.mode === 'gift' ? 'MÃ NHẬN QUÀ TẠI QUẦY' : 'MÃ VOUCHER SỬ DỤNG' }}
+            </span>
+            <strong class="reward-modal__code">{{ m.code }}</strong>
+          </div>
+          <button type="button" class="reward-modal__copy" (click)="copyRewardCode(m.code)">
+            {{ copiedCode ? 'Đã sao chép ✓' : 'Sao chép mã' }}
+          </button>
+        </div>
+      }
+
+      <div class="reward-modal__meta">
+        @if (m.discountText) {
+          <div class="reward-modal__row">
+            <span>Ưu đãi</span>
+            <b>{{ m.discountText }}</b>
+          </div>
+        }
+        @if (m.conditionText) {
+          <div class="reward-modal__row">
+            <span>{{ m.mode === 'gift' ? 'Mô tả quà' : 'Điều kiện áp dụng' }}</span>
+            <b>{{ m.conditionText }}</b>
+          </div>
+        }
+        @if (m.validityText) {
+          <div class="reward-modal__row">
+            <span>{{ m.mode === 'gift' ? 'Hình thức nhận' : 'Hiệu lực' }}</span>
+            <b>{{ m.validityText }}</b>
+          </div>
+        }
+        @if (m.dateText) {
+          <div class="reward-modal__row">
+            <span>Thời gian giao dịch</span>
+            <b>{{ m.dateText }}</b>
+          </div>
+        }
+        @if (m.coinsText) {
+          <div class="reward-modal__row">
+            <span>Biến động Coins</span>
+            <b>{{ m.coinsText }}</b>
+          </div>
+        }
+        @if (m.balanceAfterText) {
+          <div class="reward-modal__row">
+            <span>Số dư sau giao dịch</span>
+            <b>{{ m.balanceAfterText }}</b>
+          </div>
+        }
+      </div>
+
+      @if (m.instructions.length) {
+        <div class="reward-modal__guide">
+          <p class="reward-modal__guide-title">Hướng dẫn sử dụng</p>
+          <ul>
+            @for (step of m.instructions; track step) {
+              <li>{{ step }}</li>
+            }
+          </ul>
+        </div>
+      }
+
+      <div class="reward-modal__actions">
+        @if (m.mode === 'voucher' && m.code) {
+          <button type="button" class="btn-gold" (click)="useVoucherNow(m.code)">Dùng ngay khi đặt chỗ →</button>
+        }
+        <button type="button" class="btn-outline" (click)="closeRewardModal()">Đóng</button>
+      </div>
+    </div>
+  </div>
+}

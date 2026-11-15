@@ -1,10 +1,10 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { SmoothScrollService } from '../../../../core/smooth-scroll.service';
-import { KEN_MENU, kenMoney } from '../booking-state';
+import { KEN_MENU, KenBookingState, kenMoney } from '../booking-state';
 import type { KenDrinkCategory, KenProduct } from '../booking-state';
 
 @Component({ selector: 'app-ken-cafe-catalog', standalone: false, templateUrl: './cafe-catalog.html', styleUrl: './cafe-catalog.css' })
-export class KenCafeCatalogPage {
+export class KenCafeCatalogPage implements OnInit {
   private readonly smoothScroll = (() => {
     try {
       return inject(SmoothScrollService, { optional: true });
@@ -13,7 +13,21 @@ export class KenCafeCatalogPage {
     }
   })();
 
-  readonly products = KEN_MENU;
+  private readonly state = (() => {
+    try {
+      return inject(KenBookingState, { optional: true });
+    } catch {
+      return null;
+    }
+  })();
+
+  ngOnInit(): void {
+    this.state?.syncCatalogFromApi();
+  }
+
+  get products(): KenProduct[] {
+    return this.state ? this.state.menuProducts : KEN_MENU;
+  }
   category: 'all' | KenDrinkCategory = 'all';
   searchText = '';
   priceFilter: 'all' | 'under50' | 'from50' = 'all';
@@ -40,7 +54,11 @@ export class KenCafeCatalogPage {
     return items;
   }
   get resultCount(): number { return this.sections.reduce((n, s) => n + this.forSection(s.id).length, 0); }
-  image = (p: KenProduct) => '/images/ken-flow/' + p.image;
+  image = (p: KenProduct) => {
+    if (!p?.image) return '/images/ken-flow/coffee.png';
+    if (p.image.startsWith('/') || p.image.startsWith('http')) return p.image;
+    return '/images/ken-flow/' + p.image;
+  };
 
   scrollToMenu(event?: Event): void {
     event?.preventDefault();

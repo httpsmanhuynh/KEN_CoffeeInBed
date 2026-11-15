@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { KenBookingState } from '../../ken-booking/booking-state';
 
 @Component({
   selector: 'app-meeting-page',
@@ -6,7 +8,20 @@ import { Component } from '@angular/core';
   templateUrl: './meeting-page.html',
   styleUrl: './meeting-page.css',
 })
-export class MeetingPage {
+export class MeetingPage implements OnInit {
+  private readonly router = inject(Router, { optional: true });
+  private readonly bookingState = inject(KenBookingState, { optional: true });
   info = '';
-  showInfo(): void { this.info = 'Chức năng này cần kết nối với trang Menu hoặc hệ thống đặt chỗ của nhóm. Hiện chưa thực hiện giao dịch.'; }
+
+  ngOnInit(): void {
+    this.bookingState?.syncCatalogFromApi();
+  }
+
+  get spaceData() {
+    return this.bookingState?.getSpace('meeting-small');
+  }
+
+  showInfo(): void {
+    this.router?.navigateByUrl('/booking/meeting-small');
+  }
 }
