@@ -59,7 +59,7 @@ def connect_mongo(write: bool):
 
 
 def verify_written_db(db, forecast_date, model_version: str, expected_count: int) -> None:
-    """Đọc lại demand_forecasts sau khi ghi để xác nhận số lượng bản ghi."""
+    """Đọc lại demand_forecasts sau khi ghi để xác nhận số lượng bản ghi và trường action_tag."""
     from datetime import datetime, timezone
     fc_dt = datetime(forecast_date.year, forecast_date.month, forecast_date.day, 0, 0, 0, tzinfo=timezone.utc)
     count = db["demand_forecasts"].count_documents({
@@ -68,6 +68,14 @@ def verify_written_db(db, forecast_date, model_version: str, expected_count: int
     })
     logger.info("Kiểm tra sau ghi: demand_forecasts ngày %s có %d bản ghi (kỳ vọng %d) -> %s",
                 fc_dt.strftime("%Y-%m-%d"), count, expected_count, "KHỚP [OK]" if count == expected_count else "LỆCH")
+    sample = db["demand_forecasts"].find_one({
+        "forecast_date": fc_dt,
+        "model_version": model_version,
+    })
+    if sample:
+        has_tag = "action_tag" in sample and isinstance(sample["action_tag"], str)
+        logger.info("Xác nhận trường action_tag trong DB: '%s' (món %s) -> %s",
+                    sample.get("action_tag"), sample.get("item_code"), "ĐÃ GHI [OK]" if has_tag else "CHƯA CÓ [LỖI]")
 
 
 def main() -> None:

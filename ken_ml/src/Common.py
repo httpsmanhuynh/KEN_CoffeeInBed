@@ -350,7 +350,7 @@ def predict_with_intervals(
 
 
 def compute_action_tags(predicted_qty: pd.Series, baseline_qty: pd.Series) -> pd.Series:
-    """Gán nhãn hành động cho Admin (phục vụ báo cáo & dashboard, KHÔNG ghi vào DB).
+    """Gán nhãn hành động cho Admin (phục vụ báo cáo, dashboard và ghi vào demand_forecasts).
 
     - >= +15%: Tăng lượng 
     - <= -15%: Giảm lượng
@@ -371,10 +371,10 @@ def build_mongo_forecast_docs(
 ) -> list[dict[str, Any]]:
     """Tạo danh sách tài liệu ghi vào MongoDB đúng chuẩn validator (additionalProperties=false).
 
-    Chỉ chứa các trường:
+    Chứa các trường:
       item_id (ObjectId), item_code, forecast_date (datetime UTC),
       predicted_qty (int >= 0), lower_qty (int), upper_qty (int),
-      model_version (str), generated_at (datetime UTC)
+      action_tag (str), model_version (str), generated_at (datetime UTC)
     """
     from bson import ObjectId  # import muộn để phần Clustering không cần pymongo
 
@@ -396,6 +396,19 @@ def build_mongo_forecast_docs(
         lower_val = int(round(max(0, float(row["lower_qty"]))))
         upper_val = int(round(max(pred_val, float(row["upper_qty"]))))
 
+        if "action_tag" in row and pd.notna(row["action_tag"]):
+            action_tag = str(row["action_tag"])
+        elif "baseline_4w" in row and pd.notna(row["baseline_4w"]):
+            diff_pct = (pred_val - float(row["baseline_4w"])) / max(1e-6, float(row["baseline_4w"]))
+            if diff_pct >= 0.15:
+                action_tag = "Tăng lượng"
+            elif diff_pct <= -0.15:
+                action_tag = "Giảm lượng"
+            else:
+                action_tag = "Giữ nguyên"
+        else:
+            action_tag = "Giữ nguyên"
+
         doc = {
             "item_id": ObjectId(item_id_str),
             "item_code": code,
@@ -403,6 +416,7 @@ def build_mongo_forecast_docs(
             "predicted_qty": pred_val,
             "lower_qty": lower_val,
             "upper_qty": upper_val,
+            "action_tag": action_tag,
             "model_version": model_version,
             "generated_at": stamp,
         }

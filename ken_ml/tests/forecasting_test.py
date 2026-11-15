@@ -115,6 +115,7 @@ def run_tests() -> int:
     next_raw["lower_qty"] = lowers
     next_raw["upper_qty"] = uppers
     tags = compute_action_tags(next_raw["predicted_qty"], next_raw["baseline_4w"])
+    next_raw["action_tag"] = tags
     valid_tags = {"Tăng lượng", "Giảm lượng", "Giữ nguyên"}
     check(set(tags.unique()).issubset(valid_tags), "Nhãn action_tag hợp lệ", str(tags.value_counts().to_dict()))
 
@@ -130,7 +131,7 @@ def run_tests() -> int:
     doc_keys = set(first_doc.keys())
     check(doc_keys == set(SAFE_WRITE_FIELDS), "Document chỉ gồm đúng các trường được phép của demand_forecasts", str(sorted(doc_keys)))
     check(set(SAFE_WRITE_REQUIRED).issubset(doc_keys), "Document có đầy đủ các trường bắt buộc")
-    check("action_tag" not in doc_keys, "KHÔNG chứa action_tag trong document (tuân thủ validator MongoDB)")
+    check("action_tag" in doc_keys, "Chứa action_tag trong document để ghi vào MongoDB (demand_forecasts)")
 
     # Kiểm tra kiểu dữ liệu chi tiết
     all_types_ok = True
@@ -147,8 +148,10 @@ def run_tests() -> int:
             all_types_ok = False
         if not isinstance(d["upper_qty"], int) or d["upper_qty"] < d["predicted_qty"]:
             all_types_ok = False
+        if not isinstance(d["action_tag"], str) or d["action_tag"] not in valid_tags:
+            all_types_ok = False
 
-    check(all_types_ok, "Kiểu dữ liệu tất cả các bản ghi chuẩn BSON/Python (ObjectId, datetime UTC, int >= 0)")
+    check(all_types_ok, "Kiểu dữ liệu tất cả các bản ghi chuẩn BSON/Python (ObjectId, datetime UTC, int >= 0, action_tag hợp lệ)")
 
     # -------------------------------------------------------------
     # 6. Kiểm tra Dry-Run qua hàm an toàn safe_write
