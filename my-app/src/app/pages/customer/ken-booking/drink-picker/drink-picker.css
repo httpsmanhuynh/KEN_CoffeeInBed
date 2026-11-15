@@ -1,1 +1,324 @@
 /* Shared KEN booking styles remain in ../ken-booking.css, imported from src/styles.css. Add component-specific overrides here only. */
+
+/* ============================================================ */
+/* KHỐI GỢI Ý THÔNG MINH MACHINE LEARNING (AI RECOMMENDATION)   */
+/* ============================================================ */
+.ml-rec-box {
+  margin-bottom: 36px;
+  padding: 28px;
+  background: linear-gradient(135deg, #FFFDF8 0%, #FBF5EA 100%);
+  border: 1.5px solid #E2C9A1;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(169, 118, 63, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.ml-rec-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, #D4AF37, #F59E0B, #10B981, #D4AF37);
+  background-size: 300% 100%;
+  animation: gradientFlow 4s linear infinite;
+}
+
+@keyframes gradientFlow {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
+
+.ml-rec-header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.ml-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  padding: 6px 14px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 999px;
+  color: #065F46;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.ml-sparkle {
+  font-size: 14px;
+}
+
+.ml-title-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.ml-title-row h2 {
+  font-family: var(--ken-heading, 'Playfair Display', Georgia, serif);
+  font-size: 24px;
+  font-weight: 700;
+  color: #2F1E14;
+  margin: 0 0 4px;
+}
+
+.ml-sub {
+  color: #7A6553;
+  font-size: 13px;
+  margin: 0;
+}
+
+.ml-context-tag {
+  padding: 6px 12px;
+  background: #EFE6D9;
+  border-radius: 8px;
+  color: #4A3123;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Lưới card gợi ý */
+.ml-rec-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.ml-rec-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: #FFFFFF;
+  border: 1.5px solid rgba(226, 201, 161, 0.8);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(74, 49, 35, 0.05);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+              box-shadow 0.3s ease,
+              border-color 0.3s ease;
+}
+
+.ml-rec-card:hover {
+  transform: translateY(-8px);
+  border-color: #D4AF37;
+  box-shadow: 0 16px 36px -8px rgba(212, 175, 55, 0.3),
+              0 0 0 2px rgba(212, 175, 55, 0.5);
+}
+
+.ml-rec-card.is-selected {
+  border-color: #10B981;
+  background: #FAFEF9;
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.15);
+}
+
+/* Match Score Badge */
+.ml-match-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 5;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: #FFFFFF;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+  line-height: 1.2;
+}
+
+.match-score {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.match-label {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+
+/* Image Wrap */
+.ml-card-image-wrap {
+  position: relative;
+  width: 100%;
+  height: 160px;
+  background: #F3ECE1;
+  overflow: hidden;
+}
+
+.ml-card-image-wrap img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.ml-rec-card:hover .ml-card-image-wrap img {
+  transform: scale(1.08);
+}
+
+.ml-card-tag {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  padding: 4px 10px;
+  background: rgba(47, 30, 20, 0.85);
+  backdrop-filter: blur(4px);
+  color: #FBBF24;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 6px;
+}
+
+/* Content */
+.ml-card-content {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1 1 auto;
+}
+
+.ml-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ml-cat {
+  font-size: 11px;
+  font-weight: 600;
+  color: #A9763F;
+  text-transform: uppercase;
+}
+
+.ml-price {
+  font-size: 14px;
+  font-weight: 700;
+  color: #4A3123;
+}
+
+.ml-name {
+  font-family: var(--ken-heading, 'Playfair Display', Georgia, serif);
+  font-size: 17px;
+  font-weight: 600;
+  color: #2F1E14;
+  line-height: 1.35;
+  margin: 0;
+  min-height: 44px;
+}
+
+/* ML Reason Box */
+.ml-reason-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #F8F3EA;
+  border-radius: 8px;
+  border-left: 3px solid #D4AF37;
+}
+
+.ml-robot-icon {
+  font-size: 13px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.ml-reason-box p {
+  margin: 0;
+  font-size: 11.5px;
+  color: #5C4738;
+  line-height: 1.5;
+}
+
+/* Benefit chips */
+.ml-benefits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ml-benefit-chip {
+  font-size: 10px;
+  font-weight: 600;
+  color: #065F46;
+  background: #ECFDF5;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+/* Action Row */
+.ml-action-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid rgba(226, 201, 161, 0.6);
+  gap: 8px;
+}
+
+.ml-surcharge-info small {
+  font-size: 11px;
+  color: #7A6553;
+}
+
+.ml-surcharge-info b {
+  color: #D97706;
+  font-weight: 700;
+}
+
+.ml-btn-add {
+  padding: 8px 16px;
+  background: #4A3123;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.ml-btn-add:hover:not(:disabled) {
+  background: #A9763F;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(169, 118, 63, 0.3);
+}
+
+.ml-btn-add:disabled {
+  background: #D1D5DB;
+  color: #9CA3AF;
+  cursor: not-allowed;
+}
+
+.ml-quantity-control {
+  border: 1.5px solid #10B981 !important;
+  background: #ECFDF5 !important;
+}
+
+@media (max-width: 960px) {
+  .ml-rec-grid {
+    grid-template-columns: 1fr;
+  }
+}

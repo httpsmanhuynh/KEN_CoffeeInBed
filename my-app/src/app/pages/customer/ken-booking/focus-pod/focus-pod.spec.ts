@@ -1,3 +1,5 @@
+import { describe, it, expect } from 'vitest';
+import '@angular/compiler';
 import { KenFocusPodPage } from './focus-pod';
 import { KenBookingState } from '../booking-state';
 import { ChangeDetectorRef } from '@angular/core';

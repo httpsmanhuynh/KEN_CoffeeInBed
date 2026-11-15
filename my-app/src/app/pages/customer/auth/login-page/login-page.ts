@@ -83,9 +83,26 @@ export class LoginPage {
 
     this.auth.login({ identifier: v.identifier.trim(), password: v.password }).subscribe({
       next: (res) => {
-        // Không điều hướng tới route 2FA chưa tồn tại; hiển thị trạng thái rõ ràng.
-        if (res?.requires2FA) { this.loading = false; this.error = 'two-factor-unavailable'; }
-        else {
+        if (res?.requires2FA) {
+          this.loading = false;
+          const id = v.identifier.trim();
+          const isEmail = id.includes('@');
+          try {
+            sessionStorage.setItem('ken_2fa_identifier', id);
+          } catch {}
+          this.router.navigate(['/otp-verify'], {
+            queryParams: {
+              mode: 'login-2fa',
+              ...(this.returnUrl ? { returnUrl: this.returnUrl } : {}),
+            },
+            state: {
+              mode: 'login-2fa',
+              identifier: id,
+              email: isEmail ? id : undefined,
+              phone: !isEmail ? id : undefined,
+            },
+          });
+        } else {
           const defaultHome = res?.user?.role === 'ADMIN' ? '/admin/dashboard' : '/home-logged-in';
           const destination = this.returnUrl ?? defaultHome;
           this.router.navigateByUrl(destination);

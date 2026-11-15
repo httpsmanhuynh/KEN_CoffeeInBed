@@ -3,9 +3,12 @@ import { Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 
 export interface KenAvailabilityPackage {
-  durationHours: number | null;
+  durationHours?: number | null;
+  duration_hours?: number | null;
+  package_type?: string;
   pricing_type?: string;
   pricingType?: string;
+  is_full_day?: boolean;
   isAvailable: boolean;
 }
 
@@ -22,15 +25,26 @@ export interface KenAvailabilitySpace {
 export class KenAvailabilityService {
   constructor(private http: HttpClient) {}
 
-  check(date: string, startHour: number, guests: number, hours: number): Observable<KenAvailabilitySpace[]> {
+  check(
+    date: string,
+    startHour: number,
+    guests: number,
+    hours?: number,
+    spaceCode?: string,
+  ): Observable<KenAvailabilitySpace[]> {
     const startAt = new Date(`${date}T${String(startHour).padStart(2, '0')}:00:00+07:00`);
     if (!Number.isFinite(startAt.getTime())) {
       return throwError(() => new Error('Vui lòng chọn ngày và giờ hợp lệ.'));
     }
-    const params = new HttpParams()
+    let params = new HttpParams()
       .set('startAt', startAt.toISOString())
-      .set('hours', String(hours))
       .set('guestCount', String(guests));
+    if (hours !== undefined && hours !== null) {
+      params = params.set('hours', String(hours));
+    }
+    if (spaceCode) {
+      params = params.set('spaceCode', spaceCode);
+    }
     return this.http.get<KenAvailabilitySpace[]>('/api/spaces', { params });
   }
 
@@ -40,10 +54,29 @@ export class KenAvailabilityService {
 
   packageAvailable(space: KenAvailabilitySpace | undefined, hours: number): boolean {
     if (!space?.packages?.length) return false;
-    const exact = space.packages.find(pkg => pkg.durationHours === hours && pkg.isAvailable);
-    if (exact) return true;
-    const isHourly = (pkg: KenAvailabilityPackage) =>
-      pkg.pricing_type === 'HOURLY' || pkg.pricingType === 'HOURLY' || pkg.durationHours === null || pkg.durationHours === 1;
+    if (hours === 14) {
+      const fullDayMatches = space.packages.filter(
+        pkg =>
+          pkg.is_full_day ||
+          pkg.package_type === 'FULL_DAY' ||
+          pkg.durationHours === 14 ||
+          pkg.duration_hours === 14,
+      );
+      if (fullDayMatches.length > 0) {
+        return fullDayMatches.some(pkg => pkg.isAvailable);
+      }
+    }
+    const exactMatches = space.packages.filter(
+      pkg => pkg.durationHours === hours || pkg.duration_hours === hours,
+    );
+    if (exactMatches.length > 0) {
+      return exactMatches.some(pkg => pkg.isAvailable);
+    }
+    const isHourly = (pkg: KenAvailabilityPackage) => {
+      const type = pkg.package_type || pkg.pricing_type || pkg.pricingType;
+      if (type) return type === 'HOURLY';
+      return pkg.durationHours === null || pkg.durationHours === 1;
+    };
     return space.packages.some(pkg => isHourly(pkg) && pkg.isAvailable);
   }
 

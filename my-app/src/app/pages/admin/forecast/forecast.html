@@ -1,147 +1,256 @@
-<div class="forecast-page">
-  <div class="breadcrumb">
-    <strong>KÉN</strong><span>/</span><strong>Admin</strong><span>/</span
-    ><strong>Dự báo nhu cầu món</strong>
-  </div>
-
-  <main class="forecast-content">
-    <header class="forecast-heading">
-      <div class="title-row">
-        <h1>Dự báo nhu cầu món</h1>
-      </div>
-    </header>
-
-    <section class="date-panel">
-      <label>
-        <span>Ngày dự báo</span>
-        <div class="date-input">
-          <img src="/images/figma/calendar-date.svg" alt="" />
-          <input type="text" [(ngModel)]="forecastDate" />
-          <img src="/images/figma/chevron-down.svg" alt="" />
+<div style="width: 100%; min-height: 100%; background: var(--color-grey-93-2, #F7EFE2); flex-direction: column; justify-content: flex-start; align-items: flex-start; display: flex">
+    <!-- Main Content Container -->
+    <div style="align-self: stretch; padding-top: 24px; padding-bottom: 32px; padding-left: 32px; padding-right: 32px; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 20px; display: flex">
+        <!-- Title & Badge -->
+        <div style="align-self: stretch; overflow: hidden; justify-content: space-between; align-items: center; display: inline-flex">
+            <div style="overflow: hidden; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 8px; display: inline-flex">
+                <div style="overflow: hidden; justify-content: flex-start; align-items: center; gap: 16px; display: inline-flex">
+                    <div style="color: var(--color-orange-21-2, #4A3123); font-size: 32px; font-family: Inter; font-weight: 700; line-height: 40px; word-wrap: break-word">Dự báo nhu cầu món</div>
+                    <div style="padding-left: 10px; padding-right: 10px; padding-top: 6px; padding-bottom: 6px; background: var(--color-orange-90, #F1E8DA); overflow: hidden; border-radius: 999px; justify-content: flex-start; align-items: flex-start; display: flex">
+                        <div style="color: var(--color-orange-21-2, #4A3123); font-size: 12px; font-family: Inter; font-weight: 600; line-height: 16px; word-wrap: break-word">Powered by KÉN AI</div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </label>
-      <strong>Dự báo tổng số lượng trong ngày</strong>
-      <span class="update-badge">Tự động cập nhật</span>
-    </section>
 
-    <section class="kpi-grid">
-      <article class="kpi-card kpi-dark">
-        <span>Tổng số lượng · 03/11</span><strong>560</strong
-        ><small>460 ly đồ uống · 100 phần bánh</small>
-      </article>
-      <article class="kpi-card">
-        <span>Món được dự báo nhiều nhất</span><strong class="featured">Cà phê Đen/Sữa</strong
-        ><small>96 ly · Ngày 03/11/2026</small>
-      </article>
-      <article class="kpi-card kpi-confidence">
-        <span>Độ tin cậy dự báo</span><strong>92%</strong>
-        <div class="progress"><i></i></div>
-        <small>Dựa trên lịch sử 30 ngày qua</small>
-      </article>
-      <article class="kpi-card">
-        <span>Số món trong dự báo</span><strong>10 món</strong><small>7 đồ uống · 3 bánh</small>
-      </article>
-    </section>
-
-    <section class="forecast-card trend-card">
-      <div class="section-heading">
-        <h2>
-          <img src="/images/figma/table.svg" alt="" /> Xu hướng nhu cầu theo ngày <em>Minh họa</em>
-        </h2>
-        <p>
-          <span class="legend actual"></span> Thực tế minh họa · 28/10–02/11
-          <span class="legend forecast"></span> Dự báo · 03/11
-        </p>
-        <small>28/10–03/11/2026 · Tổng số lượng đồ uống và bánh / ăn nhẹ</small>
-      </div>
-      <div class="chart">
-        <div class="axis"><span>750</span><span>500</span><span>250</span><span>0</span></div>
-        <div class="bars">
-          <div *ngFor="let point of trend; let last = last" class="bar-item">
-            <strong>{{ point.value }}</strong>
-            <div
-              class="bar"
-              [class.forecast-bar]="last"
-              [style.height.%]="barHeight(point.value)"
-            ></div>
-            <small>{{ point.date }}</small>
-          </div>
+        <!-- Date Filter Panel -->
+        <div style="align-self: stretch; padding-left: 20px; padding-right: 20px; padding-top: 12px; padding-bottom: 12px; background: #FFFCF7; overflow: hidden; border-radius: 12px; outline: 1px var(--color-orange-21-14%, rgba(74, 49, 35, 0.14)) solid; outline-offset: -1px; justify-content: flex-start; align-items: center; gap: 24px; display: inline-flex">
+            <div style="width: 260px; overflow: hidden; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 8px; display: inline-flex">
+                <div style="color: var(--color-orange-21-82%, rgba(74, 49, 35, 0.82)); font-size: 13px; font-family: Inter; font-weight: 600; line-height: 18px; word-wrap: break-word">Ngày dự báo</div>
+                <div style="width: 260px; height: 44px; padding-left: 14px; padding-right: 14px; background: #FFFCF7; overflow: hidden; border-radius: 10px; outline: 1px #E5D7C5 solid; outline-offset: -1px; justify-content: flex-start; align-items: center; gap: 10px; display: inline-flex">
+                    <img src="/images/figma/calendar-date.svg" alt="" style="width: 18px; height: 18px; flex-shrink: 0;" />
+                    <input type="text" [(ngModel)]="forecastDate" style="flex: 1; border: none; outline: none; background: transparent; color: var(--color-orange-21-2, #4A3123); font-size: 14px; font-family: Inter; font-weight: 400; line-height: 20px;" />
+                    <img src="/images/figma/chevron-down.svg" alt="" style="width: 16px; height: 16px; flex-shrink: 0;" />
+                </div>
+            </div>
+            <div style="flex: 1 1 0; overflow: hidden; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 4px; display: inline-flex">
+                <div style="color: var(--color-orange-21-2, #4A3123); font-size: 14px; font-family: Inter; font-weight: 600; line-height: 20px; word-wrap: break-word">Dự báo tổng số lượng trong ngày</div>
+            </div>
+            <div style="padding-left: 8px; padding-right: 8px; padding-top: 4px; padding-bottom: 4px; background: var(--color-orange-90, #F1E8DA); overflow: hidden; border-radius: 6px; justify-content: flex-start; align-items: flex-start; display: flex">
+                <div style="color: var(--color-orange-21-2, #4A3123); font-size: 13px; font-family: Inter; font-weight: 600; line-height: 18px; word-wrap: break-word">Tự động cập nhật</div>
+            </div>
         </div>
-      </div>
-    </section>
 
-    <section class="forecast-card plan-card">
-      <div class="section-heading plan-heading">
-        <h2><img src="/images/figma/table.svg" alt="" /> Kế hoạch chuẩn bị theo món</h2>
-        <small>Ngày 03/11/2026 · 10 món · Đơn vị theo từng món</small>
-      </div>
-      <div class="plan-filters">
-        <label class="plan-search"
-          ><img src="/images/figma/search.svg" alt="" /><input
-            [(ngModel)]="search"
-            placeholder="Tìm tên hoặc mã món..."
-        /></label>
-        <select [(ngModel)]="category">
-          <option>Tất cả</option>
-          <option>Đồ uống</option>
-          <option>Bánh</option>
-        </select>
-        <select [(ngModel)]="sort">
-          <option>Mặc định</option>
-          <option>Số lượng tăng dần</option>
-          <option>Số lượng giảm dần</option>
-        </select>
-      </div>
-      <div class="plan-table-wrap">
-        <table class="plan-table">
-          <thead>
-            <tr>
-              <th>Ngày</th>
-              <th>Tên món</th>
-              <th>Số lượng dự báo</th>
-              <th>So với TB ngày trước</th>
-              <th>Hành động đề xuất</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let item of filteredItems">
-              <td><span class="date-pill">03/11</span></td>
-              <td>
-                <strong>{{ item.name }}</strong
-                ><small>{{ item.code }}</small>
-              </td>
-              <td>
-                <strong
-                  >{{ item.quantity }} {{ item.category === 'Đồ uống' ? 'ly' : 'phần' }}</strong
-                >
-              </td>
-              <td
-                [class.up]="item.change && item.change > 0"
-                [class.down]="item.change && item.change < 0"
-              >
-                {{ changeLabel(item.change) }}
-              </td>
-              <td
-                [class.action-up]="item.change && item.change > 0"
-                [class.action-down]="item.change && item.change < 0"
-              >
-                {{ item.action }}
-              </td>
-            </tr>
-          </tbody>
-          <tfoot>
-            <tr>
-              <td colspan="2"><strong>03/11 · Tổng</strong> <span>10 món</span></td>
-              <td><strong>560 phần</strong></td>
-              <td>460 ly + 100 phần</td>
-              <td>1 món cần kiểm tra lịch sử</td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-      <div class="pagination">
-        Hiển thị 1–{{ filteredItems.length }} trên 10 món <span>Trang 1 / 1</span>
-      </div>
-    </section>
-  </main>
+        <!-- 4 KPI Summary Cards -->
+        <div style="align-self: stretch; overflow: hidden; justify-content: flex-start; align-items: flex-start; gap: 16px; display: flex; flex-wrap: wrap;">
+            <div style="flex: 1 1 220px; min-height: 148px; padding: 20px; background: var(--color-orange-21-2, #4A3123); overflow: hidden; border-radius: 12px; outline: 1px var(--color-orange-21-14%, rgba(74, 49, 35, 0.14)) solid; outline-offset: -1px; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 8px; display: inline-flex">
+                <div style="color: var(--color-orange-81-2, #E6D3B5); font-size: 13px; font-family: Inter; font-weight: 400; line-height: 18px; word-wrap: break-word">Tổng số lượng · 03/11</div>
+                <div style="align-self: stretch; color: var(--color-grey-93-2, #F7EFE2); font-size: 32px; font-family: Inter; font-weight: 700; line-height: 38px; word-wrap: break-word">560</div>
+                <div style="align-self: stretch; color: var(--color-orange-81-2, #E6D3B5); font-size: 12px; font-family: Inter; font-weight: 400; line-height: 18px; word-wrap: break-word">460 ly đồ uống · 100 phần bánh</div>
+            </div>
+            <div style="flex: 1 1 220px; min-height: 148px; padding: 20px; background: #FFFCF7; overflow: hidden; border-radius: 12px; outline: 1px var(--color-orange-21-14%, rgba(74, 49, 35, 0.14)) solid; outline-offset: -1px; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 8px; display: inline-flex">
+                <div style="color: var(--color-orange-21-82%, rgba(74, 49, 35, 0.82)); font-size: 13px; font-family: Inter; font-weight: 400; line-height: 18px; word-wrap: break-word">Món được dự báo nhiều nhất</div>
+                <div style="align-self: stretch; color: var(--color-orange-21-2, #4A3123); font-size: 28px; font-family: Inter; font-weight: 700; line-height: 38px; word-wrap: break-word">Cà phê Đen/Sữa</div>
+                <div style="align-self: stretch; color: var(--color-orange-21-82%, rgba(74, 49, 35, 0.82)); font-size: 12px; font-family: Inter; font-weight: 400; line-height: 18px; word-wrap: break-word">96 ly · Ngày 03/11/2026</div>
+            </div>
+            <div style="flex: 1 1 220px; min-height: 148px; padding: 20px; background: var(--color-grey-97, #FFF9F0); overflow: hidden; border-radius: 12px; outline: 1px var(--color-orange-45-20%, rgba(169, 118, 63, 0.20)) solid; outline-offset: -1px; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 8px; display: inline-flex">
+                <div style="color: var(--color-orange-21-82%, rgba(74, 49, 35, 0.82)); font-size: 13px; font-family: Inter; font-weight: 400; line-height: 18px; word-wrap: break-word">Độ tin cậy dự báo</div>
+                <div style="align-self: stretch; color: var(--color-spring-green-28, #28663B); font-size: 32px; font-family: Inter; font-weight: 700; line-height: 38px; word-wrap: break-word">92%</div>
+                <div style="align-self: stretch; height: 6px; background: var(--color-orange-21-10%, rgba(74, 49, 35, 0.10)); overflow: hidden; border-radius: 999px; justify-content: flex-start; align-items: flex-start; display: inline-flex">
+                    <div style="width: 92%; height: 6px; background: var(--color-spring-green-28, #28663B); border-radius: 999px"></div>
+                </div>
+                <div style="align-self: stretch; color: var(--color-orange-21-82%, rgba(74, 49, 35, 0.82)); font-size: 12px; font-family: Inter; font-weight: 400; line-height: 18px; word-wrap: break-word">Dựa trên lịch sử 30 ngày qua</div>
+            </div>
+            <div style="flex: 1 1 220px; min-height: 148px; padding: 20px; background: #FFFCF7; overflow: hidden; border-radius: 12px; outline: 1px var(--color-orange-21-14%, rgba(74, 49, 35, 0.14)) solid; outline-offset: -1px; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 8px; display: inline-flex">
+                <div style="color: var(--color-orange-21-82%, rgba(74, 49, 35, 0.82)); font-size: 13px; font-family: Inter; font-weight: 400; line-height: 18px; word-wrap: break-word">Số món trong dự báo</div>
+                <div style="align-self: stretch; color: var(--color-orange-21-2, #4A3123); font-size: 32px; font-family: Inter; font-weight: 700; line-height: 38px; word-wrap: break-word">10 món</div>
+                <div style="align-self: stretch; color: var(--color-orange-21-82%, rgba(74, 49, 35, 0.82)); font-size: 12px; font-family: Inter; font-weight: 400; line-height: 18px; word-wrap: break-word">7 đồ uống · 3 bánh</div>
+            </div>
+        </div>
+
+        <!-- Trend Chart Section -->
+        <div style="align-self: stretch; padding: 24px; background: #FFFCF7; overflow: hidden; border-radius: 12px; outline: 1px var(--color-orange-21-14%, rgba(74, 49, 35, 0.14)) solid; outline-offset: -1px; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 12px; display: flex">
+            <div style="align-self: stretch; overflow: hidden; justify-content: flex-start; align-items: center; gap: 10px; display: inline-flex">
+                <img src="/images/figma/table.svg" alt="" style="width: 20px; height: 20px;" />
+                <div style="color: var(--color-orange-21-2, #4A3123); font-size: 18px; font-family: Inter; font-weight: 600; line-height: 24px; word-wrap: break-word">Xu hướng nhu cầu theo ngày</div>
+                <div style="padding-left: 10px; padding-right: 10px; padding-top: 4px; padding-bottom: 4px; background: #FFF4D9; overflow: hidden; border-radius: 999px; justify-content: flex-start; align-items: flex-start; display: flex">
+                    <div style="color: #8A591B; font-size: 11px; font-family: Inter; font-weight: 600; word-wrap: break-word">Minh họa</div>
+                </div>
+            </div>
+            <div style="align-self: stretch; overflow: hidden; justify-content: flex-start; align-items: center; gap: 20px; display: inline-flex">
+                <div style="overflow: hidden; justify-content: flex-start; align-items: center; gap: 7px; display: flex">
+                    <div style="width: 10px; height: 10px; background: var(--color-orange-45-2, #A9763F); border-radius: 2px"></div>
+                    <div style="color: #766252; font-size: 12px; font-family: Inter; font-weight: 400; word-wrap: break-word">Thực tế minh họa · 28/10–02/11</div>
+                </div>
+                <div style="overflow: hidden; justify-content: flex-start; align-items: center; gap: 7px; display: flex">
+                    <div style="width: 10px; height: 10px; background: var(--color-orange-54-2, #E3A52F); border-radius: 2px"></div>
+                    <div style="color: #766252; font-size: 12px; font-family: Inter; font-weight: 400; word-wrap: break-word">Dự báo · 03/11</div>
+                </div>
+            </div>
+            <div style="align-self: stretch; color: var(--color-orange-21-82%, rgba(74, 49, 35, 0.82)); font-size: 12px; font-family: Inter; font-weight: 400; line-height: 16px; word-wrap: break-word">28/10–03/11/2026 · Tổng số lượng đồ uống và bánh / ăn nhẹ</div>
+            <div style="align-self: stretch; overflow-x: auto; justify-content: flex-start; align-items: flex-start; gap: 12px; display: inline-flex; padding-bottom: 8px;">
+                <div style="width: 30px; height: 156px; position: relative; overflow: hidden; flex-shrink: 0;">
+                    <div style="width: 22px; left: 0px; top: 0px; position: absolute; color: var(--color-orange-21-82%, rgba(74, 49, 35, 0.82)); font-size: 12px; font-family: Inter; font-weight: 400; line-height: 16px; word-wrap: break-word">750</div>
+                    <div style="width: 23px; left: 0px; top: 48px; position: absolute; color: var(--color-orange-21-82%, rgba(74, 49, 35, 0.82)); font-size: 12px; font-family: Inter; font-weight: 400; line-height: 16px; word-wrap: break-word">500</div>
+                    <div style="width: 23px; left: 0px; top: 96px; position: absolute; color: var(--color-orange-21-82%, rgba(74, 49, 35, 0.82)); font-size: 12px; font-family: Inter; font-weight: 400; line-height: 16px; word-wrap: break-word">250</div>
+                    <div style="width: 8px; left: 0px; top: 144px; position: absolute; color: var(--color-orange-21-82%, rgba(74, 49, 35, 0.82)); font-size: 12px; font-family: Inter; font-weight: 400; line-height: 16px; word-wrap: break-word">0</div>
+                </div>
+                <div style="width: 1066px; height: 188px; position: relative; overflow: hidden; flex-shrink: 0;">
+                    <div style="width: 1066px; height: 1px; left: 0px; top: 8px; position: absolute; background: var(--color-orange-21-10%, rgba(74, 49, 35, 0.10))"></div>
+                    <div style="width: 1066px; height: 1px; left: 0px; top: 56px; position: absolute; background: var(--color-orange-21-10%, rgba(74, 49, 35, 0.10))"></div>
+                    <div style="width: 1066px; height: 1px; left: 0px; top: 104px; position: absolute; background: var(--color-orange-21-10%, rgba(74, 49, 35, 0.10))"></div>
+                    <div style="width: 1066px; height: 1px; left: 0px; top: 152px; position: absolute; background: var(--color-orange-21-10%, rgba(74, 49, 35, 0.10))"></div>
+                    <div style="width: 1px; height: 152px; left: 905.81px; top: 0px; position: absolute; background: var(--color-orange-45-20%, rgba(169, 118, 63, 0.20))"></div>
+                    <div style="width: 123.95px; height: 188px; left: 7.63px; top: 0px; position: absolute; overflow: hidden">
+                        <div style="width: 123.95px; left: 0px; top: 47.44px; position: absolute; text-align: center; color: var(--color-orange-21-2, #4A3123); font-size: 13px; font-family: Inter; font-weight: 600; line-height: 18px; word-wrap: break-word">430</div>
+                        <div style="width: 44px; height: 82.56px; left: 40.05px; top: 69.44px; position: absolute; background: var(--color-orange-45-2, #A9763F); border-top-left-radius: 4.77px; border-top-right-radius: 4.77px"></div>
+                        <div style="width: 123.95px; left: 0px; top: 168px; position: absolute; text-align: center; color: var(--color-orange-21-82%, rgba(74, 49, 35, 0.82)); font-size: 12px; font-family: Inter; font-weight: 400; line-height: 16px; word-wrap: break-word">28/10</div>
+                    </div>
+                    <div style="width: 123.95px; height: 188px; left: 141.12px; top: 0px; position: absolute; overflow: hidden">
+                        <div style="width: 123.95px; left: 0px; top: 43.22px; position: absolute; text-align: center; color: var(--color-orange-21-2, #4A3123); font-size: 13px; font-family: Inter; font-weight: 600; line-height: 18px; word-wrap: break-word">452</div>
+                        <div style="width: 44px; height: 86.78px; left: 40.05px; top: 65.22px; position: absolute; background: var(--color-orange-45-2, #A9763F); border-top-left-radius: 4.77px; border-top-right-radius: 4.77px"></div>
+                        <div style="width: 123.95px; left: 0px; top: 168px; position: absolute; text-align: center; color: var(--color-orange-21-82%, rgba(74, 49, 35, 0.82)); font-size: 12px; font-family: Inter; font-weight: 400; line-height: 16px; word-wrap: break-word">29/10</div>
+                    </div>
+                    <div style="width: 123.95px; height: 188px; left: 274.60px; top: 0px; position: absolute; overflow: hidden">
+                        <div style="width: 123.95px; left: 0px; top: 36.69px; position: absolute; text-align: center; color: var(--color-orange-21-2, #4A3123); font-size: 13px; font-family: Inter; font-weight: 600; line-height: 18px; word-wrap: break-word">486</div>
+                        <div style="width: 44px; height: 93.31px; left: 40.05px; top: 58.69px; position: absolute; background: var(--color-orange-45-2, #A9763F); border-top-left-radius: 4.77px; border-top-right-radius: 4.77px"></div>
+                        <div style="width: 123.95px; left: 0px; top: 168px; position: absolute; text-align: center; color: var(--color-orange-21-82%, rgba(74, 49, 35, 0.82)); font-size: 12px; font-family: Inter; font-weight: 400; line-height: 16px; word-wrap: break-word">30/10</div>
+                    </div>
+                    <div style="width: 123.95px; height: 188px; left: 408.09px; top: 0px; position: absolute; overflow: hidden">
+                        <div style="width: 123.95px; left: 0px; top: 12.88px; position: absolute; text-align: center; color: var(--color-orange-21-2, #4A3123); font-size: 13px; font-family: Inter; font-weight: 600; line-height: 18px; word-wrap: break-word">610</div>
+                        <div style="width: 44px; height: 117.12px; left: 40.05px; top: 34.88px; position: absolute; background: var(--color-orange-45-2, #A9763F); border-top-left-radius: 4.77px; border-top-right-radius: 4.77px"></div>
+                        <div style="width: 123.95px; left: 0px; top: 168px; position: absolute; text-align: center; color: var(--color-orange-21-82%, rgba(74, 49, 35, 0.82)); font-size: 12px; font-family: Inter; font-weight: 400; line-height: 16px; word-wrap: break-word">31/10</div>
+                    </div>
+                    <div style="width: 123.95px; height: 188px; left: 541.58px; top: 0px; position: absolute; overflow: hidden">
+                        <div style="width: 123.95px; left: 0px; top: 16.72px; position: absolute; text-align: center; color: var(--color-orange-21-2, #4A3123); font-size: 13px; font-family: Inter; font-weight: 600; line-height: 18px; word-wrap: break-word">590</div>
+                        <div style="width: 44px; height: 113.28px; left: 40.05px; top: 38.72px; position: absolute; background: var(--color-orange-45-2, #A9763F); border-top-left-radius: 4.77px; border-top-right-radius: 4.77px"></div>
+                        <div style="width: 123.95px; left: 0px; top: 168px; position: absolute; text-align: center; color: var(--color-orange-21-82%, rgba(74, 49, 35, 0.82)); font-size: 12px; font-family: Inter; font-weight: 400; line-height: 16px; word-wrap: break-word">01/11</div>
+                    </div>
+                    <div style="width: 123.95px; height: 188px; left: 675.07px; top: 0px; position: absolute; overflow: hidden">
+                        <div style="width: 123.95px; left: 0px; top: 30.16px; position: absolute; text-align: center; color: var(--color-orange-21-2, #4A3123); font-size: 13px; font-family: Inter; font-weight: 600; line-height: 18px; word-wrap: break-word">520</div>
+                        <div style="width: 44px; height: 99.84px; left: 40.05px; top: 52.16px; position: absolute; background: var(--color-orange-45-2, #A9763F); border-top-left-radius: 4.77px; border-top-right-radius: 4.77px"></div>
+                        <div style="width: 123.95px; left: 0px; top: 168px; position: absolute; text-align: center; color: var(--color-orange-21-82%, rgba(74, 49, 35, 0.82)); font-size: 12px; font-family: Inter; font-weight: 400; line-height: 16px; word-wrap: break-word">02/11</div>
+                    </div>
+                    <div style="width: 143.02px; height: 188px; left: 915.35px; top: 0px; position: absolute; overflow: hidden">
+                        <div style="width: 143.02px; left: 0px; top: 22.48px; position: absolute; text-align: center; color: var(--color-orange-21-2, #4A3123); font-size: 13px; font-family: Inter; font-weight: 700; line-height: 18px; word-wrap: break-word">560</div>
+                        <div style="width: 44px; height: 107.52px; left: 49.58px; top: 44.48px; position: absolute; background: var(--color-orange-54-2, #E3A52F); border-top-left-radius: 4.77px; border-top-right-radius: 4.77px"></div>
+                        <div style="width: 143.02px; left: 0px; top: 168px; position: absolute; text-align: center; color: var(--color-orange-21-2, #4A3123); font-size: 12px; font-family: Inter; font-weight: 600; line-height: 16px; word-wrap: break-word">03/11</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Plan Table Card -->
+        <div style="align-self: stretch; background: #FFFCF7; overflow: hidden; border-radius: 12px; outline: 1px var(--color-orange-21-14%, rgba(74, 49, 35, 0.14)) solid; outline-offset: -1px; flex-direction: column; justify-content: flex-start; align-items: flex-start; display: flex">
+            <!-- Table Card Header -->
+            <div style="align-self: stretch; padding-top: 20px; padding-bottom: 16px; padding-left: 24px; padding-right: 24px; overflow: hidden; justify-content: flex-start; align-items: center; gap: 12px; display: inline-flex">
+                <img src="/images/figma/sparkles-icon.svg" alt="" style="width: 20px; height: 20px;" />
+                <div style="flex: 1 1 0; overflow: hidden; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 4px; display: inline-flex">
+                    <div style="color: var(--color-orange-21-2, #4A3123); font-size: 18px; font-family: Inter; font-weight: 600; line-height: 24px; word-wrap: break-word">Kế hoạch chuẩn bị theo món</div>
+                    <div style="color: var(--color-orange-21-82%, rgba(74, 49, 35, 0.82)); font-size: 13px; font-family: Inter; font-weight: 400; line-height: 18px; word-wrap: break-word">Ngày {{ forecastDate }} · {{ filteredItems.length }} món · Đơn vị theo từng món</div>
+                </div>
+                <a routerLink="/admin/addons" style="color: #A9763F; font-size: 13px; font-family: Inter; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; cursor: pointer;">
+                    <span>Quản lý thực đơn & Add-on</span>
+                    <span>→</span>
+                </a>
+            </div>
+
+            <!-- Filters Bar -->
+            <div style="align-self: stretch; padding-bottom: 16px; padding-left: 24px; padding-right: 24px; overflow: hidden; justify-content: flex-start; align-items: flex-start; gap: 12px; display: flex; flex-wrap: wrap;">
+                <div style="flex: 1 1 240px; height: 44px; padding-left: 14px; padding-right: 14px; overflow: hidden; border-radius: 10px; outline: 1px #E5D7C5 solid; outline-offset: -1px; justify-content: flex-start; align-items: center; gap: 10px; display: flex">
+                    <img src="/images/figma/search.svg" alt="" style="width: 18px; height: 18px;" />
+                    <input type="text" [(ngModel)]="search" placeholder="Tìm tên hoặc mã món..." style="flex: 1; border: none; outline: none; background: transparent; color: var(--color-orange-21-2, #4A3123); font-size: 14px; font-family: Inter; font-weight: 400; line-height: 20px;" />
+                </div>
+                <div style="width: 200px; height: 44px; padding-left: 14px; padding-right: 14px; background: #FFFCF7; overflow: hidden; border-radius: 10px; outline: 1px #E5D7C5 solid; outline-offset: -1px; justify-content: flex-start; align-items: center; gap: 12px; display: flex; position: relative;">
+                    <select [(ngModel)]="category" style="position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer;">
+                        <option value="Tất cả">Nhóm: Tất cả</option>
+                        <option value="Đồ uống">Nhóm: Đồ uống</option>
+                        <option value="Bánh">Nhóm: Bánh</option>
+                    </select>
+                    <div style="flex: 1 1 0; color: var(--color-orange-21-2, #4A3123); font-size: 14px; font-family: Inter; font-weight: 400; word-wrap: break-word">Nhóm: {{ category }}</div>
+                    <img src="/images/figma/chevron-down.svg" alt="" style="width: 16px; height: 16px;" />
+                </div>
+                <div style="width: 220px; height: 44px; padding-left: 14px; padding-right: 14px; background: #FFFCF7; overflow: hidden; border-radius: 10px; outline: 1px #E5D7C5 solid; outline-offset: -1px; justify-content: flex-start; align-items: center; gap: 12px; display: flex; position: relative;">
+                    <select [(ngModel)]="sort" style="position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer;">
+                        <option value="Mặc định">Sắp xếp: Mặc định</option>
+                        <option value="Số lượng tăng dần">Sắp xếp: Số lượng tăng dần</option>
+                        <option value="Số lượng giảm dần">Sắp xếp: Số lượng giảm dần</option>
+                    </select>
+                    <div style="flex: 1 1 0; color: var(--color-orange-21-2, #4A3123); font-size: 14px; font-family: Inter; font-weight: 400; word-wrap: break-word">Sắp xếp: {{ sort }}</div>
+                    <img src="/images/figma/chevron-down.svg" alt="" style="width: 16px; height: 16px;" />
+                </div>
+            </div>
+
+            <!-- Table Responsive Container -->
+            <div style="align-self: stretch; overflow-x: auto;">
+                <div style="min-width: 900px;">
+                    <!-- Table Header Row -->
+                    <div style="align-self: stretch; padding-left: 24px; padding-right: 24px; padding-top: 12px; padding-bottom: 12px; background: var(--color-grey-93-2, #F7EFE2); overflow: hidden; border-top: 1px #EADCCB solid; border-bottom: 1px #EADCCB solid; justify-content: flex-start; align-items: flex-start; display: flex">
+                        <div style="width: 92px; color: var(--color-orange-21-2, #4A3123); font-size: 13px; font-family: Inter; font-weight: 600; line-height: 18px; word-wrap: break-word">Ngày</div>
+                        <div style="width: 272px; color: var(--color-orange-21-2, #4A3123); font-size: 13px; font-family: Inter; font-weight: 600; line-height: 18px; word-wrap: break-word">Tên món</div>
+                        <div style="width: 248px; color: var(--color-orange-21-2, #4A3123); font-size: 13px; font-family: Inter; font-weight: 600; line-height: 18px; word-wrap: break-word">Số lượng dự báo</div>
+                        <div style="width: 176px; color: var(--color-orange-21-2, #4A3123); font-size: 13px; font-family: Inter; font-weight: 600; line-height: 18px; word-wrap: break-word">So với TB ngày trước</div>
+                        <div style="width: 320px; color: var(--color-orange-21-2, #4A3123); font-size: 13px; font-family: Inter; font-weight: 600; line-height: 18px; word-wrap: break-word">Hành động đề xuất</div>
+                    </div>
+
+                    <!-- Dynamic Table Rows -->
+                    <div *ngFor="let item of filteredItems"
+                         [style.background]="item.change === null ? 'var(--color-grey-97, #FFF9F0)' : '#FFFCF7'"
+                         style="align-self: stretch; height: 78px; padding-left: 24px; padding-right: 24px; padding-top: 16px; padding-bottom: 16px; overflow: hidden; border-bottom: 1px var(--color-orange-21-10%, rgba(74, 49, 35, 0.10)) solid; justify-content: flex-start; align-items: center; display: flex">
+                        <div style="width: 92px; overflow: hidden; justify-content: flex-start; align-items: center; gap: 8px; display: flex">
+                            <div style="padding-left: 8px; padding-right: 8px; padding-top: 3px; padding-bottom: 3px; background: var(--color-orange-80-25%, rgba(240, 217, 168, 0.25)); overflow: hidden; border-radius: 999px; justify-content: flex-start; align-items: flex-start; display: flex">
+                                <div style="color: var(--color-orange-21-2, #4A3123); font-size: 12px; font-family: Inter; font-weight: 700; word-wrap: break-word">03/11</div>
+                            </div>
+                        </div>
+                        <div style="width: 272px; overflow: hidden; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 4px; display: flex">
+                            <div style="color: var(--color-orange-21-2, #4A3123); font-size: 16px; font-family: Inter; font-weight: 600; line-height: 22px; word-wrap: break-word">{{ item.name }}</div>
+                            <div style="color: var(--color-orange-21-82%, rgba(74, 49, 35, 0.82)); font-size: 12px; font-family: Inter; font-weight: 400; line-height: 16px; word-wrap: break-word">{{ item.code }}</div>
+                        </div>
+                        <div style="width: 248px; overflow: hidden; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 4px; display: flex">
+                            <div style="align-self: stretch; color: var(--color-orange-21-2, #4A3123); font-size: 18px; font-family: Inter; font-weight: 700; line-height: 22px; word-wrap: break-word">{{ item.quantity }} {{ item.category === 'Đồ uống' ? 'ly' : 'phần' }}</div>
+                            <div style="align-self: stretch; color: var(--color-orange-21-82%, rgba(74, 49, 35, 0.82)); font-size: 12px; font-family: Inter; font-weight: 400; line-height: 18px; word-wrap: break-word">{{ item.range }}</div>
+                        </div>
+                        <div style="width: 176px; overflow: hidden; justify-content: flex-start; align-items: center; gap: 5px; display: flex">
+                            <div style="overflow: hidden; border-radius: 6px; justify-content: flex-start; align-items: center; display: flex">
+                                <div [style.color]="item.change === null ? '#8A591B' : (item.change > 0 ? '#137333' : (item.change < 0 ? '#E0282B' : 'var(--color-orange-21-2, #4A3123)'))"
+                                     [style.font-size]="item.change === null ? '13px' : '16px'"
+                                     style="font-family: Inter; font-weight: 600; line-height: 22px; word-wrap: break-word">
+                                    {{ item.change === null ? 'Chưa có dữ liệu' : (item.change > 0 ? '↑ ' + item.change + '%' : (item.change < 0 ? '↓ ' + abs(item.change) + '%' : '→ 0%')) }}
+                                </div>
+                            </div>
+                        </div>
+                        <div style="width: 320px; overflow: hidden; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 4px; display: flex">
+                            <div style="overflow: hidden; border-radius: 6px; justify-content: flex-start; align-items: center; display: flex">
+                                <div [style.color]="item.change === null ? '#8A591B' : (item.change > 0 ? '#137333' : (item.change < 0 ? '#E0282B' : 'var(--color-orange-21-2, #4A3123)'))"
+                                     style="font-size: 14px; font-family: Inter; font-weight: 600; line-height: 20px; word-wrap: break-word">
+                                    {{ item.action }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div *ngIf="filteredItems.length === 0" style="padding: 32px; text-align: center; color: #766252; font-size: 14px;">
+                        Không tìm thấy món nào phù hợp với bộ lọc.
+                    </div>
+
+                    <!-- Table Footer Summary Row -->
+                    <div style="align-self: stretch; padding-left: 24px; padding-right: 24px; padding-top: 16px; padding-bottom: 16px; background: var(--color-grey-93-2, #F7EFE2); overflow: hidden; justify-content: flex-start; align-items: center; display: flex">
+                        <div style="width: 92px; color: var(--color-orange-21-2, #4A3123); font-size: 13px; font-family: Inter; font-weight: 700; line-height: 20px; word-wrap: break-word">03/11 · Tổng</div>
+                        <div style="width: 272px; color: var(--color-orange-21-2, #4A3123); font-size: 13px; font-family: Inter; font-weight: 600; line-height: 20px; word-wrap: break-word">{{ filteredItems.length }} món</div>
+                        <div style="width: 248px; color: var(--color-orange-21-2, #4A3123); font-size: 16px; font-family: Inter; font-weight: 700; line-height: 20px; word-wrap: break-word">{{ totalQuantity }} phần</div>
+                        <div style="width: 176px; color: var(--color-orange-21-2, #4A3123); font-size: 13px; font-family: Inter; font-weight: 400; line-height: 20px; word-wrap: break-word">{{ totalDrinkQuantity }} ly + {{ totalFoodQuantity }} phần</div>
+                        <div style="width: 320px; color: var(--color-orange-21-2, #4A3123); font-size: 13px; font-family: Inter; font-weight: 600; line-height: 20px; word-wrap: break-word">
+                            {{ needCheckCount > 0 ? needCheckCount + ' món cần kiểm tra lịch sử' : 'Dữ liệu đầy đủ' }}
+                        </div>
+                    </div>
+
+                    <!-- Pagination Row -->
+                    <div style="align-self: stretch; padding-left: 24px; padding-right: 24px; padding-top: 14px; padding-bottom: 14px; overflow: hidden; border-top: 1px #EADCCB solid; justify-content: space-between; align-items: flex-start; display: flex">
+                        <div style="color: #766252; font-size: 13px; font-family: Inter; font-weight: 400; word-wrap: break-word">Hiển thị 1–{{ filteredItems.length }} trên {{ items.length }} món · Ngày {{ forecastDate }}</div>
+                        <div style="color: var(--color-orange-21-2, #4A3123); font-size: 13px; font-family: Inter; font-weight: 600; line-height: 18px; word-wrap: break-word">Trang 1 / 1</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Warning / Note Box -->
+        <div style="align-self: stretch; padding: 18px; background: #FFFCF7; overflow: hidden; border-radius: 12px; outline: 1px var(--color-orange-21-14%, rgba(74, 49, 35, 0.14)) solid; outline-offset: -1px; justify-content: flex-start; align-items: flex-start; gap: 12px; display: inline-flex">
+            <img src="/images/figma/info.svg" alt="" style="width: 18px; height: 18px; flex-shrink: 0; margin-top: 2px;" />
+            <div style="flex: 1 1 0; overflow: hidden; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 4px; display: inline-flex">
+                <div style="color: var(--color-orange-21-2, #4A3123); font-size: 13px; font-family: Inter; font-weight: 600; line-height: 18px; word-wrap: break-word">Gợi ý chuẩn bị, không tự động thay đổi tồn kho</div>
+                <div style="align-self: stretch; color: var(--color-orange-21-82%, rgba(74, 49, 35, 0.82)); font-size: 12px; font-family: Inter; font-weight: 400; line-height: 18px; word-wrap: break-word">Dữ liệu, độ tin cậy 92% và biên độ chuẩn bị là minh họa, chưa kết nối dữ liệu thực tế. Cần kiểm tra món thiếu lịch sử trước khi áp dụng.</div>
+            </div>
+        </div>
+    </div>
 </div>

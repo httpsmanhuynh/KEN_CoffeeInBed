@@ -179,6 +179,20 @@ router.get(
       .sort({ created_at: -1 })
       .toArray();
     const enriched = await attachReviewsToBookings(db, bookings);
+    const bookingIds = enriched.map((b) => b._id);
+    const failedTxns = bookingIds.length
+      ? await db
+          .collection('payment_transactions')
+          .find({ booking_id: { $in: bookingIds }, txn_type: 'PAYMENT', status: 'FAILED' })
+          .project({ booking_id: 1 })
+          .toArray()
+      : [];
+    const failedIdSet = new Set(failedTxns.map((t) => String(t.booking_id)));
+    for (const b of enriched) {
+      if (b.status === 'PENDING_PAYMENT' && failedIdSet.has(String(b._id))) {
+        b.has_failed_payment = true;
+      }
+    }
     res.json(enriched);
   }),
 );
@@ -205,6 +219,20 @@ router.get(
       .sort({ created_at: -1 })
       .toArray();
     const enriched = await attachReviewsToBookings(db, bookings);
+    const bookingIds = enriched.map((b) => b._id);
+    const failedTxns = bookingIds.length
+      ? await db
+          .collection('payment_transactions')
+          .find({ booking_id: { $in: bookingIds }, txn_type: 'PAYMENT', status: 'FAILED' })
+          .project({ booking_id: 1 })
+          .toArray()
+      : [];
+    const failedIdSet = new Set(failedTxns.map((t) => String(t.booking_id)));
+    for (const b of enriched) {
+      if (b.status === 'PENDING_PAYMENT' && failedIdSet.has(String(b._id))) {
+        b.has_failed_payment = true;
+      }
+    }
     res.json(enriched);
   }),
 );

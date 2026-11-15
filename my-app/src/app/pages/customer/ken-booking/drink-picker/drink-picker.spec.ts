@@ -1,15 +1,11 @@
+import { describe, it, expect } from 'vitest';
+import '@angular/compiler';
 import { KenDrinkPickerPage } from './drink-picker';
-import { TestBed } from '@angular/core/testing';
-import { AppModule } from '../../../../app-module';
 import { KenBookingState, kenNextDay } from '../booking-state';
 import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { vi } from 'vitest';
 
 describe('KenDrinkPickerPage', () => {
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [AppModule] }).compileComponents();
-  });
-
   it('exports the Angular component', () => {
     expect(KenDrinkPickerPage).toBeDefined();
   });
@@ -62,5 +58,15 @@ describe('KenDrinkPickerPage', () => {
     page.back();
 
     expect(navigateByUrl).toHaveBeenCalledWith('/booking/focus-pod');
+  });
+
+  it('loads AI recommendations upon initialization', () => {
+    const state = new KenBookingState();
+    state.set({ spaceId: 'focus', startHour: 14, hours: 4 });
+    const route = { snapshot: { queryParamMap: convertToParamMap({}) } } as ActivatedRoute;
+    const page = new KenDrinkPickerPage(state, { navigateByUrl: vi.fn() } as unknown as Router, route);
+    page.ngOnInit();
+    expect(page.recommendations.length).toBeGreaterThan(0);
+    expect(page.recommendations[0].matchScore).toBeGreaterThan(80);
   });
 });

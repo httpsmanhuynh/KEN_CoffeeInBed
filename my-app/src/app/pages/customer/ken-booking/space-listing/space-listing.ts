@@ -38,7 +38,7 @@ export class KenSpaceListingPage {
     { id: 'meeting-large', name: 'Phòng họp lớn', image: 'listing-meeting-large.png', zone: 'focus', occupancy: '6–12 khách · Máy chiếu + bảng từ', rate: '450.000đ / gói 3 giờ', features: ['Wi-Fi', 'Máy chiếu', '3 giờ'] },
     { id: 'single', name: 'KÉN nghỉ đơn', image: 'listing-single.png', zone: 'rest', occupancy: '1 người · Rèm che · Đèn đọc sách', rate: 'Từ 70.000đ', features: ['1h · 70K', '2h · 130K', '4h · 220K'] },
     { id: 'double', name: 'KÉN nghỉ đôi', image: 'listing-double.png', zone: 'rest', occupancy: '1–2 người · Rèm che · Đèn đọc sách', rate: 'Từ 100.000đ', features: ['1h · 100K', '2h · 180K', '4h · 310K'] },
-    { id: 'private', name: 'Phòng riêng tư', image: 'listing-private.png', zone: 'rest', occupancy: '2–4 người · Bàn + ghế', rate: 'Từ 150.000đ', features: ['1h · 150K', '2h · 280K', '4h · 480K'] },
+    { id: 'private', name: 'Phòng riêng tư', image: 'listing-private.png', zone: 'rest', occupancy: '2–4 người · Bàn + ghế', rate: 'Từ 150.000đ', features: ['1h · 150K', '2h · 290K', '4h · 480K'] },
   ];
 
   constructor(
@@ -76,12 +76,12 @@ export class KenSpaceListingPage {
     this.resetAvailability();
   }
 
-  setHour(value: string): void {
+  setHour(value: number | string): void {
     this.state.set({ startHour: Number(value) });
     this.resetAvailability();
   }
 
-  setGuests(value: string): void {
+  setGuests(value: number | string): void {
     this.state.set({ guests: Number(value) });
     this.resetAvailability();
   }
@@ -93,7 +93,7 @@ export class KenSpaceListingPage {
     this.availabilityState = 'loading';
     this.availabilityMessage = '';
     this.selectedSpaceId = null;
-    this.availability.check(draft.date, draft.startHour, draft.guests, 1).subscribe({
+    this.availability.check(draft.date, draft.startHour, draft.guests).subscribe({
       next: spaces => {
         this.availabilityBySpace.clear();
         for (const space of spaces) {

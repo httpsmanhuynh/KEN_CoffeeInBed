@@ -249,7 +249,8 @@
 }
 
 .kf-advice {
-  border: 1px solid var(--kf-border);
+  background: #fffdf9;
+  border: 1px solid #dcc5a7;
   border-radius: 24px;
   padding: 24px;
 }
@@ -281,9 +282,11 @@
 /* Pricing card */
 
 .kf-pricing {
-  border: 1px solid var(--kf-border);
+  background: #fffcf7;
+  border: 1px solid #dcc5a7;
   border-radius: 24px;
   padding: 24px;
+  box-shadow: 0 12px 30px rgba(74, 49, 35, 0.08);
 }
 
 .kf-pricing-heading {
@@ -306,9 +309,11 @@
 }
 
 .kf-package {
-  padding-bottom: 18px;
-  margin-bottom: 18px;
-  border-bottom: 1px solid var(--kf-border);
+  background: #f3e5d0;
+  border: 1px solid #dcc2a1;
+  border-radius: 16px;
+  padding: 16px 18px;
+  margin-bottom: 14px;
 }
 
 .kf-package-top {

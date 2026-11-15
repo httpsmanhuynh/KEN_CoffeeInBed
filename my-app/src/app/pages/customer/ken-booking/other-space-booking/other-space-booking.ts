@@ -73,8 +73,10 @@ export class KenOtherSpacePage implements OnInit {
   }
 
   get hourlyDurationOptions(): number[] {
-    const maxHours = Math.max(1, 22 - this.startHour);
-    return Array.from({ length: maxHours }, (_, i) => i + 1);
+    const minHours = 1;
+    const maxHours = Math.max(minHours, 22 - this.startHour);
+    const length = Math.max(0, maxHours - minHours + 1);
+    return Array.from({ length }, (_, i) => i + minHours);
   }
 
   isRateSelected(rate: { hours: number; price: number }): boolean {
@@ -85,30 +87,33 @@ export class KenOtherSpacePage implements OnInit {
   }
 
   chooseDuration(hours: number): void {
-    this.duration = hours;
-    this.startHour = Math.min(this.startHour, 22 - hours);
     this.state.set({ hours });
+    const d = this.state.draft();
+    this.duration = d.hours;
+    this.startHour = d.startHour;
+    this.guests = d.guests;
     this.showAddons = false;
     this.feedback = '';
   }
 
   changeGuests(guests: number): void {
-    this.guests = guests;
     this.state.set({ guests });
+    const d = this.state.draft();
+    this.guests = d.guests;
     this.showAddons = false;
     this.feedback = '';
   }
 
   changeDate(date: string): void {
-    this.date = date;
     this.state.set({ date });
+    this.date = this.state.draft().date;
     this.showAddons = false;
     this.feedback = '';
   }
 
   changeHour(hour: number): void {
-    this.startHour = hour;
     this.state.set({ startHour: hour });
+    this.startHour = this.state.draft().startHour;
     this.showAddons = false;
     this.feedback = '';
   }
@@ -125,8 +130,12 @@ export class KenOtherSpacePage implements OnInit {
   }
 
   openDrinkPicker(): void {
+    if (!this.space) {
+      this.ngOnInit();
+    }
+    const basePath = (this.router.url || `/booking/${this.space?.id || this.state.draft().spaceId}`).split('?')[0];
     this.router.navigate(['/booking/drinks'], {
-      queryParams: { returnTo: `${this.router.url.split('?')[0]}?bookingStep=addons` },
+      queryParams: { returnTo: `${basePath}?bookingStep=addons` },
     });
   }
 
@@ -157,9 +166,34 @@ export class KenOtherSpacePage implements OnInit {
   }
 
   rateLabel(rate: { hours: number; price: number }): string {
-    if (this.space?.id === 'work' && rate.hours === 14) return 'Cả ngày · 08:00–22:00';
-    if (this.space?.id === 'work' && rate.hours === 4) return 'Nửa ngày · 4 giờ';
-    return this.space?.id === 'work' ? 'Linh hoạt · Theo giờ' : `${rate.hours} giờ`;
+    if (this.space?.id === 'work') {
+      if (rate.hours === 14) return 'Gói Cả ngày · 08:00–22:00';
+      if (rate.hours === 4) return 'Gói Nửa ngày (4 giờ)';
+      return 'Gói Linh hoạt · Theo giờ';
+    }
+    if (this.space?.id === 'meeting-small') return 'Họp nhóm nhỏ (3 giờ)';
+    if (this.space?.id === 'meeting-large') return 'Họp nhóm lớn (3 giờ)';
+    if (rate.hours === 1) return 'Nghỉ nhanh (1 giờ)';
+    if (rate.hours === 2) return 'Ngả lưng (2 giờ)';
+    if (rate.hours === 4) return 'Trú ẩn (4 giờ)';
+    if (rate.hours === 8) return 'Nguyên ngày (8 giờ)';
+    return `${rate.hours} giờ`;
+  }
+
+  packageSummaryFor(hours: number): string {
+    if (this.space?.id === 'work') {
+      if (hours === 14) return 'Mỗi khách 02 đồ uống Menu Tiêu chuẩn và 01 bánh';
+      if (hours === 4) return 'Mỗi khách 01 đồ uống Menu Tiêu chuẩn';
+      return 'Tự chọn từ 1 giờ · Tặng mỗi khách 01 chai nước suối (từ 2 giờ)';
+    }
+    if (this.space?.id === 'meeting-small' || this.space?.id === 'meeting-large') {
+      return 'Máy chiếu và bảng từ · Mỗi khách 01 chai nước suối';
+    }
+    if (hours === 1) return 'Không bao gồm F&B';
+    if (hours === 2) return 'Mỗi khách 01 đồ uống Menu Tiêu chuẩn';
+    if (hours === 4) return 'Mỗi khách 01 đồ uống Menu Tiêu chuẩn và 01 bánh';
+    if (hours === 8) return 'Mỗi khách 02 đồ uống Menu Tiêu chuẩn và 01 bánh';
+    return `${hours} giờ`;
   }
 
   toReview(): void {

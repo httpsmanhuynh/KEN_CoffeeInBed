@@ -9,6 +9,7 @@ import { ServicePackages } from './service-packages/service-packages';
 import { Addons } from './addons/addons';
 import { Voucher } from './voucher/voucher';
 import { Forecast } from './forecast/forecast';
+import { Revenue } from './revenue/revenue';
 import { adminGuard } from './admin.guard';
 
 export const adminRoutes: Routes = [
@@ -36,6 +37,7 @@ export const adminRoutes: Routes = [
       { path: 'addons', component: Addons },
       { path: 'vouchers', component: Voucher },
       { path: 'forecast', component: Forecast },
+      { path: 'revenue', component: Revenue },
     ],
   },
 ];

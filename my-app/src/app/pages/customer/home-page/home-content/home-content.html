@@ -378,7 +378,7 @@
             (click)="toggleFaq(i)"
           >
             <strong>{{ faq.question }}</strong
-            ><span aria-hidden="true">{{ expandedFaq === i ? '−' : '+' }}</span>
+            ><span aria-hidden="true">{{ expandedFaq === i ? '-' : '+' }}</span>
           </button>
           <p *ngIf="expandedFaq === i">{{ faq.answer }}</p>
         </div>
@@ -426,7 +426,7 @@
           ></label
         ><label
           >Không gian quan tâm<select formControlName="space">
-            <option value="" disabled>– Chọn không gian –</option>
+            <option value="" disabled>- Chọn không gian -</option>
             <option *ngFor="let space of spaces" [value]="space.label">{{ space.label }}</option>
           </select></label
         ><label

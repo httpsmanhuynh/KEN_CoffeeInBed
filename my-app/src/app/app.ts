@@ -1,6 +1,7 @@
-import { Component, HostListener, inject, signal } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from './core/auth.service';
+import { SmoothScrollService } from './core/smooth-scroll.service';
 
 @Component({
   selector: 'app-root',
@@ -8,9 +9,10 @@ import { AuthService } from './core/auth.service';
   styleUrl: './app.css',
   templateUrl: './app.html',
 })
-export class App {
+export class App implements OnInit, OnDestroy {
   protected readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly smoothScroll = inject(SmoothScrollService);
 
   protected readonly title = signal('my-app');
 
@@ -22,6 +24,14 @@ export class App {
     this.auth.loadSession().subscribe({
       error: error => console.error('Không thể kiểm tra phiên đăng nhập.', error),
     });
+  }
+
+  ngOnInit(): void {
+    this.smoothScroll.init();
+  }
+
+  ngOnDestroy(): void {
+    this.smoothScroll.destroy();
   }
 
   @HostListener('document:click', ['$event'])
@@ -69,12 +79,10 @@ export class App {
     event.preventDefault();
     const header = document.querySelector('app-header') as HTMLElement | null;
     const headerHeight = header ? header.getBoundingClientRect().height : 0;
-    const targetTop =
-      target.getBoundingClientRect().top + window.scrollY - headerHeight - 16;
 
-    window.scrollTo({
-      top: Math.max(0, targetTop),
-      behavior: 'smooth',
+    this.smoothScroll.scrollTo(target, {
+      offset: -(headerHeight + 16),
+      duration: 1.1,
     });
   }
 }

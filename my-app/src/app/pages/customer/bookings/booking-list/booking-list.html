@@ -161,7 +161,7 @@
           <div class="bl-modal__grid">
             <div><span>Không gian</span><strong>{{ detailBooking.spaceName || 'Không gian KÉN' }}</strong></div>
             <div><span>Gói dịch vụ</span><strong>{{ detailBooking.package_name || 'Theo đặt chỗ' }}</strong></div>
-            <div><span>Trạng thái</span><strong>{{ detailBooking.status }}</strong></div>
+            <div><span>Trạng thái</span><strong [style.color]="detailStatusColor">{{ detailStatusLabel }}</strong></div>
             <div><span>Bắt đầu</span><strong>{{ fmtDateTime(detailBooking.start_at) }}</strong></div>
             <div><span>Kết thúc</span><strong>{{ fmtDateTime(detailBooking.end_at) }}</strong></div>
             <div><span>Số khách</span><strong>{{ detailBooking.guest_count }} khách</strong></div>
@@ -169,6 +169,69 @@
             <div><span>Số điện thoại</span><strong>{{ detailBooking.contact_phone || '—' }}</strong></div>
             <div><span>Email</span><strong>{{ detailBooking.contact_email || '—' }}</strong></div>
             <div><span>Tổng thanh toán</span><strong>{{ fmtMoney(detailBooking.final_amount) }}</strong></div>
+          </div>
+
+          <div class="bl-modal__items">
+            @if (detailBooking.fixed_inclusions_snapshot?.length || detailBooking.inclusions?.length || detailBooking.inclusions_snapshot?.length) {
+              <div class="bl-modal__section">
+                <h3>Món &amp; quyền lợi trong gói (Inclusions)</h3>
+                <div class="bl-items-list">
+                  @for (fix of detailBooking.fixed_inclusions_snapshot; track $index) {
+                    <div class="bl-item-row">
+                      <div class="bl-item-info">
+                        <strong>{{ fix.label || 'Nước suối' }}</strong>
+                        <small>Số lượng: {{ fix.quantity }} · Tặng kèm theo gói</small>
+                      </div>
+                      <span class="bl-item-price" style="color: #047857;">Miễn phí (0đ)</span>
+                    </div>
+                  }
+                  @for (inc of detailBooking.inclusions; track inc._id) {
+                    <div class="bl-item-row">
+                      <div class="bl-item-info">
+                        <strong>{{ inc.product_name }}</strong>
+                        <small>Số lượng: {{ inc.quantity }}</small>
+                      </div>
+                      <span class="bl-item-price">
+                        {{ inc.surcharge_amount ? fmtMoney(inc.surcharge_amount) : 'Bao gồm (0đ)' }}
+                      </span>
+                    </div>
+                  }
+                  @for (inc of detailBooking.inclusions_snapshot; track $index) {
+                    <div class="bl-item-row">
+                      <div class="bl-item-info">
+                        <strong>{{ inc.label }}</strong>
+                        <small>Số lượng: {{ inc.quantity }}</small>
+                      </div>
+                      <span class="bl-item-price">Bao gồm (0đ)</span>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            @if (detailBooking.addons?.length) {
+              <div class="bl-modal__section">
+                <h3>Dịch vụ thêm (Add-ons)</h3>
+                <div class="bl-items-list">
+                  @for (ad of detailBooking.addons; track ad._id) {
+                    <div class="bl-item-row">
+                      <div class="bl-item-info">
+                        <strong>{{ ad.addon_name }}</strong>
+                        <small>{{ ad.quantity }} phần · {{ fmtMoney(ad.unit_price) }}</small>
+                      </div>
+                      <strong class="bl-item-price">{{ fmtMoney(ad.line_total) }}</strong>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            @if (!detailBooking.fixed_inclusions_snapshot?.length && !detailBooking.inclusions?.length && !detailBooking.inclusions_snapshot?.length && !detailBooking.addons?.length) {
+              <div class="bl-modal__section">
+                <h3>Món trong gói &amp; dịch vụ thêm</h3>
+                <p class="bl-modal__muted">Không gian sử dụng tiêu chuẩn, không kèm món nước hoặc dịch vụ thêm.</p>
+              </div>
+            }
           </div>
           @if (detailBooking.transactions?.length) {
             <div class="bl-modal__tx">

@@ -42,14 +42,14 @@
 .ksd-description { margin-bottom: 16px !important; color: var(--ksd-muted); font-size: 16px; line-height: 1.6; }
 .ksd-amenities { display: flex; align-items: center; gap: 8px; margin-bottom: 24px; font-size: 14px; font-weight: 600; }
 .ksd-amenity-icon { color: #ae7a35; font-size: 18px; }
-.ksd-advice { border: 1px solid var(--ksd-border); border-radius: 24px; padding: 24px; }
+.ksd-advice { background: #fffdf9; border: 1px solid #dcc5a7; border-radius: 24px; padding: 24px; }
 .ksd-advice h3 { margin-bottom: 8px; font-size: 14px; font-weight: 600; }
 .ksd-advice p { color: var(--ksd-muted); font-size: 16px; line-height: 1.55; }
 .ksd-divider { height: 1px; margin: 18px 0; background: var(--ksd-border); }
-.ksd-pricing { border: 1px solid var(--ksd-border); border-radius: 24px; padding: 24px; }
+.ksd-pricing { background: #fffcf7; border: 1px solid #dcc5a7; border-radius: 24px; padding: 24px; box-shadow: 0 12px 30px rgba(74, 49, 35, 0.08); }
 .ksd-pricing-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
 .ksd-pricing-heading span { font-size: 12px; white-space: nowrap; }
-.ksd-package { padding-bottom: 18px; margin-bottom: 18px; border-bottom: 1px solid var(--ksd-border); }
+.ksd-package { background: #f3e5d0; border: 1px solid #dcc2a1; border-radius: 16px; padding: 16px 18px; margin-bottom: 14px; }
 .ksd-package-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; }
 .ksd-package h3 { font-size: 14px; line-height: 1.5; font-weight: 600; }
 .ksd-price { display: flex; flex-direction: column; align-items: flex-end; text-align: right; white-space: nowrap; }

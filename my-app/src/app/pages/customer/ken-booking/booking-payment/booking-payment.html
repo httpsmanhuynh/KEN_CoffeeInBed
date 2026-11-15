@@ -106,7 +106,7 @@
         </section>
       }
       <section class="kf-payment-contact">
-        <div class="kf-panel-heading"><h2>Thông tin người đặt</h2><a routerLink="/booking/review">Bổ sung thông tin</a></div>
+        <div class="kf-panel-heading"><h2>Thông tin người đặt</h2></div>
         <div class="kf-contact-info"><div><small>Họ và tên</small><strong>{{ state.draft().fullName || 'Chưa nhập' }}</strong></div><div><small>Số điện thoại</small><strong>{{ state.draft().phone || 'Chưa nhập' }}</strong></div><div><small>Email</small><strong>{{ state.draft().email || 'Chưa nhập' }}</strong></div></div>
         <hr><div class="kf-help-row"><div><strong><img class="kf-icon" src="/images/ken-flow/icons/payment-note.svg" alt=""> Cần KÉN giúp một chút?</strong><p>Nếu đã chuyển khoản trong hệ thống thực nhưng chưa nhận xác nhận, hãy giữ lại biên lai và liên hệ nhân viên.</p></div><a class="kf-btn kf-btn-light" routerLink="/support">Nhắn KÉN ↗</a></div>
       </section>
@@ -116,14 +116,41 @@
         <img [src]="'/images/ken-flow/' + state.space.image" [alt]="state.space.name">
         <div class="kf-payment-aside-inner">
           <p class="kf-overline">KHOẢNG RIÊNG CỦA BẠN</p><h2>Tóm tắt đặt chỗ</h2><h3>{{ state.space.name }}</h3>
-          <p>{{ state.draft().guests }} khách · {{ state.draft().hours }} giờ</p>
+          <p>{{ state.packageName }} · {{ state.draft().guests }} khách · {{ state.draft().hours }} giờ</p>
           <div class="kf-sum-row"><span>Ngày</span><strong>{{ state.dateLabel }}</strong></div>
           <div class="kf-sum-row"><span>Giờ sử dụng</span><strong>{{ state.timeLabel }}</strong></div>
           <div class="kf-sum-row"><span>Số khách</span><strong>{{ state.draft().guests }} khách</strong></div>
-          <div class="kf-highlight-box"><strong>Đồ uống đi kèm</strong><small *ngFor="let item of state.selectedDrinks">{{ item.product.name }} × {{ item.quantity }}</small><small *ngIf="!state.selectedDrinks.length">Chưa chọn đồ uống</small></div>
-          <div class="kf-sum-row"><span>{{ state.space.name }}</span><strong>{{ money(state.base) }}</strong></div>
-          <div class="kf-sum-row"><span>Phụ thu đồ uống</span><strong>+{{ money(state.drinkSurcharge) }}</strong></div>
-          <div class="kf-sum-row"><span>Dịch vụ thêm</span><strong>{{ money(state.extrasTotal) }}</strong></div>
+          <div class="kf-sum-row"><span>Gói dịch vụ</span><strong>{{ money(state.base) }}</strong></div>
+          <div class="kf-sum-group">
+            <div class="kf-sum-row"><span>Phụ phí Inclusion / đồ uống</span><strong>{{ money(state.drinkSurcharge) }}</strong></div>
+            <div class="kf-sum-sublist">
+              <div class="kf-sum-subitem" *ngFor="let fixed of state.fixedInclusionsList">
+                <span>{{ fixed.label }} × {{ fixed.quantity }}</span>
+                <span>0đ</span>
+              </div>
+              <div class="kf-sum-subitem" *ngFor="let item of state.selectedDrinks">
+                <span>{{ item.product.name }} × {{ item.quantity }}</span>
+                <span>{{ money(item.quantity * (item.product.price > state.entitlement ? item.product.price - state.entitlement : 0)) }}</span>
+              </div>
+              <div class="kf-sum-subitem" *ngFor="let pastry of state.selectedPastries">
+                <span>{{ pastry.product.name }} × {{ pastry.quantity }}</span>
+                <span>0đ</span>
+              </div>
+              <div class="kf-sum-subempty" *ngIf="!state.fixedInclusionsList.length && !state.selectedDrinks.length && !state.selectedPastries.length">
+                {{ state.requiredDrinkCount ? 'Chưa chọn đồ uống' : 'Không bao gồm F&amp;B' }}
+              </div>
+            </div>
+          </div>
+          <div class="kf-sum-group">
+            <div class="kf-sum-row"><span>Add-on</span><strong>{{ money(state.extrasTotal) }}</strong></div>
+            <div class="kf-sum-sublist">
+              <div class="kf-sum-subitem" *ngFor="let extraItem of state.selectedExtrasList">
+                <span>{{ extraItem.extra.title }} × {{ extraItem.quantity }}</span>
+                <span>{{ money(extraItem.extra.price * extraItem.quantity) }}</span>
+              </div>
+              <div class="kf-sum-subempty" *ngIf="!state.selectedExtrasList.length">Chưa chọn Add-on</div>
+            </div>
+          </div>
           <hr>
           <div class="kf-sum-row"><span>Tạm tính</span><strong>{{ money(state.subtotal) }}</strong></div>
           <div class="kf-sum-row"><span>Ưu đãi Bạc · 5% (demo)</span><strong>−{{ money(state.silverDiscount) }}</strong></div>

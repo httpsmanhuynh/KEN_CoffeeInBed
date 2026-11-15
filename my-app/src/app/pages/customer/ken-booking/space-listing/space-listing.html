@@ -20,13 +20,13 @@
           <input type="date" [min]="minDate" [value]="state.draft().date" (change)="setDate($any($event.target).value)">
         </label>
         <label>Giờ bắt đầu
-          <select [value]="state.draft().startHour" (change)="setHour($any($event.target).value)">
-            <option *ngFor="let hour of hours" [value]="hour">{{ ('0' + hour).slice(-2) }}:00</option>
+          <select [ngModel]="state.draft().startHour" (ngModelChange)="setHour($event)">
+            <option *ngFor="let hour of hours" [ngValue]="hour">{{ ('0' + hour).slice(-2) }}:00</option>
           </select>
         </label>
         <label>Số khách
-          <select [value]="state.draft().guests" (change)="setGuests($any($event.target).value)">
-            <option *ngFor="let guest of guestOptions" [value]="guest">{{ guest }} khách</option>
+          <select [ngModel]="state.draft().guests" (ngModelChange)="setGuests($event)">
+            <option *ngFor="let guest of guestOptions" [ngValue]="guest">{{ guest }} khách</option>
           </select>
         </label>
         <button type="button" class="kf-btn kf-btn-gold" [disabled]="availabilityState === 'loading'" (click)="checkAvailability()">
@@ -63,7 +63,7 @@
           <div class="kf-listing-card-image">
             <img [src]="'/images/ken-flow/' + item.image" [alt]="item.name" loading="lazy">
             <span class="kf-badge">KÉN Tập Trung</span>
-            <span class="kf-availability" *ngIf="availabilityState !== 'idle'">{{ availabilityLabel(item) }}</span>
+            <span class="kf-availability" *ngIf="availabilityState === 'loading' || (availabilityState === 'ready' && availabilityLabel(item))">{{ availabilityLabel(item) }}</span>
           </div>
           <div class="kf-listing-card-copy">
             <div class="kf-card-heading"><div><h3>{{ item.name }}</h3><small>{{ item.occupancy }}</small></div><strong>{{ item.rate }}</strong></div>
@@ -86,7 +86,7 @@
           <div class="kf-listing-card-image">
             <img [src]="'/images/ken-flow/' + item.image" [alt]="item.name" loading="lazy">
             <span class="kf-badge">KÉN Tái Tạo</span>
-            <span class="kf-availability" *ngIf="availabilityState !== 'idle'">{{ availabilityLabel(item) }}</span>
+            <span class="kf-availability" *ngIf="availabilityState === 'loading' || (availabilityState === 'ready' && availabilityLabel(item))">{{ availabilityLabel(item) }}</span>
           </div>
           <div class="kf-listing-card-copy">
             <div class="kf-card-heading"><div><h3>{{ item.name }}</h3><small>{{ item.occupancy }}</small></div><strong>{{ item.rate }}</strong></div>

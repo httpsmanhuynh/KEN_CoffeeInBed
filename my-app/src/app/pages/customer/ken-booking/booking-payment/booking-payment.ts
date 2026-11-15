@@ -4,9 +4,17 @@ import { AuthService } from '../../../../core/auth.service';
 import { CustomerApiService } from '../../../../core/customer-api.service';
 import { KenBookingState, kenMoney } from '../booking-state';
 
+function tryInjectCustomerApi(): CustomerApiService | null {
+  try {
+    return inject(CustomerApiService, { optional: true });
+  } catch {
+    return null;
+  }
+}
+
 @Component({ selector: 'app-ken-booking-payment', standalone: false, templateUrl: './booking-payment.html', styleUrl: './booking-payment.css' })
 export class KenBookingPaymentPage implements OnInit, OnDestroy {
-  private readonly api = inject(CustomerApiService, { optional: true });
+  private readonly api = tryInjectCustomerApi();
   now = Date.now();
   authorized = false;
   paying = false;
@@ -25,6 +33,12 @@ export class KenBookingPaymentPage implements OnInit, OnDestroy {
           return;
         }
         this.authorized = true;
+        const d = this.state.draft();
+        const patch: { fullName?: string; phone?: string; email?: string } = {};
+        if (!d.fullName?.trim() && user?.fullName) patch.fullName = user.fullName;
+        if (!d.phone?.trim() && user?.phone) patch.phone = user.phone;
+        if (!d.email?.trim() && user?.email) patch.email = user.email;
+        if (Object.keys(patch).length > 0) this.state.set(patch);
         if (this.state.draft().paymentStatus === 'CONFIRMED') {
           this.paymentOutcome = 'success';
           this.confirmedCode = this.state.draft().createdBookingCode || '';

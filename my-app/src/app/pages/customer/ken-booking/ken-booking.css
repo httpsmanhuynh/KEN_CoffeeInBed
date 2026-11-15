@@ -70,6 +70,7 @@
 .kf-product-copy strong{font-size:14px}
 .kf-product-copy small{font-size:11px;color:var(--kf-muted)}
 /* Menu page: Figma 199:1276 */
+.kf.kf-menu{overflow-x:clip}
 .kf-menu-hero{min-height:460px;display:grid;grid-template-columns:1fr .75fr;gap:50px;align-items:center;padding-top:60px;padding-bottom:65px}
 .kf-menu-intro{max-width:615px}
 .kf-menu-intro h1{font-weight:600;font-size:55px;margin-bottom:6px}
@@ -1062,13 +1063,70 @@
 
 .kf-drink-picker .kf-drink-confirm .kf-btn {
     border-radius: 999px;
+    min-height: 48px;
+    padding: 13px 22px;
+    line-height: 1.35;
 }
 
 @media (min-width: 761px) {
     .kf-drink-picker .kf-drink-summary-grid {
-        grid-template-columns: minmax(0, 2.44fr) minmax(0, 1fr);
-        gap: 40px;
+        grid-template-columns: minmax(0, 1.55fr) minmax(360px, 1fr);
+        gap: 36px;
+        align-items: end;
     }
+}
+
+/* Grouped Summary UI (Inclusions vs Add-ons) */
+.kf-sum-group {
+    margin: 10px 0;
+}
+
+.kf-sum-group > .kf-sum-row {
+    margin: 0 0 6px;
+}
+
+.kf-sum-sublist {
+    display: grid;
+    gap: 5px;
+    padding: 8px 12px;
+    border-left: 2px solid #dcb685;
+    background: #fcf8f1;
+    border-radius: 0 8px 8px 0;
+}
+
+.kf-sum-subitem {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 12px;
+    color: #594030;
+    line-height: 1.4;
+}
+
+.kf-sum-subitem > span:last-child {
+    color: #806a57;
+    white-space: nowrap;
+    font-weight: 600;
+}
+
+.kf-sum-subempty {
+    font-size: 12px;
+    color: #9e8873;
+    font-style: italic;
+}
+
+.kf-fixed-badge {
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+    border-radius: 8px;
+    background: #e6f4ee;
+    color: #047857;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    font-size: 16px;
 }
 
 @media (max-width: 760px) {

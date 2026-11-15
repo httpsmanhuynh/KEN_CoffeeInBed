@@ -118,6 +118,20 @@ export class AuthService {
     );
   }
 
+  /** Xác thực OTP bước 2 khi tài khoản bật 2FA. */
+  verifyLogin2FA(code: string): Observable<LoginResult> {
+    return this.http.post<LoginResult>(`${this.base}/login/2fa`, { code }, { withCredentials: true }).pipe(
+      tap(result => {
+        if (result.user) this.setUser(result.user);
+      }),
+    );
+  }
+
+  /** Gửi lại OTP cho bước xác thực 2FA khi đăng nhập. */
+  resendLogin2FAOtp(): Observable<unknown> {
+    return this.http.post(`${this.base}/login/2fa/resend`, {}, { withCredentials: true });
+  }
+
   logout(): Observable<void> {
     return this.http.post<void>(`${this.base}/logout`, {}, { withCredentials: true }).pipe(
       tap(() => {

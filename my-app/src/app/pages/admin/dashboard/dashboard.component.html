@@ -2,11 +2,17 @@
   <!-- Page Heading -->
   <div class="page-heading" data-name="Page heading">
     <div class="heading-title-group">
-      <h1 class="page-title">Dashboard</h1>
+      <h1 class="page-title">Tổng quan</h1>
     </div>
-    <button type="button" class="btn-export" (click)="exportReport()" data-name="Export btn">
-      Xuất báo cáo ↗
-    </button>
+    <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+      <a routerLink="/admin/forecast" class="btn-ai-forecast" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; background: #FFFCF7; border: 1px solid #E5D7C5; border-radius: 8px; color: #4A3123; text-decoration: none; font-size: 13px; font-weight: 600; cursor: pointer;">
+        <img src="/images/figma/sparkles-icon.svg" alt="" style="width: 16px; height: 16px;" />
+        <span>Dự báo nhu cầu món (KÉN AI)</span>
+      </a>
+      <button type="button" class="btn-export" (click)="exportReport()" data-name="Export btn">
+        Xuất báo cáo ↗
+      </button>
+    </div>
   </div>
 
   <!-- Filter Bar -->
@@ -98,18 +104,24 @@
   <!-- Key Operational Metrics -->
   <div class="metrics-row" data-name="Chỉ số vận hành">
     <!-- Card 1 (Dark highlighted) -->
-    <div class="metric-card card-dark">
-      <span class="metric-label text-white">Tổng thu mẫu</span>
+    <a routerLink="/admin/revenue" class="metric-card card-dark" style="text-decoration: none; cursor: pointer;">
+      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+        <span class="metric-label text-white">Tổng thu mẫu</span>
+        <span style="color: var(--color-orange-54, #E3A52F); font-size: 12px; font-weight: 600;">Xem chi tiết →</span>
+      </div>
       <span class="metric-value text-accent">2.437.750đ</span>
       <span class="metric-desc text-white">20 đơn đã thanh toán · Sau giảm giá</span>
-    </div>
+    </a>
 
     <!-- Card 2 -->
-    <div class="metric-card">
-      <span class="metric-label">Booking theo trạng thái</span>
+    <a routerLink="/admin/bookings" class="metric-card" style="text-decoration: none; cursor: pointer;">
+      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+        <span class="metric-label">Booking theo trạng thái</span>
+        <span style="color: #A9763F; font-size: 12px; font-weight: 600;">Xem đặt chỗ →</span>
+      </div>
       <span class="metric-value">24</span>
       <span class="metric-desc">6 xác nhận · 4 sử dụng · 10 hoàn thành</span>
-    </div>
+    </a>
 
     <!-- Card 3 -->
     <div class="metric-card">
@@ -132,10 +144,13 @@
     <div class="chart-card revenue-card" data-name="Biểu đồ doanh thu">
       <div class="card-header">
         <div class="header-left">
-          <img src="/images/figma/table.svg" alt="" class="header-icon" />
+          <img src="/images/figma/wallet.svg" alt="" class="header-icon" />
           <h2 class="card-title">Doanh thu theo thời gian</h2>
         </div>
-        <span class="card-badge">Tổng thu mẫu · Sau giảm</span>
+        <a routerLink="/admin/revenue" style="color: #A9763F; font-size: 12px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 4px;">
+          <span>Chi tiết doanh thu</span>
+          <span>→</span>
+        </a>
       </div>
 
       <div class="revenue-summary">

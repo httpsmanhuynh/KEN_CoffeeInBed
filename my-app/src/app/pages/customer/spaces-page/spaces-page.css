@@ -64,11 +64,8 @@
 }
 
 .ks-hero-intro {
-  display: grid;
-  grid-template-columns: 1.15fr .72fr;
-  align-items: center;
-  gap: 52px;
-  margin-bottom: 40px;
+  display: block;
+  margin-bottom: 32px;
 }
 
 .ks-hero-intro h1 {
@@ -127,6 +124,7 @@
 
 .ks-hero-visual {
   width: 100%;
+  margin-bottom: 28px;
 }
 
 .ks-hero-visual > img {
@@ -151,22 +149,35 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 24px;
+  margin-top: 28px;
 }
 
 .ks-zone {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
   gap: 8px;
   min-height: 168px;
   padding: 24px;
+  background: #fffcf7;
   border: 1px solid var(--ks-border);
   border-radius: 24px;
-  transition: background .2s, transform .2s;
+  color: inherit;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background .2s, border-color .2s, box-shadow .2s, transform .2s;
 }
 
 .ks-zone:hover {
   background: #f1e2ca;
   transform: translateY(-3px);
+}
+
+.ks-zone.is-active {
+  background: #fff8eb;
+  border-color: #c4873b;
+  box-shadow: 0 12px 26px rgba(74, 49, 35, 0.1);
 }
 
 .ks-zone-number {
@@ -199,6 +210,11 @@
 }
 
 .ks-section-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 24px;
   margin-bottom: 38px;
 }
 
@@ -207,7 +223,36 @@
   line-height: 1.18;
   letter-spacing: -.025em;
   font-weight: 600;
-  margin: 12px 0 16px;
+  margin: 0;
+}
+
+.ks-zone-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ks-zone-pill {
+  min-height: 40px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(169, 118, 63, .35);
+  background: #fffcf7;
+  color: var(--ks-text);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .2s, border-color .2s, transform .15s;
+}
+
+.ks-zone-pill:hover {
+  background: #f1e2ca;
+}
+
+.ks-zone-pill.is-active {
+  background: var(--ks-honey);
+  border-color: var(--ks-honey);
 }
 
 .ks-section-heading > p:last-child {
@@ -258,6 +303,19 @@
 
 .ks-space-card:nth-last-child(-n + 2) {
   grid-column: span 3;
+}
+
+.ks-card-grid.is-filtered .ks-space-card {
+  grid-column: span 2;
+}
+
+.ks-card-grid.is-filtered.is-two-cols .ks-space-card {
+  grid-column: span 3;
+}
+
+.ks-card-grid.is-filtered.is-single .ks-space-card {
+  grid-column: 1 / -1;
+  max-width: 560px;
 }
 
 .ks-card-photo {
@@ -457,8 +515,7 @@
 
 @media (max-width: 1100px) {
   .ks-hero-intro {
-    grid-template-columns: 1fr 1fr;
-    gap: 30px;
+    display: block;
   }
 
   .ks-card-grid {
@@ -466,8 +523,14 @@
   }
 
   .ks-space-card,
-  .ks-space-card:nth-last-child(-n + 2) {
+  .ks-space-card:nth-last-child(-n + 2),
+  .ks-card-grid.is-filtered .ks-space-card,
+  .ks-card-grid.is-filtered.is-two-cols .ks-space-card {
     grid-column: auto;
+  }
+
+  .ks-card-grid.is-filtered.is-single .ks-space-card {
+    max-width: none;
   }
 
   .ks-card-heading h3 {

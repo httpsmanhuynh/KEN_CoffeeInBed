@@ -33,9 +33,9 @@ export class KenBookingSpaceDetailPage implements OnInit {
       gallery: ['/images/ken-figma/cowork-page-wide.png', '/images/ken-figma/cowork-page-side.png', '/images/ken-figma/cowork-page-amenities.png'],
       captions: ['Toàn cảnh khu làm việc chung', 'Góc nhìn khác', 'Chi tiết tiện ích'],
       packageNotes: {
-        1: 'Theo người. Đặt từ 2 giờ: mỗi khách có 1 nước suối.',
-        4: 'Theo người · Mỗi khách có 1 đồ uống Menu Tiêu chuẩn.',
-        14: 'Theo người · Mỗi khách có 2 đồ uống tiêu chuẩn và 1 bánh.'
+        1: 'Theo người · Tặng mỗi khách 01 chai nước suối (nếu đặt từ 2 giờ trở lên).',
+        4: 'Theo người · Mỗi khách 01 đồ uống Menu Tiêu chuẩn.',
+        14: 'Theo người · Mỗi khách 02 đồ uống Menu Tiêu chuẩn và 01 bánh.'
       },
       bufferNote: 'Không gian dùng chung, không có thời gian dọn chuyển lượt.'
     },
@@ -47,7 +47,7 @@ export class KenBookingSpaceDetailPage implements OnInit {
       amenities: 'Máy chiếu · Bảng từ · Wi-Fi · 3–6 khách',
       gallery: ['/images/ken-figma/meeting-page-wide.png', '/images/ken-figma/meeting-page-side.png', '/images/ken-figma/meeting-page-amenities.png'],
       captions: ['Toàn cảnh phòng họp nhỏ', 'Góc nhìn khác', 'Chi tiết bảng từ'],
-      packageNotes: { 3: 'Gói 3 giờ · Có 1 chai nước suối cho mỗi khách.' },
+      packageNotes: { 3: 'Họp nhóm nhỏ (3 giờ) · Máy chiếu và bảng từ; mỗi khách 01 chai nước suối.' },
       bufferNote: 'Đệm dọn 15 phút sau giờ sử dụng, không tính vào thời lượng gói.'
     },
     'meeting-large': {
@@ -58,7 +58,7 @@ export class KenBookingSpaceDetailPage implements OnInit {
       amenities: 'Máy chiếu · Bảng từ · Wi-Fi · 6–12 khách',
       gallery: ['/images/ken-figma/spaces-meetingbig.png', '/images/ken-figma/meeting-page-side.png', '/images/ken-figma/meeting-page-amenities.png'],
       captions: ['Toàn cảnh phòng họp lớn', 'Không gian phòng họp', 'Trang thiết bị'],
-      packageNotes: { 3: 'Gói 3 giờ · Có 1 chai nước suối cho mỗi khách.' },
+      packageNotes: { 3: 'Họp nhóm lớn (3 giờ) · Máy chiếu và bảng từ; mỗi khách 01 chai nước suối.' },
       bufferNote: 'Đệm dọn 15 phút sau giờ sử dụng, không tính vào thời lượng gói.'
     },
     single: {
@@ -69,7 +69,12 @@ export class KenBookingSpaceDetailPage implements OnInit {
       amenities: 'Giường nghỉ · Rèm che · Đèn đọc sách · 1 khách',
       gallery: ['/images/ken-flow/listing-single.png', '/images/ken-flow/listing-single.png', '/images/ken-flow/listing-single.png'],
       captions: ['KÉN nghỉ đơn', 'Không gian nghỉ riêng', 'Chi tiết tiện ích'],
-      packageNotes: { 1: 'Gói 1 giờ · Dành cho 1 khách.', 2: 'Gói 2 giờ · Dành cho 1 khách.', 4: 'Gói 4 giờ · Dành cho 1 khách.' },
+      packageNotes: {
+        1: 'Nghỉ nhanh (1 giờ) · Không bao gồm F&B.',
+        2: 'Ngả lưng (2 giờ) · Mỗi khách 01 đồ uống Menu Tiêu chuẩn.',
+        4: 'Trú ẩn (4 giờ) · Mỗi khách 01 đồ uống Menu Tiêu chuẩn và 01 bánh.',
+        8: 'Nguyên ngày (8 giờ) · Mỗi khách 02 đồ uống Menu Tiêu chuẩn và 01 bánh.'
+      },
       bufferNote: 'Đệm dọn 15 phút sau giờ sử dụng, không tính vào thời lượng gói.'
     },
     double: {
@@ -80,7 +85,12 @@ export class KenBookingSpaceDetailPage implements OnInit {
       amenities: 'Giường đôi · Rèm che · Đèn đọc sách · 1–2 khách',
       gallery: ['/images/ken-flow/listing-double.png', '/images/ken-flow/listing-double.png', '/images/ken-flow/listing-double.png'],
       captions: ['KÉN nghỉ đôi', 'Không gian nghỉ riêng', 'Chi tiết tiện ích'],
-      packageNotes: { 1: 'Gói 1 giờ · Giá trọn không gian.', 2: 'Gói 2 giờ · Giá trọn không gian.', 4: 'Gói 4 giờ · Giá trọn không gian.' },
+      packageNotes: {
+        1: 'Nghỉ nhanh (1 giờ) · Không bao gồm F&B.',
+        2: 'Ngả lưng (2 giờ) · Mỗi khách 01 đồ uống Menu Tiêu chuẩn.',
+        4: 'Trú ẩn (4 giờ) · Mỗi khách 01 đồ uống Menu Tiêu chuẩn và 01 bánh.',
+        8: 'Nguyên ngày (8 giờ) · Mỗi khách 02 đồ uống Menu Tiêu chuẩn và 01 bánh.'
+      },
       bufferNote: 'Đệm dọn 15 phút sau giờ sử dụng, không tính vào thời lượng gói.'
     },
     private: {
@@ -91,7 +101,12 @@ export class KenBookingSpaceDetailPage implements OnInit {
       amenities: 'Phòng riêng · Giường nghỉ · Ổ cắm điện · 2–4 khách',
       gallery: ['/images/ken-flow/listing-private.png', '/images/ken-flow/listing-private.png', '/images/ken-flow/listing-private.png'],
       captions: ['Phòng riêng tư', 'Không gian nghỉ riêng', 'Chi tiết tiện ích'],
-      packageNotes: { 1: 'Gói 1 giờ · Giá trọn phòng.', 2: 'Gói 2 giờ · Giá trọn phòng.', 4: 'Gói 4 giờ · Giá trọn phòng.' },
+      packageNotes: {
+        1: 'Nghỉ nhanh (1 giờ) · Không bao gồm F&B.',
+        2: 'Ngả lưng (2 giờ) · Mỗi khách 01 đồ uống Menu Tiêu chuẩn.',
+        4: 'Trú ẩn (4 giờ) · Mỗi khách 01 đồ uống Menu Tiêu chuẩn và 01 bánh.',
+        8: 'Nguyên ngày (8 giờ) · Mỗi khách 02 đồ uống Menu Tiêu chuẩn và 01 bánh.'
+      },
       bufferNote: 'Đệm dọn 15 phút sau giờ sử dụng, không tính vào thời lượng gói.'
     }
   };
