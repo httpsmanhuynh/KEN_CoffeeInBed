@@ -1,0 +1,163 @@
+:host {
+    --color-brown-primary: #4A3123;
+    --color-brown-muted: #7A6553;
+    --color-paper-bg: #FFFCF7;
+    --color-gold-accent: #E3A52F;
+    --color-gold-border: #A9763F;
+    --color-grey-btn: #F7EFE2;
+    --color-border-subtle: rgba(216, 199, 178, 0.62);
+    --color-error: #995E4B;
+    --color-success: #49634C;
+  }
+  
+  /* Overlay che mờ toàn màn hình */
+  .dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(74, 49, 35, 0.35);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    padding: 16px;
+    box-sizing: border-box;
+  }
+  
+  /* Card chứa Modal - Chuẩn theo Figma Spec */
+  .dialog-card {
+    width: 100%;
+    max-width: 320px;
+    background: var(--color-paper-bg);
+    box-shadow: 0px 0px 5px rgba(74, 49, 35, 0.25);
+    border-radius: 12px;
+    padding: 36px 24px 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    box-sizing: border-box;
+    overflow: hidden;
+    font-family: 'Inter', 'Roboto', sans-serif;
+    animation: popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  
+  /* Khu vực Icon */
+  .dialog-icon-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .icon-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+  }
+  
+  .warning-circle {
+    border: 1.8px solid var(--color-gold-border);
+  }
+  
+  .warning-circle .question-mark {
+    color: var(--color-brown-muted);
+    font-size: 23px;
+    font-weight: 400;
+    line-height: 1;
+  }
+  
+  .error-circle {
+    border: 1.8px solid var(--color-error);
+    color: var(--color-error);
+  }
+  
+  .success-circle {
+    border: 1.8px solid var(--color-success);
+    color: var(--color-success);
+  }
+  
+  /* Nội dung Text */
+  .dialog-content {
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .dialog-title {
+    margin: 0;
+    text-align: center;
+    color: var(--color-brown-muted);
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  
+  .dialog-message {
+    margin: 0;
+    text-align: center;
+    color: var(--color-brown-muted);
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 20.8px;
+  }
+  
+  /* Cụm Nút Thao Tác */
+  .dialog-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 4px;
+  }
+  
+  .btn {
+    height: 32px;
+    padding: 0 16px;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    border: none;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.15s ease, transform 0.1s ease;
+    white-space: nowrap;
+  }
+  
+  .btn:active {
+    transform: scale(0.97);
+  }
+  
+  .btn:hover {
+    opacity: 0.9;
+  }
+  
+  /* Nút Hủy */
+  .btn-cancel {
+    background: var(--color-grey-btn);
+    outline: 1px solid var(--color-border-subtle);
+    outline-offset: -1px;
+    color: var(--color-brown-primary);
+    font-weight: 400;
+  }
+  
+  /* Nút Xác nhận */
+  .btn-confirm {
+    background: var(--color-gold-accent);
+    color: var(--color-brown-primary);
+    font-weight: 700;
+  }

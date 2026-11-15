@@ -1,0 +1,43 @@
+:host { display: block; }
+
+.kf-mini-drinks.kf-space-drinks {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.kf-space-drinks article {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 8px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.kf-space-drinks article.selected {
+  border-color: #ad7b43;
+  background: #f7efe2;
+}
+
+.kf-space-drinks article img {
+  height: 72px;
+  width: 100%;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.kf-space-drinks article > span,
+.kf-space-drinks article > small {
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.kf-space-drinks article > small { color: var(--kf-muted); }
+.kf-space-drinks .kf-quantity { width: 100%; gap: 8px; }
+
+@media (max-width: 760px) {
+  .kf-mini-drinks.kf-space-drinks { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

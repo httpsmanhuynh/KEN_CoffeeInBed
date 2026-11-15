@@ -1,0 +1,177 @@
+<main class="coins-page">
+  <section class="coins-hero">
+    <h1>KÉN Coins · Ví đổi thưởng</h1>
+    <span class="coins-tagline">Lười một chút, chill một góc</span>
+    <p>Đổi voucher và quà lưu niệm từ Coins tích lũy khi dùng dịch vụ</p>
+  </section>
+
+  <section class="coins-concepts coins-section">
+    <div class="coins-container">
+      <h2>Phân biệt KÉN Điểm · Coins · Hạng</h2>
+
+      <div class="coins-concept-grid">
+        <article
+          *ngFor="let item of concepts"
+          class="coins-concept-card"
+          [class.highlight]="item.highlight"
+        >
+          <div class="coins-concept-icon">
+            <img [src]="'/images/ken-coins/' + item.icon" alt="" />
+          </div>
+
+          <h3>{{ item.name }}</h3>
+          <p>{{ item.description }}</p>
+          <span class="coins-concept-note">{{ item.note }}</span>
+        </article>
+      </div>
+
+      <div class="coins-info-strip">
+        <img src="/images/ken-coins/info.svg" alt="" />
+        <p>
+          Coins và Điểm là hai loại tích lũy độc lập.
+          Đổi Coins không hạ Hạng thành viên và không ảnh hưởng
+          KÉN Điểm. Giao dịch lỗi không trừ số dư.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="coins-earn coins-section">
+    <div class="coins-container">
+      <h2>Chill thoải mái, tích Coins tự nhiên!</h2>
+      <p class="coins-section-subtitle">
+        Khám phá KÉN Coins và cách tích lũy thưởng ngay tại không gian của bạn
+      </p>
+
+      <div class="coins-earn-banner">
+        <div class="coins-banner-icon">
+          <img src="/images/ken-coins/wallet-solid.svg" alt="" />
+        </div>
+        <div>
+          <h3>Kiếm KÉN Coins như thế nào?</h3>
+          <p>
+            10.000đ chi tiêu hợp lệ = 1 Coin · cộng sau khi hoàn tất
+            dịch vụ · Coins dùng đổi quà/voucher, độc lập với
+            KÉN Điểm · Hết chu kỳ 1 năm, số dư Coins về 0.
+          </p>
+        </div>
+      </div>
+
+      <div class="coins-earn-grid">
+        <article class="coins-earn-card" *ngFor="let item of earnMethods">
+          <div class="coins-earn-icon">
+            <img [src]="'/images/ken-coins/' + item.icon" alt="" />
+          </div>
+          <h3>{{ item.title }}</h3>
+          <p>{{ item.description }}</p>
+          <span>{{ item.note }}</span>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="coins-redeem coins-section">
+    <div class="coins-container">
+      <h2>KÉN Coins giúp bạn tiết kiệm hơn mỗi ngày</h2>
+
+      <div class="coins-redeem-grid">
+        <div class="coins-redeem-intro">
+          <h3>Đổi Coins lấy gì?</h3>
+          <p>
+            Dùng KÉN Coins đổi voucher giảm giá hoặc quà lưu niệm
+            mang dấu ấn KÉN. Mức Coins và điều kiện hiển thị ngay
+            tại từng ưu đãi — đọc kỹ trước khi xác nhận nhé.
+          </p>
+
+          <div class="coins-redeem-notice">
+            <img src="/images/ken-coins/info.svg" alt="" />
+            <span>
+              Đổi Coins không hạ Hạng. Hết chu kỳ 1 năm,
+              số dư Coins còn lại về 0.
+            </span>
+          </div>
+
+          <a routerLink="/spaces" class="coins-primary-btn">
+            Đặt chỗ ngay tại KÉN →
+          </a>
+        </div>
+
+        <div class="coins-rewards">
+          <article class="coins-reward" *ngFor="let item of rewards">
+            <div class="coins-reward-icon">
+              <img [src]="'/images/ken-coins/' + item.icon" alt="" />
+            </div>
+            <div class="coins-reward-text">
+              <h3>{{ item.title }}</h3>
+              <p>{{ item.description }}</p>
+            </div>
+            <img
+              class="coins-reward-arrow"
+              src="/images/ken-coins/arrow-circle.svg"
+              alt=""
+            />
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="coins-how coins-section">
+    <div class="coins-container">
+      <h2>Cách sử dụng KÉN Coins</h2>
+      <p class="coins-section-subtitle">
+        Chỉ vài bước đơn giản để xem và dùng Coins của bạn
+      </p>
+
+      <div class="coins-step-grid">
+        <article *ngFor="let step of steps" class="coins-step">
+          <div class="coins-step-number">{{ step.number }}</div>
+          <h3>{{ step.title }}</h3>
+          <p>{{ step.description }}</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="coins-faq coins-section">
+    <div class="coins-container">
+      <h2>Các câu hỏi thường gặp</h2>
+
+      <div class="coins-faq-list">
+        <article class="coins-faq-item" *ngFor="let item of faqs; let i = index">
+          <button
+            type="button"
+            [attr.aria-expanded]="openFaq === i"
+            (click)="toggleFaq(i)"
+          >
+            <span>{{ item.question }}</span>
+            <img
+              src="/images/ken-coins/caret-down.svg"
+              [class.is-open]="openFaq === i"
+              alt=""
+            />
+          </button>
+
+          <p *ngIf="openFaq === i" class="coins-faq-answer">
+            {{ item.answer }}
+          </p>
+        </article>
+      </div>
+
+      <div class="coins-faq-footer">
+        <p>
+          Có câu hỏi khác? Hãy truy cập Trung Tâm Trợ Giúp
+          để biết thêm thông tin.
+        </p>
+        <p>
+          Khám phá quy tắc trong điều khoản &amp; điều kiện.
+          Sẵn sàng bắt đầu hành trình tại KÉN?
+        </p>
+        <div class="coins-faq-links">
+          <a routerLink="/support">Trung tâm hỗ trợ</a>
+          <a routerLink="/terms">Điều kiện &amp; điều khoản</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>

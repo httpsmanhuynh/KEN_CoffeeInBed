@@ -1,0 +1,159 @@
+:host{display:block;color:#4A3123;background:#F7EFE2}
+.support-page{width:100%;min-height:100vh}
+.container{max-width:1280px;margin:0 auto;padding:0 80px;box-sizing:border-box}
+
+.search-bar,.faq-item,.category-card,.contact-card,.brand-box,.channel-btn,.btn-login,.form-group input,.form-group select,.form-group textarea,.file-input-wrapper,.btn-reset{background:#FFFCF7}
+.search-bar,.channel-btn,.btn-register,.btn-login,.btn-submit,.btn-reset{border-radius:999px}
+.form-group input,.form-group select,.form-group textarea,.file-input-wrapper{border:1px solid #A9763F;border-radius:8px;box-sizing:border-box}
+.hero,.search-btn,.nav-arrow,.category-card,.category-icon,.brand-box,.btn-submit{display:flex;align-items:center;justify-content:center}
+
+.hero{background:#E6D3B5;height:242px}
+.hero-content{text-align:center;width:100%;max-width:700px;padding:0 20px;box-sizing:border-box}
+.hero-title{font-size:40px;margin:0 0 4px;line-height:1.2}
+.hero-tagline{font-family:'Lavishly Yours',cursive;font-size:26px;margin:0 0 24px;line-height:1.3}
+.search-bar{height:48px;border:1px solid #E6D3B5;box-shadow:0 4px 16px rgba(74,49,35,.078);overflow:hidden;margin:0 auto}
+.search-input{flex:1;height:100%;border:none;outline:none;padding:0 20px;font-size:14px;background:transparent}
+.search-input::placeholder,.faq-footer,.file-name{color:#9E8E7E}
+.search-btn{width:48px;height:48px;border:none;border-radius:50%;background:#E3A52F;cursor:pointer;transition:opacity .2s}
+.search-btn:hover,.btn-register:hover,.btn-submit:hover{opacity:.85}
+
+.main-content{padding:48px 0}
+.content-grid{display:flex;gap:40px;align-items:flex-start}
+.faq-section{flex:0 1 650px;min-width:0}
+.categories-section{flex:0 1 590px;min-width:0}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.section-title,.contact-title{font-size:20px;margin:0}
+.categories-section .section-title{margin-bottom:20px}
+
+.faq-nav{display:flex;gap:8px}
+.nav-arrow{width:36px;height:36px;border-radius:50%;border:1.5px solid #D8C7B2;background:transparent;cursor:pointer;transition:background .2s}
+.nav-arrow:hover,.channel-btn:hover,.btn-login:hover,.file-btn:hover,.btn-reset:hover{background:#E6D3B5}
+.faq-list{display:flex;flex-direction:column;gap:10px}
+.faq-item{min-height:49px;padding:16px 20px;border-radius:14px;box-shadow:0 2px 8px rgba(74,49,35,.078);cursor:pointer;transition:box-shadow .2s}
+.faq-item:hover{box-shadow:0 4px 12px rgba(74,49,35,.12)}
+.faq-question{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.faq-question span{font-size:14px;line-height:1.4}
+.faq-chevron{flex-shrink:0;transition:transform .25s ease}
+.faq-chevron--open{transform:rotate(180deg)}
+.faq-answer{padding-top:12px;border-top:1px solid #D8C7B2;margin-top:12px}
+.faq-answer p{font-size:14px;color:#6B5B4F;line-height:1.7;margin:0}
+.faq-footer{font-size:13px;margin:16px 0 0;text-align:center}
+
+.categories-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.category-card{width:100%;max-width:186px;height:122px;border-radius:20px;box-shadow:0 0 10px rgba(169,118,63,.2);flex-direction:column;gap:10px;cursor:pointer;transition:box-shadow .2s,transform .2s}
+.category-card:hover{box-shadow:0 0 16px rgba(169,118,63,.3);transform:translateY(-2px)}
+.category-icon{width:56px;height:56px;border-radius:50%;background:#E6D3B5}
+.category-name{font-size:13px;font-weight:700;text-align:center;line-height:1.3;white-space:pre-line;padding:0 8px}
+
+.contact-section{padding:0 0 48px}
+.contact-card{border-radius:24px;box-shadow:0 4px 20px rgba(74,49,35,.125);padding:28px;display:flex;align-items:center;gap:32px;min-height:219px;box-sizing:border-box}
+.brand-box{width:160px;height:160px;border-radius:16px;border:2px solid #A9763F;flex-direction:column;gap:4px;flex-shrink:0}
+.brand-icon{opacity:.8}
+.brand-name{font-size:28px;font-weight:700;line-height:1}
+.brand-tagline{font-family:'Lavishly Yours',cursive;font-size:16px;color:#A9763F}
+.contact-info{flex:1;min-width:0}
+.contact-title{margin:0 0 6px}
+.contact-subtitle{font-size:14px;color:#6B5B4F;margin:0 0 18px}
+.contact-channels{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+.channel-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:1px solid #D8C7B2;font-size:13px;font-weight:500;text-decoration:none;cursor:pointer;transition:background .2s}
+.contact-auth{display:flex;gap:10px}
+.btn-register,.btn-login{padding:8px 22px;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .2s,background .2s}
+.btn-register{border:none;background:#A9763F;color:#fff}
+.btn-login{border:1px solid #D8C7B2}
+
+.form-section{padding:0 0 64px}
+.form-title{font-size:22px;margin:0 0 28px}
+.form-row{display:flex;gap:24px;margin-bottom:20px}
+.form-group{flex:1;display:flex;flex-direction:column}
+.form-group--full{width:100%;margin-bottom:20px}
+.form-group label{font-size:14px;font-weight:500;margin-bottom:6px}
+.form-group input,.form-group select,.form-group textarea{font-size:14px;outline:none;transition:border-color .2s}
+.form-group input,.form-group select{height:46px;padding:0 14px}
+.form-group select{
+  appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%234A3123' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;
+}
+.form-group textarea{height:200px;padding:14px;resize:vertical}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:#E3A52F}
+.form-group input::placeholder,.form-group textarea::placeholder{font-size:14px;color:#9E8E7E}
+.input-error{border-color:#c0392b!important}
+.error-msg{font-size:12px;color:#c0392b;margin-top:4px}
+
+.file-input-wrapper{display:flex;align-items:center;gap:12px;padding:8px 14px;height:46px}
+.file-btn{padding:6px 16px;border:1px solid #D8C7B2;border-radius:6px;background:#F7EFE2;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;transition:background .2s}
+.file-name{font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.form-actions{display:flex;gap:12px;margin-top:24px}
+.btn-submit,.btn-reset{padding:12px 28px;font-size:14px;cursor:pointer;transition:opacity .2s,background .2s}
+.btn-submit{border:none;background:#E3A52F;font-weight:700}
+.btn-reset{border:1px solid #D8C7B2;font-weight:600}
+
+@media(max-width:1024px){
+  .container{padding:0 40px}
+  .content-grid{flex-direction:column}
+  .faq-section,.categories-section{flex:auto;width:100%}
+  .category-card{max-width:none}
+  .contact-card{flex-direction:column;text-align:center}
+  .contact-channels,.contact-auth{justify-content:center}
+}
+@media(max-width:768px){
+  .container{padding:0 20px}
+  .hero{height:auto;min-height:200px;padding:32px 20px}
+  .hero-title{font-size:28px}
+  .hero-tagline{font-size:20px}
+  .main-content{padding:32px 0}
+  .content-grid{gap:32px}
+  .categories-grid{grid-template-columns:repeat(2,1fr)}
+  .category-card{height:110px}
+  .form-row{flex-direction:column;gap:16px}
+  .contact-card{padding:20px}
+  .brand-box{width:130px;height:130px}
+  .form-title{font-size:20px}
+  .form-actions{flex-direction:column}
+  .btn-submit,.btn-reset{width:100%}
+}
+@media(max-width:480px){
+  .hero-title{font-size:24px}
+  .hero-tagline{font-size:18px}
+  .categories-grid{gap:10px}
+  .category-card{height:100px}
+  .category-icon{width:44px;height:44px}
+  .category-name{font-size:11px}
+  .section-title{font-size:18px}
+  .contact-channels{flex-direction:column;align-items:center}
+}
+/* Hien thi nut tim kiem dung vi tri theo Figma */
+.search-bar {
+  display: flex;
+  align-items: center;
+}
+
+.search-input {
+  min-width: 0;
+}
+
+.search-btn {
+  flex: 0 0 48px;
+}
+/* Khoi lien he KEN theo Figma */
+.brand-box {
+  background: #4A3123;
+  border: none;
+}
+
+.brand-box .brand-icon {
+  display: none;
+}
+
+.brand-box .brand-name {
+  color: #E3A52F;
+  font-size: 44px;
+}
+
+.brand-box .brand-tagline {
+  color: #E6D3B5;
+}
+
+/* Mui ten danh muc theo Figma */
+.form-group select { background-size: 12px 8px; }

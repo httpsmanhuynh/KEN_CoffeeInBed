@@ -1,3 +1,6 @@
+@import url("./app/pages/customer/ken-booking/ken-booking.css");
+@import url("./app/pages/customer/ken-pages.css");
+
 /* Design tokens KÉN – lấy từ Figma (PTWKDNC-KÉN) */
 :root {
   --ken-font: 'Inter', system-ui, sans-serif;
@@ -27,6 +30,7 @@ body {
   color: var(--ken-brown);
   font-family: var(--ken-font);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 button, input, select { font: inherit; }
 

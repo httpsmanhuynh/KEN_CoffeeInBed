@@ -1,0 +1,23 @@
+<section class="kf-inclusion-drinks" aria-label="Chọn đồ uống trong gói">
+  <p class="kf-entitlement" *ngIf="state.requiredDrinkCount; else optionalDrinks">
+    Gói gồm {{ state.requiredDrinkCount }} món · 1 món/khách. Hỗ trợ tối đa {{ money(state.entitlement) }}/món; món vượt giá chỉ phụ thu phần chênh lệch.
+  </p>
+  <ng-template #optionalDrinks>
+    <p class="kf-entitlement">Gói này không kèm đồ uống. Bạn có thể chọn thêm; đồ uống tính theo giá niêm yết.</p>
+  </ng-template>
+
+  <div class="kf-mini-drinks kf-space-drinks">
+    <article *ngFor="let drink of drinks" [class.selected]="drinkCount(drink.id) > 0">
+      <img [src]="'/images/ken-flow/' + drink.image" [alt]="drink.name" loading="lazy">
+      <span>{{ drink.name }}</span>
+      <small>{{ money(drinkTopUp(drink.price)) }} phụ thu / món</small>
+      <div class="kf-quantity">
+        <button type="button" [attr.aria-label]="'Giảm ' + drink.name"
+          (click)="changeDrink(drink.id, -1)" [disabled]="drinkCount(drink.id) === 0">−</button>
+        <span>{{ drinkCount(drink.id) }}</span>
+        <button type="button" [attr.aria-label]="'Tăng ' + drink.name"
+          (click)="changeDrink(drink.id, 1)" [disabled]="!canAddDrink">+</button>
+      </div>
+    </article>
+  </div>
+</section>

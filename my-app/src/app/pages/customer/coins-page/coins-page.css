@@ -1,0 +1,475 @@
+﻿:host { display: block; }
+
+.coins-page {
+  background: #f7efe2;
+  color: #4a3123;
+  font-family: Inter, Arial, sans-serif;
+}
+
+.coins-page * { box-sizing: border-box; }
+
+.coins-container {
+  max-width: 1200px;
+  width: calc(100% - 40px);
+  margin: 0 auto;
+}
+
+.coins-section { padding: 60px 0; }
+
+.coins-page h2 {
+  font: 600 clamp(25px, 2.5vw, 32px)/1.35 Lora, Georgia, serif;
+  text-align: center;
+  margin: 0 0 24px;
+}
+
+.coins-page h3 { margin: 0; }
+
+.coins-page p { line-height: 1.6; }
+
+.coins-section-subtitle {
+  margin: -12px 0 32px;
+  color: #7a6553;
+  text-align: center;
+  font-size: 15px;
+}
+
+.coins-hero {
+  min-height: 300px;
+  padding: 47px 20px 65px;
+  background: #e6d3b5;
+  text-align: center;
+}
+
+.coins-hero h1 {
+  font: 600 clamp(30px, 3vw, 40px)/1.35 Lora, Georgia, serif;
+  margin: 0 0 18px;
+}
+
+.coins-tagline {
+  display: block;
+  font: 27px/1.5 'Lavishly Yours', cursive;
+  color: #a9763f;
+}
+
+.coins-hero p {
+  margin: 15px auto 0;
+  font-size: 15px;
+}
+
+.coins-concepts {
+  padding-top: 48px;
+}
+
+.coins-concept-grid,
+.coins-earn-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.coins-concept-card {
+  min-height: 219px;
+  padding: 24px;
+  border-radius: 16px;
+  background: #e6d3b5;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.coins-concept-card.highlight {
+  background: #e3a52f;
+}
+
+.coins-concept-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #e3a52f;
+}
+
+.coins-concept-card.highlight .coins-concept-icon {
+  background: #4a3123;
+}
+
+.coins-concept-icon img {
+  width: 24px;
+  height: 24px;
+}
+
+.coins-concept-card h3 {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.coins-concept-card p {
+  font-size: 13px;
+  margin: 0;
+}
+
+.coins-concept-note {
+  margin-top: auto;
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: #f7efe2;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.coins-concept-card.highlight .coins-concept-note {
+  background: #4a3123;
+  color: white;
+}
+
+.coins-info-strip {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 20px;
+  padding: 12px 24px;
+  border-radius: 10px;
+  background: #f7efe2;
+  font-size: 13px;
+}
+
+.coins-info-strip img {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.coins-info-strip p { margin: 0; }
+
+.coins-earn {
+  padding-top: 64px;
+  padding-bottom: 80px;
+}
+
+.coins-earn-banner {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px 32px;
+  border-radius: 18px;
+  background: #e6d3b5;
+  margin-bottom: 20px;
+}
+
+.coins-banner-icon {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #e3a52f;
+  display: grid;
+  place-items: center;
+}
+
+.coins-banner-icon img { width: 24px; height: 24px; }
+
+.coins-earn-banner h3 {
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.coins-earn-banner p {
+  font-size: 13px;
+  margin: 0;
+}
+
+.coins-earn-card {
+  min-height: 208px;
+  border-radius: 16px;
+  background: #e6d3b5;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.coins-earn-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #e3a52f;
+}
+
+.coins-earn-icon img { width: 24px; height: 24px; }
+
+.coins-earn-card h3 {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.coins-earn-card p {
+  font-size: 13px;
+  margin: 0;
+}
+
+.coins-earn-card > span {
+  margin-top: auto;
+  border-radius: 18px;
+  background: #e3a52f;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.coins-redeem {
+  padding-top: 75px;
+  padding-bottom: 95px;
+}
+
+.coins-redeem-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 540px) minmax(0, 628px);
+  gap: 32px;
+  align-items: center;
+}
+
+.coins-redeem-intro h3 {
+  font: 600 26px/1.35 Lora, Georgia, serif;
+  margin-bottom: 16px;
+}
+
+.coins-redeem-intro > p {
+  margin: 0 0 20px;
+  font-size: 15px;
+}
+
+.coins-redeem-notice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-radius: 8px;
+  background: #f7efe2;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.coins-redeem-notice img {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.coins-primary-btn {
+  display: inline-block;
+  padding: 14px 24px;
+  border-radius: 30px;
+  color: #4a3123;
+  background: #e3a52f;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.coins-rewards {
+  display: grid;
+  gap: 14px;
+}
+
+.coins-reward {
+  min-height: 68px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #e6d3b5;
+  border-radius: 12px;
+  padding: 12px 16px;
+}
+
+.coins-reward-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #e3a52f;
+}
+
+.coins-reward-icon img { width: 24px; height: 24px; }
+
+.coins-reward-text {
+  min-width: 0;
+  flex: 1;
+}
+
+.coins-reward-text h3 {
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+
+.coins-reward-text p {
+  font-size: 13px;
+  margin: 0;
+  color: #7a6553;
+}
+
+.coins-reward-arrow {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.coins-how {
+  padding-top: 70px;
+  padding-bottom: 80px;
+}
+
+.coins-step-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+  align-items: start;
+}
+
+.coins-step {
+  min-height: 174px;
+  padding: 22px 16px;
+  border-radius: 14px;
+  background: #e6d3b5;
+  text-align: center;
+}
+
+.coins-step-number {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 15px;
+  border-radius: 50%;
+  background: #e3a52f;
+  color: white;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.coins-step h3 {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.coins-step p {
+  font-size: 13px;
+  color: #7a6553;
+  margin: 0;
+}
+
+.coins-faq {
+  padding-top: 60px;
+  padding-bottom: 75px;
+}
+
+.coins-faq h2 { margin-bottom: 32px; }
+
+.coins-faq-list {
+  display: grid;
+  gap: 10px;
+}
+
+.coins-faq-item {
+  overflow: hidden;
+  border-radius: 12px;
+  background: #e6d3b5;
+}
+
+.coins-faq-item button {
+  width: 100%;
+  min-height: 72px;
+  padding: 20px 32px;
+  border: 0;
+  background: transparent;
+  color: #4a3123;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  text-align: left;
+  font: 600 15px/1.5 Inter, Arial, sans-serif;
+  cursor: pointer;
+}
+
+.coins-faq-item button img {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+
+.coins-faq-item button img.is-open {
+  transform: rotate(180deg);
+}
+
+.coins-faq-answer {
+  padding: 0 32px 20px;
+  margin: 0;
+  font-size: 14px;
+}
+
+.coins-faq-footer {
+  text-align: center;
+  padding-top: 22px;
+  font-size: 13px;
+  color: #7a6553;
+}
+
+.coins-faq-footer p { margin: 5px 0; }
+
+.coins-faq-links {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 15px;
+}
+
+.coins-faq-links a {
+  color: #97601f;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.coins-page a:focus-visible,
+.coins-page button:focus-visible {
+  outline: 2px solid #9b6118;
+  outline-offset: 3px;
+}
+
+@media (max-width: 950px) {
+  .coins-concept-grid,
+  .coins-earn-grid { grid-template-columns: 1fr; }
+
+  .coins-redeem-grid { grid-template-columns: 1fr; }
+
+  .coins-step-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  .coins-earn-card,
+  .coins-concept-card { min-height: auto; }
+}
+
+@media (max-width: 600px) {
+  .coins-hero { padding: 45px 20px; }
+
+  .coins-section { padding: 45px 0; }
+
+  .coins-step-grid { grid-template-columns: 1fr; }
+
+  .coins-earn-banner { padding: 20px; }
+
+  .coins-redeem-intro h3 { font-size: 23px; }
+
+  .coins-faq-item button { padding: 16px; }
+
+  .coins-faq-answer { padding: 0 16px 16px; }
+
+  .coins-faq-links { flex-wrap: wrap; gap: 12px; }
+}

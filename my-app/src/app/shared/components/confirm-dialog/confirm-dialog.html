@@ -1,0 +1,57 @@
+<div class="dialog-overlay" *ngIf="isOpen" (click)="onCancel()">
+    <div class="dialog-card" (click)="$event.stopPropagation()">
+      
+      <!-- Icon hiển thị linh hoạt dựa theo config.type -->
+      <div class="dialog-icon-wrapper" [ngClass]="config.type || 'warning'">
+        <!-- Warning (?) Icon -->
+        <ng-container *ngIf="(config.type || 'warning') === 'warning'">
+          <div class="icon-circle warning-circle">
+            <span class="question-mark">?</span>
+          </div>
+        </ng-container>
+  
+        <!-- Error (X) Icon -->
+        <ng-container *ngIf="config.type === 'error'">
+          <div class="icon-circle error-circle">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 6L6 18M6 6l12 12"/>
+            </svg>
+          </div>
+        </ng-container>
+  
+        <!-- Success (Check) Icon -->
+        <ng-container *ngIf="config.type === 'success'">
+          <div class="icon-circle success-circle">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 6L9 17l-5-5"/>
+            </svg>
+          </div>
+        </ng-container>
+      </div>
+  
+      <!-- Tiêu đề & Nội dung thông báo -->
+      <div class="dialog-content">
+        <h3 class="dialog-title">{{ config.title }}</h3>
+        <p class="dialog-message">{{ config.message }}</p>
+      </div>
+  
+      <!-- Cụm Nút Thao Tác -->
+      <div class="dialog-actions">
+        <button 
+          *ngIf="config.cancelText" 
+          type="button" 
+          class="btn btn-cancel" 
+          (click)="onCancel()">
+          {{ config.cancelText }}
+        </button>
+        
+        <button 
+          type="button" 
+          class="btn btn-confirm" 
+          (click)="onConfirm()">
+          {{ config.confirmText || 'Xác nhận' }}
+        </button>
+      </div>
+  
+    </div>
+  </div>

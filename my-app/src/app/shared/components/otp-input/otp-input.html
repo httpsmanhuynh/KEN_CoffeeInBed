@@ -1,0 +1,12 @@
+<div class="otp" role="group" aria-label="Nhập mã OTP gồm {{ length }} chữ số">
+  @for (i of slots; track i) {
+    <input #box class="otp__box" [class.is-invalid]="invalid" [class.is-filled]="digits[i]"
+           type="text" inputmode="numeric" pattern="[0-9]*"
+           [attr.maxlength]="i === 0 ? length : 1"
+           [attr.autocomplete]="i === 0 ? 'one-time-code' : 'off'"
+           [attr.aria-label]="'Chữ số ' + (i + 1)" [attr.aria-invalid]="invalid"
+           [disabled]="disabled"
+           (input)="onInput(i, $event)" (keydown)="onKeydown(i, $event)"
+           (paste)="onPaste(i, $event)" (focus)="box.select()" />
+  }
+</div>
