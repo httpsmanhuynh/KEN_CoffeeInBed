@@ -711,18 +711,20 @@
   border-top: 1px solid rgba(216, 199, 178, 0.62);
   border-bottom: 1px solid rgba(216, 199, 178, 0.62);
   display: flex;
-  padding: 9px 20px;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
   font-size: 12px;
   font-weight: 600;
   color: #4a3123;
 }
 
-.hist-col-code { width: 140px; }
-.hist-col-space { width: 180px; }
-.hist-col-date { width: 140px; }
-.hist-col-status { width: 130px; }
-.hist-col-amt { width: 140px; }
-.hist-col-act { width: 100px; }
+.hist-col-code { flex: 1.1; min-width: 120px; }
+.hist-col-space { flex: 2; min-width: 180px; }
+.hist-col-date { flex: 1; min-width: 105px; }
+.hist-col-status { flex: 1.1; min-width: 120px; }
+.hist-col-amt { flex: 1; min-width: 115px; }
+.hist-col-act { flex: 0.9; min-width: 100px; display: flex; justify-content: flex-end; }
 
 .empty-history-row {
   padding: 20px;
@@ -734,6 +736,7 @@
 .hist-trow {
   display: flex;
   align-items: center;
+  gap: 12px;
   min-height: 48px;
   padding: 11px 20px;
   border-bottom: 1px solid rgba(216, 199, 178, 0.62);

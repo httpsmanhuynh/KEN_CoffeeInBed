@@ -1056,13 +1056,17 @@
 .form-actions-buttons {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 12px;
-  margin-top: 6px;
+  margin-top: 12px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(216, 199, 178, 0.45);
 }
 
 .btn-save-space {
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   height: 44px;
   padding: 0 24px;

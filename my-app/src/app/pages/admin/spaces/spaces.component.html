@@ -573,26 +573,6 @@
           </div>
         </div>
 
-        <!-- Row 4: Image URL & Buffer note -->
-        <div class="form-amenities-row" data-name="Field Image">
-          <label class="field-label"
-            >URL Hình ảnh không gian · Thời gian dọn chuẩn bị tự động:
-            {{
-              formData.bookingMode === 'PRIVATE'
-                ? '15 phút (Phòng riêng)'
-                : '0 phút (Khu vực chung)'
-            }}</label
-          >
-          <div class="custom-input-wrap">
-            <input
-              type="text"
-              [(ngModel)]="formData.image"
-              placeholder="/images/ken-flow/listing-focus.png hoặc https://..."
-              class="form-input-control"
-            />
-          </div>
-        </div>
-
         <!-- Error Message if invalid -->
         <div *ngIf="formError" class="form-error-alert">
           <span>⚠ {{ formError }}</span>
@@ -606,7 +586,9 @@
             (click)="saveSpace()"
             data-name="Save button"
           >
-            <img src="/images/figma/check.svg" alt="" class="save-icon" />
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
             <span>{{ isEditing ? 'Lưu thay đổi' : 'Lưu Space' }}</span>
           </button>
           <button

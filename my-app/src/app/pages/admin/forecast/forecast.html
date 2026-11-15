@@ -51,46 +51,6 @@
             <input type="date" [value]="toDate" (change)="onDateChange('toDate', $event)" />
           </div>
         </label>
-
-        <div class="range-presets">
-          <span>Khoảng nhanh</span>
-          <div class="preset-row">
-            <button
-              type="button"
-              [class.active]="activeRangeDays === 7"
-              (click)="applyQuickRange(7)"
-            >
-              7 ngày
-            </button>
-            <button
-              type="button"
-              [class.active]="activeRangeDays === 14"
-              (click)="applyQuickRange(14)"
-            >
-              14 ngày
-            </button>
-            <button
-              type="button"
-              [class.active]="activeRangeDays === 30"
-              (click)="applyQuickRange(30)"
-            >
-              30 ngày
-            </button>
-            <button type="button" class="btn-refresh-inline" (click)="loadForecastBundle(true)">
-              {{ loading ? 'Đang tải...' : 'Làm mới' }}
-            </button>
-          </div>
-        </div>
-
-        <span class="update-badge" [class.fallback]="sourceMode !== 'ML_FORECAST'">
-          {{
-            sourceMode === 'ML_FORECAST'
-              ? 'Nguồn: ML Demand Forecast'
-              : sourceMode === 'HISTORICAL_FALLBACK'
-                ? 'Nguồn: Dự phóng lịch sử bán hàng'
-                : 'Chế độ dữ liệu mẫu ngoại tuyến'
-          }}
-        </span>
       </section>
 
       <div *ngIf="dateError" class="banner-error">{{ dateError }}</div>
