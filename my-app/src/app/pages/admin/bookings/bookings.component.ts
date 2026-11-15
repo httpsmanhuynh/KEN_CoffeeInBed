@@ -533,11 +533,16 @@ export class BookingsComponent implements OnInit, OnDestroy {
     );
   }
 
-  selectBooking(b: BookingRow): void {
+  selectBooking(b: BookingRow, scrollToDetail = false): void {
     this.selectedBooking = b;
     this.confirmAction = null;
     this.reconcileNote = '';
     this.loadBookingDetail(b.id);
+    if (scrollToDetail && typeof document !== 'undefined') {
+      setTimeout(() => {
+        document.getElementById('booking-detail-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 40);
+    }
   }
 
   private loadBookingDetail(bookingId: string): void {

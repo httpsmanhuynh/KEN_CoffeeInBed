@@ -157,7 +157,9 @@
         *ngFor="let b of paginatedBookings"
         class="table-row"
         [class.selected]="selectedBooking?.id === b.id"
-        (click)="selectBooking(b)"
+        tabindex="0"
+        (click)="selectBooking(b, true)"
+        (keydown.enter)="selectBooking(b, true)"
       >
         <div class="col col-id">
           <span class="cell-code">{{ b.code }}</span>
@@ -259,7 +261,7 @@
   </div>
 
   <!-- Dynamic Detail Block: Selected Booking -->
-  <div class="detail-block" *ngIf="selectedBooking as sel" data-name="DetailBlock">
+  <div id="booking-detail-panel" class="detail-block" *ngIf="selectedBooking as sel" data-name="DetailBlock">
     <div class="detail-header" data-name="DetailHeader">
       <img src="/images/figma/eye-view-fill.svg" alt="" class="detail-header-icon" />
       <h2 class="detail-title">Đơn đang chọn · {{ sel.code }}</h2>

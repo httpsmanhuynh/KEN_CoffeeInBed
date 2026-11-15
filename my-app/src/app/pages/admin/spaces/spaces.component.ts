@@ -45,7 +45,7 @@ export class SpacesComponent implements OnInit, OnDestroy {
   activeTab: 'ALL' | 'ACTIVE' | 'MAINTENANCE' | 'INACTIVE' = 'ALL';
   sortAscending = true;
   currentPage = 1;
-  readonly pageSize = 8;
+  readonly pageSize = 10;
 
   formData: SpaceFormData = this.getEmptyForm();
   formError = '';

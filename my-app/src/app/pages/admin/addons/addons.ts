@@ -45,6 +45,7 @@ export class Addons implements OnInit, OnDestroy {
   selectedCategoryFilter = 'Tất cả';
 
   currentPage = 1;
+  drinkPage = 1;
   readonly pageSize = 10;
 
   formData: AddonFormData = this.emptyForm();
@@ -189,7 +190,26 @@ export class Addons implements OnInit, OnDestroy {
     this.currentPage = p;
   }
 
-  selectProduct(product: ProductAddon): void {
+  get drinkTotalPages(): number {
+    return Math.max(1, Math.ceil(this.drinkProducts.length / this.pageSize));
+  }
+
+  get paginatedDrinkProducts(): ProductAddon[] {
+    const safe = Math.min(this.drinkPage, this.drinkTotalPages);
+    const start = (safe - 1) * this.pageSize;
+    return this.drinkProducts.slice(start, start + this.pageSize);
+  }
+
+  get drinkPageNumbers(): number[] {
+    return Array.from({ length: this.drinkTotalPages }, (_, i) => i + 1);
+  }
+
+  goToDrinkPage(p: number): void {
+    if (p < 1 || p > this.drinkTotalPages) return;
+    this.drinkPage = p;
+  }
+
+  selectProduct(product: ProductAddon, scrollToEditor = false): void {
     this.selectedProduct = product;
     this.isCreating = false;
     this.formData = {
@@ -205,6 +225,11 @@ export class Addons implements OnInit, OnDestroy {
       image: product.image,
     };
     this.formError = '';
+    if (scrollToEditor && typeof document !== 'undefined') {
+      setTimeout(() => {
+        document.getElementById('addon-editor-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 40);
+    }
   }
 
   openCreateForm(): void {

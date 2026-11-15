@@ -115,7 +115,7 @@
         <label class="kf-voucher">Mã ưu đãi (không bắt buộc)
           <div><input type="text" [value]="state.draft().voucher" (input)="setContact('voucher',$any($event.target).value)" placeholder="Nhập mã ưu đãi"><button type="button" (click)="checkVoucher()">Áp dụng</button></div>
         </label>
-        <small class="kf-inline-feedback" role="status" *ngIf="voucherMessage">{{ voucherMessage }}</small>
+        <small class="kf-inline-feedback" [class.kf-inline-success]="voucherSuccess" role="status" *ngIf="voucherMessage">{{ voucherMessage }}</small>
         <div class="kf-sum-row"><span>Tạm tính</span><strong class="kf-large-money">{{ money(state.subtotal) }}</strong></div>
         <div class="kf-sum-row" *ngIf="memberDiscount > 0"><span>Ưu đãi thành viên (5%)</span><strong>−{{ money(memberDiscount) }}</strong></div>
         <div class="kf-sum-row" *ngIf="appliedVoucherDiscount > 0"><span>Mã giảm giá ({{ appliedVoucherCode }})</span><strong>−{{ money(appliedVoucherDiscount) }}</strong></div>

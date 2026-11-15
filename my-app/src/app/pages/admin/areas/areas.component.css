@@ -236,12 +236,76 @@
   gap: 10px;
   padding: 16px 18px;
   border-bottom: 1px solid rgba(216, 199, 178, 0.62);
-  background-color: #f7efe2;
+  background-color: #fffcf7;
+  cursor: pointer;
   transition: background-color 0.15s ease;
 }
 
-.trow-item:hover {
-  background-color: #f0e6d6;
+.trow-item:hover,
+.trow-item:focus-visible {
+  background-color: #f7efe2;
+  outline: none;
+}
+
+.trow-item.is-selected {
+  background-color: #f4e6d0;
+  box-shadow: inset 3px 0 0 #a9763f;
+}
+
+.admin-pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  background-color: #fffcf7;
+  border-top: 1px solid rgba(216, 199, 178, 0.45);
+  flex-wrap: wrap;
+}
+
+.admin-pagination-info {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(74, 49, 35, 0.72);
+  font-weight: 500;
+}
+
+.admin-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-page-nav,
+.btn-page-num {
+  min-width: 32px;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(216, 199, 178, 0.75);
+  background: #fffcf7;
+  color: #4a3123;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-page-nav:hover:not(:disabled),
+.btn-page-num:hover:not(.active) {
+  background: #f7efe2;
+  border-color: #a9763f;
+}
+
+.btn-page-num.active {
+  background: #4a3123;
+  border-color: #4a3123;
+  color: #fffcf7;
+}
+
+.btn-page-nav:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .td-name {

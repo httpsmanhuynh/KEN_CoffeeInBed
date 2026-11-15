@@ -503,11 +503,19 @@
   height: 64px;
   background-color: #fffcf7;
   border-bottom: 1px solid rgba(216, 199, 178, 0.62);
+  cursor: pointer;
   transition: background-color 0.15s ease;
 }
 
-.table-data-row:hover {
-  background-color: rgba(247, 239, 226, 0.4);
+.table-data-row:hover,
+.table-data-row:focus-visible {
+  background-color: rgba(247, 239, 226, 0.7);
+  outline: none;
+}
+
+.table-data-row.is-selected {
+  background-color: #f4e6d0;
+  box-shadow: inset 3px 0 0 #a9763f;
 }
 
 .table-data-row.row-inactive {
