@@ -24,23 +24,6 @@
     </div>
   </div>
   <section class="kf-container kf-drink-catalog">
-    <section class="kf-rec-bar kf-rec-bar--inclusion" *ngIf="recommendedItems.length" aria-label="Gợi ý dành cho bạn">
-      <div class="kf-rec-head">
-        <strong>✨ Gợi ý món Inclusion dành cho bạn</strong>
-        <small class="kf-rec-persona-badge" *ngIf="state.clusterPersona || state.clusterId !== null">
-          <ng-container *ngIf="state.clusterId !== null">Nhóm khách #{{ state.clusterId }}</ng-container>
-          <ng-container *ngIf="state.clusterId !== null && state.clusterPersona"> · </ng-container>
-          <ng-container *ngIf="state.clusterPersona">{{ state.clusterPersona }}</ng-container>
-        </small>
-      </div>
-      <div class="kf-rec-list">
-        <button type="button" class="kf-rec-chip" [class.is-selected]="recommendedQty(item) > 0" *ngFor="let item of recommendedItems" (click)="addRecommended(item)" [disabled]="!canAddRecommended(item)">
-          <img [src]="state.image(item.image)" [alt]="item.name">
-          <span>{{ item.name }}<small>{{ state.inclusionSurcharge(item) > 0 ? '+' + money(state.inclusionSurcharge(item)) + ' phụ thu' : 'Trong gói (0đ)' }}</small></span>
-          <b>{{ recommendedQty(item) ? '×' + recommendedQty(item) : '+' }}</b>
-        </button>
-      </div>
-    </section>
     <div class="kf-filter-line">
       <label class="kf-search"><input type="search" [(ngModel)]="searchText" placeholder="Tìm đồ uống theo tên, ví dụ matcha, cold brew…"></label>
       <select [(ngModel)]="extraOnly" aria-label="Lọc phụ thu"><option [ngValue]="false">Phụ thu: Tất cả</option><option [ngValue]="true">Có phụ thu</option></select>
