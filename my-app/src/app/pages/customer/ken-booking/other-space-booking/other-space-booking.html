@@ -187,10 +187,7 @@
                 <b>{{ money(drink.quantity * drink.surcharge) }}</b>
               </article>
               <article class="kf-drink-entry-item" *ngFor="let pastry of state.selectedPastries">
-                <img
-                  [src]="state.image(pastry.product.image)"
-                  [alt]="pastry.product.name"
-                />
+                <img [src]="state.image(pastry.product.image)" [alt]="pastry.product.name" />
                 <span
                   ><strong>{{ pastry.product.name }}</strong
                   ><small>{{ pastry.quantity }} bánh · Miễn phí theo gói</small></span
@@ -220,9 +217,16 @@
         >
           <div class="kf-rec-head">
             <strong>✨ Gợi ý món Inclusion dành cho bạn</strong>
-            <small class="kf-rec-persona-badge" *ngIf="state.clusterPersona || state.clusterId !== null">
-              <ng-container *ngIf="state.clusterId !== null">Nhóm khách #{{ state.clusterId }}</ng-container>
-              <ng-container *ngIf="state.clusterId !== null && state.clusterPersona"> · </ng-container>
+            <small
+              class="kf-rec-persona-badge"
+              *ngIf="state.clusterPersona || state.clusterId !== null"
+            >
+              <ng-container *ngIf="state.clusterId !== null"
+                >Nhóm khách #{{ state.clusterId }}</ng-container
+              >
+              <ng-container *ngIf="state.clusterId !== null && state.clusterPersona">
+                ·
+              </ng-container>
               <ng-container *ngIf="state.clusterPersona">{{ state.clusterPersona }}</ng-container>
             </small>
           </div>
@@ -275,9 +279,16 @@
         >
           <div class="kf-rec-head">
             <strong>✨ Gợi ý Add-on dành cho bạn</strong>
-            <small class="kf-rec-persona-badge" *ngIf="state.clusterPersona || state.clusterId !== null">
-              <ng-container *ngIf="state.clusterId !== null">Nhóm khách #{{ state.clusterId }}</ng-container>
-              <ng-container *ngIf="state.clusterId !== null && state.clusterPersona"> · </ng-container>
+            <small
+              class="kf-rec-persona-badge"
+              *ngIf="state.clusterPersona || state.clusterId !== null"
+            >
+              <ng-container *ngIf="state.clusterId !== null"
+                >Nhóm khách #{{ state.clusterId }}</ng-container
+              >
+              <ng-container *ngIf="state.clusterId !== null && state.clusterPersona">
+                ·
+              </ng-container>
               <ng-container *ngIf="state.clusterPersona">{{ state.clusterPersona }}</ng-container>
             </small>
           </div>
@@ -445,7 +456,11 @@
                 <span>0đ</span>
               </div>
               <div class="kf-sum-subitem" *ngFor="let drink of state.selectedDrinks">
-                <span>{{ drink.product.name }} <small *ngIf="drink.variantLabel">({{ drink.variantLabel }})</small> × {{ drink.quantity }}</span>
+                <span
+                  >{{ drink.product.name }}
+                  <small *ngIf="drink.variantLabel">({{ drink.variantLabel }})</small> ×
+                  {{ drink.quantity }}</span
+                >
                 <span>{{ money(drink.quantity * drink.surcharge) }}</span>
               </div>
               <div class="kf-sum-subitem" *ngFor="let pastry of state.selectedPastries">
@@ -476,7 +491,11 @@
             </div>
             <div class="kf-sum-sublist">
               <div class="kf-sum-subitem" *ngFor="let extraItem of state.selectedExtrasList">
-                <span>{{ extraItem.extra.title }} <small *ngIf="extraItem.variantLabel">({{ extraItem.variantLabel }})</small> × {{ extraItem.quantity }}</span>
+                <span
+                  >{{ extraItem.extra.title }}
+                  <small *ngIf="extraItem.variantLabel">({{ extraItem.variantLabel }})</small> ×
+                  {{ extraItem.quantity }}</span
+                >
                 <span>{{ money(extraItem.lineTotal) }}</span>
               </div>
               <div class="kf-sum-subempty" *ngIf="!state.selectedExtrasList.length">
@@ -489,7 +508,8 @@
             <span>Tạm tính</span><strong>{{ money(state.subtotal) }}</strong>
           </div>
           <div class="kf-sum-row" *ngIf="state.silverDiscount > 0">
-            <span>{{ tierDiscountLabel }}</span><strong>−{{ money(state.silverDiscount) }}</strong>
+            <span>{{ state.tierDiscountLabel }}</span
+            ><strong>-{{ money(state.silverDiscount) }}</strong>
           </div>
           <div class="kf-sum-row kf-total">
             <span>Thành tiền</span><strong>{{ money(state.total) }}</strong>
@@ -512,14 +532,6 @@
         >
           {{ checkingSession || checkingAvailability ? 'Đang kiểm tra…' : 'Đặt chỗ ngay' }}
         </button>
-        <p
-          class="kf-inline-feedback"
-          *ngIf="feedback"
-          role="alert"
-          style="margin-top: 10px"
-        >
-          {{ feedback }}
-        </p>
         <p class="kf-help-mini" *ngIf="showAddons">Kiểm tra tổng giá trước khi thanh toán.</p>
       </div>
     </aside>
