@@ -21,12 +21,15 @@ describe('PointsTierPage', () => {
 
   it('should create', () => expect(component).toBeTruthy());
 
-  it('shows the 3 transactions from the design and filters by date', () => {
-    expect(component.rows.length).toBe(3);
-    component.fromDate = '2026-10-15';
-    component.applyFilter();
-    expect(component.rows.length).toBe(2);
-    component.clearFilter();
-    expect(component.rows.length).toBe(3);
+  it('calculates tier info and progress accurately', () => {
+    component.tierCode = 'BASIC';
+    component.tierPoints = 500;
+    expect(component.tierInfo.name).toBe('Mới');
+    expect(component.progressPercent).toBe(50);
+
+    component.tierCode = 'SILVER';
+    component.tierPoints = 3000;
+    expect(component.tierInfo.name).toBe('Bạc');
+    expect(component.tierInfo.discount).toBe(5);
   });
 });

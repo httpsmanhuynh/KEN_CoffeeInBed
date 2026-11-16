@@ -15,9 +15,15 @@ export class App implements OnInit, OnDestroy {
   private readonly smoothScroll = inject(SmoothScrollService);
 
   protected readonly title = signal('my-app');
+  protected readonly fontScaleLevel = signal<0 | 1 | 2>(0);
+  private readonly fontScales = ['100%', '105%', '110%'] as const;
 
   get isAdminRoute(): boolean {
     return this.router.url.startsWith('/admin');
+  }
+
+  get fontScaleLabel(): string {
+    return this.fontScales[this.fontScaleLevel()];
   }
 
   constructor() {
@@ -32,6 +38,23 @@ export class App implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.smoothScroll.destroy();
+    if (typeof document !== 'undefined') {
+      document.documentElement.style.fontSize = '';
+    }
+  }
+
+  cycleFontScale(event?: Event): void {
+    const nextLevel = ((this.fontScaleLevel() + 1) % this.fontScales.length) as 0 | 1 | 2;
+    this.fontScaleLevel.set(nextLevel);
+    if (typeof document !== 'undefined') {
+      document.documentElement.style.fontSize = nextLevel === 0 ? '' : this.fontScales[nextLevel];
+    }
+    this.animateAArrowUp(event);
+  }
+
+  animateAArrowUp(event?: Event): void {
+    const target = event?.currentTarget instanceof Element ? event.currentTarget : null;
+    this.smoothScroll.animateLucideAArrowUp(target);
   }
 
   @HostListener('document:click', ['$event'])

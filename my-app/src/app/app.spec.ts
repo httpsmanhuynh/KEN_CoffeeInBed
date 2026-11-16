@@ -65,4 +65,28 @@ describe('App', () => {
     expect(header.member).toBe(true);
     expect(header.userName).toBe(member.fullName);
   });
+
+  it('renders @lucide-animated/a-arrow-up control and cycles font scale on click', () => {
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    const btn = el.querySelector<HTMLButtonElement>('[data-lucide-animated="a-arrow-up"]');
+    expect(btn).toBeTruthy();
+    expect(btn?.querySelectorAll('svg path').length).toBe(4);
+
+    btn!.click();
+    fixture.detectChanges();
+    expect(document.documentElement.style.fontSize).toBe('105%');
+    expect(el.querySelector('.ken-lucide-a-arrow-up-badge')?.textContent?.trim()).toBe('105%');
+
+    btn!.click();
+    fixture.detectChanges();
+    expect(document.documentElement.style.fontSize).toBe('110%');
+    expect(el.querySelector('.ken-lucide-a-arrow-up-badge')?.textContent?.trim()).toBe('110%');
+
+    btn!.click();
+    fixture.detectChanges();
+    expect(document.documentElement.style.fontSize).toBe('');
+    expect(el.querySelector('.ken-lucide-a-arrow-up-badge')).toBeNull();
+  });
 });

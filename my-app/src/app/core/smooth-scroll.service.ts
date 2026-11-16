@@ -18,6 +18,7 @@ export class SmoothScrollService {
   private rafId: number | null = null;
   private initialized = false;
   private readonly spotlightWired = new WeakSet<HTMLElement>();
+  private readonly lucideAnimatedWired = new WeakSet<Element>();
   private anchorClickHandler: ((event: MouseEvent) => void) | null = null;
   private adminRefreshHandler: (() => void) | null = null;
 
@@ -536,6 +537,344 @@ export class SmoothScrollService {
 
     // 6. React Bits-Style Spotlight & Interactive Card Glow
     this.attachCardSpotlight();
+
+    // 7. Lucide Animated-Style Icon Micro-Animations
+    this.attachLucideAnimatedIcons();
+  }
+
+  animateLucideAArrowUp(target?: Element | null): void {
+    if (this.isUnsupportedEnv || this.prefersReducedMotion) {
+      return;
+    }
+
+    const host =
+      target ??
+      (typeof document !== 'undefined'
+        ? document.querySelector('[data-lucide-animated="a-arrow-up"]')
+        : null);
+    if (!(host instanceof Element)) {
+      return;
+    }
+
+    this.ngZone.runOutsideAngular(() => {
+      const letters = host.querySelectorAll('[data-part="letter"]');
+      const arrows = host.querySelectorAll('[data-part="arrow"]');
+
+      if (letters.length > 0) {
+        gsap.fromTo(
+          letters,
+          { opacity: 0, scale: 0.8, transformOrigin: '35% 65%' },
+          {
+            opacity: 1,
+            scale: 1,
+            duration: 0.3,
+            ease: 'power2.out',
+            overwrite: true,
+            clearProps: 'transform,opacity',
+          },
+        );
+      }
+
+      if (arrows.length > 0) {
+        gsap.fromTo(
+          arrows,
+          { opacity: 0, y: 10 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.3,
+            delay: 0.2,
+            ease: 'back.out(1.7)',
+            overwrite: true,
+            clearProps: 'transform,opacity',
+          },
+        );
+      }
+    });
+  }
+
+  private attachLucideAnimatedIcons(): void {
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    // 1. Standalone @lucide-animated/a-arrow-up instances (not already bound by AppComponent)
+    document
+      .querySelectorAll('[data-lucide-animated="a-arrow-up"]:not(.ken-lucide-a-arrow-up-btn)')
+      .forEach((el) => {
+        if (this.lucideAnimatedWired.has(el)) {
+          return;
+        }
+        this.lucideAnimatedWired.add(el);
+        const replay = () => this.animateLucideAArrowUp(el);
+        el.addEventListener('pointerenter', replay, { passive: true });
+        el.addEventListener('focus', replay, { passive: true });
+        el.addEventListener('click', replay, { passive: true });
+      });
+
+    // 2. Admin Sidebar Lucide SVGs (.admin-sidebar .nav-link & .btn-logout)
+    this.wireLucideHover('.admin-sidebar .nav-link', (link) => {
+      this.animateAdminNavIcon(link);
+    });
+
+    this.wireLucideHover('.admin-sidebar .btn-logout', (btn) => {
+      const arrows = btn.querySelectorAll('svg polyline, svg line');
+      if (arrows.length > 0) {
+        gsap.to(arrows, {
+          keyframes: [
+            { x: 3.5, duration: 0.16, ease: 'power2.out' },
+            { x: 0, duration: 0.22, ease: 'power2.inOut' },
+          ],
+          overwrite: true,
+          clearProps: 'transform',
+        });
+      }
+    });
+
+    // 3. Customer & Admin Interactive Cards, Icon Badges, and Controls
+    const cardIconTriggers: ReadonlyArray<{ trigger: string; icon: string; style: 'pop' | 'nudgeRight' | 'nudgeLeft' | 'spin' }> = [
+      { trigger: '.kh-advantage', icon: '.kh-advantage-icon img, .kh-advantage-icon svg', style: 'pop' },
+      { trigger: '.kh-addon', icon: '.kh-addon-symbol', style: 'pop' },
+      { trigger: '.kh-member-grid > div', icon: 'span img, span svg', style: 'pop' },
+      { trigger: '.kh-price-card', icon: '.kh-price-icon img, .kh-price-icon svg', style: 'pop' },
+      { trigger: '.kh-mascot-card', icon: '.kh-mini-pill img', style: 'pop' },
+      { trigger: '.category-card', icon: '.category-icon img, .category-icon svg', style: 'pop' },
+      { trigger: '.ks-zone', icon: '.ks-zone-number span', style: 'nudgeRight' },
+      { trigger: '.journeys-card', icon: '.journeys-header-icon img', style: 'pop' },
+      { trigger: '.journeys-primary-button', icon: 'img', style: 'nudgeRight' },
+      { trigger: '.account-sidebar .menu .item, app-account-sidebar .menu .item', icon: 'img, svg', style: 'pop' },
+      { trigger: '.ft__social li, .ft__contact li', icon: 'img, svg', style: 'pop' },
+      { trigger: '.search-btn, .pw__eye, .burger, .account__toggle', icon: 'svg, img', style: 'pop' },
+      { trigger: '.nav-arrow, .btn-topbar-nav, .btn-page-nav, .btn-page-arrow', icon: 'svg, img', style: 'pop' },
+      { trigger: '.kf-back-link, .kc-back-link', icon: 'svg, img', style: 'nudgeLeft' },
+      { trigger: '.admin-topbar .btn-refresh', icon: 'img, svg', style: 'spin' },
+      {
+        trigger: '.metric-card, .stat-card, .kpi-card, .kpi-box, .area-summary-card, .space-stat-card',
+        icon: 'svg, img[src$=".svg"]',
+        style: 'pop',
+      },
+    ];
+
+    for (const rule of cardIconTriggers) {
+      this.wireLucideHover(rule.trigger, (host) => {
+        const targets = host.querySelectorAll(rule.icon);
+        if (targets.length === 0) {
+          return;
+        }
+        if (rule.style === 'nudgeRight') {
+          gsap.to(targets, {
+            keyframes: [
+              { x: 3.5, duration: 0.16, ease: 'power2.out' },
+              { x: 0, duration: 0.22, ease: 'power2.inOut' },
+            ],
+            overwrite: true,
+            clearProps: 'transform',
+          });
+          return;
+        }
+        if (rule.style === 'nudgeLeft') {
+          gsap.to(targets, {
+            keyframes: [
+              { x: -3.5, duration: 0.16, ease: 'power2.out' },
+              { x: 0, duration: 0.22, ease: 'power2.inOut' },
+            ],
+            overwrite: true,
+            clearProps: 'transform',
+          });
+          return;
+        }
+        if (rule.style === 'spin') {
+          if (host.classList.contains('spinning')) {
+            return;
+          }
+          gsap.fromTo(
+            targets,
+            { rotation: 0 },
+            {
+              rotation: 180,
+              duration: 0.38,
+              ease: 'power2.out',
+              overwrite: true,
+              clearProps: 'transform',
+            },
+          );
+          return;
+        }
+        gsap.to(targets, {
+          keyframes: [
+            { scale: 1.15, y: -2, duration: 0.18, ease: 'power2.out' },
+            { scale: 1, y: 0, duration: 0.26, ease: 'back.out(2)' },
+          ],
+          transformOrigin: '50% 50%',
+          overwrite: true,
+          clearProps: 'transform',
+        });
+      });
+    }
+  }
+
+  private wireLucideHover(selector: string, animate: (el: HTMLElement) => void): void {
+    const elements = document.querySelectorAll(selector);
+    elements.forEach((el) => {
+      if (!(el instanceof HTMLElement) || this.lucideAnimatedWired.has(el)) {
+        return;
+      }
+      this.lucideAnimatedWired.add(el);
+      if (!el.hasAttribute('data-lucide-animated')) {
+        el.setAttribute('data-lucide-animated', 'true');
+      }
+      el.addEventListener(
+        'pointerenter',
+        () => {
+          if (this.prefersReducedMotion) {
+            return;
+          }
+          this.ngZone.runOutsideAngular(() => animate(el));
+        },
+        { passive: true },
+      );
+    });
+  }
+
+  private animateAdminNavIcon(link: HTMLElement): void {
+    const svg = link.querySelector('svg');
+    if (!(svg instanceof SVGElement)) {
+      return;
+    }
+
+    const navId = link.getAttribute('data-name') ?? '';
+    switch (navId) {
+      case 'nav-dashboard': {
+        const rects = svg.querySelectorAll('rect');
+        if (rects.length > 0) {
+          gsap.fromTo(
+            rects,
+            { scale: 0.72, transformOrigin: '50% 50%' },
+            { scale: 1, duration: 0.34, stagger: 0.045, ease: 'back.out(2.2)', overwrite: true, clearProps: 'transform' },
+          );
+        }
+        break;
+      }
+      case 'nav-booking': {
+        gsap.to(svg, {
+          keyframes: [{ y: -2, duration: 0.14 }, { y: 0, duration: 0.2 }],
+          overwrite: true,
+          clearProps: 'transform',
+        });
+        const check = svg.querySelector('path');
+        if (check) {
+          gsap.fromTo(
+            check,
+            { scale: 0.5, opacity: 0.25, transformOrigin: '50% 50%' },
+            { scale: 1, opacity: 1, duration: 0.28, delay: 0.1, ease: 'back.out(2)', overwrite: true, clearProps: 'transform,opacity' },
+          );
+        }
+        break;
+      }
+      case 'nav-cust': {
+        const parts = svg.querySelectorAll('circle, path');
+        if (parts.length > 0) {
+          gsap.fromTo(
+            parts,
+            { x: -2.5 },
+            { x: 0, duration: 0.3, stagger: 0.045, ease: 'power2.out', overwrite: true, clearProps: 'transform' },
+          );
+        }
+        break;
+      }
+      case 'nav-zone': {
+        gsap.fromTo(
+          svg,
+          { y: -4 },
+          { y: 0, duration: 0.42, ease: 'bounce.out', overwrite: true, clearProps: 'transform' },
+        );
+        const dot = svg.querySelector('circle');
+        if (dot) {
+          gsap.fromTo(
+            dot,
+            { scale: 0.65, transformOrigin: '50% 50%' },
+            { scale: 1, duration: 0.3, ease: 'back.out(2)', overwrite: true, clearProps: 'transform' },
+          );
+        }
+        break;
+      }
+      case 'nav-space': {
+        const lines = svg.querySelectorAll('path');
+        if (lines.length > 0) {
+          gsap.fromTo(
+            lines,
+            { scale: 0.78, transformOrigin: '50% 50%' },
+            { scale: 1, duration: 0.3, stagger: 0.06, ease: 'power2.out', overwrite: true, clearProps: 'transform' },
+          );
+        }
+        break;
+      }
+      case 'nav-pkg': {
+        gsap.to(svg, {
+          keyframes: [
+            { y: -2.5, scale: 1.08, duration: 0.16, ease: 'power2.out' },
+            { y: 0, scale: 1, duration: 0.24, ease: 'back.out(1.8)' },
+          ],
+          transformOrigin: '50% 50%',
+          overwrite: true,
+          clearProps: 'transform',
+        });
+        break;
+      }
+      case 'nav-addon': {
+        const steam = svg.querySelectorAll('line');
+        if (steam.length > 0) {
+          gsap.fromTo(
+            steam,
+            { y: 3, opacity: 0.25 },
+            { y: 0, opacity: 1, duration: 0.35, stagger: 0.06, ease: 'power2.out', overwrite: true, clearProps: 'transform,opacity' },
+          );
+        }
+        gsap.to(svg, {
+          keyframes: [{ rotation: -5, duration: 0.15 }, { rotation: 0, duration: 0.2 }],
+          transformOrigin: '50% 60%',
+          overwrite: true,
+          clearProps: 'transform',
+        });
+        break;
+      }
+      case 'nav-voucher': {
+        gsap.to(svg, {
+          keyframes: [
+            { rotation: -8, scale: 1.06, duration: 0.14 },
+            { rotation: 5, scale: 1.04, duration: 0.14 },
+            { rotation: 0, scale: 1, duration: 0.16 },
+          ],
+          transformOrigin: '50% 50%',
+          overwrite: true,
+          clearProps: 'transform',
+        });
+        break;
+      }
+      default: {
+        const polylines = svg.querySelectorAll('polyline');
+        if (polylines.length >= 2) {
+          gsap.fromTo(
+            polylines[0],
+            { y: 2, opacity: 0.4 },
+            { y: 0, opacity: 1, duration: 0.26, ease: 'power2.out', overwrite: true, clearProps: 'transform,opacity' },
+          );
+          gsap.fromTo(
+            polylines[1],
+            { x: -3, y: 3, opacity: 0.2 },
+            { x: 0, y: 0, opacity: 1, duration: 0.28, delay: 0.1, ease: 'back.out(1.8)', overwrite: true, clearProps: 'transform,opacity' },
+          );
+        } else {
+          gsap.to(svg, {
+            keyframes: [{ scale: 1.12, duration: 0.16 }, { scale: 1, duration: 0.22 }],
+            transformOrigin: '50% 50%',
+            overwrite: true,
+            clearProps: 'transform',
+          });
+        }
+        break;
+      }
+    }
   }
 
   private attachCardSpotlight(): void {

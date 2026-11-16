@@ -265,11 +265,11 @@
       <div class="heading-actions">
         <button
           type="button"
-          class="btn-action-outline"
-          [class.btn-pause]="item.status === 'ACTIVE'"
-          (click)="toggleStatus(item)"
+          class="btn-action-primary"
+          (click)="openEditForm(item)"
         >
-          {{ item.status === 'ACTIVE' ? 'Tạm ngưng gói' : 'Kích hoạt gói' }}
+          <img src="/images/figma/sparkles.svg" alt="" class="btn-icon" />
+          <span>Sửa gói</span>
         </button>
       </div>
     </div>

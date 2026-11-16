@@ -117,4 +117,42 @@ describe('KenBookingState', () => {
     expect(state.selectedDrinkCount).toBe(1);
     expect(state.drinkSurcharge).toBe(55000);
   });
+
+  it('supports hot/cold variants and size selection only for Matcha Latte and Hojicha Latte (M = 55k, L = 60k)', () => {
+    const state = new KenBookingState();
+    // Default Focus Pod 4h has 1 included drink, default drink is matcha
+    expect(state.requiredDrinkCount).toBe(1);
+    expect(state.isSizeSelectable({ id: 'matcha' })).toBe(true);
+    expect(state.isSizeSelectable({ id: 'hojicha' })).toBe(true);
+    expect(state.isSizeSelectable({ id: 'coffee' })).toBe(false);
+
+    // Default matcha is Size M (55k) -> surcharge is 55000 - 50000 = 5000
+    expect(state.getDrinkVariant('matcha')).toBe('Lạnh, M (500 ml)');
+    expect(state.drinkSurcharge).toBe(5000);
+
+    // Change size to L -> price becomes 60k -> surcharge is 60000 - 50000 = 10000
+    state.setDrinkSize('matcha', 'L');
+    expect(state.getDrinkVariant('matcha')).toBe('Lạnh, L (700 ml)');
+    expect(state.drinkSurcharge).toBe(10000);
+
+    // Switch temperature to Nóng -> variant is Nóng, L (700 ml)
+    state.setDrinkTemp('matcha', 'Nóng');
+    expect(state.getDrinkVariant('matcha')).toBe('Nóng, L (700 ml)');
+    expect(state.drinkSurcharge).toBe(10000);
+
+    // Switch to Size M -> 55k
+    state.setDrinkSize('matcha', 'M');
+    expect(state.getDrinkVariant('matcha')).toBe('Nóng, M (500 ml)');
+    expect(state.drinkSurcharge).toBe(5000);
+
+    // Normal drink (coffee) supports hot/cold but no size
+    state.setDrinkQuantity('matcha', 0);
+    state.setDrinkQuantity('coffee', 1);
+    expect(state.drinkSurcharge).toBe(0);
+    state.setDrinkTemp('coffee', 'Nóng');
+    expect(state.getDrinkVariant('coffee')).toBe('Nóng');
+    state.setDrinkTemp('coffee', 'Lạnh');
+    expect(state.getDrinkVariant('coffee')).toBe('Lạnh');
+    expect(state.drinkSurcharge).toBe(0);
+  });
 });

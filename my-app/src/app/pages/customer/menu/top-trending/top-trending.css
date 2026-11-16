@@ -19,9 +19,39 @@ figure {
 
 /* Hero Banner */
 .trending-hero-band {
-  background: linear-gradient(180deg, #f4ebdf 0%, #e9dbc7 100%);
-  border-bottom: 1px solid rgba(216, 199, 178, 0.7);
-  box-shadow: 0 4px 16px rgba(74, 49, 35, 0.03);
+  background: linear-gradient(135deg, #42291a 0%, #2f1b10 100%);
+  border-bottom: 1px solid rgba(227, 165, 47, 0.25);
+  box-shadow: 0 8px 28px rgba(42, 26, 17, 0.15);
+  color: #fffcf7;
+}
+
+.trending-hero-band .crumb {
+  color: #d0c0ad;
+}
+.trending-hero-band .crumb a {
+  color: #e6d3b5;
+}
+.trending-hero-band .crumb a:hover {
+  color: #fffcf7;
+}
+.trending-hero-band .crumb b {
+  color: #fffcf7;
+}
+.trending-hero-band .hero__eyebrow {
+  color: #e3a52f;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+.trending-hero-band .hero__title {
+  color: #fffcf7;
+}
+.trending-hero-band .hero__desc {
+  color: #d9c8b3;
+}
+.trending-hero-band .hero__photo {
+  border: 2px solid rgba(227, 165, 47, 0.35);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.28);
 }
 
 /* Breadcrumb */
