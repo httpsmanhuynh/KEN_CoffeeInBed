@@ -10,7 +10,9 @@ import { KenBookingState, kenMoney } from '../booking-state';
 export class KenDrinkSelectionComponent {
   readonly money = kenMoney;
 
-  constructor(public state: KenBookingState) {}
+  constructor(public state: KenBookingState) {
+    this.state.loadClusterRecommendations(true);
+  }
 
   get drinks() {
     return this.state.drinks;

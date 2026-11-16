@@ -317,6 +317,18 @@ async function collectClusterPreferences(db, mlClusterId) {
   return { clusterItemScores, clusterAddonScores };
 }
 
+async function findClusterRecDoc(db, clusterId) {
+  for (const colName of ['ml_cluster_recommendations', 'ml_cluster_recommendation']) {
+    try {
+      const doc = await db.collection(colName).findOne({ cluster_id: clusterId });
+      if (doc) return doc;
+    } catch (_) {
+      // Thử collection dự phòng nếu chưa tồn tại collection này
+    }
+  }
+  return null;
+}
+
 /**
  * GET /api/recommendations/booking & GET /api/bookings/recommendations
  * Recommend phân theo nhóm khách hàng (`ml_cluster_id`) hiển thị ngay trong luồng Booking
@@ -381,45 +393,72 @@ async function getBookingMenuRecommendations(db, query = {}, user = null) {
     }
   }
 
-  // Gợi ý theo cụm ML: users.ml_cluster_id -> ml_cluster_recommendations.cluster_id -> recommended_item_codes
+  // Gợi ý theo cụm ML: users.ml_cluster_id -> ml_cluster_recommendations(s).cluster_id -> recommended_item_codes
+  const hasQueryCluster =
+    query.clusterId !== undefined &&
+    query.clusterId !== null &&
+    String(query.clusterId).trim() !== '' &&
+    Number.isFinite(Number(query.clusterId));
+  const targetClusterId =
+    mlClusterId !== null
+      ? mlClusterId
+      : hasQueryCluster
+        ? Number(query.clusterId)
+        : user && Number(user.tier_points) >= 1000
+          ? 0
+          : 1;
+
   let clusterRecommendation = null;
-  if (mlClusterId !== null) {
-    try {
-      const rec = await db.collection('ml_cluster_recommendations').findOne({ cluster_id: mlClusterId });
-      const codes = Array.isArray(rec && rec.recommended_item_codes) ? rec.recommended_item_codes : [];
-      if (rec && codes.length) {
-        const productByCode = new Map(
-          products.filter((p) => p && p.item_code && p.is_active !== false).map((p) => [String(p.item_code), p]),
-        );
-        const addonByProduct = new Map(
-          addons.filter((a) => a && a.product_id && a.is_active !== false).map((a) => [String(a.product_id), a]),
-        );
-        const items = [];
-        for (const code of codes) {
-          const p = productByCode.get(String(code));
-          if (!p) continue;
-          const a = addonByProduct.get(String(p._id)) || null;
-          items.push({
-            itemCode: p.item_code,
-            productId: p._id,
-            addonId: a ? a._id : null,
-            name: p.name,
-            category: p.category || null,
-            price: Number(p.price || 0),
-            imageUrl: p.image_url || null,
-          });
-        }
-        if (items.length) {
-          clusterRecommendation = {
-            clusterId: mlClusterId,
-            personaName: rec.persona_name || null,
-            items,
-          };
-        }
+  try {
+    const rec = await findClusterRecDoc(db, targetClusterId);
+    const codes = Array.isArray(rec && rec.recommended_item_codes) ? rec.recommended_item_codes : [];
+    if (rec && codes.length) {
+      const productByCode = new Map(
+        products
+          .filter((p) => p && p.item_code && p.is_active !== false)
+          .map((p) => [String(p.item_code).trim().toUpperCase(), p]),
+      );
+      const activeAddons = addons.filter((a) => a && a.is_active !== false);
+      const addonByProduct = new Map(
+        activeAddons.filter((a) => a.product_id).map((a) => [String(a.product_id), a]),
+      );
+      const addonByName = new Map(
+        activeAddons
+          .filter((a) => a.name)
+          .map((a) => [String(a.name).trim().toLocaleLowerCase('vi-VN'), a]),
+      );
+      const items = [];
+      for (const code of codes) {
+        const normalizedCode = String(code || '').trim().toUpperCase();
+        const p = productByCode.get(normalizedCode);
+        if (!p) continue;
+        const pNameKey = String(p.name || '').trim().toLocaleLowerCase('vi-VN');
+        const a = addonByProduct.get(String(p._id)) || (pNameKey ? addonByName.get(pNameKey) : null) || null;
+        items.push({
+          rank: items.length + 1,
+          itemCode: p.item_code,
+          productId: p._id,
+          addonId: a ? a._id : null,
+          name: p.name,
+          addonName: a ? a.name : p.name,
+          category: p.category || null,
+          subCategory: p.sub_category || null,
+          price: Number(p.price || 0),
+          addonPrice: a ? Number(a.price ?? p.price ?? 0) : Number(p.price || 0),
+          variants: Array.isArray(p.variants) ? p.variants : [],
+          imageUrl: p.image_url || (a ? a.image_url : null) || null,
+        });
       }
-    } catch (_) {
-      clusterRecommendation = null;
+      if (items.length) {
+        clusterRecommendation = {
+          clusterId: Number(rec.cluster_id ?? targetClusterId),
+          personaName: rec.persona_name || null,
+          items,
+        };
+      }
     }
+  } catch (_) {
+    clusterRecommendation = null;
   }
 
   const built = buildBookingMenuRecommendations({

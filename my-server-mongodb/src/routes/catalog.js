@@ -748,7 +748,7 @@ router.post(
       sub_category: req.body.subCategory ? str(req.body.subCategory) : null,
       variants: Array.isArray(req.body.variants) ? req.body.variants : [],
       price,
-      image_url: str(req.body.imageUrl || req.body.image_url) || '/images/products/default.jpg',
+      image_url: str(req.body.imageUrl || req.body.image_url) || '/images/addons/cf-den.png',
       description: req.body.description ? str(req.body.description) : null,
       is_active: req.body.isActive !== undefined ? Boolean(req.body.isActive) : true,
     };
@@ -773,6 +773,8 @@ router.patch(
       'is_active',
       'isActive',
       'variants',
+      'image_url',
+      'imageUrl',
     ]);
     if ('name' in set) set.name = str(set.name).slice(0, 100);
     if ('unitPrice' in set) {
@@ -789,6 +791,12 @@ router.patch(
     if ('isActive' in set) {
       set.is_active = Boolean(set.isActive);
       delete set.isActive;
+    }
+    if ('imageUrl' in set) {
+      set.image_url = str(set.imageUrl);
+      delete set.imageUrl;
+    } else if ('image_url' in set) {
+      set.image_url = str(set.image_url);
     }
     if (!Object.keys(set).length) return fail(res, 422, 'VALIDATION_ERROR', 'Không có gì để cập nhật');
     const r = await req.app.locals.db.collection('products').updateOne({ _id: oid(id) }, { $set: set });
@@ -858,7 +866,7 @@ router.post(
       price,
       unit,
       operation_note: req.body.description || req.body.operation_note ? str(req.body.description || req.body.operation_note) : null,
-      image_url: str(req.body.imageUrl || req.body.image_url) || '/images/addons/default.jpg',
+      image_url: str(req.body.imageUrl || req.body.image_url) || '/images/addons/cf-den.png',
       is_active: req.body.isActive !== undefined ? Boolean(req.body.isActive) : true,
     };
     const { insertedId } = await req.app.locals.db.collection('addons').insertOne(doc);
@@ -882,6 +890,8 @@ router.patch(
       'is_active',
       'isActive',
       'variants',
+      'image_url',
+      'imageUrl',
     ]);
     if ('name' in set) set.name = str(set.name).slice(0, 100);
     if ('unitPrice' in set) {
@@ -898,6 +908,12 @@ router.patch(
     if ('isActive' in set) {
       set.is_active = Boolean(set.isActive);
       delete set.isActive;
+    }
+    if ('imageUrl' in set) {
+      set.image_url = str(set.imageUrl);
+      delete set.imageUrl;
+    } else if ('image_url' in set) {
+      set.image_url = str(set.image_url);
     }
     if (!Object.keys(set).length) return fail(res, 422, 'VALIDATION_ERROR', 'Không có gì để cập nhật');
     const r = await req.app.locals.db.collection('addons').updateOne({ _id: oid(id) }, { $set: set });

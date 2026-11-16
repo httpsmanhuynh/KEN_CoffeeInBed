@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../../core/auth.service';
-import { KenBookingState, kenMoney, kenNextDay } from '../booking-state';
+import { KenBookingDraft, KenBookingState, kenMoney, kenNextDay } from '../booking-state';
 import { KenAvailabilityService } from '../availability.service';
 
 @Component({ selector: 'app-ken-focus-booking', standalone: false, templateUrl: './focus-pod.html', styleUrl: './focus-pod.css' })
@@ -23,12 +23,24 @@ export class KenFocusPodPage implements OnInit {
     private changeDetector: ChangeDetectorRef,
   ) {}
   ngOnInit(): void {
-    this.state.loadClusterRecommendations(true);
-    if (!this.state.isFocusSpace) this.state.set({ spaceId: 'focus', guests: 1 });
+    this.state.loadClusterRecommendations(true, () => this.changeDetector.markForCheck());
+    const patch: Partial<KenBookingDraft> = {};
+    if (!this.state.isFocusSpace) {
+      patch.spaceId = 'focus';
+      patch.guests = 1;
+    }
+    if (!this.state.draft().date || this.state.draft().date < this.minDate) {
+      patch.date = this.minDate;
+    }
+    if (Object.keys(patch).length > 0) {
+      this.state.set(patch);
+    }
     if (this.route.snapshot.queryParamMap.get('bookingStep') === 'addons') {
       this.restoreAddonsStep();
     }
+    this.changeDetector.markForCheck();
   }
+  get tierDiscountLabel(): string { return this.state.tierDiscountLabel || 'Ưu đãi thành viên'; }
   get minDate(): string { return kenNextDay(); }
   get filteredExtras() { return this.extraCategory === 'all' ? this.state.extras : this.state.extras.filter(x => x.category === this.extraCategory); }
   get hourlyDurationOptions(): number[] {
@@ -36,24 +48,39 @@ export class KenFocusPodPage implements OnInit {
     return Array.from({ length: maxHours }, (_, i) => i + 1);
   }
   chooseHours(hours: number): void {
+    const currentStartHour = this.state.draft().startHour;
+    let nextStartHour = currentStartHour;
+    if (nextStartHour + hours > 22) {
+      nextStartHour = Math.max(8, 22 - hours);
+    }
     this.state.set({
       hours,
+      startHour: nextStartHour,
       drinkId: hours === 4 ? this.state.draft().drinkId : null,
       drinkQuantities: hours === 4 ? this.state.draft().drinkQuantities : {},
       holdUntil: null
     });
     this.showAddons = false;
     this.feedback = '';
+    this.changeDetector.markForCheck();
   }
   changeDate(date: string): void {
     this.state.set({ date, holdUntil: null });
     this.showAddons = false;
     this.feedback = '';
+    this.changeDetector.markForCheck();
   }
   changeHour(hour: number): void {
-    this.state.set({ startHour: hour, holdUntil: null });
+    const duration = this.state.draft().hours;
+    let nextHour = Number(hour);
+    if (!Number.isFinite(nextHour)) return;
+    if (nextHour + duration > 22) {
+      nextHour = Math.max(8, 22 - duration);
+    }
+    this.state.set({ startHour: nextHour, holdUntil: null });
     this.showAddons = false;
     this.feedback = '';
+    this.changeDetector.markForCheck();
   }
   get timeOptions() { return this.hours.filter(h => h + this.state.draft().hours <= 22); }
   extrasCount(id: string): number { return this.state.draft().extras[id] || 0; }
@@ -86,7 +113,14 @@ export class KenFocusPodPage implements OnInit {
 
   private restoreAddonsStep(): void {
     this.auth.ensureSession().subscribe({
-      next: user => user ? this.verifyAvailability(() => this.showAddons = true) : this.goToLogin(),
+      next: user => {
+        if (user) {
+          this.state.loadClusterRecommendations(true, () => this.changeDetector.markForCheck());
+          this.verifyAvailability(() => this.showAddons = true);
+        } else {
+          this.goToLogin();
+        }
+      },
       error: () => {
         this.feedback = 'Không thể kiểm tra phiên đăng nhập. Vui lòng thử lại.';
         this.changeDetector.markForCheck();
@@ -105,6 +139,7 @@ export class KenFocusPodPage implements OnInit {
       next: user => {
         this.checkingSession = false;
         if (user) {
+          this.state.loadClusterRecommendations(true, () => this.changeDetector.markForCheck());
           this.showAddons = true;
           this.feedback = '';
         } else {

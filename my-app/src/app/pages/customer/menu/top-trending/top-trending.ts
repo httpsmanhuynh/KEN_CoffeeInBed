@@ -36,8 +36,7 @@ function formatVariantLabels(variants: unknown): string {
   return labels.length ? `Lựa chọn: ${labels.join(' · ')}` : '';
 }
 
-const IMG = '/images/figma/';
-const KEN_IMG = '/images/ken-flow/';
+const IMG = '/images/addons/';
 const norm = (s: string) =>
   s.normalize('NFD').replace(/\p{M}/gu, '').replace(/đ/g, 'd').toLowerCase();
 
@@ -102,56 +101,51 @@ function mapDishImage(raw: any): string {
         ? raw.image_url
         : '';
   if (
-    url.startsWith('/images/figma/') ||
-    url.startsWith('/images/ken-flow/') ||
-    url.startsWith('http')
+    url.startsWith('/images/addons/') ||
+    url.startsWith('http') ||
+    url.startsWith('data:')
   ) {
     return url;
   }
   const code = String(raw?.itemCode || raw?.item_code || '').toUpperCase();
   const name = norm(String(raw?.name || ''));
-  if (code.includes('MATCHA') && !name.includes('mousse')) return IMG + 'dish-matcha-hojicha.png';
-  if (code.includes('HOJICHA') || name.includes('hojicha')) return IMG + 'dish-matcha-hojicha.png';
-  if (
-    code === 'CF_BAC_XIU' ||
-    code === 'CF_SALTED_CARAMEL' ||
-    name.includes('bac xiu') ||
-    name.includes('caramel')
-  )
-    return IMG + 'dish-bac-xiu.png';
-  if (
-    code.includes('OOLONG') ||
-    name.includes('oolong') ||
-    code.startsWith('TEA_') ||
-    name.includes('tra ')
-  )
-    return IMG + 'dish-oolong.png';
-  if (
-    code === 'BAKE_CROISSANT' ||
-    name.includes('croissant') ||
-    code === 'BAKE_SCONE' ||
-    name.includes('bo xop')
-  )
-    return IMG + 'dish-croissant.png';
-  if (code.includes('COLD_BREW') || name.includes('cold brew')) return IMG + 'dish-cold-brew.png';
+  if (code.includes('MATCHA') && !name.includes('mousse')) return IMG + 'matcha-latte.png';
+  if (code.includes('HOJICHA') || name.includes('hojicha')) return IMG + 'hojicha-latte.png';
+  if (code === 'CF_SALTED_CARAMEL' || name.includes('caramel')) return IMG + 'cf-salted-caramel.png';
+  if (code === 'CF_BAC_XIU' || name.includes('bac xiu')) return IMG + 'cf-bac-xiu.png';
+  if (code === 'TEA_DAO' || name.includes('tra dao')) return IMG + 'tea-dao.png';
+  if (code === 'TEA_LUC' || name.includes('luc tra')) return IMG + 'tea-luc.png';
+  if (code === 'TEA_THAO_MOC' || name.includes('thao moc')) return IMG + 'tea-thao-moc.png';
+  if (code === 'TEA_CHAI' || name.includes('chai an do')) return IMG + 'tea-chai.png';
+  if (code.includes('OOLONG') || name.includes('oolong') || code.startsWith('TEA_') || name.includes('tra '))
+    return IMG + 'tea-oolong-macchiato.png';
+  if (code === 'BAKE_SCONE' || name.includes('bo xop')) return IMG + 'bake-scone.png';
+  if (code === 'BAKE_CROISSANT' || name.includes('croissant')) return IMG + 'bake-croissant.png';
+  if (code === 'CF_COLD_BREW_FRUIT' || (name.includes('cold brew') && name.includes('trai cay')))
+    return IMG + 'cf-cold-brew-fruit.png';
+  if (code.includes('COLD_BREW') || name.includes('cold brew')) return IMG + 'cf-cold-brew.png';
+  if (code === 'CAKE_CHEESE' || name.includes('cheesecake')) return IMG + 'cake-cheese.png';
   if (code.startsWith('CAKE_') || name.includes('tiramisu') || name.includes('cheese'))
-    return IMG + 'dish-tiramisu.png';
+    return IMG + 'cake-tiramisu.png';
+  if (code === 'JUICE_CHANH_DAY' || (name.includes('chanh day') && !name.includes('mousse')))
+    return IMG + 'juice-chanh-day.png';
   if (code.startsWith('JUICE_') || name.includes('nuoc cam') || name.includes('chanh day'))
-    return IMG + 'dish-nuoc-cam.png';
-  if (code === 'SNACK_SANDWICH' || name.includes('sandwich')) return IMG + 'dish-sandwich.png';
-  if (code.startsWith('MOUSSE_') || name.includes('mousse')) return IMG + 'dish-mousse.png';
-  if (code === 'CF_AMERICANO' || name.includes('americano')) return IMG + 'dish-americano.png';
-  if (code === 'SODA_TRAI_CAY' || name.includes('soda')) return IMG + 'dish-soda.png';
-  if (code === 'WATER_BOTTLE' || name.includes('tinh khiet')) return KEN_IMG + 'water.png';
-  if (code === 'SNACK_FRUIT' || name.includes('trai cay')) return KEN_IMG + 'fruit.png';
-  if (
-    code === 'BREAD_QUE' ||
-    code === 'BAKE_BISCOTTI' ||
-    name.includes('banh mi') ||
-    name.includes('banh quy')
-  )
-    return KEN_IMG + 'bread.png';
-  return IMG + 'dish-ca-phe-den-sua.png';
+    return IMG + 'juice-cam.png';
+  if (code === 'SNACK_SANDWICH' || name.includes('sandwich')) return IMG + 'snack-sandwich.png';
+  if (code === 'MOUSSE_CHANH_DAY' || (name.includes('mousse') && name.includes('chanh day')))
+    return IMG + 'mousse-chanh-day.png';
+  if (code.startsWith('MOUSSE_') || name.includes('mousse')) return IMG + 'mousse-matcha.png';
+  if (code === 'CF_AMERICANO' || name.includes('americano')) return IMG + 'cf-americano.png';
+  if (code === 'CF_SUA' || name.includes('ca phe sua')) return IMG + 'cf-sua.png';
+  if (code === 'CF_PHIN' || name.includes('phin')) return IMG + 'cf-phin.png';
+  if (code === 'CF_ESPRESSO' || name.includes('espresso')) return IMG + 'cf-espresso.png';
+  if (code === 'CHOC_NONG' || name.includes('so-co-la')) return IMG + 'choc-nong.png';
+  if (code === 'SODA_TRAI_CAY' || name.includes('soda')) return IMG + 'soda-trai-cay.png';
+  if (code === 'WATER_BOTTLE' || name.includes('tinh khiet')) return IMG + 'water-bottle.png';
+  if (code === 'SNACK_FRUIT' || name.includes('trai cay')) return IMG + 'snack-fruit.png';
+  if (code === 'BAKE_BISCOTTI' || name.includes('banh quy')) return IMG + 'bake-biscotti.png';
+  if (code === 'BREAD_QUE' || name.includes('banh mi')) return IMG + 'bread-que.png';
+  return IMG + 'cf-den.png';
 }
 
 @Component({
@@ -185,7 +179,7 @@ export class TopTrending implements OnInit {
       name: 'Matcha Latte / Hojicha Latte',
       desc: 'Vị trà quyện sữa, cho một khoảng nghỉ chiều thật êm.',
       price: 55000,
-      image: IMG + 'dish-matcha-hojicha.png',
+      image: IMG + 'matcha-latte.png',
       category: 'Trà & latte',
       tag: 'Êm dịu buổi chiều',
     },
@@ -196,7 +190,7 @@ export class TopTrending implements OnInit {
       name: 'Bạc Xỉu / Salted Caramel Coffee',
       desc: 'Cà phê và sữa, thêm chút ngọt cho buổi chiều chậm lại.',
       price: 45000,
-      image: IMG + 'dish-bac-xiu.png',
+      image: IMG + 'cf-bac-xiu.png',
       category: 'Cà phê',
       tag: 'Một chút ngọt ngào',
     },
@@ -207,7 +201,7 @@ export class TopTrending implements OnInit {
       name: 'Trà Oolong Macchiato / Trà Đào',
       desc: 'Hương trà thanh nhẹ, hợp lúc muốn đổi vị giữa chiều.',
       price: 50000,
-      image: IMG + 'dish-oolong.png',
+      image: IMG + 'tea-oolong-macchiato.png',
       category: 'Trà & latte',
       tag: 'Thanh mát, dễ nhâm nhi',
     },
@@ -218,7 +212,7 @@ export class TopTrending implements OnInit {
       name: 'Bánh sừng bò (Croissant) cơ bản',
       desc: 'Một chiếc bánh thơm bơ để lót dạ cùng ly trà chiều.',
       price: 35000,
-      image: IMG + 'dish-croissant.png',
+      image: IMG + 'bake-croissant.png',
       category: 'Bánh & ăn nhẹ',
       tag: 'Ăn nhẹ lúc xế chiều',
     },
@@ -231,7 +225,7 @@ export class TopTrending implements OnInit {
       name: 'Cold Brew Truyền thống / Trái cây',
       desc: 'Thử một sắc thái cà phê khác, mát lành và đầy hương.',
       price: 50000,
-      image: IMG + 'dish-cold-brew.png',
+      image: IMG + 'cf-cold-brew.png',
       category: 'Cà phê',
       tag: 'Cà phê',
     },
@@ -242,7 +236,7 @@ export class TopTrending implements OnInit {
       name: 'Tiramisu / Cheesecake',
       desc: 'Một phần bánh mềm mịn cho cuộc trò chuyện thêm ngọt.',
       price: 50000,
-      image: IMG + 'dish-tiramisu.png',
+      image: IMG + 'cake-tiramisu.png',
       category: 'Bánh & ăn nhẹ',
       tag: 'Bánh & ăn nhẹ',
     },
@@ -253,7 +247,7 @@ export class TopTrending implements OnInit {
       name: 'Nước cam / Nước ép chanh dây',
       desc: 'Vị trái cây chua ngọt cho một khoảng nghỉ tươi mới.',
       price: 45000,
-      image: IMG + 'dish-nuoc-cam.png',
+      image: IMG + 'juice-cam.png',
       category: 'Giải khát',
       tag: 'Giải khát',
     },
@@ -264,7 +258,7 @@ export class TopTrending implements OnInit {
       name: 'Sandwich',
       desc: 'Lót dạ gọn nhẹ trước khi trở lại với công việc.',
       price: 45000,
-      image: IMG + 'dish-sandwich.png',
+      image: IMG + 'snack-sandwich.png',
       category: 'Bánh & ăn nhẹ',
       tag: 'Bánh & ăn nhẹ',
     },
@@ -275,7 +269,7 @@ export class TopTrending implements OnInit {
       name: 'Cà phê Đen / Sữa',
       desc: 'Hương cà phê quen thuộc cho những phút ngồi lại.',
       price: 40000,
-      image: IMG + 'dish-ca-phe-den-sua.png',
+      image: IMG + 'cf-den.png',
       category: 'Cà phê',
       tag: 'Cà phê',
     },
@@ -286,7 +280,7 @@ export class TopTrending implements OnInit {
       name: 'Bánh Mousse',
       desc: 'Mềm nhẹ, vừa xinh cho một buổi hẹn nhâm nhi.',
       price: 45000,
-      image: IMG + 'dish-mousse.png',
+      image: IMG + 'mousse-matcha.png',
       category: 'Bánh & ăn nhẹ',
       tag: 'Bánh & ăn nhẹ',
     },
@@ -297,7 +291,7 @@ export class TopTrending implements OnInit {
       name: 'Americano',
       desc: 'Vị cà phê rõ nét, dành cho lúc muốn chút đậm đà.',
       price: 40000,
-      image: IMG + 'dish-americano.png',
+      image: IMG + 'cf-americano.png',
       category: 'Cà phê',
       tag: 'Cà phê',
     },
@@ -308,7 +302,7 @@ export class TopTrending implements OnInit {
       name: 'Soda trái cây',
       desc: 'Một chút sủi bọt tươi vui để đổi nhịp buổi chiều.',
       price: 45000,
-      image: IMG + 'dish-soda.png',
+      image: IMG + 'soda-trai-cay.png',
       category: 'Giải khát',
       tag: 'Giải khát',
     },

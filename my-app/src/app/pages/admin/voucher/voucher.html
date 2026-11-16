@@ -44,7 +44,7 @@
   <section class="voucher-card">
     <div class="voucher-card-heading">
       <div class="heading-label">
-        <img src="/images/figma/table.svg" alt="" />
+        <lucide-icon name="table" [size]="18" [strokeWidth]="1.8" color="#4A3123"></lucide-icon>
         <h2>Danh sách Voucher hệ thống</h2>
         <span class="count-badge">{{ filteredVouchers.length }} / {{ vouchers.length }}</span>
       </div>
@@ -53,7 +53,7 @@
 
     <div class="voucher-filters">
       <label class="search-box">
-        <img src="/images/figma/search.svg" alt="" />
+        <lucide-icon name="search" [size]="16" [strokeWidth]="1.8" color="#4A3123"></lucide-icon>
         <input
           type="text"
           [value]="search"
@@ -63,7 +63,7 @@
       </label>
 
       <label class="select-box">
-        <img src="/images/figma/filter.svg" alt="" />
+        <lucide-icon name="filter" [size]="16" [strokeWidth]="1.8" color="#4A3123"></lucide-icon>
         <select [value]="statusFilter" (change)="onStatusFilterChange($event)">
           <option value="Tất cả">Tất cả trạng thái</option>
           <option value="ACTIVE">Đang áp dụng</option>
@@ -177,7 +177,7 @@
   <section id="voucher-editor-panel" class="voucher-card editor-card">
     <div class="editor-heading">
       <div class="heading-label">
-        <img src="/images/figma/icon-pkg.svg" alt="" />
+        <lucide-icon name="tag" [size]="18" [strokeWidth]="1.8" color="#4A3123"></lucide-icon>
         <h2>{{ isCreating ? 'Tạo mới Voucher' : 'Chi tiết & Chỉnh sửa Voucher' }}</h2>
       </div>
       <span class="editing-badge">

@@ -526,6 +526,13 @@ figure {
   display: block;
   transform: rotate(180deg);
 }
+.btn-outline lucide-icon {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 .btn-outline:hover img {
   filter: invert(1);
 }

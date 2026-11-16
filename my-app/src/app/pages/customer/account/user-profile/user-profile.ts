@@ -4,7 +4,13 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../../core/auth.service';
 import { CustomerApiService } from '../../../../core/customer-api.service';
 
-interface Profile { name: string; email: string; gender: string; birthday: string; city: string; }
+interface Profile {
+  name: string;
+  email: string;
+  gender: string;
+  birthday: string;
+  city: string;
+}
 
 const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -29,8 +35,11 @@ export class UserProfile implements OnInit, OnDestroy {
   private readonly ngZone = inject(NgZone);
 
   private saved: Profile = {
-    name: 'Thầy Thanh đẹp trai', email: 'thanh@example.com',
-    gender: 'Nam', birthday: '1995-05-15', city: 'Thành phố Hồ Chí Minh',
+    name: 'Thầy Thanh đẹp trai',
+    email: 'thanh@example.com',
+    gender: 'Nam',
+    birthday: '1995-05-15',
+    city: 'Thành phố Hồ Chí Minh',
   };
   form: Profile = { ...this.saved };
 
@@ -43,10 +52,14 @@ export class UserProfile implements OnInit, OnDestroy {
 
   get discountLabel(): string {
     switch (this.tierCode) {
-      case 'DIAMOND': return 'giảm 15% tổng hoá đơn';
-      case 'GOLD': return 'giảm 10% tổng hoá đơn';
-      case 'SILVER': return 'giảm 5% tổng hoá đơn';
-      default: return 'tích luỹ điểm để nhận ưu đãi lên đến 15%';
+      case 'DIAMOND':
+        return 'giảm 15% tổng hoá đơn';
+      case 'GOLD':
+        return 'giảm 10% tổng hoá đơn';
+      case 'SILVER':
+        return 'giảm 5% tổng hoá đơn';
+      default:
+        return 'tích luỹ điểm để nhận ưu đãi lên đến 15%';
     }
   }
 
@@ -85,7 +98,14 @@ export class UserProfile implements OnInit, OnDestroy {
   }
 
   readonly genders = ['Nam', 'Nữ', 'Khác', 'Không muốn nói'];
-  readonly cities = ['Thành phố Hồ Chí Minh', 'Hà Nội', 'Đà Nẵng', 'Cần Thơ', 'Hải Phòng', 'Tỉnh/thành khác'];
+  readonly cities = [
+    'Thành phố Hồ Chí Minh',
+    'Hà Nội',
+    'Đà Nẵng',
+    'Cần Thơ',
+    'Hải Phòng',
+    'Tỉnh/thành khác',
+  ];
 
   errors: Partial<Record<'name' | 'email', string>> = {};
   message = '';
@@ -93,7 +113,9 @@ export class UserProfile implements OnInit, OnDestroy {
   avatarUrl: string | null = null;
 
   get dirty(): boolean {
-    return (Object.keys(this.saved) as (keyof Profile)[]).some(k => this.saved[k] !== this.form[k]);
+    return (Object.keys(this.saved) as (keyof Profile)[]).some(
+      (k) => this.saved[k] !== this.form[k],
+    );
   }
 
   onUpdate(): void {
@@ -105,7 +127,8 @@ export class UserProfile implements OnInit, OnDestroy {
     if (!email) this.errors.email = 'Vui lòng nhập email.';
     else if (!EMAIL_RE.test(email)) this.errors.email = 'Email chưa đúng định dạng.';
     if (this.errors.name || this.errors.email) {
-      this.messageType = 'error'; this.message = 'Vui lòng kiểm tra lại các trường được đánh dấu.';
+      this.messageType = 'error';
+      this.message = 'Vui lòng kiểm tra lại các trường được đánh dấu.';
       return;
     }
     const emailChanged = email !== this.saved.email;
@@ -114,7 +137,11 @@ export class UserProfile implements OnInit, OnDestroy {
       try {
         localStorage.setItem(
           `ken-profile-extra-${uid}`,
-          JSON.stringify({ gender: this.form.gender, birthday: this.form.birthday, city: this.form.city }),
+          JSON.stringify({
+            gender: this.form.gender,
+            birthday: this.form.birthday,
+            city: this.form.city,
+          }),
         );
       } catch {}
       const payload: { fullName?: string; email?: string } = { fullName: name };
@@ -157,7 +184,8 @@ export class UserProfile implements OnInit, OnDestroy {
   onCancel(): void {
     this.form = { ...this.saved };
     this.errors = {};
-    this.message = ''; this.messageType = '';
+    this.message = '';
+    this.messageType = '';
     this.cdr.detectChanges();
   }
 
@@ -167,12 +195,14 @@ export class UserProfile implements OnInit, OnDestroy {
     input.value = '';
     if (!file) return;
     if (!['image/jpeg', 'image/png'].includes(file.type)) {
-      this.messageType = 'error'; this.message = 'Ảnh đại diện chỉ nhận định dạng JPG hoặc PNG.';
+      this.messageType = 'error';
+      this.message = 'Ảnh đại diện chỉ nhận định dạng JPG hoặc PNG.';
       this.cdr.detectChanges();
       return;
     }
     if (file.size > MAX_AVATAR_BYTES) {
-      this.messageType = 'error'; this.message = 'Ảnh vượt quá 5 MB, vui lòng chọn ảnh nhỏ hơn.';
+      this.messageType = 'error';
+      this.message = 'Ảnh vượt quá 5 MB, vui lòng chọn ảnh nhỏ hơn.';
       this.cdr.detectChanges();
       return;
     }
@@ -183,7 +213,8 @@ export class UserProfile implements OnInit, OnDestroy {
         const dataUrl = typeof reader.result === 'string' ? reader.result : null;
         this.avatarUrl = dataUrl;
         this.auth?.setAvatar(dataUrl);
-        this.messageType = 'ok'; this.message = 'Đã cập nhật ảnh đại diện.';
+        this.messageType = 'ok';
+        this.message = 'Đã cập nhật ảnh đại diện.';
         this.triggerSuccessToast();
         this.cdr.detectChanges();
       });

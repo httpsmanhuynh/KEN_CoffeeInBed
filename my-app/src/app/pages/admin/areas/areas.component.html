@@ -21,7 +21,7 @@
           Xuất danh sách CSV ↗
         </button>
         <button type="button" class="btn-add-zone" (click)="openCreateForm()" data-name="Add zone btn">
-          <img src="/images/figma/sparkles.svg" alt="" class="plus-icon" />
+          <lucide-icon name="sparkles" [size]="16" [strokeWidth]="1.8"></lucide-icon>
           <span>Thêm khu vực</span>
         </button>
       </div>
@@ -62,7 +62,7 @@
           <span *ngIf="loading" class="loading-text">Đang tải...</span>
         </div>
         <button type="button" class="table-header-right btn-sort-zones" (click)="toggleSort()">
-          <img src="/images/figma/sort-alpha-down-alt.svg" alt="" class="sort-icon" />
+          <lucide-icon name="filter" [size]="16" [strokeWidth]="1.8"></lucide-icon>
           <span class="sort-label">Sắp xếp {{ sortAsc ? 'A→Z' : 'Z→A' }}</span>
         </button>
       </div>
@@ -166,7 +166,7 @@
 
     <div class="form-zone-card" data-name="Form Zone">
       <div class="form-header-bar">
-        <img src="/images/figma/icon-info.svg" alt="" class="cursor-icon" />
+        <lucide-icon name="info" [size]="16" [strokeWidth]="1.8" color="#4A3123"></lucide-icon>
         <h3 class="form-header-title">THÔNG TIN KHU VỰC</h3>
       </div>
       <div class="form-divider"></div>
@@ -217,7 +217,7 @@
               <option value="ACTIVE">Hoạt động</option>
               <option value="HIDDEN">Tạm ẩn</option>
             </select>
-            <img src="/images/figma/chevron-down.svg" alt="" class="select-arrow" />
+            <lucide-icon name="chevron-down" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="select-arrow"></lucide-icon>
           </div>
         </div>
 
@@ -228,7 +228,7 @@
               <option [ngValue]="true">Có thể đặt trực tuyến</option>
               <option [ngValue]="false">Không nhận đặt chỗ</option>
             </select>
-            <img src="/images/figma/chevron-down.svg" alt="" class="select-arrow" />
+            <lucide-icon name="chevron-down" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="select-arrow"></lucide-icon>
           </div>
         </div>
       </div>

@@ -31,9 +31,9 @@
           <b>{{ money(state.base) }}</b>
         </div>
         <hr>
-        <p class="kf-included"><img class="kf-icon" src="/images/ken-flow/icons/review-coffee.svg" alt=""> Quyền lợi &amp; đồ uống đi kèm (Inclusion)</p>
+        <p class="kf-included"><lucide-icon class="kf-icon" name="coffee" [size]="18" [strokeWidth]="1.8" color="#A9763F" aria-hidden="true"></lucide-icon> Quyền lợi &amp; đồ uống đi kèm (Inclusion)</p>
         <div class="kf-drink-choice" *ngFor="let fixed of state.fixedInclusionsList" style="background: #fdfaf5; border: 1px dashed #dcb685; padding: 10px 14px; border-radius: 10px; margin-bottom: 8px;">
-          <img *ngIf="fixed.label === 'Nước suối'" src="/images/ken-flow/water.png" alt="Nước tinh khiết">
+          <img *ngIf="fixed.label === 'Nước suối'" src="/images/addons/water-bottle.png" alt="Nước tinh khiết">
           <span class="kf-fixed-badge" *ngIf="fixed.label !== 'Nước suối'">✓</span>
           <div>
             <strong>{{ fixed.label }} × {{ fixed.quantity }}</strong>
@@ -42,7 +42,7 @@
           <b style="color: #047857;">0đ</b>
         </div>
         <div class="kf-drink-choice" *ngFor="let item of state.selectedDrinks">
-          <img [src]="'/images/ken-flow/' + item.product.image" [alt]="item.product.name">
+          <img [src]="state.image(item.product.image)" [alt]="item.product.name">
           <div>
             <strong>{{ item.product.name }} <span class="kf-choice-variant" *ngIf="item.variantLabel">({{ item.variantLabel }})</span> × {{ item.quantity }}</strong>
             <small>{{ money(item.unitPrice) }} / món<span *ngIf="state.entitlement"> · Gói hỗ trợ {{ money(state.entitlement) }}/món</span></small>
@@ -50,7 +50,7 @@
           <b>{{ money(item.surcharge * item.quantity) }}</b>
         </div>
         <div class="kf-drink-choice" *ngFor="let pastry of state.selectedPastries">
-          <img [src]="'/images/ken-flow/' + pastry.product.image" [alt]="pastry.product.name">
+          <img [src]="state.image(pastry.product.image)" [alt]="pastry.product.name">
           <div><strong>{{ pastry.product.name }} × {{ pastry.quantity }}</strong><small>Bánh ngọt đi kèm · Miễn phí theo gói</small></div>
           <b style="color: #047857;">0đ</b>
         </div>
@@ -123,7 +123,7 @@
         </label>
         <small class="kf-inline-feedback" [class.kf-inline-success]="voucherSuccess" role="status" *ngIf="voucherMessage">{{ voucherMessage }}</small>
         <div class="kf-sum-row"><span>Tạm tính</span><strong class="kf-large-money">{{ money(state.subtotal) }}</strong></div>
-        <div class="kf-sum-row" *ngIf="memberDiscount > 0"><span>Ưu đãi thành viên (5%)</span><strong>−{{ money(memberDiscount) }}</strong></div>
+        <div class="kf-sum-row" *ngIf="memberDiscount > 0"><span>{{ tierDiscountLabel }}</span><strong>−{{ money(memberDiscount) }}</strong></div>
         <div class="kf-sum-row" *ngIf="appliedVoucherDiscount > 0"><span>Mã giảm giá ({{ appliedVoucherCode }})</span><strong>−{{ money(appliedVoucherDiscount) }}</strong></div>
         <div class="kf-sum-row kf-total"><strong>Thành tiền</strong><strong>{{ money(finalTotal) }}</strong></div>
         <label class="kf-check-agreement"><input type="checkbox" [checked]="state.draft().agreed" (change)="setAgreed($any($event.target).checked)"><span>Tôi đã đọc và đồng ý với <a routerLink="/terms">Điều kiện &amp; điều khoản</a> và <a routerLink="/policy">Chính sách hoạt động</a> của KÉN.</span></label>

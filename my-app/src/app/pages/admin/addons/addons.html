@@ -27,7 +27,7 @@
   <div class="addons-card" data-name="Khối nội dung">
       <div class="card-header-row" data-name="Tiêu đề khối">
         <div class="header-left">
-          <img src="/images/figma/table.svg" alt="" class="card-icon" />
+          <lucide-icon name="table" [size]="18" [strokeWidth]="1.8" color="#4A3123" class="card-icon" aria-hidden="true"></lucide-icon>
           <h2 class="card-title">Danh mục thực đơn &amp; Add-on</h2>
         </div>
         <span class="card-subtitle-info">
@@ -39,7 +39,7 @@
       <div class="card-filters-section" data-name="Bộ lọc sản phẩm">
         <div class="filter-inputs-row" data-name="Tìm kiếm sản phẩm">
           <div class="search-wrap" data-name="Tìm kiếm">
-            <img src="/images/figma/search.svg" alt="" class="search-icon" />
+            <lucide-icon name="search" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="search-icon" aria-hidden="true"></lucide-icon>
             <input
               type="text"
               [value]="searchQuery"
@@ -50,7 +50,7 @@
           </div>
 
           <div class="select-wrap select-status" data-name="Bộ lọc trạng thái">
-            <img src="/images/figma/filter.svg" alt="" class="filter-icon" />
+            <lucide-icon name="filter" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="filter-icon" aria-hidden="true"></lucide-icon>
             <select
               [value]="selectedStatusFilter"
               (change)="selectedStatusFilter = $any($event.target).value; currentPage = 1"
@@ -61,7 +61,7 @@
               <option value="Tạm ngưng">Tạm ngưng</option>
               <option value="Hết hàng">Hết hàng</option>
             </select>
-            <img src="/images/figma/chevron-down.svg" alt="" class="select-arrow" />
+            <lucide-icon name="chevron-down" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="select-arrow" aria-hidden="true"></lucide-icon>
           </div>
 
           <div class="select-wrap select-category" data-name="Bộ lọc nhóm">
@@ -73,7 +73,7 @@
               <option value="Tất cả">Nhóm: Tất cả</option>
               <option *ngFor="let cat of categoryOptions" [value]="cat">{{ cat }}</option>
             </select>
-            <img src="/images/figma/chevron-down.svg" alt="" class="select-arrow" />
+            <lucide-icon name="chevron-down" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="select-arrow" aria-hidden="true"></lucide-icon>
           </div>
         </div>
 
@@ -222,7 +222,7 @@
     <div id="addon-editor-panel" class="addons-card product-form-card" data-name="Form sản phẩm">
       <div class="card-header-row">
         <div class="header-left">
-          <img src="/images/figma/icon-info.svg" alt="" class="card-icon" />
+          <lucide-icon name="info" [size]="18" [strokeWidth]="1.8" color="#4A3123" class="card-icon" aria-hidden="true"></lucide-icon>
           <h2 class="card-title">
             {{ isCreating ? 'Thêm mới sản phẩm & Add-on' : 'Chi tiết sản phẩm · ' + (selectedProduct?.code || '') }}
           </h2>
@@ -240,9 +240,9 @@
         <div class="col-photo-section">
           <div class="product-photo-box">
             <img
-              [src]="formData.image || '/images/ken-flow/coffee.png'"
+              [src]="formData.image || '/images/addons/cf-den.png'"
               [alt]="formData.name"
-              (error)="$any($event.target).src = '/images/ken-flow/coffee.png'"
+              (error)="$any($event.target).src = '/images/addons/cf-den.png'"
               class="product-photo-img"
             />
           </div>
@@ -304,7 +304,7 @@
                 >
                   <option *ngFor="let u of unitOptions" [value]="u">{{ u }}</option>
                 </select>
-                <img src="/images/figma/chevron-down.svg" alt="" class="field-arrow" />
+                <lucide-icon name="chevron-down" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="field-arrow" aria-hidden="true"></lucide-icon>
               </div>
             </div>
           </div>
@@ -320,7 +320,7 @@
                 >
                   <option *ngFor="let c of categoryOptions" [value]="c">{{ c }}</option>
                 </select>
-                <img src="/images/figma/chevron-down.svg" alt="" class="field-arrow" />
+                <lucide-icon name="chevron-down" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="field-arrow" aria-hidden="true"></lucide-icon>
               </div>
             </div>
 
@@ -335,7 +335,7 @@
                   <option value="true">Có · Hiển thị</option>
                   <option value="false">Không · Ẩn</option>
                 </select>
-                <img src="/images/figma/chevron-down.svg" alt="" class="field-arrow" />
+                <lucide-icon name="chevron-down" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="field-arrow" aria-hidden="true"></lucide-icon>
               </div>
             </div>
           </div>
@@ -351,7 +351,7 @@
                 >
                   <option *ngFor="let a of availabilityOptions" [value]="a">{{ a }}</option>
                 </select>
-                <img src="/images/figma/chevron-down.svg" alt="" class="field-arrow" />
+                <lucide-icon name="chevron-down" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="field-arrow" aria-hidden="true"></lucide-icon>
               </div>
             </div>
           </div>

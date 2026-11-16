@@ -1,3 +1,4 @@
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { RouterModule } from '@angular/router';
 import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
@@ -8,6 +9,7 @@ describe('AccountSidebar', () => {
     await TestBed.configureTestingModule({
       imports: [RouterModule.forRoot([]), ConfirmDialog],
       declarations: [AccountSidebar],
+      schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
   });
 

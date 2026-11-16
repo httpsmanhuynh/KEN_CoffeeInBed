@@ -23,7 +23,7 @@
           <div role="radiogroup" aria-labelledby="pick-title" class="orders">
             @for (o of orders; track o.id) {
               <button type="button" role="radio" class="opt" [class.is-selected]="o.id === selectedId" [attr.aria-checked]="o.id === selectedId" (click)="select(o.id)">
-                <img [src]="o.id === selectedId ? '/images/figma/check.svg' : '/images/figma/circle.svg'" alt="" width="18" height="18" />
+                <lucide-icon [name]="o.id === selectedId ? 'check' : 'circle'" [size]="18" [strokeWidth]="1.8" color="#4A3123"></lucide-icon>
                 <span class="opt__body">
                   <b>{{ o.name }}</b>
                   <span>{{ o.code }} · {{ fmtDate(o.date) }} · {{ o.start }}–{{ endOf(o) }}</span>
@@ -45,9 +45,9 @@
             <p class="strong">{{ shortName(order) }}</p>
             <p class="text">{{ order.code }} · {{ order.zone }}</p>
             <hr class="line" />
-            <div class="kv"><img src="/images/figma/calendar-date.svg" alt="" width="16" height="16" /><span>Ngày sử dụng</span><b>{{ fmtDate(order.date) }}</b></div>
-            <div class="kv"><img src="/images/figma/clock-history.svg" alt="" width="16" height="16" /><span>Khung giờ</span><b>{{ order.start }}–{{ orderEnd }}</b></div>
-            <div class="kv"><img src="/images/figma/clock.svg" alt="" width="16" height="16" /><span>Thời lượng · Số khách</span><b>{{ order.hours }} giờ · {{ guests(order) }} khách</b></div>
+            <div class="kv"><lucide-icon name="calendar" [size]="16" [strokeWidth]="1.8" color="#A9763F"></lucide-icon><span>Ngày sử dụng</span><b>{{ fmtDate(order.date) }}</b></div>
+            <div class="kv"><lucide-icon name="history" [size]="16" [strokeWidth]="1.8" color="#A9763F"></lucide-icon><span>Khung giờ</span><b>{{ order.start }}–{{ orderEnd }}</b></div>
+            <div class="kv"><lucide-icon name="clock" [size]="16" [strokeWidth]="1.8" color="#A9763F"></lucide-icon><span>Thời lượng · Số khách</span><b>{{ order.hours }} giờ · {{ guests(order) }} khách</b></div>
             <hr class="line" />
             <div class="kv kv--total"><span>Tổng tiền đơn</span><b>{{ fmtMoney(order.total) }}</b></div>
           </section>
@@ -63,8 +63,7 @@
             <div class="field">
               <label class="field__label" for="rs-date">Ngày mong muốn</label>
               <div class="box">
-                <input id="rs-date" type="date" [(ngModel)]="newDate" (ngModelChange)="touch()" />
-                <img class="box__icon box__icon--lg" src="/images/figma/chon-ngay.svg" alt="" width="18" height="18" />
+                <input #rsDate id="rs-date" type="date" [(ngModel)]="newDate" (ngModelChange)="touch()" />
               </div>
             </div>
             <div class="field">
@@ -94,9 +93,9 @@
           <section class="proposal" aria-label="Lịch mới đề xuất">
             <p class="proposal__eyebrow">LỊCH MỚI ĐỀ XUẤT</p>
             <h2 class="proposal__title">{{ proposedTitle }}</h2>
-            <div class="kv kv--on"><img src="/images/figma/calendar-date.svg" alt="" width="16" height="16" /><span>Ngày bắt đầu</span><b>{{ fmtDate(newDate) }}</b></div>
-            <div class="kv kv--on"><img src="/images/figma/clock-history.svg" alt="" width="16" height="16" /><span>Giờ bắt đầu</span><b>{{ start }}</b></div>
-            <div class="kv kv--on"><img src="/images/figma/clock.svg" alt="" width="16" height="16" /><span>Giờ kết thúc</span><b>{{ end }}</b></div>
+            <div class="kv kv--on"><lucide-icon name="calendar" [size]="16" [strokeWidth]="1.8" color="#4A3123"></lucide-icon><span>Ngày bắt đầu</span><b>{{ fmtDate(newDate) }}</b></div>
+            <div class="kv kv--on"><lucide-icon name="history" [size]="16" [strokeWidth]="1.8" color="#4A3123"></lucide-icon><span>Giờ bắt đầu</span><b>{{ start }}</b></div>
+            <div class="kv kv--on"><lucide-icon name="clock" [size]="16" [strokeWidth]="1.8" color="#4A3123"></lucide-icon><span>Giờ kết thúc</span><b>{{ end }}</b></div>
             <hr class="line line--dark" />
             <div class="kv kv--on kv--total"><span>Chênh lệch</span><b>Chờ đối chiếu</b></div>
             <p class="proposal__text">Lịch hiện tại còn hiệu lực đến khi xác nhận đổi.</p>
@@ -105,7 +104,7 @@
           <section class="card" aria-labelledby="avail-title">
             <h2 class="h-serif h-serif--sm" id="avail-title">Còn chỗ?</h2>
             <div class="avail" role="status" aria-live="polite">
-              <img src="/images/figma/eye-fill.svg" alt="" width="16" height="16" />
+              <lucide-icon name="eye" [size]="16" [strokeWidth]="1.8" color="#4A3123"></lucide-icon>
               <span class="avail__text">{{ rechecking ? 'Đang kiểm tra lịch trống…' : fmtDate(newDate) + ' · ' + start + '–' + end }}</span>
               @if (!rechecking) {
                 <span class="badge" [class.badge--confirmed]="availability === 'ok'" [class.badge--bad]="availability !== 'ok'">

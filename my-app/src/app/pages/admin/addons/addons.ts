@@ -264,9 +264,9 @@ export class Addons implements OnInit, OnDestroy {
 
     let defaultImg = this.formData.image.trim();
     if (!defaultImg) {
-      if (this.formData.category === 'Đồ uống') defaultImg = '/images/figma/dish-ca-phe-den-sua.png';
-      else if (this.formData.category === 'Bánh / Ăn nhẹ') defaultImg = '/images/figma/dish-croissant.png';
-      else defaultImg = '/images/figma/monitor.svg';
+      if (this.formData.category === 'Đồ uống') defaultImg = '/images/addons/cf-den.png';
+      else if (this.formData.category === 'Bánh / Ăn nhẹ') defaultImg = '/images/addons/bake-croissant.png';
+      else defaultImg = '/images/addons/eq-monitor.png';
     }
 
     this.saving = true;
@@ -379,7 +379,7 @@ export class Addons implements OnInit, OnDestroy {
       catalogVisible: true,
       addonAvailable: 'Khả dụng',
       status: 'ACTIVE',
-      image: '/images/figma/dish-ca-phe-den-sua.png',
+      image: '/images/addons/cf-den.png',
     };
   }
 }

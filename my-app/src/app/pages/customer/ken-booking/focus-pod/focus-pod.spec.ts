@@ -1,3 +1,5 @@
+import '@angular/compiler';
+import { describe, it, expect, vi } from 'vitest';
 import { KenFocusPodPage } from './focus-pod';
 import { KenBookingState } from '../booking-state';
 import { ChangeDetectorRef } from '@angular/core';
@@ -5,7 +7,6 @@ import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { AuthService } from '../../../../core/auth.service';
 import { of } from 'rxjs';
 import { KenAvailabilityService } from '../availability.service';
-import { vi } from 'vitest';
 
 describe('KenFocusPodPage', () => {
   function availabilityService(): KenAvailabilityService {

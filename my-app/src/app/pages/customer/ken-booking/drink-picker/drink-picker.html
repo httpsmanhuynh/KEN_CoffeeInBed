@@ -24,11 +24,20 @@
     </div>
   </div>
   <section class="kf-container kf-drink-catalog">
-    <section class="kf-rec-bar" *ngIf="recommendedDrinks.length" aria-label="Gợi ý dành cho bạn">
-      <div class="kf-rec-head"><strong>✨ Gợi ý dành cho bạn</strong><small *ngIf="state.clusterPersona">Nhóm khách: {{ state.clusterPersona }}</small></div>
+    <section class="kf-rec-bar kf-rec-bar--inclusion" *ngIf="recommendedItems.length" aria-label="Gợi ý dành cho bạn">
+      <div class="kf-rec-head">
+        <strong>✨ Gợi ý món Inclusion dành cho bạn</strong>
+        <small class="kf-rec-persona-badge" *ngIf="state.clusterPersona || state.clusterId !== null">
+          <ng-container *ngIf="state.clusterId !== null">Nhóm khách #{{ state.clusterId }}</ng-container>
+          <ng-container *ngIf="state.clusterId !== null && state.clusterPersona"> · </ng-container>
+          <ng-container *ngIf="state.clusterPersona">{{ state.clusterPersona }}</ng-container>
+        </small>
+      </div>
       <div class="kf-rec-list">
-        <button type="button" class="kf-rec-chip" *ngFor="let drink of recommendedDrinks" (click)="changeDrink(drink.id,1)" [disabled]="!canAddDrink">
-          <img [src]="state.image(drink.image)" [alt]="drink.name"><span>{{ drink.name }}<small>{{ money(drink.price) }}</small></span><b>{{ state.drinkQuantity(drink.id) ? '×' + state.drinkQuantity(drink.id) : '+' }}</b>
+        <button type="button" class="kf-rec-chip" [class.is-selected]="recommendedQty(item) > 0" *ngFor="let item of recommendedItems" (click)="addRecommended(item)" [disabled]="!canAddRecommended(item)">
+          <img [src]="state.image(item.image)" [alt]="item.name">
+          <span>{{ item.name }}<small>{{ state.inclusionSurcharge(item) > 0 ? '+' + money(state.inclusionSurcharge(item)) + ' phụ thu' : 'Trong gói (0đ)' }}</small></span>
+          <b>{{ recommendedQty(item) ? '×' + recommendedQty(item) : '+' }}</b>
         </button>
       </div>
     </section>
@@ -50,7 +59,7 @@
       <div class="kf-section-title"><div><span class="kf-overline">01 /</span><h2>Cà phê &amp; trà</h2></div><p>Đồ uống đặc trưng của KÉN</p></div>
       <div class="kf-menu-grid">
         <article *ngFor="let drink of coffee" class="kf-product kf-drink-card" [class.selected]="state.drinkQuantity(drink.id) > 0">
-          <img [src]="'/images/ken-flow/' + drink.image" [alt]="drink.name">
+          <img [src]="state.image(drink.image)" [alt]="drink.name">
           <div class="kf-product-copy">
             <h3>{{ drink.name }}</h3><p>{{ drink.description }}</p><small>Giá niêm yết: {{ money(state.getProductPrice(drink)) }}</small>
 
@@ -85,7 +94,7 @@
       <div class="kf-section-title"><div><span class="kf-overline">02 /</span><h2>Giải khát</h2></div><p>Nước uống &amp; trái cây tươi</p></div>
       <div class="kf-menu-grid">
         <article *ngFor="let drink of refreshments" class="kf-product kf-drink-card" [class.selected]="state.drinkQuantity(drink.id) > 0">
-          <img [src]="'/images/ken-flow/' + drink.image" [alt]="drink.name">
+          <img [src]="state.image(drink.image)" [alt]="drink.name">
           <div class="kf-product-copy">
             <h3>{{ drink.name }}</h3><p>{{ drink.description }}</p><small>Giá niêm yết: {{ money(state.getProductPrice(drink)) }}</small>
 
@@ -125,7 +134,7 @@
       </div>
       <div class="kf-menu-grid">
         <article *ngFor="let pastry of state.pastries" class="kf-product kf-drink-card" [class.selected]="state.pastryQuantity(pastry.id) > 0">
-          <img [src]="'/images/ken-flow/' + pastry.image" [alt]="pastry.name">
+          <img [src]="state.image(pastry.image)" [alt]="pastry.name">
           <div class="kf-product-copy">
             <h3>{{ pastry.name }}</h3><p>{{ pastry.description }}</p><small>Giá niêm yết: {{ money(pastry.price) }}</small>
             <div class="kf-product-bottom">
@@ -141,14 +150,14 @@
       </div>
     </ng-container>
 
-    <p class="kf-note"><img class="kf-icon" src="/images/ken-flow/icons/drink-info.svg" alt=""> Món trong gói được hỗ trợ tối đa 50.000đ/món; chỉ tính phần chênh lệch. Add-on sẽ được chọn riêng sau khi xác nhận.</p>
+    <p class="kf-note"><lucide-icon class="kf-icon" name="info" [size]="18" [strokeWidth]="1.8" color="#A9763F" aria-hidden="true"></lucide-icon> Món trong gói được hỗ trợ tối đa 50.000đ/món; chỉ tính phần chênh lệch. Add-on sẽ được chọn riêng sau khi xác nhận.</p>
   </section>
   <section class="kf-drink-summary">
     <div class="kf-container kf-drink-summary-grid">
       <div>
         <p class="kf-overline">TÓM TẮT MÓN TRONG GÓI</p>
         <div class="kf-drink-choice" *ngFor="let item of state.selectedDrinks">
-          <img [src]="'/images/ken-flow/' + item.product.image" [alt]="item.product.name">
+          <img [src]="state.image(item.product.image)" [alt]="item.product.name">
           <div>
             <strong>{{ item.product.name }} <span class="kf-choice-variant" *ngIf="item.variantLabel">({{ item.variantLabel }})</span> × {{ item.quantity }}</strong>
             <small>{{ money(item.unitPrice) }} / món<span *ngIf="state.entitlement"> · Gói hỗ trợ {{ money(state.entitlement) }}/món</span></small>
@@ -156,7 +165,7 @@
           <span>{{ money(item.surcharge * item.quantity) }}</span>
         </div>
         <div class="kf-drink-choice" *ngFor="let item of state.selectedPastries">
-          <img [src]="'/images/ken-flow/' + item.product.image" [alt]="item.product.name">
+          <img [src]="state.image(item.product.image)" [alt]="item.product.name">
           <div><strong>{{ item.product.name }} × {{ item.quantity }}</strong><small>Bánh ngọt đi kèm · Miễn phí theo gói</small></div>
           <span style="color: #047857">0đ</span>
         </div>

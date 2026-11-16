@@ -1,3 +1,5 @@
+import '@angular/compiler';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { KenBookingState } from './booking-state';
 
 describe('KenBookingState', () => {
@@ -154,5 +156,86 @@ describe('KenBookingState', () => {
     state.setDrinkTemp('coffee', 'Lạnh');
     expect(state.getDrinkVariant('coffee')).toBe('Lạnh');
     expect(state.drinkSurcharge).toBe(0);
+  });
+
+  it('resolves cluster recommendation items for inclusion and add-on bars', () => {
+    const state = new KenBookingState();
+    state.set({ spaceId: 'work', guests: 1, hours: 14 });
+    state.clusterRecSignal.set({
+      clusterId: 0,
+      personaName: 'Khách thân thiết chi mạnh',
+      items: [
+        {
+          rank: 1,
+          itemCode: 'CF_SUA',
+          productId: 'prod-cf-sua',
+          addonId: 'addon-cf-sua',
+          name: 'Cà phê sữa',
+          addonName: 'Cà phê sữa',
+          category: 'DRINK',
+          price: 50000,
+          addonPrice: 50000,
+        },
+        {
+          rank: 2,
+          itemCode: 'BAKE_CROISSANT',
+          productId: 'prod-croissant',
+          addonId: 'addon-croissant',
+          name: 'Croissant bơ',
+          addonName: 'Croissant bơ',
+          category: 'PASTRY',
+          price: 35000,
+          addonPrice: 35000,
+        },
+      ],
+    });
+
+    expect(state.clusterId).toBe(0);
+    expect(state.clusterPersona).toBe('Khách thân thiết chi mạnh');
+    expect(state.clusterRecInclusionDrinks.map(p => p.itemCode)).toContain('CF_SUA');
+    expect(state.clusterRecInclusionPastries.map(p => p.itemCode)).toContain('BAKE_CROISSANT');
+    expect(state.clusterRecInclusionItems.length).toBe(2);
+    expect(state.clusterRecExtras.map(e => e.itemCode)).toEqual(['CF_SUA', 'BAKE_CROISSANT']);
+
+    const cfSua = state.clusterRecInclusionDrinks[0];
+    const croissant = state.clusterRecInclusionPastries[0];
+    // Simulate merging fallback items into menu/extras just as loadClusterRecommendations does
+    state.menuProductsSignal.set([...state.menuProductsSignal(), cfSua]);
+    state.addInclusionItem(cfSua, 1);
+    state.addInclusionItem(croissant, 1);
+    expect(state.inclusionItemQuantity(cfSua)).toBe(1);
+    expect(state.inclusionItemQuantity(croissant)).toBe(1);
+    expect(state.selectedDrinkCount).toBe(1);
+    expect(state.selectedPastryCount).toBe(1);
+  });
+
+  it('evaluates zero tier discount for non-members and guests', () => {
+    const state = new KenBookingState();
+    state.set({ spaceId: 'lounge', guests: 6, hours: 1 });
+    expect(state.currentTierRate).toBe(0);
+    expect(state.tierDiscount).toBe(0);
+    expect(state.silverDiscount).toBe(0);
+    expect(state.total).toBe(state.subtotal);
+  });
+
+  it('computes member tier discount when quote arrives', () => {
+    const state = new KenBookingState();
+    state.set({ spaceId: 'lounge', guests: 6, hours: 1 });
+    state.quoteSignal.set({
+      tierCode: 'SILVER',
+      tierRate: 0.05,
+      pricing: {
+        subtotal: 220000,
+        tierDiscount: 11000,
+        voucherDiscount: 0,
+        finalAmount: 209000
+      }
+    } as any);
+
+    expect(state.currentTierRate).toBe(0.05);
+    expect(state.tierDiscount).toBe(11000);
+    expect(state.silverDiscount).toBe(11000);
+    expect(state.tierDiscountLabel).toBe('Ưu đãi thành viên (5%)');
+    expect(state.total).toBe(209000);
   });
 });

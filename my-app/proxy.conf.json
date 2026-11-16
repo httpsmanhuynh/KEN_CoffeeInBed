@@ -1,7 +1,22 @@
 {
-    "/api": {
-      "target": "http://localhost:3002",
-      "secure": false,
-      "changeOrigin": true
-    }
+  "/api": {
+    "target": "http://localhost:3002",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/images/addons": {
+    "target": "http://localhost:3002",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/images/spaces": {
+    "target": "http://localhost:3002",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/images/zones": {
+    "target": "http://localhost:3002",
+    "secure": false,
+    "changeOrigin": true
   }
+}

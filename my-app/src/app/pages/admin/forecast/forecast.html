@@ -39,7 +39,7 @@
         <label>
           <span>Từ ngày</span>
           <div class="date-input">
-            <img src="/images/figma/calendar-date.svg" alt="" />
+            <lucide-icon name="calendar" [size]="16" [strokeWidth]="1.8" color="#4A3123"></lucide-icon>
             <input type="date" [value]="fromDate" (change)="onDateChange('fromDate', $event)" />
           </div>
         </label>
@@ -47,7 +47,7 @@
         <label>
           <span>Đến ngày</span>
           <div class="date-input">
-            <img src="/images/figma/calendar-date.svg" alt="" />
+            <lucide-icon name="calendar" [size]="16" [strokeWidth]="1.8" color="#4A3123"></lucide-icon>
             <input type="date" [value]="toDate" (change)="onDateChange('toDate', $event)" />
           </div>
         </label>
@@ -101,7 +101,7 @@
       <section class="forecast-card trend-card">
         <div class="section-heading">
           <h2>
-            <img src="/images/figma/table.svg" alt="" /> Xu hướng tiêu thụ thực tế gần đây
+            <lucide-icon name="table" [size]="18" [strokeWidth]="1.8" color="#4A3123"></lucide-icon> Xu hướng tiêu thụ thực tế gần đây
           </h2>
           <p>
             <span class="legend actual"></span> Tổng số lượng món bán ra theo ngày (từ lịch sử giao
@@ -129,7 +129,7 @@
 
       <section class="forecast-card plan-card">
         <div class="section-heading plan-heading">
-          <h2><img src="/images/figma/table.svg" alt="" /> Kế hoạch chuẩn bị theo món</h2>
+          <h2><lucide-icon name="table" [size]="18" [strokeWidth]="1.8" color="#4A3123"></lucide-icon> Kế hoạch chuẩn bị theo món</h2>
           <small>
             Khoảng {{ formatDateVi(fromDate) }} – {{ formatDateVi(toDate) }} ·
             {{ filteredDishes.length }} / {{ dishes.length }} món
@@ -138,7 +138,7 @@
 
         <div class="plan-filters">
           <label class="plan-search">
-            <img src="/images/figma/search.svg" alt="" />
+            <lucide-icon name="search" [size]="16" [strokeWidth]="1.8" color="#4A3123"></lucide-icon>
             <input
               type="text"
               [value]="search"
@@ -253,7 +253,7 @@
         <div class="section-heading alerts-heading">
           <div>
             <h2>
-              <img src="/images/figma/icon-info.svg" alt="" /> Cảnh báo Tồn kho Safety Stock
+              <lucide-icon name="info" [size]="16" [strokeWidth]="1.8" color="#4A3123"></lucide-icon> Cảnh báo Tồn kho Safety Stock
               ({{ alerts.length }})
             </h2>
             <small>Xác nhận hoặc đánh dấu đã xử lý sau khi nhập bổ sung nguyên liệu.</small>
@@ -309,7 +309,7 @@
       <section class="forecast-card">
         <div class="section-heading ing-heading">
           <div>
-            <h2><img src="/images/figma/icon-pkg.svg" alt="" /> Dự báo Nguyên vật liệu &amp; Nhập kho</h2>
+            <h2><lucide-icon name="tag" [size]="16" [strokeWidth]="1.8" color="#4A3123"></lucide-icon> Dự báo Nguyên vật liệu &amp; Nhập kho</h2>
             <small>Quy đổi từ kế hoạch món qua công thức (Recipes) để đề xuất nhập hàng.</small>
           </div>
           <div class="ing-filter-pills">
@@ -492,7 +492,7 @@
       <section class="forecast-card">
         <div class="section-heading">
           <h2>
-            <img src="/images/figma/sparkles.svg" alt="" /> Cặp món &amp; Add-on thường được đặt
+            <lucide-icon name="sparkles" [size]="16" [strokeWidth]="1.8" color="#4A3123"></lucide-icon> Cặp món &amp; Add-on thường được đặt
             cùng nhau (Co-occurrence)
           </h2>
           <small>Chỉ số Support, Confidence và Lift đo mức độ liên kết giữa hai sản phẩm.</small>
@@ -559,7 +559,7 @@
       <section class="recommend-bottom-grid">
         <article class="forecast-card">
           <div class="section-heading">
-            <h2><img src="/images/figma/table.svg" alt="" /> Top Trending Add-on &amp; Món bán chạy</h2>
+            <h2><lucide-icon name="table" [size]="18" [strokeWidth]="1.8" color="#4A3123"></lucide-icon> Top Trending Add-on &amp; Món bán chạy</h2>
             <small>Xếp hạng theo sản lượng thực tế cho Pop-up gợi ý.</small>
           </div>
           <div class="cluster-list">
@@ -606,7 +606,7 @@
 
         <article class="forecast-card">
           <div class="section-heading">
-            <h2><img src="/images/figma/sparkles.svg" alt="" /> Phân khúc Khách hàng ML Clusters</h2>
+            <h2><lucide-icon name="sparkles" [size]="16" [strokeWidth]="1.8" color="#4A3123"></lucide-icon> Phân khúc Khách hàng ML Clusters</h2>
             <small>Nhóm hành vi dùng để cá nhân hóa gợi ý tại bước Booking Menu.</small>
           </div>
           <div class="cluster-list">

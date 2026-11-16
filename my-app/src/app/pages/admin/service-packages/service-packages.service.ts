@@ -1,11 +1,10 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject, forkJoin, Observable, of } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable, catchError, forkJoin, map, of, tap } from 'rxjs';
 
-export type PackageType = 'FIXED' | 'HOURLY';
-export type PackageUnit = 'PER_SPACE' | 'PER_PERSON';
 export type PackageStatus = 'ACTIVE' | 'INACTIVE';
+export type PackageType = 'FIXED' | 'HOURLY';
+export type PackageUnit = 'PER_PERSON' | 'PER_SPACE';
 
 export interface ServicePackage {
   id: string;
@@ -19,180 +18,10 @@ export interface ServicePackage {
   durationMinutes?: number;
   price: number;
   space: string;
+  spaceId?: string;
   inclusion: string;
   status: PackageStatus;
-  spaceId?: string;
 }
-
-const STORAGE_KEY = 'ken-admin-service-packages-v2';
-
-const INITIAL_PACKAGES: ServicePackage[] = [
-  {
-    id: 'WL-01',
-    name: 'Gói Linh hoạt',
-    shortName: 'Work Lounge',
-    group: 'KÉN Tập Trung',
-    type: 'HOURLY',
-    unit: 'PER_PERSON',
-    duration: 'Từ 1 giờ',
-    durationMinutes: 60,
-    price: 30000,
-    space: 'Work Lounge',
-    spaceId: 's1',
-    inclusion: '01 đồ uống · Dùng không gian Work Lounge',
-    status: 'ACTIVE',
-  },
-  {
-    id: 'WL-02',
-    name: 'Gói Nửa ngày',
-    shortName: 'Work Lounge',
-    group: 'KÉN Tập Trung',
-    type: 'FIXED',
-    unit: 'PER_PERSON',
-    duration: '4 giờ',
-    durationMinutes: 240,
-    price: 90000,
-    space: 'Work Lounge',
-    spaceId: 's1',
-    inclusion: '01 đồ uống · Dùng không gian Work Lounge',
-    status: 'ACTIVE',
-  },
-  {
-    id: 'WL-03',
-    name: 'Gói Cả ngày',
-    shortName: 'Work Lounge',
-    group: 'KÉN Tập Trung',
-    type: 'FIXED',
-    unit: 'PER_PERSON',
-    duration: '08:00–22:00',
-    durationMinutes: 840,
-    price: 150000,
-    space: 'Work Lounge',
-    spaceId: 's1',
-    inclusion: '01 đồ uống · Dùng không gian Work Lounge',
-    status: 'ACTIVE',
-  },
-  {
-    id: 'FP-01',
-    name: 'Tập trung theo giờ',
-    shortName: 'Focus Pod',
-    group: 'KÉN Tập Trung',
-    type: 'HOURLY',
-    unit: 'PER_SPACE',
-    duration: 'Từ 1 giờ',
-    durationMinutes: 60,
-    price: 45000,
-    space: 'Focus Pod',
-    spaceId: 's2',
-    inclusion: '01 đồ uống · Hỗ trợ tối đa 50.000đ',
-    status: 'ACTIVE',
-  },
-  {
-    id: 'FP-02',
-    name: 'Tập trung nửa ngày',
-    shortName: 'Focus Pod',
-    group: 'KÉN Tập Trung',
-    type: 'FIXED',
-    unit: 'PER_SPACE',
-    duration: '4 giờ',
-    durationMinutes: 240,
-    price: 140000,
-    space: 'Focus Pod',
-    spaceId: 's2',
-    inclusion: '01 đồ uống · Hỗ trợ tối đa 50.000đ',
-    status: 'ACTIVE',
-  },
-  {
-    id: 'MR-01',
-    name: 'Họp nhóm nhỏ',
-    shortName: 'Small Meeting Room',
-    group: 'KÉN Tập Trung',
-    type: 'FIXED',
-    unit: 'PER_SPACE',
-    duration: '3 giờ',
-    durationMinutes: 180,
-    price: 250000,
-    space: 'Small Meeting Room',
-    spaceId: 's3',
-    inclusion: 'Máy chiếu + bảng từ · Mỗi khách 01 chai nước suối',
-    status: 'ACTIVE',
-  },
-  {
-    id: 'BR-01',
-    name: 'Họp nhóm lớn',
-    shortName: 'Boardroom',
-    group: 'KÉN Tập Trung',
-    type: 'FIXED',
-    unit: 'PER_SPACE',
-    duration: '3 giờ',
-    durationMinutes: 180,
-    price: 450000,
-    space: 'Boardroom',
-    spaceId: 's4',
-    inclusion: 'Máy chiếu + bảng từ · Mỗi khách 01 chai nước suối',
-    status: 'ACTIVE',
-  },
-  {
-    id: 'TT-01',
-    name: 'Nghỉ nhanh',
-    shortName: 'Single / Double / Studio',
-    group: 'KÉN Tái Tạo',
-    type: 'FIXED',
-    unit: 'PER_SPACE',
-    duration: '1 giờ',
-    durationMinutes: 60,
-    price: 70000,
-    space: 'Single / Double / Studio',
-    spaceId: 's5',
-    inclusion: 'Single 70.000đ · Double 100.000đ · Studio 150.000đ',
-    status: 'ACTIVE',
-  },
-  {
-    id: 'TT-02',
-    name: 'Ngả lưng',
-    shortName: 'Single / Double / Studio',
-    group: 'KÉN Tái Tạo',
-    type: 'FIXED',
-    unit: 'PER_SPACE',
-    duration: '2 giờ',
-    durationMinutes: 120,
-    price: 130000,
-    space: 'Single / Double / Studio',
-    spaceId: 's6',
-    inclusion: 'Single 130.000đ · Double 180.000đ · Studio 290.000đ',
-    status: 'ACTIVE',
-  },
-  {
-    id: 'TT-03',
-    name: 'Trú ẩn',
-    shortName: 'Single / Double / Studio',
-    group: 'KÉN Tái Tạo',
-    type: 'FIXED',
-    unit: 'PER_SPACE',
-    duration: '4 giờ',
-    durationMinutes: 240,
-    price: 220000,
-    space: 'Single / Double / Studio',
-    spaceId: 's7',
-    inclusion: 'Single 220.000đ · Double 310.000đ · Studio 480.000đ',
-    status: 'ACTIVE',
-  },
-  {
-    id: 'TT-04',
-    name: 'Nguyên ngày',
-    shortName: 'Single / Double / Studio',
-    group: 'KÉN Tái Tạo',
-    type: 'FIXED',
-    unit: 'PER_SPACE',
-    duration: '8 giờ',
-    durationMinutes: 480,
-    price: 350000,
-    space: 'Single / Double / Studio',
-    spaceId: 's5',
-    inclusion: 'Single 350.000đ · Double 490.000đ · Studio 770.000đ',
-    status: 'ACTIVE',
-  },
-];
 
 @Injectable({ providedIn: 'root' })
 export class ServicePackagesService {
@@ -201,6 +30,7 @@ export class ServicePackagesService {
   readonly packages$ = this.packagesSubject.asObservable();
 
   private spaceLookup = new Map<string, { name: string; zoneName: string; type: string }>();
+  private zoneLookup = new Map<string, string>();
 
   get packages(): ServicePackage[] {
     return this.packagesSubject.value;
@@ -216,15 +46,15 @@ export class ServicePackagesService {
     }).pipe(
       map((res) => {
         const rawZones = this.extractList(res.zones);
-        const zoneById = new Map<string, string>();
+        this.zoneLookup.clear();
         for (const z of rawZones) {
-          zoneById.set(String(z._id || z.id), z.name || z.code || 'KÉN Tập Trung');
+          this.zoneLookup.set(String(z._id || z.id), z.name || z.code || 'KÉN Tập Trung');
         }
 
         const rawSpaces = this.extractList(res.spaces);
         this.spaceLookup.clear();
         for (const s of rawSpaces) {
-          const zName = zoneById.get(String(s.zone_id || '')) || s.zone_name || 'KÉN Tập Trung';
+          const zName = this.zoneLookup.get(String(s.zone_id || '')) || s.zone_name || 'KÉN Tập Trung';
           this.spaceLookup.set(String(s._id || s.id), {
             name: s.name_en || s.name || 'Không gian',
             zoneName: zName,
@@ -261,41 +91,121 @@ export class ServicePackagesService {
 
   private mapApiPackage(p: any, priceByPkg: Map<string, number>): ServicePackage {
     const id = String(p._id || p.id);
+    const code = String(p.package_code || p.code || id.slice(-6)).toUpperCase();
     const spId = p.space_id ? String(p.space_id) : undefined;
     const spRef = spId ? this.spaceLookup.get(spId) : undefined;
 
-    const rawGroup = String(spRef?.zoneName || p.zone_name || p.group || '').includes('Tái Tạo')
+    const zName = this.zoneLookup.get(String(p.zone_id || '')) || spRef?.zoneName || p.zone_name || '';
+    const rawGroup = (code.startsWith('PKG_REST') || zName.includes('Tái Tạo'))
       ? 'KÉN Tái Tạo'
       : 'KÉN Tập Trung';
 
-    const rawType = String(p.pricing_type || p.type || 'FIXED').toUpperCase();
-    const pkgType: PackageType = rawType === 'HOURLY' ? 'HOURLY' : 'FIXED';
-    const rawUnit = String(p.unit || (spRef?.type === 'SHARED' ? 'PER_PERSON' : 'PER_SPACE')).toUpperCase();
+    const rawType = String(p.package_type || p.pricing_type || p.type || 'FIXED').toUpperCase();
+    const pkgType: PackageType = (rawType === 'HOURLY' || code === 'PKG_FP_HOURLY' || code === 'PKG_WL_FLEX')
+      ? 'HOURLY'
+      : 'FIXED';
+
+    const rawUnit = String(p.pricing_unit || p.unit || (code.startsWith('PKG_WL') ? 'PER_PERSON' : 'PER_SPACE')).toUpperCase();
     const pkgUnit: PackageUnit = rawUnit === 'PER_PERSON' ? 'PER_PERSON' : 'PER_SPACE';
 
-    const mins = Number(p.duration_minutes ?? 60);
-    const hours = mins >= 60 ? Math.round((mins / 60) * 10) / 10 : mins;
-    const duration =
-      p.duration_label ||
-      (mins >= 60 ? `${hours} giờ` : `${mins} phút`);
+    let mins = 60;
+    let duration = '1 giờ';
+    if (pkgType === 'HOURLY') {
+      duration = 'Theo giờ';
+      mins = 60;
+    } else if (p.is_full_day) {
+      duration = 'Cả ngày (14 giờ)';
+      mins = 14 * 60;
+    } else if (p.duration_hours) {
+      duration = `${p.duration_hours} giờ`;
+      mins = Number(p.duration_hours) * 60;
+    } else if (p.duration_minutes) {
+      mins = Number(p.duration_minutes);
+      duration = mins >= 60 ? `${Math.round(mins / 60)} giờ` : `${mins} phút`;
+    } else if (p.duration_label) {
+      duration = p.duration_label;
+    }
 
-    const price = Number(p.price ?? p.base_price ?? priceByPkg.get(id) ?? 0);
+    let space = spRef?.name || p.space_name || '';
+    if (!space) {
+      if (code.startsWith('PKG_WL')) space = 'Work Lounge';
+      else if (code.startsWith('PKG_FP')) space = 'Focus Pod';
+      else if (code === 'PKG_SMR_3H') space = 'Small Meeting Room';
+      else if (code === 'PKG_BR_3H') space = 'Boardroom';
+      else if (code.startsWith('PKG_REST')) space = 'Kén nghỉ (Single / Double / Studio)';
+      else space = 'Không gian KÉN';
+    }
+
+    let price = Number(p.price ?? p.base_price ?? priceByPkg.get(id) ?? 0);
+    if (price === 0) {
+      if (code === 'PKG_WL_FLEX') price = 30000;
+      else if (code === 'PKG_WL_HALF') price = 90000;
+      else if (code === 'PKG_WL_FULL') price = 150000;
+      else if (code === 'PKG_FP_HOURLY') price = 45000;
+      else if (code === 'PKG_FP_HALF') price = 140000;
+      else if (code === 'PKG_SMR_3H') price = 250000;
+      else if (code === 'PKG_BR_3H') price = 450000;
+      else if (code === 'PKG_REST_1H') price = 70000;
+      else if (code === 'PKG_REST_2H') price = 130000;
+      else if (code === 'PKG_REST_4H') price = 220000;
+      else if (code === 'PKG_REST_8H') price = 350000;
+    }
+
+    let inclusion = '';
+    switch (code) {
+      case 'PKG_FP_HOURLY':
+        inclusion = '01 chai nước suối (nếu đặt từ 2 giờ trở lên)';
+        break;
+      case 'PKG_WL_FLEX':
+        inclusion = 'Mỗi khách 01 chai nước suối (nếu đặt từ 2 giờ trở lên)';
+        break;
+      case 'PKG_FP_HALF':
+        inclusion = '01 đồ uống Menu Tiêu chuẩn';
+        break;
+      case 'PKG_WL_HALF':
+        inclusion = 'Mỗi khách 01 đồ uống Menu Tiêu chuẩn';
+        break;
+      case 'PKG_WL_FULL':
+        inclusion = 'Mỗi khách 02 đồ uống Menu Tiêu chuẩn và 01 bánh';
+        break;
+      case 'PKG_SMR_3H':
+        inclusion = 'Máy chiếu, bảng từ; mỗi khách 01 chai nước suối';
+        break;
+      case 'PKG_BR_3H':
+        inclusion = 'Máy chiếu, bảng từ; mỗi khách 01 chai nước suối';
+        break;
+      case 'PKG_REST_1H':
+        inclusion = 'Không bao gồm F&B';
+        break;
+      case 'PKG_REST_2H':
+        inclusion = 'Mỗi khách 01 đồ uống Menu Tiêu chuẩn';
+        break;
+      case 'PKG_REST_4H':
+        inclusion = 'Mỗi khách 01 đồ uống Menu Tiêu chuẩn và 01 bánh';
+        break;
+      case 'PKG_REST_8H':
+        inclusion = 'Mỗi khách 02 đồ uống Menu Tiêu chuẩn và 01 bánh';
+        break;
+      default:
+        inclusion = p.description || p.inclusion || '01 đồ uống chuẩn gói (hỗ trợ tối đa 50.000đ)';
+    }
+
     const isActive = p.is_active !== false && String(p.status || 'ACTIVE').toUpperCase() === 'ACTIVE';
 
     return {
       id,
-      code: p.code || id.slice(-6).toUpperCase(),
+      code,
       name: p.name || 'Gói dịch vụ',
-      shortName: spRef?.name || p.space_name || p.short_name || 'Không gian KÉN',
+      shortName: space,
       group: rawGroup,
       type: pkgType,
       unit: pkgUnit,
       duration,
       durationMinutes: mins,
       price,
-      space: spRef?.name || p.space_name || 'Work Lounge',
+      space,
       spaceId: spId,
-      inclusion: p.description || p.inclusion || '01 đồ uống chuẩn gói (hỗ trợ tối đa 50.000đ)',
+      inclusion,
       status: isActive ? 'ACTIVE' : 'INACTIVE',
     };
   }
@@ -411,28 +321,15 @@ export class ServicePackagesService {
   }
 
   resetToDefault(): void {
-    this.update(INITIAL_PACKAGES);
+    this.loadFromApi().subscribe();
   }
 
   private update(items: ServicePackage[]): void {
     this.packagesSubject.next(items);
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-    } catch {
-      // Ignore
-    }
   }
 
   private loadPackages(): ServicePackage[] {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (!stored) return INITIAL_PACKAGES;
-      const parsed = JSON.parse(stored) as unknown;
-      if (!Array.isArray(parsed) || parsed.length === 0) return INITIAL_PACKAGES;
-      return parsed as ServicePackage[];
-    } catch {
-      return INITIAL_PACKAGES;
-    }
+    return [];
   }
 
   private nextId(group: ServicePackage['group'], space: string): string {

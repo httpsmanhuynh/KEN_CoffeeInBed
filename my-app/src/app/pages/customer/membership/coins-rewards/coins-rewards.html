@@ -16,7 +16,7 @@
       <!-- Ví Coins -->
       <section class="wallet" aria-label="Số dư Coins">
         <div class="wallet__balance">
-          <span class="wallet__icon"><img src="/images/figma/wallet.svg" alt="" width="28" height="28" /></span>
+          <span class="wallet__icon"><lucide-icon name="wallet" [size]="28" [strokeWidth]="1.8" color="#A9763F"></lucide-icon></span>
           <div class="wallet__num">
             <p class="wallet__label">SỐ DƯ KHẢ DỤNG</p>
             <p class="wallet__value">{{ balance }} Coins</p>
@@ -32,7 +32,7 @@
           <div class="vt__row vt__row--head" role="row">
             <span role="columnheader">VOUCHER</span>
             <span role="columnheader">COINS YÊU CẦU</span>
-            <span class="vt__valid" role="columnheader"><img src="/images/figma/icon-hieuluc.svg" alt="" width="12" height="12" />HIỆU LỰC</span>
+            <span class="vt__valid" role="columnheader"><lucide-icon name="clock" [size]="12" [strokeWidth]="1.8" color="#7A6553"></lucide-icon>HIỆU LỰC</span>
             <span role="columnheader">TRẠNG THÁI</span>
             <span class="center" role="columnheader">HÀNH ĐỘNG</span>
           </div>
@@ -86,7 +86,7 @@
         <div class="hist__head">
           <h2 class="h-serif">Lịch sử Coins</h2>
           <button type="button" class="refresh" (click)="loadHistory()">
-            <img src="/images/figma/btn-refresh.svg" alt="" width="14" height="14" /><span>Làm mới</span>
+            <lucide-icon name="refresh-cw" [size]="14" [strokeWidth]="1.8" color="#4A3123"></lucide-icon><span>Làm mới</span>
           </button>
         </div>
 

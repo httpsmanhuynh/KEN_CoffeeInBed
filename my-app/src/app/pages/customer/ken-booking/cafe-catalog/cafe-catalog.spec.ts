@@ -1,3 +1,4 @@
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -15,6 +16,7 @@ describe('KenCafeCatalogPage', () => {
         provideRouter([]),
         { provide: SmoothScrollService, useValue: smoothScroll },
       ],
+      schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
 
     const fixture = TestBed.createComponent(KenCafeCatalogPage);

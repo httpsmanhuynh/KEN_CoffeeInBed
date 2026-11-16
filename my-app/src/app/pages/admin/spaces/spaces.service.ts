@@ -34,127 +34,7 @@ export interface SpaceItem {
 
 const STORAGE_KEY = 'ken-admin-spaces-v2';
 
-const INITIAL_SPACES: SpaceItem[] = [
-  {
-    id: 's1',
-    zone: 'KÉN Tập Trung',
-    name: 'Khu làm việc chung',
-    nameEn: 'Work Lounge',
-    type: 'Dùng chung',
-    capacity: 20,
-    minGuest: 1,
-    maxGuest: 20,
-    priceLabel: 'Theo người',
-    status: 'ACTIVE',
-    amenities: ['WiFi', 'Ổ cắm điện', 'Đặt chỗ trực tuyến'],
-    bookingMode: 'SHARED',
-    bufferMinutes: 0,
-    futureBookingCount: 0,
-    image: '/images/ken-flow/listing-work.png',
-  },
-  {
-    id: 's2',
-    zone: 'KÉN Tập Trung',
-    name: 'Ô tập trung cá nhân',
-    nameEn: 'Focus Pod',
-    type: 'Dùng riêng',
-    capacity: 1,
-    minGuest: 1,
-    maxGuest: 1,
-    priceLabel: 'Theo không gian',
-    status: 'ACTIVE',
-    amenities: ['WiFi', 'Ổ cắm điện', 'Đặt chỗ trực tuyến'],
-    bookingMode: 'PRIVATE',
-    bufferMinutes: 15,
-    futureBookingCount: 0,
-    image: '/images/ken-flow/listing-focus.png',
-  },
-  {
-    id: 's3',
-    zone: 'KÉN Tập Trung',
-    name: 'Phòng họp nhỏ',
-    nameEn: 'Small Meeting Room',
-    type: 'Dùng riêng',
-    capacity: 6,
-    minGuest: 3,
-    maxGuest: 6,
-    priceLabel: 'Theo không gian',
-    status: 'ACTIVE',
-    amenities: ['WiFi', 'Ổ cắm điện', 'Đặt chỗ trực tuyến'],
-    bookingMode: 'PRIVATE',
-    bufferMinutes: 15,
-    futureBookingCount: 0,
-    image: '/images/ken-flow/listing-meeting-small.png',
-  },
-  {
-    id: 's4',
-    zone: 'KÉN Tập Trung',
-    name: 'Phòng họp lớn',
-    nameEn: 'Boardroom',
-    type: 'Dùng riêng',
-    capacity: 12,
-    minGuest: 6,
-    maxGuest: 12,
-    priceLabel: 'Theo không gian',
-    status: 'ACTIVE',
-    amenities: ['WiFi', 'Ổ cắm điện', 'Đặt chỗ trực tuyến', 'Đặt theo giờ'],
-    bookingMode: 'PRIVATE',
-    bufferMinutes: 15,
-    futureBookingCount: 0,
-    image: '/images/ken-flow/listing-meeting-small.png',
-  },
-  {
-    id: 's5',
-    zone: 'KÉN Tái Tạo',
-    name: 'KÉN nghỉ đơn',
-    nameEn: 'Single Bed Pod',
-    type: 'Dùng riêng',
-    capacity: 1,
-    minGuest: 1,
-    maxGuest: 1,
-    priceLabel: 'Theo không gian',
-    status: 'ACTIVE',
-    amenities: ['WiFi', 'Đặt chỗ trực tuyến', 'Đặt theo giờ'],
-    bookingMode: 'PRIVATE',
-    bufferMinutes: 15,
-    futureBookingCount: 0,
-    image: '/images/ken-flow/listing-single.png',
-  },
-  {
-    id: 's6',
-    zone: 'KÉN Tái Tạo',
-    name: 'KÉN nghỉ đôi',
-    nameEn: 'Double Bed Pod',
-    type: 'Dùng riêng',
-    capacity: 2,
-    minGuest: 1,
-    maxGuest: 2,
-    priceLabel: 'Theo không gian',
-    status: 'ACTIVE',
-    amenities: ['WiFi', 'Đặt chỗ trực tuyến', 'Đặt theo giờ'],
-    bookingMode: 'PRIVATE',
-    bufferMinutes: 15,
-    futureBookingCount: 0,
-    image: '/images/ken-flow/listing-single.png',
-  },
-  {
-    id: 's7',
-    zone: 'KÉN Tái Tạo',
-    name: 'Phòng riêng tư',
-    nameEn: 'Private Studio',
-    type: 'Dùng riêng',
-    capacity: 4,
-    minGuest: 2,
-    maxGuest: 4,
-    priceLabel: 'Theo không gian',
-    status: 'INACTIVE',
-    amenities: ['WiFi', 'Ổ cắm điện', 'Đặt chỗ trực tuyến', 'Đặt theo giờ'],
-    bookingMode: 'PRIVATE',
-    bufferMinutes: 15,
-    futureBookingCount: 0,
-    image: '/images/ken-flow/listing-focus.png',
-  },
-];
+const INITIAL_SPACES: SpaceItem[] = [];
 
 @Injectable({ providedIn: 'root' })
 export class SpacesService {
@@ -257,7 +137,7 @@ export class SpacesService {
   private normalizeImage(value: unknown, fallback: string): string {
     const raw = typeof value === 'string' ? value.trim() : '';
     if (!raw) return fallback;
-    if (raw.startsWith('/images/ken-flow/') || raw.startsWith('/images/figma/') || raw.startsWith('http') || raw.startsWith('data:')) {
+    if (raw.startsWith('/images/spaces/') || raw.startsWith('/images/zones/') || raw.startsWith('/images/ken-flow/') || raw.startsWith('/images/figma/') || raw.startsWith('http') || raw.startsWith('data:')) {
       return raw;
     }
     return fallback;
@@ -378,28 +258,14 @@ export class SpacesService {
   }
 
   resetToDefault(): void {
-    this.update(INITIAL_SPACES);
+    this.loadFromApi().subscribe();
   }
 
   private update(spaces: SpaceItem[]): void {
     this.spacesSubject.next(spaces);
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(spaces));
-    } catch {
-      // Ignore if localStorage unavailable
-    }
   }
 
   private loadSpaces(): SpaceItem[] {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (!stored) {
-        return INITIAL_SPACES;
-      }
-      const parsed = JSON.parse(stored) as unknown;
-      return Array.isArray(parsed) && parsed.length > 0 ? (parsed as SpaceItem[]) : INITIAL_SPACES;
-    } catch {
-      return INITIAL_SPACES;
-    }
+    return [];
   }
 }

@@ -33,6 +33,10 @@ const publicUser = (u, tier) => {
       tierCode = expected.code;
     }
   }
+  const mlClusterId =
+    u.ml_cluster_id !== undefined && u.ml_cluster_id !== null && Number.isFinite(Number(u.ml_cluster_id))
+      ? Number(u.ml_cluster_id)
+      : null;
   return {
     id: String(u._id),
     fullName: u.full_name,
@@ -43,6 +47,8 @@ const publicUser = (u, tier) => {
     membershipTier: tierCode,
     tierPoints: u.tier_points,
     coinsBalance: u.coin_balance,
+    mlClusterId,
+    ml_cluster_id: mlClusterId,
   };
 };
 

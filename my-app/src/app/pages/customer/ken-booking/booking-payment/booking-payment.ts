@@ -24,6 +24,7 @@ export class KenBookingPaymentPage implements OnInit, OnDestroy {
   paidAmount = 0;
   private timer?: ReturnType<typeof setInterval>;
   readonly money = kenMoney;
+  get tierDiscountLabel(): string { return this.state.tierDiscountLabel || 'Ưu đãi thành viên'; }
   constructor(public state: KenBookingState, private router: Router, private auth: AuthService) {}
   ngOnInit(): void {
     this.auth.ensureSession().subscribe({

@@ -86,7 +86,7 @@
     <div class="sidebar-footer" data-name="AdminProfile">
       <div class="profile-card">
         <div class="profile-avatar">
-          <img src="/images/figma/user-round.svg" alt="" class="avatar-icon" />
+          <lucide-icon name="user-round" [size]="18" [strokeWidth]="1.8" color="#A9763F" class="avatar-icon" aria-hidden="true"></lucide-icon>
         </div>
         <div class="profile-info">
           <span class="profile-name" [title]="auth.user?.fullName ?? 'Quản trị viên'">{{ auth.user?.fullName ?? 'Quản trị viên KÉN' }}</span>
@@ -149,7 +149,7 @@
           title="Làm mới dữ liệu"
           [class.spinning]="isRefreshing"
         >
-          <img src="/images/figma/btn-refresh.svg" alt="Refresh" class="refresh-icon" />
+          <lucide-icon name="refresh-cw" [size]="18" [strokeWidth]="1.8" color="#4A3123" class="refresh-icon" aria-hidden="true"></lucide-icon>
         </button>
       </div>
     </header>

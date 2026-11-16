@@ -1,10 +1,11 @@
+import '@angular/compiler';
 import { KenOtherSpacePage } from './other-space-booking';
 import { ChangeDetectorRef } from '@angular/core';
 import { KenBookingState, kenNextDay } from '../booking-state';
 import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { AuthService } from '../../../../core/auth.service';
 import { of } from 'rxjs';
-import { vi } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { KenAvailabilityService } from '../availability.service';
 
 describe('KenOtherSpacePage', () => {
@@ -98,5 +99,58 @@ describe('KenOtherSpacePage', () => {
     expect(navigate).toHaveBeenCalledWith(['/login'], {
       queryParams: { returnUrl: '/booking/private?bookingStep=addons' },
     });
+  });
+
+  it('keeps startHour, duration, and timeLabel synchronized when selecting package and hours', () => {
+    const state = new KenBookingState();
+    const route = {
+      paramMap: of(convertToParamMap({ id: 'private' })),
+      snapshot: { queryParamMap: convertToParamMap({}) },
+    } as ActivatedRoute;
+    const page = new KenOtherSpacePage(
+      route, {} as unknown as Router, state, { ensureSession: () => of(null) } as unknown as AuthService,
+      availabilityService(), { markForCheck: vi.fn() } as unknown as ChangeDetectorRef,
+    );
+    page.ngOnInit();
+
+    // Select startHour = 15:00
+    page.changeHour(15);
+    expect(page.startHour).toBe(15);
+    expect(state.draft().startHour).toBe(15);
+
+    // Choose 1h package -> 15:00 - 16:00
+    page.chooseDuration(1);
+    expect(page.duration).toBe(1);
+    expect(page.startHour).toBe(15);
+    expect(state.timeLabel).toBe('15:00–16:00');
+
+    // Choose 2h package -> 15:00 - 17:00
+    page.chooseDuration(2);
+    expect(page.duration).toBe(2);
+    expect(page.startHour).toBe(15);
+    expect(state.timeLabel).toBe('15:00–17:00');
+
+    // Choose 4h package -> 15:00 - 19:00
+    page.chooseDuration(4);
+    expect(page.duration).toBe(4);
+    expect(page.startHour).toBe(15);
+    expect(state.timeLabel).toBe('15:00–19:00');
+
+    // Choose 8h package -> 15 + 8 = 23 > 22, should clamp to 14:00 (14:00 - 22:00)
+    page.chooseDuration(8);
+    expect(page.duration).toBe(8);
+    expect(page.startHour).toBe(14);
+    expect(state.timeLabel).toBe('14:00–22:00');
+
+    // Switch start hour back to 10
+    page.changeHour(10);
+    expect(page.startHour).toBe(10);
+    expect(state.timeLabel).toBe('10:00–18:00');
+
+    // Switch to 1h package
+    page.chooseDuration(1);
+    expect(page.duration).toBe(1);
+    expect(page.startHour).toBe(10);
+    expect(state.timeLabel).toBe('10:00–11:00');
   });
 });

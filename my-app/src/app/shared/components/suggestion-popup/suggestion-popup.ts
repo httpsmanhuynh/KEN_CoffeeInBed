@@ -10,22 +10,24 @@ const TICK_MS = 50;
 const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 function mapPopupImage(item: any): string {
-  const url = typeof item?.imageUrl === 'string' ? item.imageUrl : '';
-  if (url.startsWith('/images/figma/') || url.startsWith('/images/ken-flow/') || url.startsWith('http')) {
+  const url = typeof item?.imageUrl === 'string' ? item.imageUrl.trim() : '';
+  if (url.startsWith('/images/addons/') || url.startsWith('http') || url.startsWith('data:')) {
     return url;
   }
   const code = String(item?.itemCode || '').toUpperCase();
   const name = String(item?.name || '').toLocaleLowerCase('vi-VN');
-  if (code.includes('MATCHA') && !name.includes('mousse')) return '/images/figma/popup-matcha.png';
-  if (code === 'CF_BAC_XIU' || name.includes('bạc xỉu')) return '/images/figma/popup-bac-xiu.png';
-  if (code.includes('COLD_BREW') || name.includes('cold brew')) return '/images/figma/dish-cold-brew.png';
-  if (code.includes('OOLONG') || name.includes('oolong') || code.startsWith('TEA_')) return '/images/figma/dish-oolong.png';
-  if (code === 'BAKE_CROISSANT' || name.includes('croissant')) return '/images/figma/dish-croissant.png';
-  if (code.startsWith('CAKE_') || name.includes('tiramisu') || name.includes('cheese')) return '/images/figma/dish-tiramisu.png';
-  if (code.startsWith('JUICE_') || name.includes('cam') || name.includes('chanh')) return '/images/figma/dish-nuoc-cam.png';
-  if (code === 'CF_AMERICANO' || name.includes('americano')) return '/images/figma/dish-americano.png';
-  if (code.startsWith('MOUSSE_') || name.includes('mousse')) return '/images/figma/dish-mousse.png';
-  return '/images/figma/dish-ca-phe-den-sua.png';
+  if (code.includes('MATCHA') && !name.includes('mousse')) return '/images/addons/matcha-latte.png';
+  if (code.includes('HOJICHA') || name.includes('hojicha')) return '/images/addons/hojicha-latte.png';
+  if (code === 'CF_SALTED_CARAMEL' || name.includes('caramel')) return '/images/addons/cf-salted-caramel.png';
+  if (code === 'CF_BAC_XIU' || name.includes('bạc xỉu')) return '/images/addons/cf-bac-xiu.png';
+  if (code.includes('COLD_BREW') || name.includes('cold brew')) return '/images/addons/cf-cold-brew.png';
+  if (code.includes('OOLONG') || name.includes('oolong') || code.startsWith('TEA_')) return '/images/addons/tea-oolong-macchiato.png';
+  if (code === 'BAKE_CROISSANT' || name.includes('croissant')) return '/images/addons/bake-croissant.png';
+  if (code.startsWith('CAKE_') || name.includes('tiramisu') || name.includes('cheese')) return '/images/addons/cake-tiramisu.png';
+  if (code.startsWith('JUICE_') || name.includes('cam') || name.includes('chanh')) return '/images/addons/juice-cam.png';
+  if (code === 'CF_AMERICANO' || name.includes('americano')) return '/images/addons/cf-americano.png';
+  if (code.startsWith('MOUSSE_') || name.includes('mousse')) return '/images/addons/mousse-matcha.png';
+  return '/images/addons/cf-den.png';
 }
 
 @Component({
@@ -43,9 +45,9 @@ export class SuggestionPopup implements OnInit, OnDestroy {
   @ViewChild('dialog') dialog?: ElementRef<HTMLElement>;
 
   slides: Slide[] = [
-    { id: 'matcha', name: 'Matcha Latte / Hojicha Latte', price: '55.000đ', image: '/images/figma/popup-matcha.png',
+    { id: 'matcha', name: 'Matcha Latte / Hojicha Latte', price: '55.000đ', image: '/images/addons/matcha-latte.png',
       desc: 'Một chút trà thơm quyện cùng sữa dịu nhẹ. Vừa hay cho lúc bạn muốn chậm lại giữa buổi chiều.' },
-    { id: 'bacxiu', name: 'Bạc Xỉu / Salted Caramel Coffee', price: '45.000đ', image: '/images/figma/popup-bac-xiu.png',
+    { id: 'bacxiu', name: 'Bạc Xỉu / Salted Caramel Coffee', price: '45.000đ', image: '/images/addons/cf-bac-xiu.png',
       desc: 'Cà phê quyện sữa, ngọt dịu vừa đủ. Một lựa chọn để nhâm nhi cùng câu chuyện còn đang dang dở.' },
   ];
 

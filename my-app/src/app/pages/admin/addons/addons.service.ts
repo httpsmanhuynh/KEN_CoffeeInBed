@@ -29,90 +29,7 @@ export interface ProductAddon {
 
 const STORAGE_KEY = 'ken-admin-addons-v1';
 
-const INITIAL_ADDONS: ProductAddon[] = [
-  {
-    id: 'DU-01',
-    code: 'DU-01',
-    source: 'PRODUCT',
-    name: 'Cà phê đen / sữa',
-    category: 'Đồ uống',
-    price: 40000,
-    unit: 'Ly',
-    catalogVisible: true,
-    addonAvailable: 'Khả dụng',
-    status: 'ACTIVE',
-    image: '/images/figma/dish-ca-phe-den-sua.png',
-    packageLink: { packageName: 'Hỗ trợ chuẩn gói Focus / Lounge', packageSupport: 50000 },
-  },
-  {
-    id: 'DU-02',
-    code: 'DU-02',
-    source: 'PRODUCT',
-    name: 'Americano',
-    category: 'Đồ uống',
-    price: 40000,
-    unit: 'Ly',
-    catalogVisible: true,
-    addonAvailable: 'Khả dụng',
-    status: 'ACTIVE',
-    image: '/images/figma/dish-americano.png',
-    packageLink: { packageName: 'Hỗ trợ chuẩn gói Focus / Lounge', packageSupport: 50000 },
-  },
-  {
-    id: 'DU-03',
-    code: 'DU-03',
-    source: 'PRODUCT',
-    name: 'Bạc Xỉu',
-    category: 'Đồ uống',
-    price: 45000,
-    unit: 'Ly',
-    catalogVisible: true,
-    addonAvailable: 'Khả dụng',
-    status: 'ACTIVE',
-    image: '/images/figma/dish-bac-xiu.png',
-    packageLink: { packageName: 'Hỗ trợ chuẩn gói Focus / Lounge', packageSupport: 50000 },
-  },
-  {
-    id: 'DU-06',
-    code: 'DU-06',
-    source: 'PRODUCT',
-    name: 'Matcha Latte',
-    category: 'Đồ uống',
-    price: 55000,
-    unit: 'Ly',
-    catalogVisible: true,
-    addonAvailable: 'Khả dụng',
-    status: 'ACTIVE',
-    image: '/images/figma/popup-matcha.png',
-    packageLink: { packageName: 'Trong gói Focus Pod', packageSupport: 50000 },
-  },
-  {
-    id: 'BN-01',
-    code: 'BN-01',
-    source: 'ADDON',
-    name: 'Croissant Bơ Pháp',
-    category: 'Bánh / Ăn nhẹ',
-    price: 42000,
-    unit: 'Phần',
-    catalogVisible: true,
-    addonAvailable: 'Khả dụng',
-    status: 'ACTIVE',
-    image: '/images/figma/dish-croissant.png',
-  },
-  {
-    id: 'TI-01',
-    code: 'TI-01',
-    source: 'ADDON',
-    name: 'Bộ cáp sạc đa năng',
-    category: 'Tiện ích',
-    price: 20000,
-    unit: 'Lượt',
-    catalogVisible: false,
-    addonAvailable: 'Khả dụng',
-    status: 'ACTIVE',
-    image: '/images/figma/monitor.svg',
-  },
-];
+const INITIAL_ADDONS: ProductAddon[] = [];
 
 @Injectable({ providedIn: 'root' })
 export class AddonsService {
@@ -249,9 +166,9 @@ export class AddonsService {
   }
 
   private defaultImage(cat: ProductCategory): string {
-    if (cat === 'Đồ uống') return '/images/figma/dish-ca-phe-den-sua.png';
-    if (cat === 'Bánh / Ăn nhẹ') return '/images/figma/dish-croissant.png';
-    return '/images/figma/monitor.svg';
+    if (cat === 'Đồ uống') return '/images/addons/cf-den.png';
+    if (cat === 'Bánh / Ăn nhẹ') return '/images/addons/bake-croissant.png';
+    return '/images/addons/eq-monitor.png';
   }
 
   findById(id: string): ProductAddon | undefined {
@@ -351,31 +268,49 @@ export class AddonsService {
 
   private resolveProductImage(raw: any, cat: ProductCategory): string {
     const imgRaw = typeof (raw?.image_url || raw?.image) === 'string' ? String(raw.image_url || raw.image).trim() : '';
-    if (imgRaw.startsWith('/images/ken-flow/') || imgRaw.startsWith('/images/figma/') || imgRaw.startsWith('http') || imgRaw.startsWith('data:')) {
+    if (imgRaw.startsWith('/images/addons/') || imgRaw.startsWith('http') || imgRaw.startsWith('data:')) {
       return imgRaw;
     }
     const code = String(raw?.item_code || raw?.code || '').toUpperCase();
     const name = String(raw?.name || raw?.product_name || raw?.addon_name || '').toLocaleLowerCase('vi-VN');
-    if (code === 'CF_AMERICANO' || name.includes('americano')) return '/images/ken-flow/americano.png';
-    if (code === 'CF_BAC_XIU' || code === 'CF_SALTED_CARAMEL' || name.includes('bạc xỉu') || name.includes('caramel')) return '/images/ken-flow/bac-xiu.png';
-    if (code.includes('COLD_BREW') || name.includes('cold brew')) return '/images/ken-flow/cold-brew.png';
-    if (code.startsWith('TEA_') || name.includes('trà') || name.includes('oolong')) return '/images/ken-flow/oolong.png';
-    if (code.includes('MATCHA') && cat !== 'Bánh / Ăn nhẹ') return '/images/ken-flow/matcha.png';
-    if (code.includes('HOJICHA') || name.includes('hojicha') || name.includes('matcha')) return cat === 'Bánh / Ăn nhẹ' ? '/images/ken-flow/mousse.png' : '/images/ken-flow/matcha.png';
-    if (code === 'WATER_BOTTLE' || name.includes('tinh khiết') || name.includes('nước suối')) return '/images/ken-flow/water.png';
-    if (code.startsWith('JUICE_') || name.includes('nước cam') || name.includes('nước ép')) return '/images/ken-flow/juice.png';
-    if (code.startsWith('SODA_') || name.includes('soda')) return '/images/ken-flow/soda.png';
-    if (name.includes('croissant') || name.includes('sừng bò') || name.includes('bơ xốp') || code === 'BAKE_SCONE') return '/images/ken-flow/croissant.png';
-    if (name.includes('mousse') || code.startsWith('MOUSSE_')) return '/images/ken-flow/mousse.png';
-    if (name.includes('tiramisu') || name.includes('cheesecake') || code.startsWith('CAKE_')) return '/images/ken-flow/tiramisu.png';
-    if (name.includes('bánh mì') || name.includes('biscotti') || code === 'BREAD_QUE' || code === 'BAKE_BISCOTTI') return '/images/ken-flow/bread.png';
-    if (name.includes('sandwich')) return '/images/ken-flow/sandwich.png';
-    if (name.includes('trái cây')) return '/images/ken-flow/fruit.png';
-    if (name.includes('màn hình')) return '/images/ken-flow/monitor.png';
-    if (name.includes('bàn phím') || name.includes('chuột')) return '/images/ken-flow/keyboard.png';
-    if (name.includes('cáp') || name.includes('sạc')) return '/images/ken-flow/powerbank.png';
-    if (name.includes('bút') || name.includes('bảng')) return '/images/ken-flow/stationery.png';
-    if (name.includes('in tài liệu')) return '/images/ken-flow/printer.png';
+    if (code === 'CF_AMERICANO' || name.includes('americano')) return '/images/addons/cf-americano.png';
+    if (code === 'CF_SALTED_CARAMEL' || name.includes('caramel')) return '/images/addons/cf-salted-caramel.png';
+    if (code === 'CF_BAC_XIU' || name.includes('bạc xỉu')) return '/images/addons/cf-bac-xiu.png';
+    if (code === 'CF_COLD_BREW_FRUIT' || (name.includes('cold brew') && name.includes('trái cây'))) return '/images/addons/cf-cold-brew-fruit.png';
+    if (code.includes('COLD_BREW') || name.includes('cold brew')) return '/images/addons/cf-cold-brew.png';
+    if (code === 'CF_SUA' || name.includes('cà phê sữa')) return '/images/addons/cf-sua.png';
+    if (code === 'CF_PHIN' || name.includes('phin')) return '/images/addons/cf-phin.png';
+    if (code === 'CF_ESPRESSO' || name.includes('espresso')) return '/images/addons/cf-espresso.png';
+    if (code === 'TEA_DAO' || name.includes('trà đào')) return '/images/addons/tea-dao.png';
+    if (code === 'TEA_LUC' || name.includes('lục trà')) return '/images/addons/tea-luc.png';
+    if (code === 'TEA_THAO_MOC' || name.includes('thảo mộc')) return '/images/addons/tea-thao-moc.png';
+    if (code === 'TEA_CHAI' || name.includes('chai ấn độ')) return '/images/addons/tea-chai.png';
+    if (code.startsWith('TEA_') || name.includes('trà') || name.includes('oolong')) return '/images/addons/tea-oolong-macchiato.png';
+    if (code.includes('MATCHA') && cat !== 'Bánh / Ăn nhẹ' && !name.includes('mousse')) return '/images/addons/matcha-latte.png';
+    if (code.includes('HOJICHA') || name.includes('hojicha')) return '/images/addons/hojicha-latte.png';
+    if (code === 'CHOC_NONG' || name.includes('sô-cô-la')) return '/images/addons/choc-nong.png';
+    if (code === 'WATER_BOTTLE' || name.includes('tinh khiết') || name.includes('nước suối')) return '/images/addons/water-bottle.png';
+    if (code === 'JUICE_CHANH_DAY' || (name.includes('chanh dây') && !name.includes('mousse'))) return '/images/addons/juice-chanh-day.png';
+    if (code.startsWith('JUICE_') || name.includes('nước cam') || name.includes('nước ép')) return '/images/addons/juice-cam.png';
+    if (code.startsWith('SODA_') || name.includes('soda')) return '/images/addons/soda-trai-cay.png';
+    if (code === 'BAKE_SCONE' || name.includes('bơ xốp')) return '/images/addons/bake-scone.png';
+    if (name.includes('croissant') || name.includes('sừng bò')) return '/images/addons/bake-croissant.png';
+    if (code === 'MOUSSE_CHANH_DAY' || (name.includes('mousse') && name.includes('chanh dây'))) return '/images/addons/mousse-chanh-day.png';
+    if (name.includes('mousse') || code.startsWith('MOUSSE_')) return '/images/addons/mousse-matcha.png';
+    if (code === 'CAKE_CHEESE' || name.includes('cheesecake')) return '/images/addons/cake-cheese.png';
+    if (name.includes('tiramisu') || code.startsWith('CAKE_')) return '/images/addons/cake-tiramisu.png';
+    if (code === 'BAKE_BISCOTTI' || name.includes('biscotti') || name.includes('bánh quy')) return '/images/addons/bake-biscotti.png';
+    if (name.includes('bánh mì') || code === 'BREAD_QUE') return '/images/addons/bread-que.png';
+    if (name.includes('sandwich')) return '/images/addons/snack-sandwich.png';
+    if (name.includes('trái cây')) return '/images/addons/snack-fruit.png';
+    if (name.includes('màn hình')) return '/images/addons/eq-monitor.png';
+    if (name.includes('bàn phím') || name.includes('chuột')) return '/images/addons/eq-keyboard-mouse.png';
+    if (name.includes('cáp') || name.includes('sạc')) return '/images/addons/eq-cable-powerbank.png';
+    if (name.includes('bút') || name.includes('bảng')) return '/images/addons/eq-pen-board.png';
+    if (name.includes('in tài liệu')) return '/images/addons/eq-print-a4.png';
+    if (name.includes('khăn ấm')) return '/images/addons/eq-warm-towel.png';
+    if (name.includes('bộ nghỉ') || name.includes('bịt mắt')) return '/images/addons/eq-rest-kit.png';
+    if (name.includes('chăn')) return '/images/addons/eq-blanket.png';
     return this.defaultImage(cat);
   }
 
@@ -391,21 +326,9 @@ export class AddonsService {
 
   private update(items: ProductAddon[]): void {
     this.addonsSubject.next(items);
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-    } catch {
-      // Ignore
-    }
   }
 
   private loadInitial(): ProductAddon[] {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return INITIAL_ADDONS;
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) && parsed.length > 0 ? parsed : INITIAL_ADDONS;
-    } catch {
-      return INITIAL_ADDONS;
-    }
+    return [];
   }
 }

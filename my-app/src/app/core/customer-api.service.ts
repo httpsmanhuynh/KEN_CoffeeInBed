@@ -155,6 +155,14 @@ export class CustomerApiService {
     return this.http.get<any[]>('/api/pricing', { params, withCredentials: true });
   }
 
+  getPackageInclusions(query?: Record<string, string>): Observable<any[]> {
+    let params = new HttpParams();
+    for (const [k, v] of Object.entries(query || {})) {
+      if (v) params = params.set(k, v);
+    }
+    return this.http.get<any[]>('/api/package-inclusions', { params, withCredentials: true });
+  }
+
   getRecommendations(query?: Record<string, string>): Observable<any> {
     let params = new HttpParams();
     for (const [k, v] of Object.entries(query || {})) {

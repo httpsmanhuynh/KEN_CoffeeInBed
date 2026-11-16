@@ -698,3 +698,49 @@ test('TC-REC-15: Phân quyền Security — Customer nhận 403 FORBIDDEN, Guest
     }
   });
 });
+
+test('TC-REC-25: clusterRecommendation đọc users.ml_cluster_id và ml_cluster_recommendations / ml_cluster_recommendation', async () => {
+  const seed = buildSeedData();
+  seed.ml_cluster_recommendations = [
+    {
+      _id: new ObjectId(),
+      cluster_id: 2,
+      persona_name: 'Khách ngủ đông (lâu chưa quay lại)',
+      recommended_item_codes: ['MATCHA', 'CR_BO'],
+    },
+  ];
+  const db = fakeDb(seed);
+
+  await withServer(db, null, async (baseUrl) => {
+    const res = await fetch(`${baseUrl}/api/recommendations/booking?userId=${IDS.customerCluster}`);
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    assert.equal(body.clusterRecommendation.clusterId, 2);
+    assert.equal(body.clusterRecommendation.personaName, 'Khách ngủ đông (lâu chưa quay lại)');
+    assert.deepEqual(
+      body.clusterRecommendation.items.map((x) => x.itemCode),
+      ['MATCHA', 'CR_BO'],
+    );
+    assert.equal(String(body.clusterRecommendation.items[1].addonId), String(IDS.addonCroissant));
+  });
+
+  // Kiểm tra fallback tên collection số ít `ml_cluster_recommendation`
+  const seedSingle = buildSeedData();
+  seedSingle.ml_cluster_recommendation = [
+    {
+      _id: new ObjectId(),
+      cluster_id: 2,
+      persona_name: 'Cụm test singular',
+      recommended_item_codes: ['CF_DEN'],
+    },
+  ];
+  const dbSingle = fakeDb(seedSingle);
+  await withServer(dbSingle, { id: String(IDS.customerCluster), role: 'CUSTOMER', pwdAt: 0 }, async (baseUrl) => {
+    const res = await fetch(`${baseUrl}/api/recommendations/booking`);
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    assert.equal(body.clusterRecommendation.clusterId, 2);
+    assert.equal(body.clusterRecommendation.personaName, 'Cụm test singular');
+    assert.equal(body.clusterRecommendation.items[0].itemCode, 'CF_DEN');
+  });
+});

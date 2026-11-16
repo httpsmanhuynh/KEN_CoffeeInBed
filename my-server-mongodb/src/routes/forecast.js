@@ -63,11 +63,14 @@ const handle = (fn) => async (req, res) => {
 async function resolveOptionalUser(req) {
   try {
     if (req.user) return req.user;
-    const sessUser = req.session && req.session.user;
-    if (!sessUser || !sessUser.id) return null;
     const db = getDb(req);
-    if (!db || !ObjectId.isValid(String(sessUser.id))) return null;
-    const user = await db.collection('users').findOne({ _id: new ObjectId(String(sessUser.id)) });
+    if (!db) return null;
+    const sessUser = req.session && req.session.user;
+    const rawUserId =
+      (sessUser && sessUser.id ? String(sessUser.id) : '') ||
+      (req.query && req.query.userId ? String(req.query.userId).trim() : '');
+    if (!rawUserId || !ObjectId.isValid(rawUserId)) return null;
+    const user = await db.collection('users').findOne({ _id: new ObjectId(rawUserId) });
     if (!user || user.status !== 'ACTIVE') return null;
     return user;
   } catch (_) {

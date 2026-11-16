@@ -21,6 +21,8 @@ export interface AuthenticatedUser {
   membershipTier: string;
   tierPoints: number;
   coinsBalance: number;
+  mlClusterId?: number | null;
+  ml_cluster_id?: number | null;
 }
 
 export interface LoginResult {

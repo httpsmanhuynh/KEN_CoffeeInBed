@@ -20,7 +20,7 @@
   <div class="filter-bar" data-name="Filter bar">
     <div class="filter-field">
       <label class="field-label-row" for="dash-from-date">
-        <img src="/images/figma/calendar-date.svg" alt="" class="field-icon" />
+        <lucide-icon name="calendar" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="field-icon"></lucide-icon>
         <span class="field-label">Từ ngày</span>
       </label>
       <input
@@ -34,7 +34,7 @@
 
     <div class="filter-field">
       <label class="field-label-row" for="dash-to-date">
-        <img src="/images/figma/calendar-date.svg" alt="" class="field-icon" />
+        <lucide-icon name="calendar" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="field-icon"></lucide-icon>
         <span class="field-label">Đến ngày</span>
       </label>
       <input
@@ -92,11 +92,11 @@
     <!-- Filter Actions -->
     <div class="filter-actions">
       <button type="button" class="btn-filter-action btn-filter-primary" (click)="applyFilters()" [disabled]="loading">
-        <img src="/images/figma/filter.svg" alt="" class="action-icon" />
+        <lucide-icon name="filter" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="action-icon"></lucide-icon>
         <span>{{ loading ? 'Đang tải...' : 'Xem báo cáo' }}</span>
       </button>
       <button type="button" class="btn-filter-action" (click)="resetFilters()" [disabled]="loading">
-        <img src="/images/figma/btn-refresh.svg" alt="" class="action-icon" />
+        <lucide-icon name="refresh-cw" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="action-icon"></lucide-icon>
         <span>Đặt lại</span>
       </button>
     </div>
@@ -155,7 +155,7 @@
     <div class="chart-card revenue-card" data-name="Biểu đồ doanh thu">
       <div class="card-header">
         <div class="header-left">
-          <img src="/images/figma/table.svg" alt="" class="header-icon" />
+          <lucide-icon name="table" [size]="18" [strokeWidth]="1.8" color="#4A3123" class="header-icon"></lucide-icon>
           <h2 class="card-title">Doanh thu thuần theo ngày</h2>
         </div>
         <span class="card-badge">ĐÃ THU − ĐÃ HOÀN TIỀN</span>
@@ -321,7 +321,7 @@
     <div class="panel-card tasks-card" data-name="Tasks">
       <div class="panel-header">
         <div class="header-left">
-          <img src="/images/figma/lich-dat-cho.svg" alt="" class="header-icon" />
+          <lucide-icon name="calendar-check" [size]="18" [strokeWidth]="1.8" color="#4A3123" class="header-icon"></lucide-icon>
           <h2 class="panel-title">Việc cần mình chăm chút</h2>
         </div>
         <span class="panel-badge">{{ tasks.length }} việc ưu tiên</span>
@@ -344,7 +344,7 @@
     <div class="panel-card upcoming-card" data-name="Upcoming">
       <div class="panel-header">
         <div class="header-left">
-          <img src="/images/figma/clock.svg" alt="" class="header-icon" />
+          <lucide-icon name="clock" [size]="18" [strokeWidth]="1.8" color="#4A3123" class="header-icon"></lucide-icon>
           <h2 class="panel-title">Khách sắp ghé KÉN (Đã xác nhận)</h2>
         </div>
         <a (click)="goToBookings('CONFIRMED')" class="panel-link">Xem tất cả →</a>
@@ -353,7 +353,7 @@
       <div class="upcoming-list" *ngIf="upcomingGuests.length > 0; else emptyGuests">
         <div *ngFor="let guest of upcomingGuests" class="upcoming-item">
           <div class="upcoming-time-col">
-            <img src="/images/figma/clock.svg" alt="" class="time-clock-icon" />
+            <lucide-icon name="clock" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="time-clock-icon"></lucide-icon>
             <span class="time-val">{{ guest.time }}</span>
             <span class="time-date-sub">{{ guest.dateLabel }}</span>
           </div>

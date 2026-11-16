@@ -74,7 +74,7 @@ export class AccountSidebar {
   readonly items: SidebarItem[] = [
     { key: 'points',     label: 'KÉN Điểm',        path: '/points-tier',       icon: 'sparkles' },
     { key: 'coins',      label: 'KÉN Coins',       path: '/coins-rewards',     icon: 'coins' },
-    { key: 'bookings',   label: 'Lịch sử đặt chỗ', path: '/booking-list',      icon: 'lich-dat-cho' },
+    { key: 'bookings',   label: 'Lịch sử đặt chỗ', path: '/booking-list',      icon: 'calendar-check' },
     { key: 'reschedule', label: 'Đổi / Huỷ lịch',  path: '/booking-reschedule', icon: 'calendar-clock' },
     { key: 'account',    label: 'Tài khoản',       path: '/user-profile',      icon: 'user-round' },
   ];

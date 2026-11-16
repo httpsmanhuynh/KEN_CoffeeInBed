@@ -9,7 +9,7 @@
   <div class="page-title-row" data-name="Page title row">
     <div class="title-block" data-name="Title block">
       <div class="title-with-icon" data-name="Title with icon">
-        <img src="/images/figma/nguoi-dung.svg" alt="" class="title-icon" />
+        <lucide-icon name="user" [size]="18" [strokeWidth]="1.8" color="#4A3123" class="title-icon"></lucide-icon>
         <h1 class="page-title">Khách hàng &amp; Thành viên</h1>
       </div>
       <p class="page-subtitle">Quản lý hồ sơ khách hàng, trạng thái tài khoản và hạng thành viên KÉN. Nhấp vào một dòng khách hàng để xem chi tiết.</p>
@@ -24,7 +24,7 @@
     <!-- Filter Row -->
     <div class="filters-row" data-name="Filters">
       <div class="search-input-box">
-        <img src="/images/figma/search.svg" alt="" class="search-icon" />
+        <lucide-icon name="search" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="search-icon"></lucide-icon>
         <input
           type="text"
           [(ngModel)]="searchTerm"
@@ -42,7 +42,7 @@
           <option value="VANG">Vàng (5.000 – 9.999 điểm · Giảm 10%)</option>
           <option value="KIM_CUONG">Kim Cương (Từ 10.000 điểm · Giảm 15%)</option>
         </select>
-        <img src="/images/figma/chevron-down.svg" alt="" class="select-arrow" />
+        <lucide-icon name="chevron-down" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="select-arrow"></lucide-icon>
       </div>
 
       <div class="select-dropdown">
@@ -51,7 +51,7 @@
           <option value="ACTIVE">Hoạt động</option>
           <option value="LOCKED">Tạm khoá</option>
         </select>
-        <img src="/images/figma/chevron-down.svg" alt="" class="select-arrow" />
+        <lucide-icon name="chevron-down" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="select-arrow"></lucide-icon>
       </div>
 
       <button type="button" class="btn-filter-action" (click)="resetFilters()">
@@ -192,7 +192,7 @@
   <!-- Interactive Customer Detail Section (Revealed on Row Click) -->
   <div id="customer-detail-anchor" class="customer-detail-section" *ngIf="selectedCustomer as sel" data-name="Customer detail section">
     <div class="detail-section-header">
-      <img src="/images/figma/eye-view-fill.svg" alt="" class="detail-icon" />
+      <lucide-icon name="eye" [size]="18" [strokeWidth]="1.8" color="#4A3123" class="detail-icon"></lucide-icon>
       <span class="detail-section-title">HỒ SƠ CHI TIẾT KHÁCH HÀNG · {{ sel.name }} ({{ sel.code }})</span>
       <button type="button" class="admin-detail-close-btn" (click)="closeCustomerDetail()">
         Đóng chi tiết ✕
@@ -203,7 +203,7 @@
       <!-- Left Panel: Account Info & Lock/Unlock -->
       <div class="detail-panel">
         <div class="panel-header">
-          <img src="/images/figma/user-round.svg" alt="" class="panel-icon" />
+          <lucide-icon name="user-round" [size]="18" [strokeWidth]="1.8" color="#4A3123" class="panel-icon"></lucide-icon>
           <h3 class="panel-title">Thông tin tài khoản</h3>
         </div>
         <div class="panel-divider"></div>
@@ -272,7 +272,7 @@
       <!-- Right Panel: Loyalty Card & Benefits -->
       <div class="detail-panel">
         <div class="panel-header">
-          <img src="/images/figma/sparkles.svg" alt="" class="panel-icon" />
+          <lucide-icon name="sparkles" [size]="18" [strokeWidth]="1.8" color="#4A3123" class="panel-icon"></lucide-icon>
           <h3 class="panel-title">Thẻ thành viên &amp; KÉN Xu</h3>
         </div>
 
@@ -313,7 +313,7 @@
     <!-- Booking History of Selected Customer -->
     <div class="booking-history-block">
       <div class="history-header">
-        <img src="/images/figma/lich-dat-cho.svg" alt="" class="history-icon" />
+        <lucide-icon name="calendar-check" [size]="18" [strokeWidth]="1.8" color="#4A3123" class="history-icon"></lucide-icon>
         <h3 class="history-title">Lịch sử đặt chỗ của {{ sel.name }}</h3>
         <span class="history-count">{{ sel.bookingHistory.length }} đơn gần nhất</span>
       </div>

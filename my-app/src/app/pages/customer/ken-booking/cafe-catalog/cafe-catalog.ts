@@ -55,9 +55,9 @@ export class KenCafeCatalogPage implements OnInit {
   }
   get resultCount(): number { return this.sections.reduce((n, s) => n + this.forSection(s.id).length, 0); }
   image = (p: KenProduct) => {
-    if (!p?.image) return '/images/ken-flow/coffee.png';
-    if (p.image.startsWith('/') || p.image.startsWith('http')) return p.image;
-    return '/images/ken-flow/' + p.image;
+    if (!p?.image) return '/images/addons/cf-den.png';
+    if (p.image.startsWith('/') || p.image.startsWith('http') || p.image.startsWith('data:')) return p.image;
+    return '/images/addons/' + p.image;
   };
 
   scrollToMenu(event?: Event): void {

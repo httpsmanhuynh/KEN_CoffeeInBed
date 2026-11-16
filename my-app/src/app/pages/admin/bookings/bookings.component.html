@@ -68,7 +68,7 @@
   <!-- Main Booking List Block -->
   <div class="booking-list-block" data-name="BookingListBlock">
     <div class="block-header" data-name="BlockHeader">
-      <img src="/images/figma/lich-dat-cho.svg" alt="" class="block-header-icon" />
+      <lucide-icon name="calendar-check" [size]="18" [strokeWidth]="1.8" color="#4A3123" class="block-header-icon"></lucide-icon>
       <h2 class="block-title">Danh sách đặt chỗ</h2>
       <span class="block-header-count">
         {{ loading ? 'Đang tải dữ liệu...' : (filteredBookings.length + ' đơn phù hợp · ' + bookings.length + ' tổng đơn đã nạp') }}
@@ -79,7 +79,7 @@
     <div class="filters-container" data-name="Filters">
       <div class="filter-row" data-name="FilterRow1">
         <div class="search-box">
-          <img src="/images/figma/search.svg" alt="" class="search-icon" />
+          <lucide-icon name="search" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="search-icon"></lucide-icon>
           <input
             type="text"
             [(ngModel)]="searchTerm"
@@ -263,7 +263,7 @@
   <!-- Dynamic Detail Block: Selected Booking -->
   <div id="booking-detail-panel" class="detail-block" *ngIf="selectedBooking as sel" data-name="DetailBlock">
     <div class="detail-header" data-name="DetailHeader">
-      <img src="/images/figma/eye-view-fill.svg" alt="" class="detail-header-icon" />
+      <lucide-icon name="eye" [size]="18" [strokeWidth]="1.8" color="#4A3123" class="detail-header-icon"></lucide-icon>
       <h2 class="detail-title">Đơn đang chọn · {{ sel.code }}</h2>
       <div class="detail-header-badges">
         <span class="status-badge" [ngClass]="sel.statusBadgeClass">{{ sel.statusLabel }}</span>
@@ -406,7 +406,7 @@
   <!-- Counter Operations Block -->
   <div class="ops-block" *ngIf="selectedBooking as sel" data-name="OpsBlock">
     <div class="ops-header" data-name="OpsHeader">
-      <img src="/images/figma/filter.svg" alt="" class="ops-header-icon" />
+      <lucide-icon name="filter" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="ops-header-icon"></lucide-icon>
       <h2 class="ops-title">Thao tác quầy &amp; Đối soát hoàn tiền</h2>
       <span class="ops-subtitle">Đang xem: {{ sel.code }} ({{ sel.status }})</span>
     </div>

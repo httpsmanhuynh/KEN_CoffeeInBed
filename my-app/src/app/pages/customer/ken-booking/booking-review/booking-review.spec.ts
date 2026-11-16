@@ -1,3 +1,5 @@
+import '@angular/compiler';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { KenBookingReviewPage } from './booking-review';
 import { TestBed } from '@angular/core/testing';
 import { AppModule } from '../../../../app-module';
@@ -5,7 +7,6 @@ import { Router } from '@angular/router';
 import { AuthService, AuthenticatedUser } from '../../../../core/auth.service';
 import { KenBookingState, kenNextDay } from '../booking-state';
 import { of, throwError } from 'rxjs';
-import { vi } from 'vitest';
 
 describe('KenBookingReviewPage', () => {
   beforeEach(async () => {

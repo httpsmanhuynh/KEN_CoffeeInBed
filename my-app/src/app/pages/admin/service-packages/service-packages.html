@@ -13,12 +13,7 @@
     <!-- Page Heading -->
     <div class="page-heading-row" data-name="Page heading">
       <div class="heading-title-block">
-        <div class="title-with-icon">
-          <div class="page-title-icon-wrap">
-            <img src="/images/figma/table.svg" alt="" class="page-title-icon" />
-          </div>
-          <h1 class="page-title">Quản lý gói dịch vụ</h1>
-        </div>
+        <h1 class="page-title">Quản lý gói dịch vụ</h1>
         <p class="page-subtitle">
           {{ totalCount }} nhóm gói · 2 khu vực · KÉN Tập Trung &amp; KÉN Tái Tạo
         </p>
@@ -29,7 +24,7 @@
           Xuất CSV ↗
         </button>
         <button type="button" class="btn-action-primary" (click)="openCreateForm()" data-name="Add package btn">
-          <img src="/images/figma/sparkles.svg" alt="" class="btn-icon" />
+          <lucide-icon name="sparkles" [size]="16" [strokeWidth]="1.8"></lucide-icon>
           <span>Thêm gói</span>
         </button>
       </div>
@@ -40,7 +35,7 @@
       <!-- Card Heading -->
       <div class="card-heading-row" data-name="Card heading">
         <div class="card-heading-left">
-          <img src="/images/figma/table.svg" alt="" class="card-heading-icon" />
+          <lucide-icon name="table" [size]="18" [strokeWidth]="1.8" color="#4A3123"></lucide-icon>
           <h2 class="card-heading-title">Các gói đang phục vụ</h2>
         </div>
         <span class="card-heading-right-info">
@@ -52,7 +47,7 @@
       <div class="filters-bar" data-name="Filters">
         <!-- Search Input -->
         <div class="search-input-wrap">
-          <img src="/images/figma/search.svg" alt="" class="search-icon" />
+          <lucide-icon name="search" [size]="16" [strokeWidth]="1.8" color="#4A3123"></lucide-icon>
           <input
             type="text"
             [(ngModel)]="query"
@@ -68,7 +63,7 @@
             <option value="KÉN Tập Trung">KÉN Tập Trung</option>
             <option value="KÉN Tái Tạo">KÉN Tái Tạo</option>
           </select>
-          <img src="/images/figma/chevron-down.svg" alt="" class="select-chevron" />
+          <lucide-icon name="chevron-down" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="select-chevron"></lucide-icon>
         </div>
 
         <!-- Filter Loại gói -->
@@ -78,7 +73,7 @@
             <option value="FIXED">Theo gói cố định</option>
             <option value="HOURLY">Theo giờ lẻ</option>
           </select>
-          <img src="/images/figma/chevron-down.svg" alt="" class="select-chevron" />
+          <lucide-icon name="chevron-down" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="select-chevron"></lucide-icon>
         </div>
 
         <!-- Filter Đơn vị giá -->
@@ -88,7 +83,7 @@
             <option value="PER_SPACE">Theo không gian / phòng</option>
             <option value="PER_PERSON">Theo đầu người</option>
           </select>
-          <img src="/images/figma/chevron-down.svg" alt="" class="select-chevron" />
+          <lucide-icon name="chevron-down" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="select-chevron"></lucide-icon>
         </div>
 
         <!-- Filter Trạng thái -->
@@ -98,7 +93,7 @@
             <option value="ACTIVE">Hoạt động</option>
             <option value="INACTIVE">Ngừng hoạt động</option>
           </select>
-          <img src="/images/figma/chevron-down.svg" alt="" class="select-chevron" />
+          <lucide-icon name="chevron-down" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="select-chevron"></lucide-icon>
         </div>
 
         <button type="button" class="btn-back-link" (click)="toggleSort('price')" style="border:1px solid rgba(216,199,178,.7);padding:7px 14px;border-radius:999px;margin:0;white-space:nowrap">
@@ -128,7 +123,7 @@
               <tr class="group-header-row" *ngIf="groupItems(group).length > 0">
                 <td colspan="8">
                   <div class="group-title-content">
-                    <img src="/images/figma/icon-pkg.svg" alt="" class="group-icon" />
+                    <lucide-icon name="tag" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="group-icon"></lucide-icon>
                     <span class="group-name">{{ group }}</span>
                     <span class="group-sep">·</span>
                     <span class="group-count">{{ groupItems(group).length }} nhóm gói</span>
@@ -254,8 +249,9 @@
           ‹ Quay lại danh sách gói
         </button>
         <div class="title-with-icon">
-          <img src="/images/figma/icon-pkg.svg" alt="" class="detail-page-icon" />
-          <h1 class="page-title">Chi tiết gói {{ item.id }}</h1>
+          <lucide-icon name="tag" [size]="18" [strokeWidth]="1.8" color="#4A3123" class="detail-page-icon"></lucide-icon>
+          <h1 class="page-title">Chi tiết gói: {{ item.name }}</h1>
+          <span class="detail-code-badge">{{ item.code || item.id }}</span>
         </div>
         <p class="page-subtitle">
           {{ item.name }} · {{ item.duration }} · {{ item.shortName }} · Giá {{ formatPrice(item.price) }}
@@ -268,7 +264,7 @@
           class="btn-action-primary"
           (click)="openEditForm(item)"
         >
-          <img src="/images/figma/sparkles.svg" alt="" class="btn-icon" />
+          <lucide-icon name="sparkles" [size]="16" [strokeWidth]="1.8"></lucide-icon>
           <span>Sửa gói</span>
         </button>
       </div>
@@ -279,29 +275,43 @@
       <!-- Card Header -->
       <div class="card-heading-row">
         <div class="card-heading-left">
-          <img src="/images/figma/calendar-date.svg" alt="" class="card-heading-icon" />
-          <h2 class="card-heading-title">{{ item.id }} · {{ item.name }}</h2>
+          <lucide-icon name="calendar" [size]="18" [strokeWidth]="1.8" color="#4A3123"></lucide-icon>
+          <h2 class="card-heading-title">{{ item.name }} · {{ item.shortName }}</h2>
         </div>
         <span class="card-heading-right-info">Giá và quyền lợi hiện hành</span>
       </div>
 
-      <!-- Detail Body (3-Column Layout) -->
+      <!-- Detail Body (Balanced Layout) -->
       <div class="detail-body-grid">
         <!-- Column 1: Image & Space Link -->
         <div class="detail-photo-col">
           <div class="photo-container">
             <img [src]="imagePath(item)" [alt]="item.space" class="space-photo" />
           </div>
+          <div class="photo-caption-info">
+            <span class="caption-space-label">{{ item.space }}</span>
+            <span class="caption-group-label">{{ item.group }}</span>
+          </div>
         </div>
 
-        <!-- Column 2: Package Specs & Price -->
-        <div class="detail-specs-col">
-          <h3 class="detail-big-price">
-            {{ formatPrice(item.price) }}
-            <span class="price-unit-sub">/ gói {{ item.duration }}</span>
-          </h3>
+        <!-- Column 2: Package Specs & Benefits -->
+        <div class="detail-content-col">
+          <div class="detail-price-status-row">
+            <h3 class="detail-big-price">
+              {{ formatPrice(item.price) }}
+              <span class="price-unit-sub">/ gói {{ item.duration }}</span>
+            </h3>
+            <span
+              class="status-pill"
+              [class.status-active]="item.status === 'ACTIVE'"
+              [class.status-inactive]="item.status === 'INACTIVE'"
+            >
+              <span class="status-dot"></span>
+              {{ statusLabel(item.status) }}
+            </span>
+          </div>
 
-          <div class="spec-attributes-list">
+          <div class="spec-attributes-grid">
             <div class="spec-row">
               <span class="spec-k">Áp dụng:</span>
               <span class="spec-v font-bold">
@@ -324,24 +334,15 @@
               </div>
             </div>
             <div class="spec-row">
-              <span class="spec-k">Trạng thái:</span>
-              <span
-                class="status-pill"
-                [class.status-active]="item.status === 'ACTIVE'"
-                [class.status-inactive]="item.status === 'INACTIVE'"
-              >
-                <span class="status-dot"></span>
-                {{ statusLabel(item.status) }}
-              </span>
+              <span class="spec-k">Mã gói:</span>
+              <span class="spec-v font-mono">{{ item.code || item.id }}</span>
             </div>
           </div>
-        </div>
 
-        <!-- Column 3: Benefits Box & Quick Actions -->
-        <div class="detail-benefits-col">
+          <!-- Benefits Box -->
           <div class="benefit-box">
             <div class="benefit-head">
-              <img src="/images/figma/gem-kim.svg" alt="" class="benefit-icon" />
+              <lucide-icon name="sparkles" [size]="16" [strokeWidth]="1.8" color="#A9763F"></lucide-icon>
               <h4 class="benefit-title">{{ benefitTitle(item) }}</h4>
             </div>
             <p class="benefit-description">
@@ -360,13 +361,6 @@
               </button>
               <button type="button" class="btn-benefit-outline" (click)="duplicate(item)">
                 Nhân bản
-              </button>
-              <button
-                type="button"
-                class="btn-benefit-outline"
-                (click)="toggleStatus(item)"
-              >
-                {{ item.status === 'ACTIVE' ? 'Tạm ngưng' : 'Kích hoạt' }}
               </button>
             </div>
           </div>
@@ -409,7 +403,7 @@
       <!-- Form Header -->
       <div class="card-heading-row">
         <div class="card-heading-left">
-          <img src="/images/figma/icon-info.svg" alt="" class="card-heading-icon" />
+          <lucide-icon name="info" [size]="18" [strokeWidth]="1.8" color="#4A3123"></lucide-icon>
           <h2 class="card-heading-title">
             {{ editingId ? 'CHỈNH SỬA PACKAGE · ' + editingId : 'THÔNG TIN GÓI DỊCH VỤ' }}
           </h2>
@@ -431,7 +425,7 @@
                 <option value="KÉN Tập Trung">KÉN Tập Trung</option>
                 <option value="KÉN Tái Tạo">KÉN Tái Tạo</option>
               </select>
-              <img src="/images/figma/chevron-down.svg" alt="" class="select-arrow-icon" />
+              <lucide-icon name="chevron-down" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="select-arrow-icon"></lucide-icon>
             </div>
           </div>
 
@@ -457,7 +451,7 @@
                 <option value="">Chọn không gian...</option>
                 <option *ngFor="let s of spaceOptions" [value]="s">{{ s }}</option>
               </select>
-              <img src="/images/figma/chevron-down.svg" alt="" class="select-arrow-icon" />
+              <lucide-icon name="chevron-down" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="select-arrow-icon"></lucide-icon>
             </div>
           </div>
 
@@ -496,7 +490,7 @@
                 <option value="FIXED">FIXED (Cố định khung giờ)</option>
                 <option value="HOURLY">HOURLY (Tính theo giờ)</option>
               </select>
-              <img src="/images/figma/chevron-down.svg" alt="" class="select-arrow-icon" />
+              <lucide-icon name="chevron-down" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="select-arrow-icon"></lucide-icon>
             </div>
           </div>
 
@@ -508,7 +502,7 @@
                 <option value="PER_SPACE">PER_SPACE (Theo không gian)</option>
                 <option value="PER_PERSON">PER_PERSON (Theo người)</option>
               </select>
-              <img src="/images/figma/chevron-down.svg" alt="" class="select-arrow-icon" />
+              <lucide-icon name="chevron-down" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="select-arrow-icon"></lucide-icon>
             </div>
           </div>
 
@@ -520,7 +514,7 @@
                 <option value="ACTIVE">Đang hoạt động</option>
                 <option value="INACTIVE">Tạm ngưng hoạt động</option>
               </select>
-              <img src="/images/figma/chevron-down.svg" alt="" class="select-arrow-icon" />
+              <lucide-icon name="chevron-down" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="select-arrow-icon"></lucide-icon>
             </div>
           </div>
         </div>

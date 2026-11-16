@@ -13,12 +13,7 @@
     <!-- Page Heading -->
     <div class="page-heading-row" data-name="Page heading">
       <div class="heading-title-block">
-        <div class="title-with-icon">
-          <div class="page-title-icon-wrap">
-            <img src="/images/ken-about/focus-icon.svg" alt="" class="page-title-icon" />
-          </div>
-          <h1 class="page-title">Quản lý không gian</h1>
-        </div>
+        <h1 class="page-title">Quản lý không gian</h1>
       </div>
 
       <div class="heading-actions">
@@ -36,7 +31,7 @@
           (click)="openCreateForm()"
           data-name="Add space btn"
         >
-          <img src="/images/figma/sparkles.svg" alt="" class="btn-icon" />
+          <lucide-icon name="sparkles" [size]="16" [strokeWidth]="1.8"></lucide-icon>
           <span>Thêm không gian</span>
         </button>
       </div>
@@ -76,7 +71,7 @@
       <div class="filter-bar" data-name="Filter bar">
         <!-- Search Input -->
         <div class="search-input-wrap">
-          <img src="/images/figma/search.svg" alt="" class="search-icon" />
+          <lucide-icon name="search" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="search-icon"></lucide-icon>
           <input
             type="text"
             [(ngModel)]="searchQuery"
@@ -96,7 +91,7 @@
             <option value="Tất cả">Zone: Tất cả</option>
             <option *ngFor="let z of zoneOptions" [value]="z">Zone: {{ z }}</option>
           </select>
-          <img src="/images/figma/chevron-down.svg" alt="" class="select-chevron" />
+          <lucide-icon name="chevron-down" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="select-chevron"></lucide-icon>
         </div>
 
         <!-- Filter Status -->
@@ -111,12 +106,12 @@
             <option value="Bảo trì">Bảo trì</option>
             <option value="Ngừng hoạt động">Ngừng hoạt động</option>
           </select>
-          <img src="/images/figma/chevron-down.svg" alt="" class="select-chevron" />
+          <lucide-icon name="chevron-down" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="select-chevron"></lucide-icon>
         </div>
 
         <!-- Sort Button -->
         <button type="button" class="btn-sort" (click)="toggleSort()" data-name="Sort btn">
-          <img src="/images/figma/sort-alpha-down-alt.svg" alt="" class="sort-icon" />
+          <lucide-icon name="filter" [size]="16" [strokeWidth]="1.8" class="sort-icon"></lucide-icon>
           <span>Sắp xếp</span>
         </button>
       </div>
@@ -269,7 +264,7 @@
                     (click)="openViewModal(s); $event.stopPropagation()"
                     title="Xem chi tiết"
                   >
-                    <img src="/images/figma/eye-view-fill.svg" alt="" class="action-svg" />
+                    <lucide-icon name="eye" [size]="16" [strokeWidth]="1.8" color="#4A3123"></lucide-icon>
                     <span>Xem</span>
                   </button>
 
@@ -301,15 +296,12 @@
                     (click)="requestToggleStatus(s); $event.stopPropagation()"
                     [title]="s.status === 'INACTIVE' ? 'Kích hoạt lại' : 'Ngừng hoạt động'"
                   >
-                    <img
-                      [src]="
-                        s.status === 'INACTIVE'
-                          ? '/images/figma/check.svg'
-                          : '/images/figma/clock.svg'
-                      "
-                      alt=""
+                    <lucide-icon
+                      [name]="s.status === 'INACTIVE' ? 'check' : 'clock'"
+                      [size]="14"
+                      [strokeWidth]="1.8"
                       class="action-svg"
-                    />
+                    ></lucide-icon>
                     <span>{{ s.status === 'INACTIVE' ? 'Kích hoạt' : 'Ngừng' }}</span>
                   </button>
                 </div>
@@ -408,7 +400,7 @@
           [disabled]="!isEditing"
           data-name="Create action"
         >
-          <img src="/images/figma/sparkles.svg" alt="" class="btn-icon" />
+          <lucide-icon name="sparkles" [size]="16" [strokeWidth]="1.8"></lucide-icon>
           <span>Thêm không gian</span>
         </button>
         <button
@@ -417,7 +409,7 @@
           (click)="cancelForm()"
           data-name="Create action primary"
         >
-          <img src="/images/figma/arrow-left.svg" alt="" class="btn-icon" />
+          <lucide-icon name="arrow-left" [size]="16" [strokeWidth]="1.8"></lucide-icon>
           <span>Quay lại danh sách</span>
         </button>
       </div>
@@ -428,7 +420,7 @@
       <!-- Form Header -->
       <div class="form-header-row" data-name="Form header">
         <div class="form-header-left" data-name="Form title row">
-          <img src="/images/figma/icon-info.svg" alt="" class="form-title-icon" />
+          <lucide-icon name="info" [size]="18" [strokeWidth]="1.8" color="#4A3123" class="form-title-icon"></lucide-icon>
           <h2 class="form-title-text">
             {{ isEditing ? 'CHỈNH SỬA KHÔNG GIAN' : 'THÔNG TIN KHÔNG GIAN' }}
           </h2>
@@ -454,7 +446,7 @@
                 <option value="">Chọn zone…</option>
                 <option *ngFor="let z of zoneOptions" [value]="z">{{ z }}</option>
               </select>
-              <img src="/images/figma/chevron-down.svg" alt="" class="select-chevron-icon" />
+              <lucide-icon name="chevron-down" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="select-chevron-icon"></lucide-icon>
             </div>
           </div>
 
@@ -555,7 +547,7 @@
                 <option value="SHARED">Dùng chung</option>
                 <option value="PRIVATE">Dùng riêng</option>
               </select>
-              <img src="/images/figma/chevron-down.svg" alt="" class="select-chevron-icon" />
+              <lucide-icon name="chevron-down" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="select-chevron-icon"></lucide-icon>
             </div>
           </div>
 
@@ -568,7 +560,7 @@
                 <option value="MAINTENANCE">Bảo trì</option>
                 <option value="INACTIVE">Ngừng hoạt động</option>
               </select>
-              <img src="/images/figma/chevron-down.svg" alt="" class="select-chevron-icon" />
+              <lucide-icon name="chevron-down" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="select-chevron-icon"></lucide-icon>
             </div>
           </div>
         </div>

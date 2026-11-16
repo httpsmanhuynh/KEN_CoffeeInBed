@@ -102,7 +102,7 @@
             [attr.aria-expanded]="accountOpen"
             (click)="accountOpen = !accountOpen"
           >
-            <img src="/images/figma/menu-tai-khoan.svg" alt="" width="16" height="16" />
+            <lucide-icon name="chevron-down" [size]="16" [strokeWidth]="1.8" color="#4A3123"></lucide-icon>
           </button>
           @if (accountOpen) {
             <ul class="sub sub--account">

@@ -80,6 +80,9 @@ export class KenBookingReviewPage {
   get memberDiscount(): number {
     return this.state.silverDiscount;
   }
+  get tierDiscountLabel(): string {
+    return this.state.tierDiscountLabel || 'Ưu đãi thành viên';
+  }
 
   get finalTotal(): number {
     return Math.max(0, this.state.total - this.appliedVoucherDiscount);

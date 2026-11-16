@@ -22,7 +22,7 @@
       <div class="pw-row">
         <section class="card pw-card" aria-labelledby="pw-title">
           <div class="card__title">
-            <img src="/images/figma/bao-ve-mat-khau.svg" alt="" width="22" height="22" />
+            <lucide-icon name="shield" [size]="22" [strokeWidth]="1.8" color="#4A3123"></lucide-icon>
             <h2 id="pw-title">Đổi mật khẩu</h2>
           </div>
 
@@ -31,7 +31,7 @@
             <div class="box">
               <input id="pw-current" [type]="showCurrent ? 'text' : 'password'" [(ngModel)]="currentPassword" autocomplete="current-password" placeholder="Nhập mật khẩu hiện tại" />
               <button type="button" class="box__btn" (click)="showCurrent = !showCurrent" [attr.aria-label]="showCurrent ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'">
-                <img src="/images/figma/hien-mat-khau.svg" alt="" width="18" height="18" [style.opacity]="showCurrent ? '1' : '0.5'" />
+                <lucide-icon [name]="showCurrent ? 'eye' : 'eye-off'" [size]="18" [strokeWidth]="1.8" color="#4A3123"></lucide-icon>
               </button>
             </div>
           </div>
@@ -41,7 +41,7 @@
             <div class="box box--focus">
               <input id="pw-new" [type]="showNew ? 'text' : 'password'" [(ngModel)]="newPassword" placeholder="Tối thiểu 8 ký tự" autocomplete="new-password" />
               <button type="button" class="box__btn" (click)="showNew = !showNew" [attr.aria-label]="showNew ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'">
-                <img src="/images/figma/hien-mat-khau-active.svg" alt="" width="18" height="18" [style.opacity]="showNew ? '1' : '0.5'" />
+                <lucide-icon [name]="showNew ? 'eye' : 'eye-off'" [size]="18" [strokeWidth]="1.8" color="#4A3123"></lucide-icon>
               </button>
             </div>
           </div>
@@ -51,7 +51,7 @@
             <div class="box">
               <input id="pw-confirm" [type]="showConfirm ? 'text' : 'password'" [(ngModel)]="confirmPassword" placeholder="Nhập lại mật khẩu mới" autocomplete="new-password" />
               <button type="button" class="box__btn" (click)="showConfirm = !showConfirm" [attr.aria-label]="showConfirm ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'">
-                <img src="/images/figma/hien-mat-khau.svg" alt="" width="18" height="18" [style.opacity]="showConfirm ? '1' : '0.5'" />
+                <lucide-icon [name]="showConfirm ? 'eye' : 'eye-off'" [size]="18" [strokeWidth]="1.8" color="#4A3123"></lucide-icon>
               </button>
             </div>
           </div>
@@ -61,7 +61,7 @@
             <div class="otp">
               <div class="box box--grow">
                 <input id="pw-otp" type="text" inputmode="numeric" maxlength="6" [(ngModel)]="otpCode" placeholder="Nhập mã OTP 6 chữ số" autocomplete="one-time-code" />
-                <img class="box__icon" src="/images/figma/dang-nhap-otp.svg" alt="" width="18" height="18" />
+                <lucide-icon name="key" [size]="18" [strokeWidth]="1.8" color="#4A3123" class="box__icon"></lucide-icon>
               </div>
               <button type="button" class="btn-gold" [disabled]="otpCooldown > 0 || sendingOtp" (click)="onSendOtp()">
                 {{ sendingOtp ? 'Đang gửi…' : otpCooldown > 0 ? ('Gửi lại ' + otpCooldown + 's') : 'Gửi mã' }}
@@ -84,9 +84,9 @@
         <aside class="tips">
           <p class="tips__eyebrow">MỘT NHẮC NHỎ</p>
           <h3 class="tips__title">Một mật khẩu, chỉ dành cho KÉN</h3>
-          <div class="tip"><img src="/images/figma/check-tip.svg" alt="" width="16" height="16" /><p>Nên dùng ít nhất 12 ký tự, kết hợp chữ, số và ký hiệu.</p></div>
-          <div class="tip"><img src="/images/figma/check-tip.svg" alt="" width="16" height="16" /><p>Tránh tên, ngày sinh hoặc mật khẩu đã dùng ở nơi khác.</p></div>
-          <div class="tip"><img src="/images/figma/check-tip.svg" alt="" width="16" height="16" /><p>Không gửi mật khẩu, mã OTP qua tin nhắn hay cuộc gọi.</p></div>
+          <div class="tip"><lucide-icon name="check" [size]="16" [strokeWidth]="1.8" color="#047857"></lucide-icon><p>Nên dùng ít nhất 12 ký tự, kết hợp chữ, số và ký hiệu.</p></div>
+          <div class="tip"><lucide-icon name="check" [size]="16" [strokeWidth]="1.8" color="#047857"></lucide-icon><p>Tránh tên, ngày sinh hoặc mật khẩu đã dùng ở nơi khác.</p></div>
+          <div class="tip"><lucide-icon name="check" [size]="16" [strokeWidth]="1.8" color="#047857"></lucide-icon><p>Không gửi mật khẩu, mã OTP qua tin nhắn hay cuộc gọi.</p></div>
           <p class="tips__foot">Đây là gợi ý bảo mật, không phải thông báo mật khẩu đã được thay đổi.</p>
         </aside>
       </div>
@@ -143,7 +143,7 @@
       <section class="card card--gap">
         <div class="sess-head">
           <div class="sess-title">
-            <img src="/images/figma/session-clock-icon.svg" alt="" width="20" height="20" />
+            <lucide-icon name="clock" [size]="20" [strokeWidth]="1.8" color="#4A3123"></lucide-icon>
             <h2 class="h-serif">Thiết bị đang đăng nhập</h2>
           </div>
           <p class="small">{{ sessions.length }} phiên hoạt động</p>
@@ -151,7 +151,7 @@
 
         @for (s of sessions; track s.id) {
           <div class="device">
-            <img src="/images/figma/monitor.svg" alt="" width="24" height="24" />
+            <lucide-icon name="laptop" [size]="24" [strokeWidth]="1.8" color="#4A3123"></lucide-icon>
             <div class="grow">
               <p class="device__name">{{ s.name }}</p>
               <p class="small">{{ s.desc }}</p>

@@ -6,9 +6,27 @@
     <p class="kf-entitlement">Gói này không kèm đồ uống. Bạn có thể chọn thêm; đồ uống tính theo giá niêm yết.</p>
   </ng-template>
 
+  <section class="kf-rec-bar kf-rec-bar--inclusion" *ngIf="state.clusterRecInclusionDrinks.length" aria-label="Gợi ý dành cho bạn">
+    <div class="kf-rec-head">
+      <strong>✨ Gợi ý đồ uống dành cho bạn</strong>
+      <small class="kf-rec-persona-badge" *ngIf="state.clusterPersona || state.clusterId !== null">
+        <ng-container *ngIf="state.clusterId !== null">Nhóm khách #{{ state.clusterId }}</ng-container>
+        <ng-container *ngIf="state.clusterId !== null && state.clusterPersona"> · </ng-container>
+        <ng-container *ngIf="state.clusterPersona">{{ state.clusterPersona }}</ng-container>
+      </small>
+    </div>
+    <div class="kf-rec-list">
+      <button type="button" class="kf-rec-chip" [class.is-selected]="state.inclusionItemQuantity(drink) > 0" *ngFor="let drink of state.clusterRecInclusionDrinks" (click)="state.addInclusionItem(drink, 1)" [disabled]="!state.canAddInclusionItem(drink)">
+        <img [src]="state.image(drink.image)" [alt]="drink.name">
+        <span>{{ drink.name }}<small>{{ state.inclusionSurcharge(drink) > 0 ? '+' + money(state.inclusionSurcharge(drink)) + ' phụ thu' : 'Trong gói (0đ)' }}</small></span>
+        <b>{{ state.inclusionItemQuantity(drink) ? '×' + state.inclusionItemQuantity(drink) : '+' }}</b>
+      </button>
+    </div>
+  </section>
+
   <div class="kf-mini-drinks kf-space-drinks">
     <article *ngFor="let drink of drinks" [class.selected]="drinkCount(drink.id) > 0">
-      <img [src]="'/images/ken-flow/' + drink.image" [alt]="drink.name" loading="lazy">
+      <img [src]="state.image(drink.image)" [alt]="drink.name" loading="lazy">
       <span>{{ drink.name }}</span>
       <small>{{ money(drinkTopUp(drink.price)) }} phụ thu / món</small>
       <div class="kf-quantity">
