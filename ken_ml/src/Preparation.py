@@ -271,7 +271,7 @@ def transform(raw: dict[str, list[dict]]) -> pd.DataFrame:
     df["guest_count"] = pd.to_numeric(df["guest_count"], errors="coerce").astype("Int64")
 
     # ---- Bước 5: đặc trưng ngữ cảnh (từ sale_date + hour) ----
-    dow = df["sale_date"].dt.dayofweek  # 0 = Thứ Hai ... 6 = Chủ Nhật (cùng quy ước DB)
+    dow = df["sale_date"].dt.day_of_week  # 0 = Thứ Hai ... 6 = Chủ Nhật (cùng quy ước DB)
     n_dow = int((dow != pd.to_numeric(df["day_of_week"], errors="coerce")).sum())
     if n_dow:
         logger.warning("  - %s dòng có day_of_week của DB khác tính từ sale_date (dùng giá trị tính lại)", f"{n_dow:,}")
