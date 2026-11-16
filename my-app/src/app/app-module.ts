@@ -65,6 +65,7 @@ import {
   ShieldCheck,
   EyeOff,
   Key,
+  Layout,
 } from 'lucide-angular';
 
 // Shared Components & Layouts
@@ -262,6 +263,7 @@ import { Forecast } from './pages/admin/forecast/forecast';
       ShieldCheck,
       EyeOff,
       Key,
+      Layout,
     }),
   ],
   providers: [

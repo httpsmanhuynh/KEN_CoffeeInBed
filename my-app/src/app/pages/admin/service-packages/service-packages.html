@@ -13,7 +13,10 @@
     <!-- Page Heading -->
     <div class="page-heading-row" data-name="Page heading">
       <div class="heading-title-block">
-        <h1 class="page-title">Quản lý gói dịch vụ</h1>
+        <div class="title-with-icon" data-name="Title with icon">
+          <lucide-icon name="calendar-clock" [size]="18" [strokeWidth]="1.8" color="#4A3123" class="title-icon"></lucide-icon>
+          <h1 class="page-title">Quản lý gói dịch vụ</h1>
+        </div>
         <p class="page-subtitle">
           {{ totalCount }} nhóm gói · 2 khu vực · KÉN Tập Trung &amp; KÉN Tái Tạo
         </p>
@@ -379,9 +382,12 @@
         <button type="button" class="btn-back-link" (click)="cancelForm()">
           ‹ Quay lại danh sách gói
         </button>
-        <h1 class="page-title font-large">
-          {{ editingId ? 'Chỉnh sửa gói dịch vụ · ' + editingId : 'Thêm gói dịch vụ' }}
-        </h1>
+        <div class="title-with-icon" data-name="Title with icon">
+          <lucide-icon name="calendar-clock" [size]="18" [strokeWidth]="1.8" color="#4A3123" class="title-icon"></lucide-icon>
+          <h1 class="page-title font-large">
+            {{ editingId ? 'Chỉnh sửa gói dịch vụ · ' + editingId : 'Thêm gói dịch vụ' }}
+          </h1>
+        </div>
         <p class="page-subtitle text-regular">
           Tạo gói mới cho KÉN Tập Trung và KÉN Tái Tạo · Giá theo từng Space · Snapshot giá nguyên khi cập nhật.
         </p>

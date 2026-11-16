@@ -8,7 +8,10 @@
   <!-- Page Heading -->
   <div class="page-heading" data-name="Page heading">
     <div class="heading-title-group">
-      <h1 class="page-title">Tổng quan vận hành KÉN</h1>
+      <div class="title-with-icon" data-name="Title with icon">
+        <lucide-icon name="table" [size]="18" [strokeWidth]="1.8" color="#4A3123" class="title-icon"></lucide-icon>
+        <h1 class="page-title">Tổng quan vận hành KÉN</h1>
+      </div>
       <p class="page-subtitle">Theo dõi doanh thu thuần, tỷ lệ lấp đầy không gian và lượt đặt chỗ theo thời gian thực</p>
     </div>
     <button type="button" class="btn-export" (click)="exportReport()" data-name="Export btn">
