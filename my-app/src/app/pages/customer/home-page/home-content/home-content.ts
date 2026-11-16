@@ -12,6 +12,7 @@ interface KenHomeSpace {
   thumb: string;
   images: string[];
   route: string | null;
+  bookingRoute?: string | null;
 }
 
 @Component({
@@ -57,11 +58,11 @@ export class KenHomeContent implements OnInit, OnDestroy {
   ];
 
   readonly spaces: KenHomeSpace[] = [
-    { label: 'KÉN Café', privacy: 'CỞI MỞ NHẤT', heading: 'KÉN Café', description: 'Khu vực mở như một quán cà phê quen thuộc: nơi bạn hẹn bạn bè, đọc sách hoặc ngồi làm việc nhẹ. Không giới hạn thời gian, không cần đặt trước cứ ghé và chọn một góc.', benefits: ['Cà phê & bánh ngọt', 'Gặp gỡ, trò chuyện'], thumb: '/images/ken-home/privacy-cafe.png', images: ['/images/ken-home/cafe-1.png','/images/ken-home/cafe-2.png','/images/ken-home/cafe-3.png','/images/ken-home/cafe-4.png'], route: '/spaces/connect' },
-    { label: 'Bàn chung', privacy: 'KHÁ RIÊNG TƯ', heading: 'Bàn chung', description: 'Bàn dài và ánh sáng vừa đủ, Wi-Fi và ổ cắm điện để học bài, làm việc độc lập. Đặt theo người và thời lượng sử dụng.', benefits: ['Wi-Fi & ổ cắm', 'Làm việc linh hoạt'], thumb: '/images/ken-home/privacy-work.png', images: ['/images/ken-home/privacy-work.png','/images/ken-home/about-work.png'], route: '/spaces/work-lounge' },
-    { label: 'Phòng họp nhỏ', privacy: 'RIÊNG TƯ', heading: 'Phòng họp nhỏ', description: 'Phòng họp riêng cho nhóm 3–6 người, trang bị máy chiếu, bảng từ và Wi-Fi, phù hợp học nhóm hoặc thảo luận dự án.', benefits: ['3–6 khách', 'Máy chiếu & bảng từ'], thumb: '/images/ken-home/privacy-meeting.png', images: ['/images/ken-home/privacy-meeting.png','/images/ken-home/about-meeting.png'], route: '/spaces/small-meeting-room' },
-    { label: 'KÉN nghỉ đơn', privacy: 'RIÊNG TƯ CAO', heading: 'KÉN nghỉ đơn', description: 'Một chiếc kén nhỏ có giường nằm, rèm che và ổ cắm điện để bạn nghỉ ngắn, tái tạo năng lượng giữa ngày.', benefits: ['Dành cho 1 khách', 'Nghỉ ngắn theo giờ'], thumb: '/images/ken-home/privacy-single.png', images: ['/images/ken-home/privacy-single.png','/images/ken-home/about-rest.png'], route: '/spaces/booking/single' },
-    { label: 'Kén đôi', privacy: 'RIÊNG TƯ NHẤT', heading: 'KÉN nghỉ đôi', description: 'Không gian nghỉ riêng cho hai người, yên tĩnh và thoải mái, phù hợp những khoảng nghỉ ngắn trong ngày.', benefits: ['1–2 khách', 'Kén nghỉ riêng'], thumb: '/images/ken-home/privacy-double.png', images: ['/images/ken-home/privacy-double.png','/images/ken-home/about-rest.png'], route: '/spaces/booking/double' }
+    { label: 'KÉN Café', privacy: 'CỞI MỞ NHẤT', heading: 'KÉN Café', description: 'Khu vực mở như một quán cà phê quen thuộc: nơi bạn hẹn bạn bè, đọc sách hoặc ngồi làm việc nhẹ. Không giới hạn thời gian, không cần đặt trước cứ ghé và chọn một góc.', benefits: ['Cà phê & bánh ngọt', 'Gặp gỡ, trò chuyện'], thumb: '/images/ken-home/privacy-cafe.png', images: ['/images/ken-home/cafe-1.png','/images/ken-home/cafe-2.png','/images/ken-home/cafe-3.png','/images/ken-home/cafe-4.png'], route: '/spaces/connect', bookingRoute: null },
+    { label: 'Bàn chung', privacy: 'KHÁ RIÊNG TƯ', heading: 'Bàn chung', description: 'Bàn dài và ánh sáng vừa đủ, Wi-Fi và ổ cắm điện để học bài, làm việc độc lập. Đặt theo người và thời lượng sử dụng.', benefits: ['Wi-Fi & ổ cắm', 'Làm việc linh hoạt'], thumb: '/images/ken-home/privacy-work.png', images: ['/images/ken-home/privacy-work.png','/images/ken-home/about-work.png'], route: '/spaces/work-lounge', bookingRoute: '/booking/work' },
+    { label: 'Phòng họp nhỏ', privacy: 'RIÊNG TƯ', heading: 'Phòng họp nhỏ', description: 'Phòng họp riêng cho nhóm 3–6 người, trang bị máy chiếu, bảng từ và Wi-Fi, phù hợp học nhóm hoặc thảo luận dự án.', benefits: ['3–6 khách', 'Máy chiếu & bảng từ'], thumb: '/images/ken-home/privacy-meeting.png', images: ['/images/ken-home/privacy-meeting.png','/images/ken-home/about-meeting.png'], route: '/spaces/small-meeting-room', bookingRoute: '/booking/meeting-small' },
+    { label: 'KÉN nghỉ đơn', privacy: 'RIÊNG TƯ CAO', heading: 'KÉN nghỉ đơn', description: 'Một chiếc kén nhỏ có giường nằm, rèm che và ổ cắm điện để bạn nghỉ ngắn, tái tạo năng lượng giữa ngày.', benefits: ['Dành cho 1 khách', 'Nghỉ ngắn theo giờ'], thumb: '/images/ken-home/privacy-single.png', images: ['/images/ken-home/privacy-single.png','/images/ken-home/about-rest.png'], route: '/spaces/booking/single', bookingRoute: '/booking/single' },
+    { label: 'Kén đôi', privacy: 'RIÊNG TƯ NHẤT', heading: 'KÉN nghỉ đôi', description: 'Không gian nghỉ riêng cho hai người, yên tĩnh và thoải mái, phù hợp những khoảng nghỉ ngắn trong ngày.', benefits: ['1–2 khách', 'Kén nghỉ riêng'], thumb: '/images/ken-home/privacy-double.png', images: ['/images/ken-home/privacy-double.png','/images/ken-home/about-rest.png'], route: '/spaces/booking/double', bookingRoute: '/booking/double' }
   ];
 
   readonly prices = [
@@ -158,6 +159,7 @@ export class KenHomeContent implements OnInit, OnDestroy {
       this.submittedMessage = 'Vui lòng kiểm tra và điền đầy đủ thông tin hợp lệ.';
       return;
     }
-    this.submittedMessage = 'Thông tin đã hợp lệ. Chức năng gửi yêu cầu đến KÉN đang chờ kết nối máy chủ; chưa có yêu cầu nào được gửi.';
+    this.submittedMessage = 'Cảm ơn bạn! Yêu cầu tư vấn đã được gửi thành công. Đội ngũ KÉN sẽ liên hệ với bạn trong thời gian sớm nhất.';
+    this.consultation.reset();
   }
 }

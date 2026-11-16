@@ -1,6 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
+import { SPACE_CODE_TO_LOCAL } from './booking-state';
 
 export interface KenAvailabilityPackage {
   durationHours?: number | null;
@@ -81,19 +82,22 @@ export class KenAvailabilityService {
   }
 
   private spaceIdFor(space: KenAvailabilitySpace): string | undefined {
-    const identity = `${space.space_code || ''} ${space.name}`
+    const spaceCode = String(space.space_code || '').trim().toUpperCase();
+    const knownSpaceId = SPACE_CODE_TO_LOCAL[spaceCode];
+    if (knownSpaceId) return knownSpaceId;
+
+    const identity = String(space.name || '')
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .toLocaleLowerCase('en');
     if (identity.includes('single') || identity.includes('nghi don')) return 'single';
     if (identity.includes('double') || identity.includes('nghi doi')) return 'double';
     if (identity.includes('private') || identity.includes('phong rieng')) return 'private';
-    if (identity.includes('lmr') || identity.includes('hop lon') ||
+    if (identity.includes('lmr') || identity.includes('hop lon') || identity.includes('boardroom') ||
         (identity.includes('meeting') && identity.includes('large'))) return 'meeting-large';
     if (identity.includes('smr') || identity.includes('hop nho') ||
         (identity.includes('meeting') && identity.includes('small'))) return 'meeting-small';
-    if (identity.includes('focus') || identity.includes('pod') ||
-        identity.includes('tap trung')) return 'focus';
+    if (identity.includes('focus') || identity.includes('tap trung')) return 'focus';
     if (identity.includes('work') || identity.includes('lounge') ||
         identity.includes('wl-') || identity.includes('lam viec chung')) return 'work';
     return undefined;

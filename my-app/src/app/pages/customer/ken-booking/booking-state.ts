@@ -245,7 +245,7 @@ const CANONICAL_ADDON_SLUGS: Record<string, string> = {
   'in tài liệu dưới 20 trang a4': 'extra-printer',
 };
 
-const SPACE_CODE_TO_LOCAL: Record<string, string> = {
+export const SPACE_CODE_TO_LOCAL: Record<string, string> = {
   'FP-01': 'focus',
   'WL-01': 'work',
   'SMR-01': 'meeting-small',
@@ -786,14 +786,7 @@ export class KenBookingState {
     });
   }
 
-  resolveBackendTarget(): {
-    space: any;
-    pkg: any;
-    startAt: string;
-    inclusions: Array<{ packageInclusionId: string; productId: string; quantity: number; variant?: string }>;
-    addons: Array<{ addonId: string; quantity: number; variant?: string }>;
-    voucherCode?: string;
-  } | null {
+  private resolveBackendPackage(): { space: any; pkg: any } | null {
     const d = this.draft();
     const expectedCode = LOCAL_TO_SPACE_CODE[d.spaceId];
     const space = this.rawSpaces.find((s: any) => s.space_code === expectedCode) || this.rawSpaces[0];
@@ -811,7 +804,21 @@ export class KenBookingState {
       compPkgs.find((p: any) => p.package_type === 'HOURLY') ||
       compPkgs[0];
 
-    if (!pkg?._id) return null;
+    return pkg?._id ? { space, pkg } : null;
+  }
+
+  resolveBackendTarget(): {
+    space: any;
+    pkg: any;
+    startAt: string;
+    inclusions: Array<{ packageInclusionId: string; productId: string; quantity: number; variant?: string }>;
+    addons: Array<{ addonId: string; quantity: number; variant?: string }>;
+    voucherCode?: string;
+  } | null {
+    const d = this.draft();
+    const backendPackage = this.resolveBackendPackage();
+    if (!backendPackage) return null;
+    const { space, pkg } = backendPackage;
 
     const startAt = new Date(`${d.date}T${String(d.startHour).padStart(2, '0')}:00:00+07:00`).toISOString();
 
@@ -1158,7 +1165,7 @@ export class KenBookingState {
   }
   get requiredDrinkCount(): number {
     const d = this.draft();
-    const target = this.resolveBackendTarget();
+    const target = this.resolveBackendPackage();
     if (target?.pkg?._id && this.rawPackageInclusions.length > 0) {
       const drinkInc = this.rawPackageInclusions.find(
         (inc: any) => String(inc.package_id) === String(target.pkg._id) && inc.item_type === 'STANDARD_DRINK'
@@ -1176,7 +1183,7 @@ export class KenBookingState {
   }
   get requiredPastryCount(): number {
     const d = this.draft();
-    const target = this.resolveBackendTarget();
+    const target = this.resolveBackendPackage();
     if (target?.pkg?._id && this.rawPackageInclusions.length > 0) {
       const pastryInc = this.rawPackageInclusions.find(
         (inc: any) => String(inc.package_id) === String(target.pkg._id) && inc.item_type === 'PASTRY'
@@ -1509,7 +1516,7 @@ export class KenBookingState {
     return price * (this.space.perPerson ? this.draft().guests : 1);
   }
   get entitlement(): number {
-    const target = this.resolveBackendTarget();
+    const target = this.resolveBackendPackage();
     if (target?.pkg?._id && this.rawPackageInclusions.length > 0) {
       const drinkInc = this.rawPackageInclusions.find(
         (inc: any) => String(inc.package_id) === String(target.pkg._id) && inc.item_type === 'STANDARD_DRINK'
