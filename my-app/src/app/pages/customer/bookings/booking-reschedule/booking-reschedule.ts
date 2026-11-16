@@ -60,7 +60,10 @@ export class BookingReschedule implements OnInit, OnDestroy {
     if (!this.api || !this.auth) return;
     this.auth.ensureSession().subscribe({
       next: (user) => {
-        if (!user) return;
+        if (!user) {
+          this.router?.navigate(['/login'], { queryParams: { returnUrl: this.router?.url } });
+          return;
+        }
         forkJoin({
           bookings: this.api!.getMyBookings('CONFIRMED'),
           spaces: this.api!.getSpaces(),
@@ -68,6 +71,9 @@ export class BookingReschedule implements OnInit, OnDestroy {
           next: ({ bookings, spaces }) => {
             if (!bookings.length) {
               this.orders = [];
+              this.selectedId = '';
+              this.hours = 0;
+              this.note = '';
               this.cdr?.markForCheck();
               return;
             }
@@ -100,14 +106,19 @@ export class BookingReschedule implements OnInit, OnDestroy {
             this.checkLiveAvailability();
             this.cdr?.markForCheck();
           },
+          error: () => {},
         });
       },
+      error: () => {},
     });
   }
 
-  get order(): Order { return this.orders.find(o => o.id === this.selectedId) ?? this.orders[0]; }
-  get end(): string { return `${pad(parseInt(this.start, 10) + this.hours)}:00`; }
+  get order(): Order | undefined { return this.orders.find(o => o.id === this.selectedId) ?? this.orders[0]; }
+  get end(): string { return this.order ? `${pad(parseInt(this.start, 10) + this.hours)}:00` : '--:--'; }
   get orderEnd(): string { return this.order ? this.endOf(this.order) : '—'; }
+  get durationDisplay(): string {
+    return this.order ? `${this.order.hours} giờ · Giữ nguyên gói` : 'Mặc định theo gói (chưa chọn đơn)';
+  }
   endOf(o: Order): string { return `${pad(parseInt(o.start, 10) + o.hours)}:00`; }
   shortName(o: Order): string { return o.name.replace(/\s*\(.*\)$/, ''); }
   guests(o: Order): string { return pad(o.guests); }
@@ -131,6 +142,7 @@ export class BookingReschedule implements OnInit, OnDestroy {
     if (id === this.selectedId) return;
     this.selectedId = id;
     const o = this.order;
+    if (!o) return;
     const d = new Date(o.date + 'T00:00:00'); d.setDate(d.getDate() + 1);
     this.newDate = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
     this.hours = o.hours; this.start = '09:00';
@@ -155,7 +167,7 @@ export class BookingReschedule implements OnInit, OnDestroy {
     }).subscribe({
       next: (spaces) => {
         this.rechecking = false;
-        const sp = spaces.find((x) => String(x._id) === this.order.spaceId);
+        const sp = spaces.find((x) => String(x._id) === this.order?.spaceId);
         this.liveFull = sp ? !sp.isAvailable : false;
         this.cdr?.markForCheck();
       },

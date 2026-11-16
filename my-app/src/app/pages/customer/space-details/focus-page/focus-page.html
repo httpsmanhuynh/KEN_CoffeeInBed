@@ -2,12 +2,12 @@
   <div class="kf-container">
     <nav class="kf-breadcrumb" aria-label="Đường dẫn">
       <div class="kf-crumb">
-        <a routerLink="/spaces">Không gian</a>
+        <a [routerLink]="backPath">Không gian</a>
         <span aria-hidden="true">/</span>
         <span>Ô tập trung cá nhân</span>
       </div>
 
-      <a routerLink="/spaces" class="kf-back">
+      <a [routerLink]="backPath" class="kf-back">
         <img src="/images/ken-figma/focus-page-back.svg" alt="" aria-hidden="true" />
         Quay lại tất cả không gian
       </a>

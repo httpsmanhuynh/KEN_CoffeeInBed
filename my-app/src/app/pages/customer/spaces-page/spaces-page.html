@@ -95,13 +95,20 @@
 
             <p class="ks-price">{{ space.price }}</p>
 
-            <div class="ks-card-action">
+            <div class="ks-card-action" [class.ks-card-action--split]="!!space.bookingRoute">
               <a
                 *ngIf="space.route; else detailOnly"
                 class="ks-outline-button"
                 [routerLink]="space.route"
               >
                 Xem chi tiết
+              </a>
+              <a
+                *ngIf="space.bookingRoute"
+                class="ks-primary-button"
+                [routerLink]="space.bookingRoute"
+              >
+                Đặt chỗ ngay
               </a>
 
               <ng-template #detailOnly>

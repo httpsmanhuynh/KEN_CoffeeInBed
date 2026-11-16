@@ -99,6 +99,13 @@ async function getTopTrendingRecommendations(db, query = {}, defaultLimit = 6) {
     salesDaily = [];
   }
 
+  let mlGlobal = [];
+  try {
+    mlGlobal = await db.collection('ml_global_trending').find({}).toArray();
+  } catch (_) {
+    mlGlobal = [];
+  }
+
   const built = buildTopTrendingRecommendations({
     addons,
     products,
@@ -108,6 +115,112 @@ async function getTopTrendingRecommendations(db, query = {}, defaultLimit = 6) {
     limit,
     excludeProductIds,
   });
+
+  if (mlGlobal.length > 0) {
+    const prodByCode = new Map();
+    const prodByName = new Map();
+    for (const p of products) {
+      if (!p || p.is_active === false) continue;
+      if (p.item_code) prodByCode.set(String(p.item_code).trim().toUpperCase(), p);
+      if (p.name) prodByName.set(String(p.name).trim().toLocaleLowerCase('vi-VN'), p);
+    }
+    const addonByCode = new Map();
+    const addonByProdId = new Map();
+    const addonByName = new Map();
+    for (const a of addons) {
+      if (!a || a.is_active === false) continue;
+      if (a.item_code) addonByCode.set(String(a.item_code).trim().toUpperCase(), a);
+      if (a.product_id) addonByProdId.set(String(a.product_id), a);
+      if (a.name) addonByName.set(String(a.name).trim().toLocaleLowerCase('vi-VN'), a);
+    }
+
+    const sortedGlobal = [...mlGlobal].sort((a, b) => {
+      const rA = Number(a?.rank);
+      const rB = Number(b?.rank);
+      const hasRA = Number.isFinite(rA) && rA > 0;
+      const hasRB = Number.isFinite(rB) && rB > 0;
+      if (hasRA && hasRB && rA !== rB) return rA - rB;
+      return (Number(b?.trending_score ?? 0) || 0) - (Number(a?.trending_score ?? 0) || 0);
+    });
+
+    const mappedItems = [];
+    const seenKeys = new Set();
+
+    for (const row of sortedGlobal) {
+      if (!row) continue;
+      const code = String(row.item_code || '').trim().toUpperCase();
+      const lowerName = String(row.item_name || '').trim().toLocaleLowerCase('vi-VN');
+      const prod = (code && prodByCode.get(code)) || (lowerName && prodByName.get(lowerName)) || null;
+      const addon =
+        (prod && addonByProdId.get(String(prod._id))) ||
+        (code && addonByCode.get(code)) ||
+        (lowerName && addonByName.get(lowerName)) ||
+        null;
+
+      if (prod && excludeProductIds.has(String(prod._id))) continue;
+      const dedupeKey = code || (prod ? String(prod._id) : lowerName);
+      if (!dedupeKey || seenKeys.has(dedupeKey)) continue;
+      seenKeys.add(dedupeKey);
+
+      const price = Number(prod?.price ?? addon?.price ?? 45000) || 0;
+      const scoreVal = Number(row.trending_score ?? row.score ?? 0) || 0;
+      const rankNum = Number(row.rank) || mappedItems.length + 1;
+      mappedItems.push({
+        addonId: addon?._id || null,
+        productId: prod?._id || addon?.product_id || null,
+        itemCode: code || prod?.item_code || null,
+        name: prod?.name || row.item_name || addon?.name || 'Món KÉN',
+        description: prod?.description || addon?.description || '',
+        category: prod?.category || row.item_type || 'DRINK',
+        subCategory: prod?.sub_category || row.category || null,
+        itemType: row.item_type || prod?.category || 'DRINK',
+        price,
+        listedPrice: price,
+        unit: addon?.unit || 'PER_ITEM',
+        variants: Array.isArray(prod?.variants)
+          ? prod.variants
+          : Array.isArray(addon?.variants)
+            ? addon.variants
+            : [],
+        imageUrl: prod?.image_url || addon?.image_url || null,
+        is_active: true,
+        rank: rankNum,
+        score: scoreVal,
+        trendingScore: scoreVal,
+        reason: `Top #${rankNum} thịnh hành · Điểm ${scoreVal.toFixed(2)}`,
+      });
+      if (mappedItems.length >= limit) break;
+    }
+
+    if (mappedItems.length < limit) {
+      for (const fallbackItem of built.items) {
+        const fKey = String(fallbackItem.itemCode || fallbackItem.productId || fallbackItem.name || '').toUpperCase();
+        if (fKey && seenKeys.has(fKey)) continue;
+        if (fallbackItem.productId && seenKeys.has(String(fallbackItem.productId))) continue;
+        if (fKey) seenKeys.add(fKey);
+        mappedItems.push({
+          ...fallbackItem,
+          rank: mappedItems.length + 1,
+        });
+        if (mappedItems.length >= limit) break;
+      }
+    }
+
+    return {
+      items: mappedItems,
+      total: mappedItems.length,
+      strategy: 'ML_GLOBAL_TRENDING',
+      hasHistory: true,
+      roleScoped: false,
+      topTrendingPath: '/top-trending',
+      context: {
+        spaceId: space ? space._id : null,
+        guestCount,
+        daypart,
+        limit,
+      },
+    };
+  }
 
   return {
     items: built.items,
@@ -268,6 +381,47 @@ async function getBookingMenuRecommendations(db, query = {}, user = null) {
     }
   }
 
+  // Gợi ý theo cụm ML: users.ml_cluster_id -> ml_cluster_recommendations.cluster_id -> recommended_item_codes
+  let clusterRecommendation = null;
+  if (mlClusterId !== null) {
+    try {
+      const rec = await db.collection('ml_cluster_recommendations').findOne({ cluster_id: mlClusterId });
+      const codes = Array.isArray(rec && rec.recommended_item_codes) ? rec.recommended_item_codes : [];
+      if (rec && codes.length) {
+        const productByCode = new Map(
+          products.filter((p) => p && p.item_code && p.is_active !== false).map((p) => [String(p.item_code), p]),
+        );
+        const addonByProduct = new Map(
+          addons.filter((a) => a && a.product_id && a.is_active !== false).map((a) => [String(a.product_id), a]),
+        );
+        const items = [];
+        for (const code of codes) {
+          const p = productByCode.get(String(code));
+          if (!p) continue;
+          const a = addonByProduct.get(String(p._id)) || null;
+          items.push({
+            itemCode: p.item_code,
+            productId: p._id,
+            addonId: a ? a._id : null,
+            name: p.name,
+            category: p.category || null,
+            price: Number(p.price || 0),
+            imageUrl: p.image_url || null,
+          });
+        }
+        if (items.length) {
+          clusterRecommendation = {
+            clusterId: mlClusterId,
+            personaName: rec.persona_name || null,
+            items,
+          };
+        }
+      }
+    } catch (_) {
+      clusterRecommendation = null;
+    }
+  }
+
   const built = buildBookingMenuRecommendations({
     addons,
     products,
@@ -305,6 +459,7 @@ async function getBookingMenuRecommendations(db, query = {}, user = null) {
     addons: built.addons,
     recommendedInclusions: built.recommendedInclusions,
     recommendedAddons: built.recommendedAddons,
+    clusterRecommendation,
   };
 }
 
@@ -694,7 +849,10 @@ async function getAdminRecommendAnalysis(db, query = {}) {
       price: Number(p.price ?? p.base_price ?? 0) || 0,
     };
     if (entry.id) catalogByKey.set(`p:${entry.id}`, entry);
-    if (entry.code) catalogByKey.set(`c:${String(entry.code)}`, entry);
+    if (entry.code) {
+      catalogByKey.set(`c:${String(entry.code)}`, entry);
+      catalogByKey.set(`c:${String(entry.code).trim().toUpperCase()}`, entry);
+    }
   }
   for (const a of addons) {
     if (!a) continue;
@@ -702,7 +860,7 @@ async function getAdminRecommendAnalysis(db, query = {}) {
     const entry = {
       id: a._id ? String(a._id) : null,
       productId: a.product_id ? String(a.product_id) : null,
-      code: a.code || a.addon_code || linked?.code || null,
+      code: a.code || a.addon_code || a.item_code || linked?.code || null,
       name: a.name || a.addon_name || linked?.name || 'Add-on',
       category: a.category || a.type || linked?.category || 'ADDON',
       price: Number(a.price ?? a.unit_price ?? linked?.price ?? 0) || 0,
@@ -710,6 +868,7 @@ async function getAdminRecommendAnalysis(db, query = {}) {
     if (entry.id) catalogByKey.set(`a:${entry.id}`, entry);
     if (entry.code && !catalogByKey.has(`c:${String(entry.code)}`)) {
       catalogByKey.set(`c:${String(entry.code)}`, entry);
+      catalogByKey.set(`c:${String(entry.code).trim().toUpperCase()}`, entry);
     }
   }
 
@@ -718,12 +877,13 @@ async function getAdminRecommendAnalysis(db, query = {}) {
     const aid = row.addon_id ? String(row.addon_id) : null;
     const iid = row.item_id ? String(row.item_id) : null;
     const code = row.item_code || row.product_code || row.addon_code || row.code || null;
+    const upperCode = code ? String(code).trim().toUpperCase() : null;
 
     const meta =
       (pid && catalogByKey.get(`p:${pid}`)) ||
       (aid && catalogByKey.get(`a:${aid}`)) ||
       (iid && (catalogByKey.get(`p:${iid}`) || catalogByKey.get(`a:${iid}`))) ||
-      (code && catalogByKey.get(`c:${String(code)}`)) ||
+      (code && (catalogByKey.get(`c:${String(code)}`) || catalogByKey.get(`c:${upperCode}`))) ||
       null;
 
     const key =
@@ -828,24 +988,61 @@ async function getAdminRecommendAnalysis(db, query = {}) {
     limit,
   });
 
+  const globalTrendingItems =
+    mlGlobal.length > 0
+      ? [...mlGlobal]
+          .sort((a, b) => {
+            const rA = Number(a?.rank);
+            const rB = Number(b?.rank);
+            if (Number.isFinite(rA) && rA > 0 && Number.isFinite(rB) && rB > 0 && rA !== rB) {
+              return rA - rB;
+            }
+            return (Number(b?.trending_score ?? 0) || 0) - (Number(a?.trending_score ?? 0) || 0);
+          })
+          .slice(0, limit)
+          .map((g, idx) => {
+            const meta = resolveItemMeta(g, g.item_type || 'DRINK');
+            const freq = meta ? itemFreq.get(meta.key) : null;
+            const totalQty = freq?.totalQty || 0;
+            const unitPrice = meta?.price || 0;
+            return {
+              rank: Number(g.rank || idx + 1),
+              itemId: meta?.key || g.item_code || String(g._id || idx),
+              itemCode: g.item_code || meta?.code || '',
+              name: meta?.name || g.item_name || 'Món KÉN',
+              category: g.category || g.item_type || meta?.category || 'DRINK',
+              trendingScore: Number(g.trending_score ?? g.score ?? 0) || 0,
+              totalQty,
+              totalRevenue: totalQty * unitPrice,
+              price: unitPrice,
+            };
+          })
+      : trendingResult.items || [];
+
   const clusters = mlClusters.map((c, idx) => {
     const rawItems = Array.isArray(c.recommended_items)
       ? c.recommended_items
       : Array.isArray(c.items)
         ? c.items
-        : [];
+        : Array.isArray(c.recommended_item_codes)
+          ? c.recommended_item_codes.map((code) => ({ item_code: code }))
+          : [];
     const mappedItems = rawItems.slice(0, 5).map((ri) => {
-      const m = resolveItemMeta(ri || {}, 'ADDON');
+      const itemObj = typeof ri === 'string' ? { item_code: ri } : ri || {};
+      const m = resolveItemMeta(itemObj, 'ADDON');
       return {
-        name: ri?.name || ri?.item_name || m?.name || ri?.item_code || 'Món gợi ý',
-        code: ri?.item_code || ri?.code || m?.code || '',
-        score: Number(ri?.score ?? ri?.weight ?? 0) || 0,
+        name: itemObj?.name || itemObj?.item_name || m?.name || itemObj?.item_code || 'Món gợi ý',
+        code: itemObj?.item_code || itemObj?.code || m?.code || '',
+        score: Number(itemObj?.score ?? itemObj?.weight ?? 0) || 0,
       };
     });
+    const personaName =
+      c.persona_name || c.cluster_name || c.persona || c.description || `Nhóm khách hàng #${idx + 1}`;
     return {
       clusterId: c.cluster_id ?? c._id ?? `CLUSTER_${idx + 1}`,
-      name: c.cluster_name || c.persona || c.description || `Nhóm khách hàng #${idx + 1}`,
-      size: Number(c.user_count ?? c.customer_count ?? c.size ?? 0) || 0,
+      persona_name: personaName,
+      name: personaName,
+      size: Number(c.customer_count ?? c.user_count ?? c.size ?? 0) || 0,
       items: mappedItems,
     };
   });
@@ -863,7 +1060,7 @@ async function getAdminRecommendAnalysis(db, query = {}) {
       mlClusterCount: clusters.length,
     },
     coOccurringPairs,
-    topTrending: trendingResult.items || [],
+    topTrending: globalTrendingItems,
     clusters,
   };
 }

@@ -221,7 +221,10 @@ export class CoinsRewardsPage implements OnInit {
 
     session$.subscribe({
       next: (user) => {
-        if (!user) return;
+        if (!user) {
+          this.router?.navigate(['/login'], { queryParams: { returnUrl: this.router?.url } });
+          return;
+        }
         this.balance = Number(user.coinsBalance) || 0;
         this.cdr.markForCheck();
         forkJoin({
@@ -250,8 +253,10 @@ export class CoinsRewardsPage implements OnInit {
             this.history = this.mapHistory(history);
             this.cdr.markForCheck();
           },
+          error: () => {},
         });
       },
+      error: () => {},
     });
   }
 

@@ -23,6 +23,7 @@ export class KenFocusPodPage implements OnInit {
     private changeDetector: ChangeDetectorRef,
   ) {}
   ngOnInit(): void {
+    this.state.loadClusterRecommendations(true);
     if (!this.state.isFocusSpace) this.state.set({ spaceId: 'focus', guests: 1 });
     if (this.route.snapshot.queryParamMap.get('bookingStep') === 'addons') {
       this.restoreAddonsStep();

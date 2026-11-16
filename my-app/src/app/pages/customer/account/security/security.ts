@@ -51,10 +51,17 @@ export class Security implements OnInit, OnDestroy {
   ];
   sessionMessage = '';
 
+  confirmingDelete = false;
+  deletingAccount = false;
+  deleteError = '';
+
   ngOnInit(): void {
     this.auth?.ensureSession().subscribe({
       next: (user) => {
-        if (!user) return;
+        if (!user) {
+          this.router?.navigate(['/login'], { queryParams: { returnUrl: this.router?.url } });
+          return;
+        }
         this.twoFactorEnabled = !!user.twoFactorEnabled;
         const ua = navigator.userAgent;
         const isMobile = /Android|iPhone|iPad/i.test(ua);
@@ -63,6 +70,7 @@ export class Security implements OnInit, OnDestroy {
         this.sessions[0].name = `${browser} · ${os} (Phiên hiện tại)`;
         this.cdr?.markForCheck();
       },
+      error: () => {},
     });
   }
 
@@ -214,7 +222,37 @@ export class Security implements OnInit, OnDestroy {
   }
 
   onRequestDeleteAccount(): void {
-    alert('Yêu cầu xoá tài khoản đã được ghi nhận. Ban quản trị KÉN sẽ liên hệ với bạn để hoàn tất quy trình.');
+    this.deleteError = '';
+    this.confirmingDelete = true;
+  }
+
+  onCancelDeleteAccount(): void {
+    if (this.deletingAccount) return;
+    this.confirmingDelete = false;
+    this.deleteError = '';
+  }
+
+  onConfirmDeleteAccount(): void {
+    if (!this.api || this.deletingAccount) return;
+    this.deletingAccount = true;
+    this.deleteError = '';
+    const userId = this.auth?.user?.id;
+    this.api.deleteAccount().subscribe({
+      next: () => {
+        this.deletingAccount = false;
+        try {
+          localStorage.removeItem('ken-figma-booking-demo-v1');
+          if (userId) localStorage.removeItem(`ken-avatar-${userId}`);
+        } catch {}
+        this.auth?.setUser(null);
+        this.router?.navigateByUrl('/');
+      },
+      error: (err) => {
+        this.deletingAccount = false;
+        this.deleteError = err.error?.message || 'Không thể xoá tài khoản. Vui lòng thử lại.';
+        this.cdr?.markForCheck();
+      },
+    });
   }
 
   logout(): void {

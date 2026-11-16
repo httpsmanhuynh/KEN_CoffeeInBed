@@ -53,7 +53,10 @@ export class UserProfile implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.auth?.ensureSession().subscribe({
       next: (user) => {
-        if (!user) return;
+        if (!user) {
+          this.router?.navigate(['/login'], { queryParams: { returnUrl: this.router?.url } });
+          return;
+        }
         let extra: Partial<Pick<Profile, 'gender' | 'birthday' | 'city'>> = {};
         try {
           const raw = localStorage.getItem(`ken-profile-extra-${user.id}`);
@@ -77,6 +80,7 @@ export class UserProfile implements OnInit, OnDestroy {
         this.points = pts.toLocaleString('vi-VN');
         this.avatarUrl = this.auth?.avatarUrl() ?? null;
       },
+      error: () => {},
     });
   }
 

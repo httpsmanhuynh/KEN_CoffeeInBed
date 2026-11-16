@@ -28,8 +28,27 @@ export class AccountSidebar {
   @Input() points?: string;
   @Output() logout = new EventEmitter<void>();
 
+  showLogoutConfirm = false;
+
+  get isAuthenticated(): boolean {
+    return !!this.auth?.isAuthenticated;
+  }
+
   get displayName(): string {
-    return this.userName ?? this.auth?.user?.fullName ?? 'Thầy Thanh đẹp trai';
+    return this.userName ?? this.auth?.user?.fullName ?? 'Khách hàng';
+  }
+
+  requestLogout(): void {
+    this.showLogoutConfirm = true;
+  }
+
+  cancelLogout(): void {
+    this.showLogoutConfirm = false;
+  }
+
+  confirmLogout(): void {
+    this.showLogoutConfirm = false;
+    this.logout.emit();
   }
 
   get displayTier(): string {

@@ -16,6 +16,7 @@ interface DishForecastRow {
   upperQty: number;
   forecastDate: string;
   modelVersion: string;
+  actionTag: string;
 }
 
 interface IngredientForecastRow {
@@ -66,16 +67,19 @@ interface CoOccurringPair {
 }
 
 interface TrendingItem {
+  rank?: number;
   id: string;
   code: string;
   name: string;
   category: string;
   qty: number;
   revenueVnd: number;
+  trendingScore?: number;
 }
 
 interface MlCluster {
   clusterId: string;
+  persona_name?: string;
   name: string;
   size: number;
   items: { name: string; code: string; score: number }[];
@@ -280,17 +284,28 @@ export class Forecast implements OnInit, OnDestroy {
           this.coOccurringPairs = res.coOccurringPairs;
         }
         if (Array.isArray(res.topTrending)) {
-          this.topTrending = res.topTrending.map((t: any) => ({
+          this.topTrending = res.topTrending.map((t: any, idx: number) => ({
+            rank: Number(t.rank ?? idx + 1),
             id: String(t.itemId ?? t._id ?? t.id ?? ''),
             code: String(t.itemCode ?? t.item_code ?? t.code ?? ''),
-            name: String(t.name ?? t.itemName ?? ''),
+            name: String(t.name ?? t.itemName ?? t.item_name ?? ''),
             category: String(t.category ?? 'ADDON'),
-            qty: Number(t.totalQty ?? t.qty ?? t.score ?? 0),
+            qty: Number(t.totalQty ?? t.qty ?? 0),
             revenueVnd: Number(t.totalRevenue ?? t.revenueVnd ?? 0),
+            trendingScore: Number(t.trendingScore ?? t.trending_score ?? t.score ?? 0),
           }));
         }
         if (Array.isArray(res.clusters)) {
-          this.clusters = res.clusters;
+          this.clusters = res.clusters.map((c: any, idx: number) => {
+            const pName = String(c.persona_name ?? c.name ?? c.cluster_name ?? `Nhóm khách hàng #${idx + 1}`);
+            return {
+              clusterId: String(c.clusterId ?? c.cluster_id ?? idx),
+              persona_name: pName,
+              name: pName,
+              size: Number(c.size ?? c.customer_count ?? 0),
+              items: Array.isArray(c.items) ? c.items : [],
+            };
+          });
         }
         if (showToast) {
           this.notify('Đã cập nhật phân tích gợi ý bán kèm AI');
@@ -301,17 +316,19 @@ export class Forecast implements OnInit, OnDestroy {
 
   private normalizeDish(d: any): DishForecastRow {
     const models = Array.isArray(d.modelVersions) ? d.modelVersions : [];
+    const qty = Number(d.predictedQty ?? 0);
     return {
       itemId: String(d.itemId ?? ''),
       itemCode: String(d.itemCode ?? ''),
       name: String(d.name ?? 'Món không rõ'),
       category: String(d.category ?? 'OTHER').toUpperCase(),
       price: Number(d.price ?? 0),
-      predictedQty: Number(d.predictedQty ?? 0),
+      predictedQty: qty,
       lowerQty: Number(d.lowerQty ?? 0),
       upperQty: Number(d.upperQty ?? 0),
       forecastDate: String(d.forecastDate ?? this.fromDate),
       modelVersion: String(d.modelVersion ?? models[0] ?? 'HIST_SEASONAL_V1'),
+      actionTag: String(d.actionTag ?? d.action_tag ?? (qty >= 50 ? 'Tăng lượng' : 'Giữ nguyên')),
     };
   }
 
@@ -361,6 +378,7 @@ export class Forecast implements OnInit, OnDestroy {
         upperQty: 118,
         forecastDate: this.fromDate,
         modelVersion: 'HIST_SEASONAL_V1',
+        actionTag: 'Tăng lượng',
       },
       {
         itemId: 'd2',
@@ -373,6 +391,7 @@ export class Forecast implements OnInit, OnDestroy {
         upperQty: 102,
         forecastDate: this.fromDate,
         modelVersion: 'HIST_SEASONAL_V1',
+        actionTag: 'Tăng lượng',
       },
       {
         itemId: 'd3',
@@ -385,6 +404,7 @@ export class Forecast implements OnInit, OnDestroy {
         upperQty: 82,
         forecastDate: this.fromDate,
         modelVersion: 'HIST_SEASONAL_V1',
+        actionTag: 'Tăng lượng',
       },
       {
         itemId: 'd4',
@@ -397,6 +417,7 @@ export class Forecast implements OnInit, OnDestroy {
         upperQty: 55,
         forecastDate: this.fromDate,
         modelVersion: 'HIST_SEASONAL_V1',
+        actionTag: 'Giữ nguyên',
       },
       {
         itemId: 'd5',
@@ -409,6 +430,7 @@ export class Forecast implements OnInit, OnDestroy {
         upperQty: 40,
         forecastDate: this.fromDate,
         modelVersion: 'HIST_SEASONAL_V1',
+        actionTag: 'Giảm lượng',
       },
     ];
 

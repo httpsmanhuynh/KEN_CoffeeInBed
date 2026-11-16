@@ -106,6 +106,7 @@ const routes: Routes = [
   { path: 'policy', component: PolicyPage },
   { path: 'terms', component: TermsPage },
   { path: 'reviews', component: ReviewPage },
+  { path: 'blog/:id', component: StoryPage },
   { path: 'blog', component: StoryPage },
   { path: 'points', component: PointsPage },
   { path: 'coins', component: CoinsPage },

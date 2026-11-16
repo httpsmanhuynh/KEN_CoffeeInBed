@@ -1,4 +1,5 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { SmoothScrollService } from '../../../core/smooth-scroll.service';
 
 export type KenZoneFilter = 'all' | 'connect' | 'focus' | 'rest';
@@ -15,6 +16,7 @@ interface SpaceCard {
   caution: string;
   image: string;
   route: string | null;
+  bookingRoute?: string;
 }
 
 @Component({
@@ -23,7 +25,14 @@ interface SpaceCard {
   templateUrl: './spaces-page.html',
   styleUrl: './spaces-page.css'
 })
-export class SpacesPage {
+export class SpacesPage implements OnInit {
+  private readonly route = (() => {
+    try {
+      return inject(ActivatedRoute, { optional: true });
+    } catch {
+      return null;
+    }
+  })();
   private readonly smoothScroll = (() => {
     try {
       return inject(SmoothScrollService, { optional: true });
@@ -35,6 +44,15 @@ export class SpacesPage {
   bookingNotice = false;
   menuNotice = false;
   activeZone: KenZoneFilter = 'all';
+
+  ngOnInit(): void {
+    this.route?.queryParamMap.subscribe(params => {
+      const z = params.get('zone');
+      if (z === 'connect' || z === 'focus' || z === 'rest') {
+        this.activeZone = z;
+      }
+    });
+  }
 
   readonly zoneFilters: { id: KenZoneFilter; label: string }[] = [
     { id: 'all', label: 'Tất cả không gian' },
@@ -68,7 +86,8 @@ export class SpacesPage {
       recommended: 'Nên chọn khi: học hoặc làm việc cá nhân, muốn linh hoạt thời gian và ngân sách.',
       caution: 'Cân nhắc: đây là khu dùng chung, không phải phòng riêng để họp nhóm.',
       image: '/images/ken-figma/spaces-cowork.png',
-      route: '/spaces/work-lounge'
+      route: '/spaces/work-lounge',
+      bookingRoute: '/booking/work'
     },
     {
       id: 'focus',
@@ -81,7 +100,8 @@ export class SpacesPage {
       recommended: 'Nên chọn khi: cần yên tĩnh cao và tập trung sâu.',
       caution: 'Cân nhắc: chỉ phù hợp 1 người; nhóm đôi nên dùng 2 chỗ Work Lounge.',
       image: '/images/ken-figma/spaces-focus.png',
-      route: '/spaces/focus-pod'
+      route: '/spaces/focus-pod',
+      bookingRoute: '/booking/focus-pod'
     },
     {
       id: 'meeting',
@@ -94,7 +114,8 @@ export class SpacesPage {
       recommended: 'Nên chọn khi: nhóm 3–6 người cần họp, học nhóm hoặc trao đổi riêng tư.',
       caution: 'Cân nhắc: cần ít nhất 3 khách; hai người làm việc có thể chọn 2 chỗ Bàn chung.',
       image: '/images/ken-figma/spaces-meeting.png',
-      route: '/spaces/small-meeting-room'
+      route: '/spaces/small-meeting-room',
+      bookingRoute: '/booking/meeting-small'
     },
     {
       id: 'boardroom',
@@ -107,7 +128,8 @@ export class SpacesPage {
       recommended: 'Nên chọn khi: nhóm 6–12 người cần họp lớn, trình bày hoặc workshop.',
       caution: 'Cân nhắc: cần ít nhất 6 khách; nhóm 3–6 người có thể xem Phòng họp nhỏ.',
       image: '/images/ken-figma/spaces-meetingbig.png',
-      route: '/spaces/booking/meeting-large'
+      route: '/spaces/booking/meeting-large',
+      bookingRoute: '/booking/meeting-large'
     },
     {
       id: 'single',
@@ -120,7 +142,8 @@ export class SpacesPage {
       recommended: 'Nên chọn khi: cần nghỉ trưa ngắn hoặc một khoảng riêng cho 1 người.',
       caution: 'Cân nhắc: chỉ dành cho 1 khách; hai người nên xem KÉN nghỉ đôi.',
       image: '/images/ken-figma/spaces-single.png',
-      route: '/spaces/booking/single'
+      route: '/spaces/booking/single',
+      bookingRoute: '/booking/single'
     },
     {
       id: 'double',
@@ -133,7 +156,8 @@ export class SpacesPage {
       recommended: 'Nên chọn khi: cặp đôi hoặc 2 người cần nghỉ ngắn cùng lúc.',
       caution: 'Cân nhắc: nhóm 3–4 người nên dùng Private Studio để rộng rãi hơn.',
       image: '/images/ken-figma/spaces-double.png',
-      route: '/spaces/booking/double'
+      route: '/spaces/booking/double',
+      bookingRoute: '/booking/double'
     },
     {
       id: 'private',
@@ -146,7 +170,8 @@ export class SpacesPage {
       recommended: 'Nên chọn khi: nhóm 2–4 người cần một phòng riêng để nghỉ ngơi.',
       caution: 'Cân nhắc: không nhận 1 khách; nếu cần học hoặc họp, hãy xem KÉN Tập Trung.',
       image: '/images/ken-figma/spaces-private.png',
-      route: '/spaces/booking/private'
+      route: '/spaces/booking/private',
+      bookingRoute: '/booking/private'
     }
   ];
 

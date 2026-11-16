@@ -62,9 +62,7 @@ export class SuggestionPopup implements OnInit, OnDestroy {
           desc: String(it.reason || 'Gợi ý phù hợp cho khung giờ này tại KÉN.'),
           image: mapPopupImage(it),
         }));
-        this.index = 0;
-        this.current = [this.slides[0]];
-        this.cdr?.markForCheck();
+        this.go(0);
       },
       error: () => {},
     });
@@ -102,7 +100,12 @@ export class SuggestionPopup implements OnInit, OnDestroy {
 
   next(): void { this.go((this.index + 1) % this.slides.length); }
   prev(): void { this.go((this.index - 1 + this.slides.length) % this.slides.length); }
-  private go(i: number): void { this.index = i; this.progress = 0; this.current = [this.slides[i]]; }
+  private go(i: number): void {
+    this.index = i;
+    this.progress = 0;
+    this.current = [this.slides[i]];
+    this.cdr?.markForCheck();
+  }
 
   close(): void { this.popup.hide(); }
   explore(): void { this.close(); this.router.navigateByUrl('/top-trending'); }
@@ -139,7 +142,11 @@ export class SuggestionPopup implements OnInit, OnDestroy {
       this.timer = setInterval(() => {
         this.progress += TICK_MS / SLIDE_MS;
         if (this.progress >= 1) this.next();
+        this.cdr?.markForCheck();
       }, TICK_MS);
+    } else {
+      this.progress = 1;
+      this.cdr?.markForCheck();
     }
     setTimeout(() => this.dialog?.nativeElement.focus());
   }

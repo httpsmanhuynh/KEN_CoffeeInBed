@@ -126,6 +126,12 @@ function createProfileTestDb() {
           }
           return { matchedCount: count, modifiedCount: count };
         },
+        async deleteOne(filter) {
+          const idx = rows.findIndex((r) => matches(r, filter));
+          if (idx === -1) return { deletedCount: 0 };
+          rows.splice(idx, 1);
+          return { deletedCount: 1 };
+        },
       };
     },
   };
@@ -648,11 +654,32 @@ test('TC-PF-05..15\tAUTO-PF-02: Đổi SĐT (/me/phone), cập nhật họ tên 
       ['POST', '/api/profile/me/2fa'],
       ['POST', '/api/profile/me/phone'],
       ['PATCH', '/api/profile/me'],
+      ['DELETE', '/api/profile/me'],
     ]) {
       const rUnauth = await srv.request(m, p, { body: {} });
       assert.equal(rUnauth.status, 401);
       assert.equal(rUnauth.body.code, 'UNAUTHENTICATED');
     }
+  } finally {
+    await srv.close();
+  }
+});
+
+test('DELETE /api/profile/me: Xóa tài khoản trực tiếp trong DB và hủy session', async () => {
+  const db = createProfileTestDb();
+  const srv = await startTestServer(db);
+  try {
+    const user = db.seedUser({ phone: '0908887776', email: 'del@example.com' });
+    const cookie = await srv.loginAs(user);
+
+    const res = await srv.request('DELETE', '/api/profile/me', { cookie });
+    assert.equal(res.status, 200);
+    assert.equal(res.body.deleted, true);
+    assert.equal(db._raw.users.some((u) => String(u._id) === String(user._id)), false);
+
+    // Session cũ không còn hiệu lực
+    const meAfter = await srv.request('GET', '/api/profile', { cookie });
+    assert.equal(meAfter.status, 401);
   } finally {
     await srv.close();
   }

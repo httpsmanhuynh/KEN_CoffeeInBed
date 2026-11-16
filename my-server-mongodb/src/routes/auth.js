@@ -3,6 +3,7 @@
 // users.coin_balance; otp_codes dùng user_id / is_used / attempt_count / max_attempts.
 // Luồng đăng ký: /register chỉ lưu thông tin vào otp_codes.pending_data; user chỉ được tạo ở /verify-otp.
 const express = require('express');
+const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const { ObjectId } = require('mongodb');
 const { requireAuth, startSession, destroySession } = require('../middleware/auth');
@@ -38,6 +39,39 @@ const phoneOtpLimiter = rateLimit({
 });
 
 const DUMMY_HASH = bcrypt.hashSync('dummy-password', 10); // giữ thời gian phản hồi đều khi user không tồn tại
+
+function createResetToken(phone) {
+  const exp = Date.now() + 10 * 60 * 1000;
+  const payload = `${phone}|${exp}`;
+  const sig = crypto
+    .createHmac('sha256', process.env.SESSION_SECRET || 'dev-only-secret')
+    .update(payload)
+    .digest('hex');
+  return `${Buffer.from(payload, 'utf8').toString('base64url')}.${sig}`;
+}
+
+function verifyResetToken(token, phone) {
+  if (!token || typeof token !== 'string' || !token.includes('.')) return 'INVALID';
+  const [encoded, sig] = token.split('.');
+  let payload = '';
+  try {
+    payload = Buffer.from(encoded, 'base64url').toString('utf8');
+  } catch (_) {
+    return 'INVALID';
+  }
+  const parts = payload.split('|');
+  if (parts.length !== 2 || parts[0] !== phone) return 'INVALID';
+  const exp = Number(parts[1]);
+  if (!Number.isFinite(exp) || exp <= Date.now()) return 'EXPIRED';
+  const expected = crypto
+    .createHmac('sha256', process.env.SESSION_SECRET || 'dev-only-secret')
+    .update(payload)
+    .digest('hex');
+  const a = Buffer.from(sig, 'hex');
+  const b = Buffer.from(expected, 'hex');
+  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return 'INVALID';
+  return 'OK';
+}
 
 // BR-A03: đăng ký -> lưu tạm vào otp_codes.pending_data -> OTP REGISTER (chưa tạo user)
 router.post(
@@ -263,13 +297,10 @@ router.post(
 );
 
 router.post(
-  '/reset-password',
+  '/forgot-password/verify-otp',
   ipLimiter,
   wrap(async (req, res) => {
     const db = req.app.locals.db;
-    const { newPassword, confirmPassword } = req.body;
-    if (!validNewPassword(newPassword) || newPassword !== confirmPassword)
-      return fail(res, 422, 'VALIDATION_ERROR', 'Mật khẩu mới không hợp lệ hoặc không khớp');
     const user = await db
       .collection('users')
       .findOne({ phone: str(req.body.phone), status: 'ACTIVE' });
@@ -280,6 +311,45 @@ router.post(
       code: str(req.body.code),
     });
     if (status !== 'OK') return otpError(res, status);
+    res.json({ ok: true, resetToken: createResetToken(user.phone) });
+  }),
+);
+
+router.post(
+  '/reset-password',
+  ipLimiter,
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    const { newPassword } = req.body;
+    const resetToken = str(req.body.resetToken);
+    const confirmPassword =
+      req.body.confirmPassword !== undefined
+        ? req.body.confirmPassword
+        : resetToken
+          ? newPassword
+          : undefined;
+    if (!validNewPassword(newPassword) || newPassword !== confirmPassword)
+      return fail(res, 422, 'VALIDATION_ERROR', 'Mật khẩu mới không hợp lệ hoặc không khớp');
+    const user = await db
+      .collection('users')
+      .findOne({ phone: str(req.body.phone), status: 'ACTIVE' });
+    if (!user) return fail(res, 422, 'OTP_INVALID', 'Mã OTP không đúng');
+    if (resetToken) {
+      const tokenStatus = verifyResetToken(resetToken, user.phone);
+      if (tokenStatus === 'EXPIRED') {
+        return fail(res, 401, 'RESET_TOKEN_EXPIRED', 'Phiên đặt lại mật khẩu đã hết hạn');
+      }
+      if (tokenStatus !== 'OK') {
+        return fail(res, 401, 'RESET_TOKEN_INVALID', 'Phiên đặt lại mật khẩu không hợp lệ');
+      }
+    } else {
+      const { status } = await verifyOtp(db, {
+        phone: user.phone,
+        purpose: 'FORGOT_PASSWORD',
+        code: str(req.body.code),
+      });
+      if (status !== 'OK') return otpError(res, status);
+    }
     await db.collection('users').updateOne(
       { _id: user._id },
       {

@@ -24,6 +24,14 @@
     </div>
   </div>
   <section class="kf-container kf-drink-catalog">
+    <section class="kf-rec-bar" *ngIf="recommendedDrinks.length" aria-label="Gợi ý dành cho bạn">
+      <div class="kf-rec-head"><strong>✨ Gợi ý dành cho bạn</strong><small *ngIf="state.clusterPersona">Nhóm khách: {{ state.clusterPersona }}</small></div>
+      <div class="kf-rec-list">
+        <button type="button" class="kf-rec-chip" *ngFor="let drink of recommendedDrinks" (click)="changeDrink(drink.id,1)" [disabled]="!canAddDrink">
+          <img [src]="state.image(drink.image)" [alt]="drink.name"><span>{{ drink.name }}<small>{{ money(drink.price) }}</small></span><b>{{ state.drinkQuantity(drink.id) ? '×' + state.drinkQuantity(drink.id) : '+' }}</b>
+        </button>
+      </div>
+    </section>
     <div class="kf-filter-line">
       <label class="kf-search"><input type="search" [(ngModel)]="searchText" placeholder="Tìm đồ uống theo tên, ví dụ matcha, cold brew…"></label>
       <select [(ngModel)]="extraOnly" aria-label="Lọc phụ thu"><option [ngValue]="false">Phụ thu: Tất cả</option><option [ngValue]="true">Có phụ thu</option></select>
@@ -44,9 +52,25 @@
         <article *ngFor="let drink of coffee" class="kf-product kf-drink-card" [class.selected]="state.drinkQuantity(drink.id) > 0">
           <img [src]="'/images/ken-flow/' + drink.image" [alt]="drink.name">
           <div class="kf-product-copy">
-            <h3>{{ drink.name }}</h3><p>{{ drink.description }}</p><small>Giá niêm yết: {{ money(drink.price) }}</small>
+            <h3>{{ drink.name }}</h3><p>{{ drink.description }}</p><small>Giá niêm yết: {{ money(state.getProductPrice(drink)) }}</small>
+
+            <!-- Tùy chọn Biến thể Nóng / Lạnh và Size -->
+            <div class="kf-variant-selector" *ngIf="state.hasTemperatureOptions(drink.variants) || state.isSizeSelectable(drink)">
+              <div class="kf-variant-group" *ngIf="state.hasTemperatureOptions(drink.variants) || state.isSizeSelectable(drink)">
+                <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getDrinkVariant(drink.id)).temp === 'Nóng'" (click)="state.setDrinkTemp(drink.id, 'Nóng')">Nóng</button>
+                <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getDrinkVariant(drink.id)).temp === 'Lạnh'" (click)="state.setDrinkTemp(drink.id, 'Lạnh')">Lạnh</button>
+              </div>
+              <div class="kf-variant-group" *ngIf="state.isSizeSelectable(drink)">
+                <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getDrinkVariant(drink.id)).size === 'M'" (click)="state.setDrinkSize(drink.id, 'M')">Size M (55k)</button>
+                <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getDrinkVariant(drink.id)).size === 'L'" (click)="state.setDrinkSize(drink.id, 'L')">Size L (60k)</button>
+              </div>
+            </div>
+            <div class="kf-single-temp-badge" *ngIf="!state.hasTemperatureOptions(drink.variants) && !state.isSizeSelectable(drink) && state.getTemperatureType(drink.variants) !== 'none'">
+              <span class="kf-badge-tag">{{ state.getTemperatureType(drink.variants) === 'cold' ? '❄️ Chỉ phục vụ Lạnh' : '♨️ Chỉ phục vụ Nóng' }}</span>
+            </div>
+
             <div class="kf-product-bottom">
-              <strong>{{ '+' + money(drink.price - state.entitlement > 0 ? drink.price - state.entitlement : 0) }}</strong>
+              <strong>{{ '+' + money(state.getProductPrice(drink) - state.entitlement > 0 ? state.getProductPrice(drink) - state.entitlement : 0) }}</strong>
               <div class="kf-quantity">
                 <button type="button" [attr.aria-label]="'Bớt ' + drink.name" [disabled]="state.drinkQuantity(drink.id) === 0" (click)="changeDrink(drink.id,-1)">−</button>
                 <span>{{ state.drinkQuantity(drink.id) }}</span>
@@ -63,9 +87,25 @@
         <article *ngFor="let drink of refreshments" class="kf-product kf-drink-card" [class.selected]="state.drinkQuantity(drink.id) > 0">
           <img [src]="'/images/ken-flow/' + drink.image" [alt]="drink.name">
           <div class="kf-product-copy">
-            <h3>{{ drink.name }}</h3><p>{{ drink.description }}</p><small>Giá niêm yết: {{ money(drink.price) }}</small>
+            <h3>{{ drink.name }}</h3><p>{{ drink.description }}</p><small>Giá niêm yết: {{ money(state.getProductPrice(drink)) }}</small>
+
+            <!-- Tùy chọn Biến thể Nóng / Lạnh và Size -->
+            <div class="kf-variant-selector" *ngIf="state.hasTemperatureOptions(drink.variants) || state.isSizeSelectable(drink)">
+              <div class="kf-variant-group" *ngIf="state.hasTemperatureOptions(drink.variants) || state.isSizeSelectable(drink)">
+                <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getDrinkVariant(drink.id)).temp === 'Nóng'" (click)="state.setDrinkTemp(drink.id, 'Nóng')">Nóng</button>
+                <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getDrinkVariant(drink.id)).temp === 'Lạnh'" (click)="state.setDrinkTemp(drink.id, 'Lạnh')">Lạnh</button>
+              </div>
+              <div class="kf-variant-group" *ngIf="state.isSizeSelectable(drink)">
+                <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getDrinkVariant(drink.id)).size === 'M'" (click)="state.setDrinkSize(drink.id, 'M')">Size M (55k)</button>
+                <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getDrinkVariant(drink.id)).size === 'L'" (click)="state.setDrinkSize(drink.id, 'L')">Size L (60k)</button>
+              </div>
+            </div>
+            <div class="kf-single-temp-badge" *ngIf="!state.hasTemperatureOptions(drink.variants) && !state.isSizeSelectable(drink) && state.getTemperatureType(drink.variants) !== 'none'">
+              <span class="kf-badge-tag">{{ state.getTemperatureType(drink.variants) === 'cold' ? '❄️ Chỉ phục vụ Lạnh' : '♨️ Chỉ phục vụ Nóng' }}</span>
+            </div>
+
             <div class="kf-product-bottom">
-              <strong>+{{ money(drink.price - state.entitlement > 0 ? drink.price - state.entitlement : 0) }}</strong>
+              <strong>+{{ money(state.getProductPrice(drink) - state.entitlement > 0 ? state.getProductPrice(drink) - state.entitlement : 0) }}</strong>
               <div class="kf-quantity">
                 <button type="button" [attr.aria-label]="'Bớt ' + drink.name" [disabled]="state.drinkQuantity(drink.id) === 0" (click)="changeDrink(drink.id,-1)">−</button>
                 <span>{{ state.drinkQuantity(drink.id) }}</span>
@@ -109,8 +149,11 @@
         <p class="kf-overline">TÓM TẮT MÓN TRONG GÓI</p>
         <div class="kf-drink-choice" *ngFor="let item of state.selectedDrinks">
           <img [src]="'/images/ken-flow/' + item.product.image" [alt]="item.product.name">
-          <div><strong>{{ item.product.name }} × {{ item.quantity }}</strong><small>{{ money(item.product.price) }} / món<span *ngIf="state.entitlement"> · Gói hỗ trợ {{ money(state.entitlement) }}/món</span></small></div>
-          <span>{{ money((item.product.price > state.entitlement ? item.product.price - state.entitlement : 0) * item.quantity) }}</span>
+          <div>
+            <strong>{{ item.product.name }} <span class="kf-choice-variant" *ngIf="item.variantLabel">({{ item.variantLabel }})</span> × {{ item.quantity }}</strong>
+            <small>{{ money(item.unitPrice) }} / món<span *ngIf="state.entitlement"> · Gói hỗ trợ {{ money(state.entitlement) }}/món</span></small>
+          </div>
+          <span>{{ money(item.surcharge * item.quantity) }}</span>
         </div>
         <div class="kf-drink-choice" *ngFor="let item of state.selectedPastries">
           <img [src]="'/images/ken-flow/' + item.product.image" [alt]="item.product.name">

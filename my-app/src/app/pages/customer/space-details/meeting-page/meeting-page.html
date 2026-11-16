@@ -2,12 +2,12 @@
   <div class="km-container">
     <nav class="km-breadcrumb" aria-label="Đường dẫn">
       <div class="km-crumb">
-        <a routerLink="/spaces">Không gian</a>
+        <a [routerLink]="backPath">Không gian</a>
         <span aria-hidden="true">/</span>
         <span>Phòng họp nhỏ</span>
       </div>
 
-      <a routerLink="/spaces" class="km-back">
+      <a [routerLink]="backPath" class="km-back">
         <img src="/images/ken-figma/meeting-page-back.svg" alt="" aria-hidden="true" />
         Quay lại tất cả không gian
       </a>

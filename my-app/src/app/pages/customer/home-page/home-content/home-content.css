@@ -35,7 +35,8 @@
 .kh-hero-body{position:relative;z-index:1}
 .kh-hero-eyebrow{font-size:14px;letter-spacing:.16em;font-weight:600;margin-bottom:36px!important}
 .kh-hero h1{font-size:72px;line-height:1.04;font-weight:400;margin-left:100px}
-.kh-hero-slogan{font-size:46px;line-height:1.1;margin:7px 0 24px}
+.kh-hero-slogan{font-size:46px;line-height:1.25;margin:10px 0 32px!important}
+.kh-hero .kh-actions{margin-top:8px}
 .kh-hero-description{max-width:535px;font-size:17px;line-height:1.65;margin-bottom:28px!important}
 .kh-slide-dots{position:absolute;z-index:2;bottom:18px;left:50%;transform:translateX(-50%);display:flex;gap:10px}
 .kh-slide-dots button{width:9px;height:9px;border-radius:50%;border:1px solid #fff;background:rgba(255,255,255,.3);padding:0}

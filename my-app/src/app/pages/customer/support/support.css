@@ -55,7 +55,7 @@
 .contact-title{margin:0 0 6px}
 .contact-subtitle{font-size:14px;color:#6B5B4F;margin:0 0 18px}
 .contact-channels{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px}
-.channel-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:1px solid #D8C7B2;font-size:13px;font-weight:500;text-decoration:none;cursor:pointer;transition:background .2s}
+.channel-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:1px solid #D8C7B2;color:#4A3123;font-size:13px;font-weight:500;text-decoration:none;cursor:pointer;transition:background .2s}
 .contact-auth{display:flex;gap:10px}
 .btn-register,.btn-login{padding:8px 22px;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .2s,background .2s}
 .btn-register{border:none;background:#A9763F;color:#fff}

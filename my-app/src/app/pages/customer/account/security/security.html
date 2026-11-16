@@ -178,11 +178,26 @@
         <div class="danger__row">
           <div class="grow danger__body">
             <h2 class="danger__title">Xoá tài khoản</h2>
-            <p class="text">Yêu cầu xoá có thể làm mất quyền truy cập lịch sử, Coins và quyền lợi thành viên. Hãy kiểm tra các đặt chỗ, yêu cầu đang xử lý trước khi tiếp tục.</p>
+            <p class="text">Xoá tài khoản sẽ xoá vĩnh viễn tài khoản khỏi hệ thống, làm mất quyền truy cập lịch sử, Coins và quyền lợi thành viên.</p>
           </div>
-          <button type="button" class="btn-outline" (click)="onRequestDeleteAccount()">Yêu cầu xoá tài khoản</button>
+          @if (!confirmingDelete) {
+            <button type="button" class="btn-outline" (click)="onRequestDeleteAccount()">Xoá tài khoản</button>
+          } @else {
+            <div class="danger__actions">
+              <button type="button" class="btn-outline" [disabled]="deletingAccount" (click)="onCancelDeleteAccount()">Huỷ</button>
+              <button type="button" class="btn-danger" [disabled]="deletingAccount" (click)="onConfirmDeleteAccount()">
+                {{ deletingAccount ? 'Đang xoá...' : 'Xác nhận xoá' }}
+              </button>
+            </div>
+          }
         </div>
-        <p class="danger__hint">Bạn sẽ cần xác minh danh tính và xác nhận riêng. Chưa có yêu cầu xoá nào được gửi.</p>
+        @if (deleteError) {
+          <p class="danger__hint">{{ deleteError }}</p>
+        } @else if (confirmingDelete) {
+          <p class="danger__hint">Bạn chắc chắn muốn xoá tài khoản? Hành động này không thể hoàn tác.</p>
+        } @else {
+          <p class="danger__hint">Tài khoản sẽ được xoá ngay lập tức mà không cần chờ duyệt.</p>
+        }
       </section>
     </main>
   </div>

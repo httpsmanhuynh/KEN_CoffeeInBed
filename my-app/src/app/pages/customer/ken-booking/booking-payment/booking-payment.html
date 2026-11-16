@@ -97,6 +97,9 @@
               <button type="button" class="kf-btn kf-btn-gold" [disabled]="paying" (click)="payNow('SUCCESS')">
                 {{ paying ? 'Đang xử lý…' : 'Xác nhận đã thanh toán' }}
               </button>
+              <button type="button" class="kf-btn kf-btn-light" [disabled]="paying" (click)="payNow('FAILED')">
+                Giả lập thanh toán thất bại
+              </button>
             </div>
           }
         </section>

@@ -23,7 +23,7 @@
         @if (it.key === active) { <i class="item__bar" aria-hidden="true"></i> }
       </a>
     }
-    <button type="button" class="item item--logout" (click)="logout.emit()">
+    <button type="button" class="item item--logout" (click)="requestLogout()">
       <img src="/images/figma/dang-xuat.svg" alt="" width="20" height="20" />
       <span>Đăng xuất</span>
     </button>
@@ -32,6 +32,11 @@
   <div class="help">
     <p class="help__title">Một chút hỗ trợ từ KÉN</p>
     <p class="help__text">Về đặt chỗ, quyền lợi hay tài khoản — KÉN luôn sẵn lòng.</p>
-    <a class="help__link" href="#">Nhắn KÉN ↗</a>
+    <a class="help__link" routerLink="/support">Nhắn KÉN ↗</a>
   </div>
 </aside>
+<app-confirm-dialog
+  [isOpen]="showLogoutConfirm"
+  (confirmed)="confirmLogout()"
+  (cancelled)="cancelLogout()"
+></app-confirm-dialog>

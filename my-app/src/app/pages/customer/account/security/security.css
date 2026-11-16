@@ -90,6 +90,11 @@ p, h1, h2, h3 { margin: 0; }
 .danger__body { display: flex; flex-direction: column; gap: 8px; }
 .danger__title { font-family: var(--ken-heading); font-size: 23px; font-weight: 400; line-height: 1.4; }
 .danger__hint { color: #995E4B; font-size: 12px; line-height: 1.6; }
+.danger__actions { display: flex; align-items: center; gap: 10px; }
+.btn-danger { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; padding: 10px 20px; border: 0; border-radius: 999px; background: #995E4B; color: #FFFCF7; font-size: 14px; font-weight: 600; line-height: 21px; white-space: nowrap; cursor: pointer; transition: opacity .18s ease; }
+.btn-danger:hover { opacity: .9; }
+.btn-danger:disabled, .btn-outline:disabled { opacity: .6; cursor: not-allowed; }
+.btn-danger:focus-visible { outline: 2px solid #995E4B; outline-offset: 2px; }
 
 @media (max-width: 1100px) {
   .wrap { width: min(100% - 48px, 1280px); }

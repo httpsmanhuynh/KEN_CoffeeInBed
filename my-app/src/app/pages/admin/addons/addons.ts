@@ -238,6 +238,11 @@ export class Addons implements OnInit, OnDestroy {
     this.selectedProduct = null;
     this.formData = this.emptyForm();
     this.formError = '';
+    if (typeof document !== 'undefined') {
+      setTimeout(() => {
+        document.getElementById('addon-editor-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 40);
+    }
   }
 
   cancelForm(): void {

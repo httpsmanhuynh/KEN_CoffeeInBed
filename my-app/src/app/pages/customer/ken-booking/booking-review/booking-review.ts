@@ -23,6 +23,7 @@ const PRODUCT_NAME_MAP: Record<string, string> = {
   'cold-brew': 'Cold Brew truyền thống',
   oolong: 'Hồng trà Oolong Macchiato',
   matcha: 'Matcha Latte',
+  hojicha: 'Hojicha Latte',
   water: 'Nước tinh khiết',
   juice: 'Nước cam',
   soda: 'Soda trái cây',
@@ -36,6 +37,7 @@ const ADDON_NAME_MAP: Record<string, string> = {
   'extra-coffee': 'Cà phê đen',
   'extra-americano': 'Americano',
   'extra-matcha': 'Matcha Latte',
+  'extra-hojicha': 'Hojicha Latte',
   'extra-water': 'Nước tinh khiết',
   'extra-juice': 'Nước cam',
   'extra-croissant': 'Croissant bơ',
@@ -67,7 +69,7 @@ export class KenBookingReviewPage {
   feedback = '';
   voucherMessage = '';
   voucherSuccess = false;
-  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly cdr = (() => { try { return inject(ChangeDetectorRef); } catch { return { markForCheck: () => {} } as ChangeDetectorRef; } })();
   appliedVoucherCode = '';
   appliedVoucherDiscount = 0;
   checkingSession = false;
@@ -193,8 +195,8 @@ export class KenBookingReviewPage {
           ) || products.find((p: any) => normName(p.name) === target);
         };
 
-        const mappedInclusions: Array<{ packageInclusionId: string; productId: string; quantity: number }> = [];
-        const extraDrinksAsAddons: Array<{ name: string; quantity: number }> = [];
+        const mappedInclusions: Array<{ packageInclusionId: string; productId: string; quantity: number; variant?: string }> = [];
+        const extraDrinksAsAddons: Array<{ name: string; quantity: number; variant?: string }> = [];
 
         if (drinkInc?._id) {
           let remainingDrinkQuota =
@@ -208,6 +210,7 @@ export class KenBookingReviewPage {
                 packageInclusionId: String(drinkInc._id),
                 productId: String(matchedProd._id),
                 quantity: take,
+                ...(item.variant ? { variant: item.variant } : {}),
               });
               remainingDrinkQuota -= take;
             }
@@ -215,7 +218,7 @@ export class KenBookingReviewPage {
         } else {
           for (const item of this.state.selectedDrinks) {
             const targetName = PRODUCT_NAME_MAP[item.product.id] || item.product.name;
-            extraDrinksAsAddons.push({ name: targetName, quantity: item.quantity });
+            extraDrinksAsAddons.push({ name: targetName, quantity: item.quantity, variant: item.variant });
           }
         }
 
@@ -257,15 +260,19 @@ export class KenBookingReviewPage {
           }
         }
 
-        const mappedAddons: Array<{ addonId: string; quantity: number }> = [];
-        const addMappedAddon = (addonObj: any, qty: number) => {
+        const mappedAddons: Array<{ addonId: string; quantity: number; variant?: string }> = [];
+        const addMappedAddon = (addonObj: any, qty: number, variant?: string) => {
           if (!addonObj?._id || qty < 1) return;
           const clampedQty = addonObj.unit === 'PER_BOOKING' ? 1 : qty;
-          const existing = mappedAddons.find((a) => a.addonId === String(addonObj._id));
+          const existing = mappedAddons.find((a) => a.addonId === String(addonObj._id) && a.variant === variant);
           if (existing) {
             existing.quantity = addonObj.unit === 'PER_BOOKING' ? 1 : existing.quantity + clampedQty;
           } else {
-            mappedAddons.push({ addonId: String(addonObj._id), quantity: clampedQty });
+            mappedAddons.push({
+              addonId: String(addonObj._id),
+              quantity: clampedQty,
+              ...(variant ? { variant } : {}),
+            });
           }
         };
 
@@ -281,12 +288,12 @@ export class KenBookingReviewPage {
                 normName(a.name) === normName(extraItem.extra.title) ||
                 normName(a.name) === targetName,
             );
-          addMappedAddon(matchedAddon, extraItem.quantity);
+          addMappedAddon(matchedAddon, extraItem.quantity, extraItem.variant);
         }
 
         for (const extraDrink of extraDrinksAsAddons) {
           const matchedAddon = addons.find((a: any) => normName(a.name) === normName(extraDrink.name));
-          addMappedAddon(matchedAddon, extraDrink.quantity);
+          addMappedAddon(matchedAddon, extraDrink.quantity, extraDrink.variant);
         }
 
         return { sp, pkg, startAt, d, mappedInclusions, mappedAddons };
@@ -387,6 +394,17 @@ export class KenBookingReviewPage {
 
   private confirmAuthenticated(): void {
     const d = this.state.draft();
+    // Đơn đã tạo: không tạo Booking mới, không đặt lại hạn (BR-E03). Kiểm tra TRƯỚC khi xét lại lead-time.
+    if (this.api && d.createdBookingId) {
+      if (d.paymentStatus === 'CONFIRMED') {
+        this.router.navigateByUrl('/bookings/payment');
+        return;
+      }
+      if (d.paymentStatus === 'PENDING_PAYMENT' && d.holdUntil && d.holdUntil > Date.now()) {
+        this.router.navigateByUrl('/bookings/payment');
+        return;
+      }
+    }
     if (!this.state.isSlotValid) {
       this.feedback = 'Khung giờ đã chọn chưa hợp lệ hoặc không còn cách hiện tại ít nhất 30 phút. Hãy quay lại chọn ngày giờ.';
     } else if (this.state.requiredDrinkCount > 0 &&

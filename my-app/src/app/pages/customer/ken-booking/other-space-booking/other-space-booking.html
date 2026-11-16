@@ -158,9 +158,7 @@
         >
           <div>
             <strong>{{
-              state.requiredPastryCount > 0
-                ? 'Đồ uống &amp; bánh ngọt đi kèm'
-                : 'Đồ uống đi kèm'
+              state.requiredPastryCount > 0 ? 'Đồ uống &amp; bánh ngọt đi kèm' : 'Đồ uống đi kèm'
             }}</strong>
             <p>
               {{ state.packageInclusionSummary }} ({{ guests }} khách · chọn
@@ -172,27 +170,24 @@
             </p>
             <div
               class="kf-drink-entry-list"
-              *ngIf="state.selectedDrinks.length || state.selectedPastries.length; else noSelectedDrinks"
+              *ngIf="
+                state.selectedDrinks.length || state.selectedPastries.length;
+                else noSelectedDrinks
+              "
             >
               <article class="kf-drink-entry-item" *ngFor="let drink of state.selectedDrinks">
                 <img [src]="'/images/ken-flow/' + drink.product.image" [alt]="drink.product.name" />
-                <span
-                  ><strong>{{ drink.product.name }}</strong
-                  ><small
-                    >{{ drink.quantity }} món · {{ money(drink.product.price) }} / món</small
-                  ></span
-                >
-                <b>{{
-                  money(
-                    drink.quantity *
-                      (drink.product.price > state.entitlement
-                        ? drink.product.price - state.entitlement
-                        : 0)
-                  )
-                }}</b>
+                <span>
+                  <strong>{{ drink.product.name }} <small *ngIf="drink.variantLabel">({{ drink.variantLabel }})</small></strong>
+                  <small>{{ drink.quantity }} món · {{ money(drink.unitPrice) }} / món</small>
+                </span>
+                <b>{{ money(drink.quantity * drink.surcharge) }}</b>
               </article>
               <article class="kf-drink-entry-item" *ngFor="let pastry of state.selectedPastries">
-                <img [src]="'/images/ken-flow/' + pastry.product.image" [alt]="pastry.product.name" />
+                <img
+                  [src]="'/images/ken-flow/' + pastry.product.image"
+                  [alt]="pastry.product.name"
+                />
                 <span
                   ><strong>{{ pastry.product.name }}</strong
                   ><small>{{ pastry.quantity }} bánh · Miễn phí theo gói</small></span
@@ -200,9 +195,7 @@
                 <b style="color: #047857">0đ</b>
               </article>
             </div>
-            <ng-template #noSelectedDrinks
-              ><small>Chưa chọn món trong gói.</small></ng-template
-            >
+            <ng-template #noSelectedDrinks><small>Chưa chọn món trong gói.</small></ng-template>
           </div>
           <button type="button" class="kf-btn kf-btn-light" (click)="openDrinkPicker()">
             {{
@@ -225,12 +218,35 @@
           <div>
             <strong>Quyền lợi Inclusion</strong>
             <p>
-              Gói {{ state.packageName }} không bao gồm F&amp;B miễn phí. Bạn có thể chọn thêm
-              đồ uống, bánh hoặc tiện ích ở danh sách Add-on bên dưới.
+              Gói {{ state.packageName }} không bao gồm F&amp;B miễn phí. Bạn có thể chọn thêm đồ
+              uống, bánh hoặc tiện ích ở danh sách Add-on bên dưới.
             </p>
           </div>
         </section>
 
+        <section
+          class="kf-rec-bar"
+          *ngIf="state.clusterRecExtras.length"
+          aria-label="Gợi ý dành cho bạn"
+        >
+          <div class="kf-rec-head">
+            <strong>✨ Gợi ý dành cho bạn</strong
+            ><small *ngIf="state.clusterPersona">Nhóm khách: {{ state.clusterPersona }}</small>
+          </div>
+          <div class="kf-rec-list">
+            <button
+              type="button"
+              class="kf-rec-chip"
+              *ngFor="let item of state.clusterRecExtras"
+              (click)="changeExtra(item.id, 1)"
+              [disabled]="extrasCount(item.id) >= state.maxExtraCount(item.id)"
+            >
+              <img [src]="state.image(item.image)" [alt]="item.title" /><span
+                >{{ item.title }}<small>+{{ money(item.price) }}</small></span
+              ><b>{{ extrasCount(item.id) ? '×' + extrasCount(item.id) : '+' }}</b>
+            </button>
+          </div>
+        </section>
         <div class="kf-tabs">
           <button
             type="button"
@@ -264,8 +280,22 @@
         <div class="kf-extras-grid">
           <article *ngFor="let extra of filteredExtras" class="kf-extra-card">
             <img [src]="'/images/ken-flow/' + extra.image" [alt]="extra.title" loading="lazy" />
-            <strong>{{ extra.title }}</strong
-            ><small>+{{ money(extra.price) }}</small>
+            <strong>{{ extra.title }}</strong>
+            <small>+{{ money(state.getExtraPrice(extra)) }}</small>
+            <!-- Tùy chọn Biến thể Nóng / Lạnh và Size cho Add-on đồ uống -->
+            <div class="kf-variant-selector" *ngIf="extra.category === 'drink' && (state.hasTemperatureOptions(extra.variants) || state.isSizeSelectable(extra))">
+              <div class="kf-variant-group" *ngIf="state.hasTemperatureOptions(extra.variants) || state.isSizeSelectable(extra)">
+                <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getExtraVariant(extra.id)).temp === 'Nóng'" (click)="state.setExtraTemp(extra.id, 'Nóng')">Nóng</button>
+                <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getExtraVariant(extra.id)).temp === 'Lạnh'" (click)="state.setExtraTemp(extra.id, 'Lạnh')">Lạnh</button>
+              </div>
+              <div class="kf-variant-group" *ngIf="state.isSizeSelectable(extra)">
+                <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getExtraVariant(extra.id)).size === 'M'" (click)="state.setExtraSize(extra.id, 'M')">M (55k)</button>
+                <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getExtraVariant(extra.id)).size === 'L'" (click)="state.setExtraSize(extra.id, 'L')">L (60k)</button>
+              </div>
+            </div>
+            <div class="kf-single-temp-badge" *ngIf="extra.category === 'drink' && !state.hasTemperatureOptions(extra.variants) && !state.isSizeSelectable(extra) && state.getTemperatureType(extra.variants) !== 'none'">
+              <span class="kf-badge-tag">{{ state.getTemperatureType(extra.variants) === 'cold' ? '❄️ Lạnh' : '♨️ Nóng' }}</span>
+            </div>
             <div class="kf-quantity">
               <button
                 type="button"

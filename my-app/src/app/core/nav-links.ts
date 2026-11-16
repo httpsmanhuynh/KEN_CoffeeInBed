@@ -31,7 +31,6 @@ export const FOOTER_ABOUT: NavChild[] = [
   { label: 'Blog', path: '/blog' },
   { label: 'Đánh giá', path: '/reviews' },
   { label: 'Trung tâm hỗ trợ', path: '/support' },
-  { label: 'Đặt chỗ của tôi', path: '/booking-list' },
 ];
 
 export const FOOTER_POLICY: NavChild[] = [

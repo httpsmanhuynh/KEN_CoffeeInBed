@@ -133,8 +133,23 @@ export class AdminLayoutComponent {
     }, 600);
   }
 
+  showLogoutConfirm = false;
+
   toggleUserMenu(): void {
     this.isUserMenuOpen = !this.isUserMenuOpen;
+  }
+
+  requestLogout(): void {
+    this.showLogoutConfirm = true;
+  }
+
+  cancelLogout(): void {
+    this.showLogoutConfirm = false;
+  }
+
+  confirmLogout(): void {
+    this.showLogoutConfirm = false;
+    this.logout();
   }
 
   logout(): void {

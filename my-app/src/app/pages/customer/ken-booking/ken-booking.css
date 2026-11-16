@@ -1143,3 +1143,15 @@
 #ken-space-filters {
     scroll-margin-top: 96px;
 }
+/* Thanh g?i ý theo c?m ML (ml_cluster_id) */
+.kf-rec-bar{margin:0 0 18px;padding:14px 16px;border:1px solid #e3a52f;border-radius:14px;background:#fff8e8}
+.kf-rec-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:10px;color:#4a3123}
+.kf-rec-head small{color:#7a6553}
+.kf-rec-list{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px}
+.kf-rec-chip{display:flex;align-items:center;gap:10px;flex:0 0 auto;padding:8px 12px 8px 8px;border:1px solid #dcb685;border-radius:999px;background:#fffcf7;color:#4a3123;font:inherit;cursor:pointer}
+.kf-rec-chip:hover:not(:disabled){background:#f6ecd8}
+.kf-rec-chip:disabled{opacity:.55;cursor:not-allowed}
+.kf-rec-chip img{width:40px;height:40px;border-radius:50%;object-fit:cover}
+.kf-rec-chip span{display:grid;text-align:left;font-size:13px;font-weight:600}
+.kf-rec-chip span small{font-weight:400;color:#7a6553}
+.kf-rec-chip b{min-width:24px;height:24px;display:grid;place-items:center;border-radius:50%;background:#4a3123;color:#fffcf7;font-size:13px}

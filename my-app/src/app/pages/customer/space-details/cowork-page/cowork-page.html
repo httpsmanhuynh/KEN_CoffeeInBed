@@ -2,12 +2,12 @@
   <div class="kw-container">
     <nav class="kw-breadcrumb" aria-label="Đường dẫn">
       <div>
-        <a routerLink="/spaces">Không gian</a>
+        <a [routerLink]="backPath">Không gian</a>
         <span aria-hidden="true"> / </span>
         <span>Khu làm việc chung</span>
       </div>
 
-      <a routerLink="/spaces" class="kw-back">
+      <a [routerLink]="backPath" class="kw-back">
         <img src="/images/ken-figma/cowork-page-back.svg" alt="" aria-hidden="true" />
         Quay lại tất cả không gian
       </a>

@@ -13,7 +13,7 @@
       <h1>KÉN</h1>
       <p class="kh-script kh-hero-slogan">Lười một chút, chill một góc</p>
       <div class="kh-actions">
-        <a class="kh-btn kh-btn--gold" routerLink="/spaces"
+        <a class="kh-btn kh-btn--gold" routerLink="/booking/spaces"
           >Đặt không gian của bạn <span aria-hidden="true">→</span></a
         >
         <a class="kh-btn kh-btn--outline-light" routerLink="/spaces">Xem các không gian</a>
@@ -54,7 +54,7 @@
       <div class="kh-about-copy">
         <p class="kh-eyebrow">—&nbsp; VỀ CHÚNG TÔI</p>
         <h2 id="kh-about-title">Ở KÉN, bạn luôn có một không gian của riêng mình</h2>
-        <a class="kh-btn kh-btn--beige" routerLink="/spaces"
+        <a class="kh-btn kh-btn--beige" routerLink="/about"
           >Khám phá không gian của bạn <span aria-hidden="true">→</span></a
         >
       </div>
@@ -98,7 +98,7 @@
             <p>{{ item.description }}</p>
           </div>
         </div>
-        <a routerLink="/spaces" class="kh-btn kh-btn--beige"
+        <a routerLink="/booking/spaces" class="kh-btn kh-btn--beige"
           >Khám phá không gian của bạn <span aria-hidden="true">→</span></a
         >
       </div>
@@ -193,9 +193,9 @@
           <a class="kh-btn kh-btn--gold" [routerLink]="p.route">Đặt gói này</a>
         </article>
       </div>
-      <a class="kh-btn kh-btn--white kh-price-more" routerLink="/booking/spaces"
+      <!-- <a class="kh-btn kh-btn--white kh-price-more" routerLink="/booking/spaces"
         >Xem chi tiết bảng giá <span aria-hidden="true">→</span></a
-      >
+      > -->
       <div class="kh-addons">
         <div class="kh-addons-head">
           <div>
@@ -281,10 +281,10 @@
     <div class="kh-container">
       <div class="kh-member-card">
         <div class="kh-member-copy">
-          <p class="kh-eyebrow kh-eyebrow--pill">HỘI VIÊN KÉN</p>
-          <h2 id="kh-member-title">Bạn đã là hội viên KÉN chưa?</h2>
+          <p class="kh-eyebrow kh-eyebrow--pill">THÀNH VIÊN KÉN</p>
+          <h2 id="kh-member-title">Bạn đã là thành viên KÉN chưa?</h2>
           <p>
-            KÉN trân trọng những vị khách đã đồng hành cùng quán. Chương trình hội viên giúp bạn
+            KÉN trân trọng những vị khách đã đồng hành cùng quán. Chương trình thành viên giúp bạn
             tích lũy điểm sau mỗi đơn hoàn tất, theo dõi lịch sử và đổi điểm lấy voucher.
           </p>
           <div class="kh-member-grid">
@@ -295,7 +295,7 @@
             </div>
             <div>
               <span><img src="/images/ken-home/icons/member-award.svg" alt="" /></span
-              ><strong>Hạng hội viên</strong
+              ><strong>Hạng thành viên</strong
               ><small>Đồng hành cùng KÉN với ba hạng Basic, Silver và Gold.</small>
             </div>
             <div>
@@ -313,9 +313,9 @@
             type="button"
             class="kh-btn kh-btn--gold"
             disabled
-            title="Chức năng đăng ký hội viên sẽ được kết nối khi tích hợp tài khoản"
+            title="Chức năng đăng ký thành viên sẽ được kết nối khi tích hợp tài khoản"
           >
-            Đăng ký hội viên <span aria-hidden="true">→</span>
+            Đăng ký thành viên <span aria-hidden="true">→</span>
           </button>
         </div>
         <img src="/images/ken-home/member.png" alt="Nhân viên KÉN phục vụ khách hàng" />
@@ -348,7 +348,7 @@
         <div class="kh-actions">
           <a class="kh-btn kh-btn--white" routerLink="/support"
             >Liên hệ đội ngũ KÉN <span aria-hidden="true">→</span></a
-          ><a class="kh-btn kh-btn--beige" routerLink="/spaces"
+          ><a class="kh-btn kh-btn--beige" routerLink="/spaces/connect"
             >Ghé KÉN chơi <span aria-hidden="true">→</span></a
           >
         </div>

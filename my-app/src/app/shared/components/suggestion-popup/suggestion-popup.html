@@ -36,7 +36,7 @@
         <p class="counter" aria-live="off">{{ counter }}</p>
         <div class="bars" aria-hidden="true">
           @for (b of slides; track b.id; let i = $index) {
-            <span class="bar"><i [style.width.%]="fill(i)"></i></span>
+            <span class="bar" [class.is-active]="i === index"><i [style.width.%]="fill(i)"></i></span>
           }
         </div>
         <div class="nav">

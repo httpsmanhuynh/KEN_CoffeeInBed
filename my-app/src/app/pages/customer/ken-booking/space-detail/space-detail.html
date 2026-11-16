@@ -1,8 +1,8 @@
 <main class="ken-space-detail" *ngIf="space as item; else unavailable">
   <div class="ksd-container">
     <nav class="ksd-breadcrumb" aria-label="Đường dẫn">
-      <div class="ksd-crumb"><a routerLink="/spaces">Không gian</a><span aria-hidden="true">/</span><span>{{ item.name }}</span></div>
-      <a routerLink="/spaces" class="ksd-back">← Quay lại tất cả không gian</a>
+      <div class="ksd-crumb"><a [routerLink]="backPath">Không gian</a><span aria-hidden="true">/</span><span>{{ item.name }}</span></div>
+      <a [routerLink]="backPath" class="ksd-back">← Quay lại tất cả không gian</a>
     </nav>
 
     <section class="ksd-heading">

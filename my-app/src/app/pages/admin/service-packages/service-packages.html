@@ -544,7 +544,9 @@
         <!-- Form Buttons -->
         <div class="form-actions-row">
           <button type="button" class="btn-save-package" (click)="savePackage()">
-            <img src="/images/figma/check.svg" alt="" class="btn-save-icon" />
+            <svg class="btn-save-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M13.3334 4L6.00008 11.3333L2.66675 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
             <span>Lưu {{ editingId ? 'thay đổi' : 'gói' }}</span>
           </button>
           <button type="button" class="btn-cancel-package" (click)="cancelForm()">

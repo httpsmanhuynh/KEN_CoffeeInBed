@@ -43,8 +43,11 @@
         </div>
         <div class="kf-drink-choice" *ngFor="let item of state.selectedDrinks">
           <img [src]="'/images/ken-flow/' + item.product.image" [alt]="item.product.name">
-          <div><strong>{{ item.product.name }} × {{ item.quantity }}</strong><small>{{ money(item.product.price) }} / món<span *ngIf="state.entitlement"> · Gói hỗ trợ {{ money(state.entitlement) }}/món</span></small></div>
-          <b>{{ money(drinkCharge(item.product.price, item.quantity)) }}</b>
+          <div>
+            <strong>{{ item.product.name }} <span class="kf-choice-variant" *ngIf="item.variantLabel">({{ item.variantLabel }})</span> × {{ item.quantity }}</strong>
+            <small>{{ money(item.unitPrice) }} / món<span *ngIf="state.entitlement"> · Gói hỗ trợ {{ money(state.entitlement) }}/món</span></small>
+          </div>
+          <b>{{ money(item.surcharge * item.quantity) }}</b>
         </div>
         <div class="kf-drink-choice" *ngFor="let pastry of state.selectedPastries">
           <img [src]="'/images/ken-flow/' + pastry.product.image" [alt]="pastry.product.name">
@@ -67,11 +70,14 @@
         </div>
       </section>
 
-      <section class="kf-panel" *ngIf="selectedExtras.length">
+      <section class="kf-panel" *ngIf="state.selectedExtrasList.length">
         <h2>Dịch vụ thêm</h2><p>Tùy chọn · Phục vụ khi check-in tại KÉN</p>
-        <div class="kf-extra-check" *ngFor="let extra of selectedExtras">
-          <span><strong>{{ extra.title }}</strong><small>{{ extraCount(extra.id) }} phần · {{ money(extra.price) }} / phần</small></span>
-          <b>{{ money(extra.price * extraCount(extra.id)) }}</b>
+        <div class="kf-extra-check" *ngFor="let extraItem of state.selectedExtrasList">
+          <span>
+            <strong>{{ extraItem.extra.title }} <small *ngIf="extraItem.variantLabel">({{ extraItem.variantLabel }})</small></strong>
+            <small>{{ extraItem.quantity }} phần · {{ money(extraItem.unitPrice) }} / phần</small>
+          </span>
+          <b>{{ money(extraItem.lineTotal) }}</b>
         </div>
       </section>
     </div>
@@ -89,8 +95,8 @@
               <span>0đ</span>
             </div>
             <div class="kf-sum-subitem" *ngFor="let item of state.selectedDrinks">
-              <span>{{ item.product.name }} × {{ item.quantity }}</span>
-              <span>{{ money(drinkCharge(item.product.price, item.quantity)) }}</span>
+              <span>{{ item.product.name }} <small *ngIf="item.variantLabel">({{ item.variantLabel }})</small> × {{ item.quantity }}</span>
+              <span>{{ money(item.surcharge * item.quantity) }}</span>
             </div>
             <div class="kf-sum-subitem" *ngFor="let pastry of state.selectedPastries">
               <span>{{ pastry.product.name }} × {{ pastry.quantity }}</span>
@@ -105,8 +111,8 @@
           <div class="kf-sum-row"><span>Add-on</span><strong>{{ money(state.extrasTotal) }}</strong></div>
           <div class="kf-sum-sublist">
             <div class="kf-sum-subitem" *ngFor="let extraItem of state.selectedExtrasList">
-              <span>{{ extraItem.extra.title }} × {{ extraItem.quantity }}</span>
-              <span>{{ money(extraItem.extra.price * extraItem.quantity) }}</span>
+              <span>{{ extraItem.extra.title }} <small *ngIf="extraItem.variantLabel">({{ extraItem.variantLabel }})</small> × {{ extraItem.quantity }}</span>
+              <span>{{ money(extraItem.lineTotal) }}</span>
             </div>
             <div class="kf-sum-subempty" *ngIf="!state.selectedExtrasList.length">Chưa chọn Add-on</div>
           </div>

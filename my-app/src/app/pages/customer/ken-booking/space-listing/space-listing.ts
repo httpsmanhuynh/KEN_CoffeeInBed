@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { KenBookingState, kenNextDay } from '../booking-state';
 import { KenAvailabilityService, KenAvailabilitySpace } from '../availability.service';
@@ -20,7 +20,7 @@ interface KenListingSpace {
   templateUrl: './space-listing.html',
   styleUrl: './space-listing.css',
 })
-export class KenSpaceListingPage {
+export class KenSpaceListingPage implements OnInit {
   zone: 'all' | 'focus' | 'rest' = 'all';
   availabilityFilter: 'all' | 'available' = 'all';
   searchText = '';
@@ -47,6 +47,14 @@ export class KenSpaceListingPage {
     private availability: KenAvailabilityService,
     private changeDetector: ChangeDetectorRef,
   ) {}
+
+  ngOnInit(): void {
+    const savedId = this.state.draft().spaceId;
+    if (savedId && this.cards.some(c => c.id === savedId)) {
+      this.selectedSpaceId = savedId;
+    }
+    this.checkAvailability();
+  }
 
   get focusCards(): KenListingSpace[] {
     return this.filteredCards.filter(space => space.zone === 'focus');
@@ -131,13 +139,16 @@ export class KenSpaceListingPage {
   }
 
   canChoose(space: KenListingSpace): boolean {
-    return this.availabilityState === 'ready' && this.isAvailable(space);
+    if (this.availabilityState === 'loading') return false;
+    if (this.availabilityState === 'ready') return this.isAvailable(space);
+    return this.fitsGuests(space);
   }
 
   choose(space: KenListingSpace): void {
     if (!this.canChoose(space)) return;
     if (this.selectedSpaceId !== space.id) {
       this.selectedSpaceId = space.id;
+      this.state.set({ spaceId: space.id });
       return;
     }
 
@@ -146,12 +157,14 @@ export class KenSpaceListingPage {
   }
 
   open(space: KenListingSpace): void {
+    this.state.set({ spaceId: space.id });
     const details: Record<string, string> = {
       focus: '/spaces/focus-pod',
       work: '/spaces/work-lounge',
       'meeting-small': '/spaces/small-meeting-room',
     };
-    this.router.navigateByUrl(details[space.id] || '/spaces/booking/' + space.id);
+    const path = details[space.id] || '/spaces/booking/' + space.id;
+    this.router.navigate([path], { queryParams: { from: 'booking' } });
   }
 
   get minDate(): string {

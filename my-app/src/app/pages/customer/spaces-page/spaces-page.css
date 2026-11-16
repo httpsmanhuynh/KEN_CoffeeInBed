@@ -386,6 +386,19 @@
   margin-top: auto;
 }
 
+.ks-card-action--split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.ks-card-action--split > .ks-outline-button,
+.ks-card-action--split > .ks-primary-button {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 13px;
+}
+
 .ks-card-action > .ks-outline-button,
 .ks-expand > summary.ks-outline-button {
   width: 100%;

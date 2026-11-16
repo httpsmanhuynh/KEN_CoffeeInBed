@@ -111,6 +111,8 @@ export class KenBookingSpaceDetailPage implements OnInit {
     }
   };
 
+  backPath = '/spaces';
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -120,6 +122,9 @@ export class KenBookingSpaceDetailPage implements OnInit {
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
       this.space = this.state.getSpace(params.get('id') || '');
+    });
+    this.route.queryParamMap?.subscribe(params => {
+      this.backPath = params.get('from') === 'booking' ? '/booking/spaces' : '/spaces';
     });
   }
 

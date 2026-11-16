@@ -14,7 +14,10 @@ export class KenDrinkPickerPage {
     public state: KenBookingState,
     private router: Router,
     private route: ActivatedRoute,
-  ) {}
+  ) {
+    this.state.loadClusterRecommendations(true);
+  }
+  get recommendedDrinks() { return this.state.clusterRecProducts.filter(p => p.category !== 'bakery'); }
   get filteredDrinks() {
     let arr = this.state.drinks.filter(d =>
       (this.category === 'all' || d.category === this.category) &&

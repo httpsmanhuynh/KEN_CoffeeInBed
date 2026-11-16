@@ -5,6 +5,13 @@ import { CustomerApiService } from '../../../core/customer-api.service';
 
 export type KenZone = 'focus' | 'rest';
 export type KenDrinkCategory = 'coffee' | 'refreshment' | 'bakery';
+export type KenTemperature = 'Nóng' | 'Lạnh';
+export type KenSize = 'M' | 'L';
+
+export interface KenProductVariant {
+  name: string;
+  price: number;
+}
 
 export interface KenProduct {
   id: string;
@@ -17,6 +24,7 @@ export interface KenProduct {
   category: KenDrinkCategory;
   description: string;
   detail?: string;
+  variants?: KenProductVariant[];
 }
 
 export interface KenSpaceRate {
@@ -86,15 +94,16 @@ export function kenBookingSpace(id: string): KenBookingSpace {
 }
 
 export const KEN_MENU: KenProduct[] = [
-  { id: 'coffee', name: 'Cà phê Đen / Sữa', price: 40000, image: 'coffee.png', category: 'coffee', description: 'Đá / Nóng' },
-  { id: 'americano', name: 'Americano', price: 40000, image: 'americano.png', category: 'coffee', description: 'Một lựa chọn cà phê quen thuộc' },
-  { id: 'bac-xiu', name: 'Bạc Xỉu / Salted Caramel Coffee', price: 45000, image: 'bac-xiu.png', category: 'coffee', description: 'Hai hương vị, hai cách tận hưởng' },
-  { id: 'cold-brew', name: 'Cold Brew Truyền thống / Trái cây', price: 50000, image: 'cold-brew.png', category: 'coffee', description: 'Chọn vị truyền thống hoặc trái cây' },
-  { id: 'oolong', name: 'Trà Oolong Macchiato / Trà Đào', price: 50000, image: 'oolong.png', category: 'coffee', description: 'Chọn oolong macchiato hoặc trà đào' },
-  { id: 'matcha', name: 'Matcha Latte / Hojicha Latte', price: 55000, image: 'matcha.png', category: 'coffee', description: 'Chọn matcha hoặc hojicha' },
-  { id: 'water', name: 'Nước tinh khiết (chai)', price: 15000, image: 'water.png', category: 'refreshment', description: 'Cho những cuộc trò chuyện dài' },
-  { id: 'juice', name: 'Nước cam / Nước ép chanh dây', price: 45000, image: 'juice.png', category: 'refreshment', description: 'Chọn cam hoặc chanh dây' },
-  { id: 'soda', name: 'Soda trái cây', price: 45000, image: 'soda.png', category: 'refreshment', description: 'Một chút sắc màu cho buổi hẹn' },
+  { id: 'coffee', name: 'Cà phê Đen / Sữa', price: 40000, image: 'coffee.png', category: 'coffee', description: 'Nóng / Lạnh', variants: [{ name: 'Nóng', price: 40000 }, { name: 'Lạnh', price: 40000 }] },
+  { id: 'americano', name: 'Americano', price: 40000, image: 'americano.png', category: 'coffee', description: 'Nóng / Lạnh', variants: [{ name: 'Nóng', price: 40000 }, { name: 'Lạnh', price: 40000 }] },
+  { id: 'bac-xiu', name: 'Bạc Xỉu / Salted Caramel Coffee', price: 45000, image: 'bac-xiu.png', category: 'coffee', description: 'Nóng / Lạnh', variants: [{ name: 'Nóng', price: 45000 }, { name: 'Lạnh', price: 45000 }] },
+  { id: 'cold-brew', name: 'Cold Brew Truyền thống / Trái cây', price: 50000, image: 'cold-brew.png', category: 'coffee', description: 'Lạnh', variants: [{ name: 'Lạnh', price: 50000 }] },
+  { id: 'oolong', name: 'Trà Oolong Macchiato / Trà Đào', price: 50000, image: 'oolong.png', category: 'coffee', description: 'Lạnh', variants: [{ name: 'Lạnh', price: 50000 }] },
+  { id: 'matcha', name: 'Matcha Latte', price: 55000, image: 'matcha.png', category: 'coffee', description: 'Nóng / Lạnh, Size M (55k) / L (60k)', variants: [{ name: 'Nóng, M (500 ml)', price: 55000 }, { name: 'Nóng, L (700 ml)', price: 60000 }, { name: 'Lạnh, M (500 ml)', price: 55000 }, { name: 'Lạnh, L (700 ml)', price: 60000 }] },
+  { id: 'hojicha', name: 'Hojicha Latte', price: 55000, image: 'matcha.png', category: 'coffee', description: 'Nóng / Lạnh, Size M (55k) / L (60k)', variants: [{ name: 'Nóng, M (500 ml)', price: 55000 }, { name: 'Nóng, L (700 ml)', price: 60000 }, { name: 'Lạnh, M (500 ml)', price: 55000 }, { name: 'Lạnh, L (700 ml)', price: 60000 }] },
+  { id: 'water', name: 'Nước tinh khiết (chai)', price: 15000, image: 'water.png', category: 'refreshment', description: 'Chai 500 ml', variants: [{ name: 'Chai', price: 15000 }] },
+  { id: 'juice', name: 'Nước cam / Nước ép chanh dây', price: 45000, image: 'juice.png', category: 'refreshment', description: 'Lạnh', variants: [{ name: 'Lạnh', price: 45000 }] },
+  { id: 'soda', name: 'Soda trái cây', price: 45000, image: 'soda.png', category: 'refreshment', description: 'Lạnh', variants: [{ name: 'Lạnh', price: 45000 }] },
   { id: 'croissant', name: 'Bánh sừng bò (Croissant) cơ bản', price: 35000, image: 'croissant.png', category: 'bakery', description: 'Một chiếc bánh cho buổi cà phê' },
   { id: 'mousse', name: 'Bánh Mousse', price: 45000, image: 'mousse.png', category: 'bakery', description: 'Trà xanh / Chanh dây' },
   { id: 'tiramisu', name: 'Tiramisu / Cheesecake', price: 50000, image: 'tiramisu.png', category: 'bakery', description: 'Chọn tiramisu hoặc cheesecake' },
@@ -111,14 +120,16 @@ export interface KenExtra {
   image: string;
   category: 'drink' | 'food' | 'equipment';
   unit?: 'PER_ITEM' | 'PER_BOOKING';
+  variants?: KenProductVariant[];
 }
 
 export const KEN_EXTRAS: KenExtra[] = [
-  { id: 'extra-coffee', title: 'Cà phê Đen/Sữa', price: 40000, image: 'coffee.png', category: 'drink', unit: 'PER_ITEM' },
-  { id: 'extra-americano', title: 'Americano', price: 40000, image: 'americano.png', category: 'drink', unit: 'PER_ITEM' },
-  { id: 'extra-matcha', title: 'Matcha Latte', price: 55000, image: 'matcha.png', category: 'drink', unit: 'PER_ITEM' },
-  { id: 'extra-water', title: 'Nước suối', price: 15000, image: 'water.png', category: 'drink', unit: 'PER_ITEM' },
-  { id: 'extra-juice', title: 'Nước cam', price: 45000, image: 'juice.png', category: 'drink', unit: 'PER_ITEM' },
+  { id: 'extra-coffee', title: 'Cà phê Đen/Sữa', price: 40000, image: 'coffee.png', category: 'drink', unit: 'PER_ITEM', variants: [{ name: 'Nóng', price: 40000 }, { name: 'Lạnh', price: 40000 }] },
+  { id: 'extra-americano', title: 'Americano', price: 40000, image: 'americano.png', category: 'drink', unit: 'PER_ITEM', variants: [{ name: 'Nóng', price: 40000 }, { name: 'Lạnh', price: 40000 }] },
+  { id: 'extra-matcha', title: 'Matcha Latte', price: 55000, image: 'matcha.png', category: 'drink', unit: 'PER_ITEM', variants: [{ name: 'Nóng, M (500 ml)', price: 55000 }, { name: 'Nóng, L (700 ml)', price: 60000 }, { name: 'Lạnh, M (500 ml)', price: 55000 }, { name: 'Lạnh, L (700 ml)', price: 60000 }] },
+  { id: 'extra-hojicha', title: 'Hojicha Latte', price: 55000, image: 'matcha.png', category: 'drink', unit: 'PER_ITEM', variants: [{ name: 'Nóng, M (500 ml)', price: 55000 }, { name: 'Nóng, L (700 ml)', price: 60000 }, { name: 'Lạnh, M (500 ml)', price: 55000 }, { name: 'Lạnh, L (700 ml)', price: 60000 }] },
+  { id: 'extra-water', title: 'Nước suối', price: 15000, image: 'water.png', category: 'drink', unit: 'PER_ITEM', variants: [{ name: 'Chai', price: 15000 }] },
+  { id: 'extra-juice', title: 'Nước cam', price: 45000, image: 'juice.png', category: 'drink', unit: 'PER_ITEM', variants: [{ name: 'Lạnh', price: 45000 }] },
   { id: 'extra-croissant', title: 'Bánh sừng bò (Croissant)', price: 35000, image: 'croissant.png', category: 'food', unit: 'PER_ITEM' },
   { id: 'extra-mousse', title: 'Bánh Mousse', price: 45000, image: 'mousse.png', category: 'food', unit: 'PER_ITEM' },
   { id: 'extra-sandwich', title: 'Sandwich', price: 45000, image: 'sandwich.png', category: 'food', unit: 'PER_ITEM' },
@@ -138,8 +149,10 @@ export interface KenBookingDraft {
   guests: number;
   drinkId: string | null;
   drinkQuantities: Record<string, number>;
+  drinkVariants?: Record<string, string>;
   pastryQuantities: Record<string, number>;
   extras: Record<string, number>;
+  extraVariants?: Record<string, string>;
   fullName: string;
   phone: string;
   email: string;
@@ -186,6 +199,7 @@ const CANONICAL_PRODUCT_SLUGS: Record<string, string> = {
   CF_COLD_BREW: 'cold-brew',
   TEA_OOLONG_MACCHIATO: 'oolong',
   MATCHA_LATTE: 'matcha',
+  HOJICHA_LATTE: 'hojicha',
   WATER_BOTTLE: 'water',
   JUICE_CAM: 'juice',
   SODA_TRAI_CAY: 'soda',
@@ -199,8 +213,10 @@ const CANONICAL_PRODUCT_SLUGS: Record<string, string> = {
 
 const CANONICAL_ADDON_SLUGS: Record<string, string> = {
   'cà phê đen': 'extra-coffee',
+  'cà phê sữa': 'extra-coffee',
   americano: 'extra-americano',
   'matcha latte': 'extra-matcha',
+  'hojicha latte': 'extra-hojicha',
   'nước tinh khiết': 'extra-water',
   'nước suối': 'extra-water',
   'nước cam': 'extra-juice',
@@ -321,6 +337,45 @@ export class KenBookingState {
     return this.spacesSignal();
   }
 
+  /** Gợi ý theo cụm ML của khách (users.ml_cluster_id -> ml_cluster_recommendations). */
+  readonly clusterRecSignal = signal<{ clusterId: number; personaName: string | null; items: any[] } | null>(null);
+  private clusterRecLoaded = false;
+
+  loadClusterRecommendations(force = false): void {
+    if (!this.api || (this.clusterRecLoaded && !force)) return;
+    this.clusterRecLoaded = true;
+    this.api.getBookingRecommendations().pipe(catchError(() => of(null))).subscribe((res: any) => {
+      const rec = res?.clusterRecommendation;
+      this.clusterRecSignal.set(rec && Array.isArray(rec.items) && rec.items.length ? rec : null);
+    });
+  }
+  get clusterPersona(): string {
+    return this.clusterRecSignal()?.personaName || '';
+  }
+  /** Món gợi ý có trong menu Inclusion (đồ uống/bánh). */
+  get clusterRecProducts(): KenProduct[] {
+    const items = this.clusterRecSignal()?.items || [];
+    const out: KenProduct[] = [];
+    for (const it of items) {
+      const code = String(it.itemCode || '').toUpperCase();
+      const found = this.menuProductsSignal().find(
+        p => (code && p.itemCode === code) || (it.productId && p.apiProductId === String(it.productId)),
+      );
+      if (found && !out.includes(found)) out.push(found);
+    }
+    return out;
+  }
+  /** Món gợi ý có trong danh mục Add-on. */
+  get clusterRecExtras(): KenExtra[] {
+    const items = this.clusterRecSignal()?.items || [];
+    const out: KenExtra[] = [];
+    for (const it of items) {
+      const found = this.extrasSignal().find(e => it.addonId && e.apiAddonId === String(it.addonId));
+      if (found && !out.includes(found)) out.push(found);
+    }
+    return out;
+  }
+
   constructor() {
     this.syncCatalogFromApi();
     if (this.auth) {
@@ -368,6 +423,7 @@ export class KenBookingState {
                 image: resolveProductImage(p),
                 category: mapProductCategory(p),
                 description: String(p.description || variantsText || 'Món phục vụ tại KÉN'),
+                variants: Array.isArray(p.variants) ? p.variants : [],
               };
             });
           if (mappedProducts.length > 0) {
@@ -389,6 +445,7 @@ export class KenBookingState {
                 image: resolveProductImage(a),
                 category: mapAddonCategory(a),
                 unit: a.unit === 'PER_BOOKING' ? 'PER_BOOKING' : 'PER_ITEM',
+                variants: Array.isArray(a.variants) ? a.variants : [],
               };
             });
           if (mappedAddons.length > 0) {
@@ -427,7 +484,7 @@ export class KenBookingState {
   private defaults(): KenBookingDraft {
     return {
       spaceId: 'focus', date: kenNextDay(), startHour: 9, hours: 4, guests: 1,
-      drinkId: 'matcha', drinkQuantities: {}, pastryQuantities: {}, extras: {}, fullName: '', phone: '', email: '', note: '',
+      drinkId: 'matcha', drinkQuantities: {}, drinkVariants: {}, pastryQuantities: {}, extras: {}, extraVariants: {}, fullName: '', phone: '', email: '', note: '',
       voucher: '', agreed: false, holdUntil: null
     };
   }
@@ -442,8 +499,10 @@ export class KenBookingState {
       const state: KenBookingDraft = {
         ...empty, ...obj,
         drinkQuantities: { ...empty.drinkQuantities, ...(obj.drinkQuantities || {}) },
+        drinkVariants: { ...(obj.drinkVariants || {}) },
         pastryQuantities: { ...empty.pastryQuantities, ...(obj.pastryQuantities || {}) },
-        extras: { ...empty.extras, ...(obj.extras || {}) }
+        extras: { ...empty.extras, ...(obj.extras || {}) },
+        extraVariants: { ...(obj.extraVariants || {}) }
       };
       const space = kenBookingSpace(state.spaceId);
       state.spaceId = space.id;
@@ -458,6 +517,7 @@ export class KenBookingState {
       if (this.hasNoDrinkInclusionMenu(space.id, state.hours) || (space.id === 'focus' && state.hours !== 4 && Object.keys(state.drinkQuantities).length === 0)) {
         state.drinkId = null;
         state.drinkQuantities = {};
+        state.drinkVariants = {};
       }
       if (this.requiredPastryCountFor(space.id, state.hours, state.guests) === 0) {
         state.pastryQuantities = {};
@@ -483,8 +543,10 @@ export class KenBookingState {
       }
       next.drinkId = null;
       next.drinkQuantities = {};
+      next.drinkVariants = {};
       next.pastryQuantities = {};
       next.extras = {};
+      next.extraVariants = {};
     } else if (
       (change.guests !== undefined && change.guests !== previous.guests) ||
       (change.hours !== undefined && change.hours !== previous.hours)
@@ -516,10 +578,14 @@ export class KenBookingState {
       (change.drinkId !== undefined && change.drinkId !== previous.drinkId) ||
       (change.drinkQuantities !== undefined &&
        JSON.stringify(change.drinkQuantities) !== JSON.stringify(previous.drinkQuantities)) ||
+      (change.drinkVariants !== undefined &&
+       JSON.stringify(change.drinkVariants) !== JSON.stringify(previous.drinkVariants)) ||
       (change.pastryQuantities !== undefined &&
        JSON.stringify(change.pastryQuantities) !== JSON.stringify(previous.pastryQuantities)) ||
       (change.extras !== undefined &&
        JSON.stringify(change.extras) !== JSON.stringify(previous.extras)) ||
+      (change.extraVariants !== undefined &&
+       JSON.stringify(change.extraVariants) !== JSON.stringify(previous.extraVariants)) ||
       (change.voucher !== undefined && change.voucher !== previous.voucher);
 
     if (selectionChanged) {
@@ -630,11 +696,159 @@ export class KenBookingState {
     }
     return 0;
   }
-  get selectedDrinks(): Array<{ product: KenProduct; quantity: number }> {
+  isSizeSelectable(item: { itemCode?: string; id?: string; name?: string; title?: string } | null | undefined): boolean {
+    if (!item) return false;
+    const code = String(item.itemCode || '').toUpperCase();
+    const name = String(item.name || item.title || item.id || '').toLowerCase();
+    return code === 'MATCHA_LATTE' || code === 'HOJICHA_LATTE' || name.includes('matcha') || name.includes('hojicha');
+  }
+
+  hasTemperatureOptions(variants?: KenProductVariant[]): boolean {
+    if (!Array.isArray(variants) || variants.length === 0) return false;
+    const hasHot = variants.some(v => v && v.name && v.name.includes('Nóng'));
+    const hasCold = variants.some(v => v && v.name && v.name.includes('Lạnh'));
+    return hasHot && hasCold;
+  }
+
+  getTemperatureType(variants?: KenProductVariant[]): 'both' | 'hot' | 'cold' | 'none' {
+    if (!Array.isArray(variants) || variants.length === 0) return 'none';
+    const hasHot = variants.some(v => v && v.name && v.name.includes('Nóng'));
+    const hasCold = variants.some(v => v && v.name && v.name.includes('Lạnh'));
+    if (hasHot && hasCold) return 'both';
+    if (hasHot) return 'hot';
+    if (hasCold) return 'cold';
+    return 'none';
+  }
+
+  parseVariant(variantName: string | undefined): { temp: KenTemperature; size: KenSize } {
+    const isHot = variantName ? variantName.includes('Nóng') : false;
+    const isSizeL = variantName ? (variantName.includes('L (700 ml)') || variantName.includes('Size L')) : false;
+    return {
+      temp: isHot ? 'Nóng' : 'Lạnh',
+      size: isSizeL ? 'L' : 'M',
+    };
+  }
+
+  buildVariantName(isSizeAllowed: boolean, temp: KenTemperature, size: KenSize): string {
+    if (isSizeAllowed) {
+      return `${temp}, ${size === 'L' ? 'L (700 ml)' : 'M (500 ml)'}`;
+    }
+    return temp;
+  }
+
+  formatVariantLabel(item: any, variantName: string): string {
+    if (!variantName) return '';
+    const parsed = this.parseVariant(variantName);
+    if (this.isSizeSelectable(item)) {
+      return `${parsed.temp}, Size ${parsed.size}`;
+    }
+    return parsed.temp;
+  }
+
+  getDrinkVariant(drinkId: string): string {
+    const custom = this.draft().drinkVariants?.[drinkId];
+    if (custom) return custom;
+    const prod = this.drinks.find(d => d.id === drinkId);
+    if (!prod) return '';
+    if (this.isSizeSelectable(prod)) {
+      return 'Lạnh, M (500 ml)';
+    }
+    const tempType = this.getTemperatureType(prod.variants);
+    if (tempType === 'hot') return 'Nóng';
+    if (tempType === 'cold' || tempType === 'both') return 'Lạnh';
+    return prod.variants?.[0]?.name || '';
+  }
+
+  setDrinkVariant(drinkId: string, variantName: string): void {
+    const drinkVariants = { ...(this.draft().drinkVariants || {}), [drinkId]: variantName };
+    this.set({ drinkVariants });
+  }
+
+  setDrinkTemp(drinkId: string, temp: KenTemperature): void {
+    const current = this.getDrinkVariant(drinkId);
+    const parsed = this.parseVariant(current);
+    const prod = this.drinks.find(d => d.id === drinkId);
+    const isSize = this.isSizeSelectable(prod);
+    this.setDrinkVariant(drinkId, this.buildVariantName(isSize, temp, parsed.size));
+  }
+
+  setDrinkSize(drinkId: string, size: KenSize): void {
+    const current = this.getDrinkVariant(drinkId);
+    const parsed = this.parseVariant(current);
+    this.setDrinkVariant(drinkId, this.buildVariantName(true, parsed.temp, size));
+  }
+
+  getExtraVariant(extraId: string): string {
+    const custom = this.draft().extraVariants?.[extraId];
+    if (custom) return custom;
+    const extra = this.extras.find(e => e.id === extraId);
+    if (!extra) return '';
+    if (this.isSizeSelectable(extra)) {
+      return 'Lạnh, M (500 ml)';
+    }
+    const tempType = this.getTemperatureType(extra.variants);
+    if (tempType === 'hot') return 'Nóng';
+    if (tempType === 'cold' || tempType === 'both') return 'Lạnh';
+    return extra.variants?.[0]?.name || '';
+  }
+
+  setExtraVariant(extraId: string, variantName: string): void {
+    const extraVariants = { ...(this.draft().extraVariants || {}), [extraId]: variantName };
+    this.set({ extraVariants });
+  }
+
+  setExtraTemp(extraId: string, temp: KenTemperature): void {
+    const current = this.getExtraVariant(extraId);
+    const parsed = this.parseVariant(current);
+    const extra = this.extras.find(e => e.id === extraId);
+    const isSize = this.isSizeSelectable(extra);
+    this.setExtraVariant(extraId, this.buildVariantName(isSize, temp, parsed.size));
+  }
+
+  setExtraSize(extraId: string, size: KenSize): void {
+    const current = this.getExtraVariant(extraId);
+    const parsed = this.parseVariant(current);
+    this.setExtraVariant(extraId, this.buildVariantName(true, parsed.temp, size));
+  }
+
+  getProductPrice(prod: KenProduct, variantName?: string): number {
+    const vName = variantName ?? this.getDrinkVariant(prod.id);
+    if (vName && Array.isArray(prod.variants) && prod.variants.length > 0) {
+      const matched = prod.variants.find(v => v.name === vName);
+      if (matched) return Number(matched.price);
+    }
+    if (this.isSizeSelectable(prod)) {
+      const parsed = this.parseVariant(vName);
+      return parsed.size === 'L' ? 60000 : 55000;
+    }
+    return Number(prod.price || 0);
+  }
+
+  getExtraPrice(extra: KenExtra, variantName?: string): number {
+    const vName = variantName ?? this.getExtraVariant(extra.id);
+    if (vName && Array.isArray(extra.variants) && extra.variants.length > 0) {
+      const matched = extra.variants.find(v => v.name === vName);
+      if (matched) return Number(matched.price);
+    }
+    if (this.isSizeSelectable(extra)) {
+      const parsed = this.parseVariant(vName);
+      return parsed.size === 'L' ? 60000 : 55000;
+    }
+    return Number(extra.price || 0);
+  }
+
+  get selectedDrinks(): Array<{ product: KenProduct; quantity: number; variant: string; unitPrice: number; surcharge: number; variantLabel: string }> {
     const d = this.draft();
     if (this.hasNoDrinkInclusionMenu(d.spaceId, d.hours)) return [];
     return this.drinks
-      .map(product => ({ product, quantity: this.drinkQuantity(product.id) }))
+      .map(product => {
+        const quantity = this.drinkQuantity(product.id);
+        const variant = this.getDrinkVariant(product.id);
+        const unitPrice = this.getProductPrice(product, variant);
+        const surcharge = Math.max(0, unitPrice - this.entitlement);
+        const variantLabel = this.formatVariantLabel(product, variant);
+        return { product, quantity, variant, unitPrice, surcharge, variantLabel };
+      })
       .filter(item => item.quantity > 0);
   }
   pastryQuantity(id: string): number {
@@ -651,10 +865,17 @@ export class KenBookingState {
       .map(product => ({ product, quantity: this.pastryQuantity(product.id) }))
       .filter(item => item.quantity > 0);
   }
-  get selectedExtrasList(): Array<{ extra: KenExtra; quantity: number }> {
+  get selectedExtrasList(): Array<{ extra: KenExtra; quantity: number; variant: string; unitPrice: number; lineTotal: number; variantLabel: string }> {
     const extrasMap = this.draft().extras || {};
     return this.extras
-      .map(extra => ({ extra, quantity: Math.max(0, Math.min(this.maxExtraCount(extra.id), extrasMap[extra.id] || 0)) }))
+      .map(extra => {
+        const quantity = Math.max(0, Math.min(this.maxExtraCount(extra.id), extrasMap[extra.id] || 0));
+        const variant = this.getExtraVariant(extra.id);
+        const unitPrice = this.getExtraPrice(extra, variant);
+        const lineTotal = unitPrice * quantity;
+        const variantLabel = this.formatVariantLabel(extra, variant);
+        return { extra, quantity, variant, unitPrice, lineTotal, variantLabel };
+      })
       .filter(item => item.quantity > 0);
   }
 
@@ -737,12 +958,12 @@ export class KenBookingState {
   }
   get drinkSurcharge(): number {
     return this.selectedDrinks.reduce(
-      (total, item) => total + item.quantity * Math.max(0, item.product.price - this.entitlement),
+      (total, item) => total + item.quantity * item.surcharge,
       0
     );
   }
   get extrasTotal(): number {
-    return this.extras.reduce((sum, product) => sum + product.price * (this.draft().extras[product.id] || 0), 0);
+    return this.selectedExtrasList.reduce((sum, item) => sum + item.lineTotal, 0);
   }
   get subtotal(): number { return this.base + this.drinkSurcharge + this.extrasTotal; }
   get silverDiscount(): number { return Math.round(this.subtotal * 0.05); }

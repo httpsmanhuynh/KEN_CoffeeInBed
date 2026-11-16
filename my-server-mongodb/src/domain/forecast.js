@@ -620,6 +620,7 @@ function computeIngredientForecasts({
       lowerQty: Number.isFinite(Number(f.lower_qty)) ? Number(f.lower_qty) : Number(f.predicted_qty),
       upperQty: Number.isFinite(Number(f.upper_qty)) ? Number(f.upper_qty) : Number(f.predicted_qty),
       modelVersion: f.model_version || 'UNKNOWN',
+      actionTag: f.action_tag ? String(f.action_tag).trim() : null,
     });
   }
 
@@ -664,6 +665,7 @@ function computeIngredientForecasts({
         upperQty: 0,
         byDate: new Map(),
         modelVersions: new Set(),
+        actionTags: [],
       };
       dishAccMap.set(key, dAcc);
     }
@@ -671,6 +673,7 @@ function computeIngredientForecasts({
     dAcc.lowerQty = round2(dAcc.lowerQty + vf.lowerQty);
     dAcc.upperQty = round2(dAcc.upperQty + vf.upperQty);
     dAcc.modelVersions.add(vf.modelVersion);
+    if (vf.actionTag) dAcc.actionTags.push(vf.actionTag);
 
     const dayDish = dAcc.byDate.get(vf.forecastDate) || {
       forecastDate: vf.forecastDate,
@@ -689,6 +692,16 @@ function computeIngredientForecasts({
       const dailyForecasts = [...d.byDate.values()].sort((a, b) =>
         a.forecastDate.localeCompare(b.forecastDate),
       );
+      let resolvedActionTag = null;
+      if (d.actionTags.length > 0) {
+        const tagCounts = new Map();
+        for (const t of d.actionTags) {
+          tagCounts.set(t, (tagCounts.get(t) || 0) + 1);
+        }
+        resolvedActionTag = [...tagCounts.entries()].sort((a, b) => b[1] - a[1])[0][0];
+      }
+      const actionTag =
+        resolvedActionTag || (d.predictedQty >= 50 ? 'Tăng lượng' : 'Giữ nguyên');
       return {
         itemId: d.itemId,
         itemCode: d.itemCode,
@@ -706,6 +719,8 @@ function computeIngredientForecasts({
               : null,
         dailyForecasts,
         modelVersions: [...d.modelVersions],
+        actionTag,
+        action_tag: actionTag,
       };
     })
     .sort((a, b) => b.predictedQty - a.predictedQty);

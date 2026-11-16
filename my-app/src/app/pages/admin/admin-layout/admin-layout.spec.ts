@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterModule } from '@angular/router';
 import { AdminLayoutComponent } from './admin-layout.component';
 import { AuthService } from '../../../core/auth.service';
+import { ConfirmDialog } from '../../../shared/components/confirm-dialog/confirm-dialog';
 import { of } from 'rxjs';
 
 describe('AdminLayoutComponent', () => {
@@ -11,7 +12,7 @@ describe('AdminLayoutComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [AdminLayoutComponent],
-      imports: [RouterModule.forRoot([])],
+      imports: [RouterModule.forRoot([]), ConfirmDialog],
       providers: [
         { provide: AuthService, useValue: { logout: () => of(void 0), user: { fullName: 'Admin' } } },
       ],

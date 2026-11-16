@@ -218,4 +218,18 @@ router.patch(
   }),
 );
 
+// Xóa tài khoản trực tiếp (không cần admin duyệt): xóa user trong MongoDB và hủy session
+router.delete(
+  '/me',
+  ...guard,
+  sensitiveLimiter,
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    const user = req.user;
+    await db.collection('users').deleteOne({ _id: user._id });
+    await destroySession(req, res);
+    res.json({ deleted: true, message: 'Đã xóa tài khoản' });
+  }),
+);
+
 module.exports = router;

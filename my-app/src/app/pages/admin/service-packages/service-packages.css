@@ -1204,7 +1204,8 @@
 .btn-save-icon {
   width: 16px;
   height: 16px;
-  object-fit: contain;
+  color: #4a3123;
+  flex-shrink: 0;
 }
 
 .btn-cancel-package {

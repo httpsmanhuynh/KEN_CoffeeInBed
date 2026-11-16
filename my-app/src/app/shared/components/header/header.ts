@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, Input } from '@angular/core';
+import { Component, ElementRef, HostListener, Input, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/auth.service';
 import { MAIN_NAV, NavItem } from '../../../core/nav-links';
@@ -9,7 +9,7 @@ import { MAIN_NAV, NavItem } from '../../../core/nav-links';
   templateUrl: './header.html',
   styleUrl: './header.css',
 })
-export class Header {
+export class Header implements OnInit {
   readonly nav = MAIN_NAV;
   /** Menu con đang mở (theo label). */
   open: string | null = null;
@@ -24,12 +24,13 @@ export class Header {
     this.member = value;
   }
   get isLoggedIn(): boolean {
-    return this.member;
+    return this.isMember;
   }
 
   @Input() userName = 'Khách hàng';
   logoutError = '';
   loggingOut = false;
+  showLogoutConfirm = false;
 
   constructor(
     private host: ElementRef<HTMLElement>,
@@ -37,11 +38,33 @@ export class Header {
     private auth: AuthService,
   ) {}
 
+  ngOnInit(): void {
+    this.auth?.ensureSession?.().subscribe({ error: () => {} });
+  }
+
+  get isMember(): boolean {
+    return this.member || !!this.auth?.isAuthenticated;
+  }
+
+  get displayUserName(): string {
+    return this.auth?.user?.fullName || this.userName || 'Khách hàng';
+  }
+
+  get displayAvatar(): string {
+    return this.auth?.avatarUrl?.() || '/images/figma/nguoi-dung.svg';
+  }
+
   /** Mục nav đang xem (gạch chân như Figma). */
   isActive(item: NavItem): boolean {
     const url = this.router.url.split(/[?#]/)[0].replace(/\/+$/, '') || '/';
-    const paths = item.match ?? (item.path ? [item.path] : []);
-    return paths.includes(url);
+    if (item.path === '/') {
+      return url === '/' || url === '/home-logged-in';
+    }
+    if (item.path === '/spaces') {
+      return url === '/spaces' || url.startsWith('/spaces/');
+    }
+    const paths = item.match ?? (item.path ? [item.path] : item.children?.map(c => c.path) ?? []);
+    return paths.some(p => url === p || (p !== '/' && url.startsWith(p + '/')));
   }
 
   // Chuột: hover mở/đóng. Cảm ứng: bỏ qua hover, chỉ dùng click (tránh mở rồi đóng ngay).
@@ -52,6 +75,20 @@ export class Header {
     this.closeAll();
   }
   closeAll(): void { this.open = null; this.mobileOpen = false; this.accountOpen = false; }
+
+  requestLogout(): void {
+    this.closeAll();
+    this.showLogoutConfirm = true;
+  }
+
+  cancelLogout(): void {
+    this.showLogoutConfirm = false;
+  }
+
+  confirmLogout(): void {
+    this.showLogoutConfirm = false;
+    this.logout();
+  }
 
   logout(): void {
     if (this.loggingOut) return;

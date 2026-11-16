@@ -167,7 +167,7 @@
                 <th>Tên món &amp; Phân loại</th>
                 <th>Dự báo tiêu thụ</th>
                 <th>Khoảng tin cậy [Min–Max]</th>
-                <th>Mô hình / Đề xuất</th>
+                <th>Hành động đề xuất</th>
               </tr>
             </thead>
             <tbody>
@@ -188,15 +188,11 @@
                   <strong>{{ item.predictedQty | number }} phần</strong>
                 </td>
                 <td>{{ item.lowerQty | number }} – {{ item.upperQty | number }} phần</td>
-                <td [class.action-up]="item.predictedQty >= 50">
-                  <strong>{{ item.modelVersion }}</strong>
-                  <small>
-                    {{
-                      item.upperQty > item.predictedQty * 1.3
-                        ? 'Biên độ dao động cao · Dự phòng thêm'
-                        : 'Chuẩn bị theo mức dự báo chuẩn'
-                    }}
-                  </small>
+                <td
+                  [class.action-up]="item.actionTag === 'Tăng lượng'"
+                  [class.action-down]="item.actionTag === 'Giảm lượng'"
+                >
+                  <strong>{{ item.actionTag }}</strong>
                 </td>
               </tr>
               <tr *ngIf="filteredDishes.length === 0">
@@ -228,7 +224,7 @@
           <div class="dish-detail-grid">
             <div><span>Dự báo tiêu thụ</span><strong>{{ sd.predictedQty | number }} phần</strong></div>
             <div><span>Khoảng tin cậy</span><strong>{{ sd.lowerQty | number }} – {{ sd.upperQty | number }} phần</strong></div>
-            <div><span>Mô hình</span><strong>{{ sd.modelVersion }}</strong></div>
+            <div><span>Hành động đề xuất</span><strong>{{ sd.actionTag }}</strong></div>
             <div><span>Ngày dự báo</span><strong>{{ formatDateVi(sd.forecastDate) }}</strong></div>
           </div>
         </div>
@@ -569,15 +565,21 @@
           <div class="cluster-list">
             <div *ngFor="let t of paged('trend', topTrending); let idx = index" class="trending-row">
               <div class="trending-left">
-                <span class="rank-circle">{{ pageFrom('trend', topTrending.length) + idx }}</span>
+                <span class="rank-circle">{{ t.rank || (pageFrom('trend', topTrending.length) + idx) }}</span>
                 <div>
                   <strong>{{ t.name }}</strong>
                   <small>{{ t.code }} · {{ categoryLabel(t.category) }}</small>
                 </div>
               </div>
               <div class="trending-right">
-                <strong>{{ t.qty | number }} lượt</strong>
-                <small>{{ formatCurrency(t.revenueVnd) }}</small>
+                <ng-container *ngIf="t.trendingScore; else qtyFallback">
+                  <strong>Điểm: {{ t.trendingScore | number: '1.2-4' }}</strong>
+                  <small>{{ t.qty ? (t.qty | number) + ' lượt' : 'ml_global_trending' }}</small>
+                </ng-container>
+                <ng-template #qtyFallback>
+                  <strong>{{ t.qty | number }} lượt</strong>
+                  <small>{{ formatCurrency(t.revenueVnd) }}</small>
+                </ng-template>
               </div>
             </div>
             <div *ngIf="topTrending.length === 0" class="empty-box">Chưa có dữ liệu Top Trending.</div>
@@ -610,12 +612,12 @@
           <div class="cluster-list">
             <div *ngFor="let cl of clusters" class="cluster-box">
               <div class="cluster-head">
-                <strong>{{ cl.name }}</strong>
+                <strong>{{ cl.persona_name || cl.name }}</strong>
                 <span class="date-pill">{{ cl.size }} thành viên</span>
               </div>
               <div class="cluster-items">
                 <span *ngFor="let ci of cl.items" class="cluster-chip">
-                  {{ ci.name }} ({{ ci.score | number: '1.2-2' }})
+                  {{ ci.name }}<ng-container *ngIf="ci.score > 0"> ({{ ci.score | number: '1.2-2' }})</ng-container>
                 </span>
               </div>
             </div>

@@ -110,6 +110,10 @@ export class CustomerApiService {
     return this.http.post<{ twoFactorEnabled: boolean }>('/api/profile/me/2fa', body, { withCredentials: true });
   }
 
+  deleteAccount(): Observable<{ deleted: boolean; message: string }> {
+    return this.http.delete<{ deleted: boolean; message: string }>('/api/profile/me', { withCredentials: true });
+  }
+
   // ─── Catalog ───
   getSpaces(query?: Record<string, string>): Observable<any[]> {
     let params = new HttpParams();

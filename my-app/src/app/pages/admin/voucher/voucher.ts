@@ -350,11 +350,16 @@ export class Voucher implements OnInit, OnDestroy {
     }
   }
 
-  startCreate(): void {
+  startCreate(scrollToEditor = false): void {
     this.isCreating = true;
     this.selectedId = '';
     this.formError = '';
     this.form = this.emptyForm();
+    if (scrollToEditor && typeof document !== 'undefined') {
+      setTimeout(() => {
+        document.getElementById('voucher-editor-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 40);
+    }
   }
 
   resetForm(): void {

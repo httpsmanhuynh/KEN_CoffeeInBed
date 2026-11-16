@@ -79,7 +79,7 @@ export class JourneysPage {
         { title: 'Đủ 18 tuổi', note: 'Điều kiện bắt buộc' }
       ],
       action: 'Chọn không gian nghỉ',
-      route: '/spaces'
+      route: '/spaces/booking/single'
     }
   ];
 }

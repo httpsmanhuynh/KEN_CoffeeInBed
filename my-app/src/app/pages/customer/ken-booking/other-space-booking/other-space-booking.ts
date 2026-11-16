@@ -9,7 +9,7 @@ import { KenAvailabilityService } from '../availability.service';
   selector: 'app-ken-other-space-booking',
   standalone: false,
   templateUrl: './other-space-booking.html',
-  styleUrl: './other-space-booking.css'
+  styleUrl: './other-space-booking.css',
 })
 export class KenOtherSpacePage implements OnInit {
   space?: KenBookingSpace;
@@ -36,7 +36,8 @@ export class KenOtherSpacePage implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.route.paramMap.subscribe(params => {
+    this.state.loadClusterRecommendations(true);
+    this.route.paramMap.subscribe((params) => {
       const id = params.get('id') || '';
       this.space = this.state.getSpace(id);
       if (!this.space) return;
@@ -54,17 +55,25 @@ export class KenOtherSpacePage implements OnInit {
     });
   }
 
-  get minDate(): string { return kenNextDay(); }
-  get isFocusZone(): boolean {
-    return this.space?.id === 'work' || !!this.space?.id.startsWith('meeting') || this.space?.id === 'focus';
+  get minDate(): string {
+    return kenNextDay();
   }
-  get zoneLabel(): string { return this.isFocusZone ? 'KÉN TẬP TRUNG' : 'KÉN TÁI TẠO'; }
+  get isFocusZone(): boolean {
+    return (
+      this.space?.id === 'work' ||
+      !!this.space?.id.startsWith('meeting') ||
+      this.space?.id === 'focus'
+    );
+  }
+  get zoneLabel(): string {
+    return this.isFocusZone ? 'KÉN TẬP TRUNG' : 'KÉN TÁI TẠO';
+  }
 
   get guestOptions(): number[] {
     if (!this.space) return [];
     return Array.from(
       { length: this.space.maxGuests - this.space.minGuests + 1 },
-      (_, i) => this.space!.minGuests + i
+      (_, i) => this.space!.minGuests + i,
     );
   }
 
@@ -121,10 +130,12 @@ export class KenOtherSpacePage implements OnInit {
   get filteredExtras() {
     return this.extraCategory === 'all'
       ? this.state.extras
-      : this.state.extras.filter(extra => extra.category === this.extraCategory);
+      : this.state.extras.filter((extra) => extra.category === this.extraCategory);
   }
 
-  extrasCount(id: string): number { return this.state.draft().extras[id] || 0; }
+  extrasCount(id: string): number {
+    return this.state.draft().extras[id] || 0;
+  }
   changeExtra(id: string, delta: number): void {
     this.state.setExtra(id, this.extrasCount(id) + delta);
   }
@@ -133,7 +144,9 @@ export class KenOtherSpacePage implements OnInit {
     if (!this.space) {
       this.ngOnInit();
     }
-    const basePath = (this.router.url || `/booking/${this.space?.id || this.state.draft().spaceId}`).split('?')[0];
+    const basePath = (
+      this.router.url || `/booking/${this.space?.id || this.state.draft().spaceId}`
+    ).split('?')[0];
     this.router.navigate(['/booking/drinks'], {
       queryParams: { returnTo: `${basePath}?bookingStep=addons` },
     });
@@ -157,10 +170,12 @@ export class KenOtherSpacePage implements OnInit {
   }
 
   get timeOptions(): number[] {
-    return this.allHours.filter(hour => hour + this.duration <= 22);
+    return this.allHours.filter((hour) => hour + this.duration <= 22);
   }
 
-  get needsDrinks(): boolean { return this.state.requiredDrinkCount > 0; }
+  get needsDrinks(): boolean {
+    return this.state.requiredDrinkCount > 0;
+  }
   get drinksComplete(): boolean {
     return this.state.selectedDrinkCount === this.state.requiredDrinkCount;
   }
@@ -206,7 +221,8 @@ export class KenOtherSpacePage implements OnInit {
       guests: this.guests,
     });
     if (!this.state.isSlotValid) {
-      this.feedback = 'Vui lòng chọn ngày và giờ bắt đầu trong tương lai, cách hiện tại ít nhất 30 phút, và kết thúc trước 22:00.';
+      this.feedback =
+        'Vui lòng chọn ngày và giờ bắt đầu trong tương lai, cách hiện tại ít nhất 30 phút, và kết thúc trước 22:00.';
       return;
     }
     if (this.needsDrinks && !this.drinksComplete) {
@@ -218,8 +234,8 @@ export class KenOtherSpacePage implements OnInit {
 
   private restoreAddonsStep(): void {
     this.auth.ensureSession().subscribe({
-      next: user => {
-        if (user) this.verifyAvailability(() => this.showAddons = true);
+      next: (user) => {
+        if (user) this.verifyAvailability(() => (this.showAddons = true));
         else this.goToLogin();
       },
       error: () => {
@@ -237,7 +253,7 @@ export class KenOtherSpacePage implements OnInit {
   private requireSession(): void {
     this.checkingSession = true;
     this.auth.ensureSession().subscribe({
-      next: user => {
+      next: (user) => {
         this.checkingSession = false;
         if (user) {
           this.showAddons = true;
@@ -259,7 +275,7 @@ export class KenOtherSpacePage implements OnInit {
     if (!this.space) return;
     this.checkingAvailability = true;
     this.availability.check(this.date, this.startHour, this.guests, this.duration).subscribe({
-      next: spaces => {
+      next: (spaces) => {
         this.checkingAvailability = false;
         const selected = this.availability.forSpace(this.space!.id, spaces);
         if (!this.availability.packageAvailable(selected, this.duration)) {
@@ -274,9 +290,10 @@ export class KenOtherSpacePage implements OnInit {
       error: (error: HttpErrorResponse) => {
         this.checkingAvailability = false;
         const message = error.error?.message ?? error.message;
-        this.feedback = typeof message === 'string'
-          ? message
-          : 'Không thể kiểm tra lịch lúc này. Vui lòng thử lại.';
+        this.feedback =
+          typeof message === 'string'
+            ? message
+            : 'Không thể kiểm tra lịch lúc này. Vui lòng thử lại.';
         this.changeDetector.markForCheck();
       },
     });

@@ -48,6 +48,10 @@ export class OtpInput implements OnInit, AfterViewInit {
   }
 
   onKeydown(i: number, ev: KeyboardEvent): void {
+    if (ev.key.length === 1 && !ev.ctrlKey && !ev.metaKey && !ev.altKey && !/^\d$/.test(ev.key)) {
+      ev.preventDefault();
+      return;
+    }
     if (ev.key === 'Backspace' && !this.digits[i] && i > 0) {
       ev.preventDefault();
       this.digits[i - 1] = '';

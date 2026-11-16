@@ -30,6 +30,8 @@
                 </span>
                 <span class="badge badge--{{ o.status }}">{{ statusLabel[o.status] }}</span>
               </button>
+            } @empty {
+              <p class="empty-orders" role="status">Chưa có đơn nào</p>
             }
           </div>
         </section>
@@ -68,7 +70,7 @@
             <div class="field">
               <label class="field__label" for="rs-hours">Thời lượng (cố định theo gói)</label>
               <div class="box" style="opacity: 0.75; background: #f5f2ed; cursor: not-allowed;">
-                <input id="rs-hours" type="text" [value]="order.hours + ' giờ · Giữ nguyên gói'" disabled style="cursor: not-allowed; border: none; background: transparent; width: 100%; font-weight: 600; color: #3e2b1e;" />
+                <input id="rs-hours" type="text" [value]="durationDisplay" disabled style="cursor: not-allowed; border: none; background: transparent; width: 100%; font-weight: 600; color: #3e2b1e;" />
               </div>
             </div>
           </div>
@@ -107,7 +109,7 @@
               <span class="avail__text">{{ rechecking ? 'Đang kiểm tra lịch trống…' : fmtDate(newDate) + ' · ' + start + '–' + end }}</span>
               @if (!rechecking) {
                 <span class="badge" [class.badge--confirmed]="availability === 'ok'" [class.badge--bad]="availability !== 'ok'">
-                  {{ availability === 'ok' ? 'Còn chỗ' : availability === 'full' ? 'Hết chỗ' : availability === 'same' ? 'Trùng lịch' : 'Chưa chọn ngày' }}
+                  {{ !order ? 'Chưa có đơn' : availability === 'ok' ? 'Còn chỗ' : availability === 'full' ? 'Hết chỗ' : availability === 'same' ? 'Trùng lịch' : 'Chưa chọn ngày' }}
                 </span>
               }
             </div>
@@ -116,7 +118,7 @@
             } @else if (availability === 'full') {
               <p class="text">Khung giờ này đã kín chỗ. Vui lòng chọn khung giờ khác.</p>
             }
-            <button type="button" class="btn btn--gold" [disabled]="!canSubmit" (click)="confirm()">Xác nhận đổi →</button>
+            <button type="button" class="btn btn--gold" [disabled]="!order || !canSubmit" (click)="confirm()">Xác nhận đổi →</button>
             @if (rescheduleError) {
               <p class="text" style="color:#b42318;" role="alert">{{ rescheduleError }}</p>
             }

@@ -28,15 +28,15 @@
             <input type="text" name="searchCode" [(ngModel)]="searchCode" (ngModelChange)="page = 1" placeholder="VD: BK261112..." aria-label="Tìm theo mã Booking" />
           </span>
         </label>
-        <label class="field">
-          <span class="field__label">Trạng thái</span>
-          <span class="box">
-            <select name="status" [ngModel]="status" (ngModelChange)="setStatus($event)" aria-label="Trạng thái">
+        <div class="field">
+          <label class="field__label" for="bl-status">Trạng thái</label>
+          <div class="box">
+            <select id="bl-status" name="status" [ngModel]="status" (ngModelChange)="setStatus($event)" aria-label="Trạng thái">
               @for (t of tabs; track t.key) { <option [value]="t.key">{{ t.label }}</option> }
             </select>
             <img class="box__icon" src="/images/figma/selectarrow.svg" alt="" width="16" height="16" />
-          </span>
-        </label>
+          </div>
+        </div>
         <label class="field">
           <span class="field__label">Từ ngày</span>
           <span class="box">
@@ -106,7 +106,7 @@
                 <p class="next__text">Chưa xác nhận chỗ. Giữ biên lai nếu đã thanh toán.</p>
                 <div class="next__row">
                   <a class="next__text" routerLink="/booking-reschedule">Đổi / Huỷ lịch →</a>
-                  <a class="next__contact" href="#">Liên hệ KÉN ↗</a>
+                  <a class="next__contact" routerLink="/support">Liên hệ KÉN ↗</a>
                 </div>
               </div>
             }
@@ -122,7 +122,7 @@
           <div class="help__body">
             <p class="help__title">Cần KÉN kiểm tra giúp?</p>
           </div>
-          <a class="btn-outline" href="#">Nhắn KÉN ↗</a>
+          <a class="btn-outline" routerLink="/support">Nhắn KÉN ↗</a>
         </div>
       }
 

@@ -35,7 +35,8 @@ p, h2 { margin: 0; }
 .counter { color: #7A6553; font-size: 12px; white-space: nowrap; }
 .bars { display: flex; gap: 8px; }
 .bar { position: relative; width: 80px; height: 4px; overflow: hidden; border-radius: 3px; background: #E8DCCB; }
-.bar i { position: absolute; inset: 0 auto 0 0; display: block; border-radius: 3px; background: #A9763F; }
+.bar.is-active { background: #D8C7B2; box-shadow: 0 0 0 1px rgba(169, 118, 63, 0.35); }
+.bar i { position: absolute; inset: 0 auto 0 0; display: block; border-radius: 3px; background: #A9763F; transition: width 50ms linear; }
 .nav { display: flex; align-items: center; gap: 10px; }
 .nav__btn { display: grid; place-items: center; width: 34px; height: 34px; padding: 0; border: 1px solid rgba(216, 199, 178, .62); border-radius: 999px; background: transparent; cursor: pointer; transition: background .18s ease; }
 .nav__btn:hover { background: #F7EFE2; }

@@ -40,7 +40,10 @@ export class BookingCancel implements OnInit {
     if (!this.api || !this.auth) return;
     this.auth.ensureSession().subscribe({
       next: (user) => {
-        if (!user) return;
+        if (!user) {
+          this.router?.navigate(['/login'], { queryParams: { returnUrl: this.router?.url } });
+          return;
+        }
         forkJoin({
           bookings: this.api!.getMyBookings(),
           spaces: this.api!.getSpaces(),
@@ -74,8 +77,10 @@ export class BookingCancel implements OnInit {
             this.order = this.pick(this.route.snapshot.queryParamMap.get('code'));
             this.cdr?.markForCheck();
           },
+          error: () => {},
         });
       },
+      error: () => {},
     });
   }
 
