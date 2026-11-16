@@ -178,7 +178,10 @@
               <article class="kf-drink-entry-item" *ngFor="let drink of state.selectedDrinks">
                 <img [src]="'/images/ken-flow/' + drink.product.image" [alt]="drink.product.name" />
                 <span>
-                  <strong>{{ drink.product.name }} <small *ngIf="drink.variantLabel">({{ drink.variantLabel }})</small></strong>
+                  <strong
+                    >{{ drink.product.name }}
+                    <small *ngIf="drink.variantLabel">({{ drink.variantLabel }})</small></strong
+                  >
                   <small>{{ drink.quantity }} món · {{ money(drink.unitPrice) }} / món</small>
                 </span>
                 <b>{{ money(drink.quantity * drink.surcharge) }}</b>
@@ -283,18 +286,69 @@
             <strong>{{ extra.title }}</strong>
             <small>+{{ money(state.getExtraPrice(extra)) }}</small>
             <!-- Tùy chọn Biến thể Nóng / Lạnh và Size cho Add-on đồ uống -->
-            <div class="kf-variant-selector" *ngIf="extra.category === 'drink' && (state.hasTemperatureOptions(extra.variants) || state.isSizeSelectable(extra))">
-              <div class="kf-variant-group" *ngIf="state.hasTemperatureOptions(extra.variants) || state.isSizeSelectable(extra)">
-                <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getExtraVariant(extra.id)).temp === 'Nóng'" (click)="state.setExtraTemp(extra.id, 'Nóng')">Nóng</button>
-                <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getExtraVariant(extra.id)).temp === 'Lạnh'" (click)="state.setExtraTemp(extra.id, 'Lạnh')">Lạnh</button>
+            <div
+              class="kf-variant-selector"
+              *ngIf="
+                extra.category === 'drink' &&
+                (state.hasTemperatureOptions(extra.variants) || state.isSizeSelectable(extra))
+              "
+            >
+              <div
+                class="kf-variant-group"
+                *ngIf="state.hasTemperatureOptions(extra.variants) || state.isSizeSelectable(extra)"
+              >
+                <button
+                  type="button"
+                  class="kf-chip-btn"
+                  [class.active]="
+                    state.parseVariant(state.getExtraVariant(extra.id)).temp === 'Nóng'
+                  "
+                  (click)="state.setExtraTemp(extra.id, 'Nóng')"
+                >
+                  Nóng
+                </button>
+                <button
+                  type="button"
+                  class="kf-chip-btn"
+                  [class.active]="
+                    state.parseVariant(state.getExtraVariant(extra.id)).temp === 'Lạnh'
+                  "
+                  (click)="state.setExtraTemp(extra.id, 'Lạnh')"
+                >
+                  Lạnh
+                </button>
               </div>
               <div class="kf-variant-group" *ngIf="state.isSizeSelectable(extra)">
-                <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getExtraVariant(extra.id)).size === 'M'" (click)="state.setExtraSize(extra.id, 'M')">M (55k)</button>
-                <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getExtraVariant(extra.id)).size === 'L'" (click)="state.setExtraSize(extra.id, 'L')">L (60k)</button>
+                <button
+                  type="button"
+                  class="kf-chip-btn"
+                  [class.active]="state.parseVariant(state.getExtraVariant(extra.id)).size === 'M'"
+                  (click)="state.setExtraSize(extra.id, 'M')"
+                >
+                  M (55k)
+                </button>
+                <button
+                  type="button"
+                  class="kf-chip-btn"
+                  [class.active]="state.parseVariant(state.getExtraVariant(extra.id)).size === 'L'"
+                  (click)="state.setExtraSize(extra.id, 'L')"
+                >
+                  L (60k)
+                </button>
               </div>
             </div>
-            <div class="kf-single-temp-badge" *ngIf="extra.category === 'drink' && !state.hasTemperatureOptions(extra.variants) && !state.isSizeSelectable(extra) && state.getTemperatureType(extra.variants) !== 'none'">
-              <span class="kf-badge-tag">{{ state.getTemperatureType(extra.variants) === 'cold' ? '❄️ Lạnh' : '♨️ Nóng' }}</span>
+            <div
+              class="kf-single-temp-badge"
+              *ngIf="
+                extra.category === 'drink' &&
+                !state.hasTemperatureOptions(extra.variants) &&
+                !state.isSizeSelectable(extra) &&
+                state.getTemperatureType(extra.variants) !== 'none'
+              "
+            >
+              <span class="kf-badge-tag">{{
+                state.getTemperatureType(extra.variants) === 'cold' ? '❄️ Lạnh' : '♨️ Nóng'
+              }}</span>
             </div>
             <div class="kf-quantity">
               <button
@@ -345,15 +399,8 @@
                 <span>0đ</span>
               </div>
               <div class="kf-sum-subitem" *ngFor="let drink of state.selectedDrinks">
-                <span>{{ drink.product.name }} × {{ drink.quantity }}</span>
-                <span>{{
-                  money(
-                    drink.quantity *
-                      (drink.product.price > state.entitlement
-                        ? drink.product.price - state.entitlement
-                        : 0)
-                  )
-                }}</span>
+                <span>{{ drink.product.name }} <small *ngIf="drink.variantLabel">({{ drink.variantLabel }})</small> × {{ drink.quantity }}</span>
+                <span>{{ money(drink.quantity * drink.surcharge) }}</span>
               </div>
               <div class="kf-sum-subitem" *ngFor="let pastry of state.selectedPastries">
                 <span>{{ pastry.product.name }} × {{ pastry.quantity }}</span>
@@ -383,8 +430,8 @@
             </div>
             <div class="kf-sum-sublist">
               <div class="kf-sum-subitem" *ngFor="let extraItem of state.selectedExtrasList">
-                <span>{{ extraItem.extra.title }} × {{ extraItem.quantity }}</span>
-                <span>{{ money(extraItem.extra.price * extraItem.quantity) }}</span>
+                <span>{{ extraItem.extra.title }} <small *ngIf="extraItem.variantLabel">({{ extraItem.variantLabel }})</small> × {{ extraItem.quantity }}</span>
+                <span>{{ money(extraItem.lineTotal) }}</span>
               </div>
               <div class="kf-sum-subempty" *ngIf="!state.selectedExtrasList.length">
                 Chưa chọn Add-on
