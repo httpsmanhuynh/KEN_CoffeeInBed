@@ -1,6 +1,7 @@
 # KÉN Machine Learning Pipeline (ken_ml)
 
 Hệ thống Học máy phục vụ cho nền tảng KÉN Coffee & Workspace Booking, bao gồm 3 bài toán chính:
+
 1. **Bài toán 1 - Global Trending (Popularity-based & Time Decay)**: Gợi ý các món F&B xu hướng toàn hệ thống cho Pop-up và trang `/top-trending`.
 2. **Bài toán 2 - Demand Forecasting**: Dự báo số lượng món F&B tiêu thụ cho ngày tiếp theo (mô hình Random Forest), từ đó quy đổi nhu cầu nguyên vật liệu và cảnh báo tồn kho.
 3. **Bài toán 3 - Customer Clustering (RFM + K-Means)**: Gom cụm hành vi khách hàng theo Recency, Frequency, Monetary để cá nhân hóa menu gợi ý (Inclusion & Add-ons) trong luồng đặt chỗ (Booking).
@@ -60,16 +61,16 @@ Bạn có thể chạy trực tiếp từ thư mục gốc dự án hoặc thư 
 
 ### Các lệnh nhanh qua npm
 
-| Lệnh npm | Mô tả |
-| :--- | :--- |
-| `npm run ml:check` | Kiểm tra kết nối MongoDB Atlas và các collection cần thiết |
-| `npm run ml:prep` | Chạy pipeline trích xuất dữ liệu từ MongoDB Atlas ra `master_ken_data.csv` |
-| `npm run ml:test` | Chạy toàn bộ 3 bài test tự động cho Trending, Forecasting, Clustering |
-| `npm run ml:trending` | Chạy bài toán 1 và ghi kết quả vào collection `ml_global_trending` |
-| `npm run ml:forecast` | Chạy bài toán 2 và ghi kết quả vào collection `demand_forecasts` |
-| `npm run ml:cluster` | Chạy bài toán 3 và ghi nhãn cụm vào `users` và `ml_cluster_recommendations` |
-| `npm run ml:all` | Chạy tuần tự cả 3 bài toán và ghi dữ liệu cập nhật vào MongoDB |
-| `npm run ml:dry` | Chạy thử nghiệm cả 3 bài toán ở chế độ an toàn (Dry-run, không ghi DB) |
+| Lệnh npm              | Mô tả                                                                       |
+| :-------------------- | :-------------------------------------------------------------------------- |
+| `npm run ml:check`    | Kiểm tra kết nối MongoDB Atlas và các collection cần thiết                  |
+| `npm run ml:prep`     | Chạy pipeline trích xuất dữ liệu từ MongoDB Atlas ra `master_ken_data.csv`  |
+| `npm run ml:test`     | Chạy toàn bộ 3 bài test tự động cho Trending, Forecasting, Clustering       |
+| `npm run ml:trending` | Chạy bài toán 1 và ghi kết quả vào collection `ml_global_trending`          |
+| `npm run ml:forecast` | Chạy bài toán 2 và ghi kết quả vào collection `demand_forecasts`            |
+| `npm run ml:cluster`  | Chạy bài toán 3 và ghi nhãn cụm vào `users` và `ml_cluster_recommendations` |
+| `npm run ml:all`      | Chạy tuần tự cả 3 bài toán và ghi dữ liệu cập nhật vào MongoDB              |
+| `npm run ml:dry`      | Chạy thử nghiệm cả 3 bài toán ở chế độ an toàn (Dry-run, không ghi DB)      |
 
 ### Chạy trực tiếp bằng Python
 
@@ -100,6 +101,7 @@ python src/03_Clustering_run.py --write
 ## 4. Tích hợp với hệ thống Backend (`my-server-mongodb`)
 
 Backend Kén sử dụng dữ liệu từ ML pipeline thông qua các endpoint:
+
 - `GET /api/recommendations` & `/api/recommendations/top-trending`: Lấy danh sách Top Trending từ `ml_global_trending`.
 - `GET /api/recommendations/booking` & `/api/bookings/recommendations`: Gợi ý món Inclusion & Add-on theo cụm khách hàng `ml_cluster_id` từ `ml_cluster_recommendations`.
 - `GET /api/admin/forecast`: Lấy dự báo nhu cầu món F&B từ `demand_forecasts` và tính toán nguyên vật liệu tiêu thụ tương ứng.

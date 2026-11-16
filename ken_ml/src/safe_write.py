@@ -18,11 +18,11 @@ logger = logging.getLogger("safe_write")
 
 REPLACEABLE = {"ml_global_trending", "ml_cluster_recommendations"}  # thay toàn bộ nội dung mỗi lần chạy
 FORECAST_COLLECTION = "demand_forecasts"                            # upsert theo khóa duy nhất của DB
-# Trường được phép theo validator hiện tại của demand_forecasts.
-# Nếu nhóm cập nhật validator để thêm action_tag thì thêm "action_tag" vào tập này.
+# Trường được phép theo validator của demand_forecasts (đã bao gồm action_tag).
 FORECAST_FIELDS = {"item_id", "item_code", "forecast_date", "predicted_qty",
-                   "lower_qty", "upper_qty", "model_version", "generated_at"}
-FORECAST_REQUIRED = ("item_id", "item_code", "forecast_date", "predicted_qty", "model_version", "generated_at")
+                   "lower_qty", "upper_qty", "action_tag", "model_version", "generated_at"}
+FORECAST_REQUIRED = ("item_id", "item_code", "forecast_date", "predicted_qty",
+                     "action_tag", "model_version", "generated_at")
 
 
 def now_utc() -> datetime:
@@ -77,6 +77,33 @@ def replace_collection(db, name: str, docs: list[dict], *, write: bool = False) 
     return len(docs)
 
 
+def ensure_forecast_validator(db) -> None:
+    """Đảm bảo collection demand_forecasts trên MongoDB cho phép trường action_tag trong validator ($jsonSchema)."""
+    if db is None:
+        return
+    try:
+        colls = db.command("listCollections", filter={"name": FORECAST_COLLECTION})
+        batch = colls.get("cursor", {}).get("firstBatch", [])
+        if not batch:
+            return
+        options = batch[0].get("options", {})
+        validator = options.get("validator")
+        if not validator or "$jsonSchema" not in validator:
+            return
+        schema = validator["$jsonSchema"]
+        properties = schema.get("properties", {})
+        if "action_tag" not in properties:
+            properties["action_tag"] = {
+                "bsonType": "string",
+                "enum": ["Tăng lượng", "Giảm lượng", "Giữ nguyên"],
+                "description": "Nhãn hành động gợi ý cho Admin",
+            }
+            db.command("collMod", FORECAST_COLLECTION, validator=validator)
+            logger.info("Đã đồng bộ validator của %s trên MongoDB để cho phép trường 'action_tag'.", FORECAST_COLLECTION)
+    except Exception as exc:
+        logger.debug("Bỏ qua bước cập nhật validator MongoDB cho %s: %s", FORECAST_COLLECTION, exc)
+
+
 def upsert_forecasts(db, docs: list[dict], *, write: bool = False) -> int:
     """Ghi dự báo vào demand_forecasts bằng upsert theo (item_code, forecast_date, model_version).
 
@@ -98,9 +125,12 @@ def upsert_forecasts(db, docs: list[dict], *, write: bool = False) -> int:
             raise TypeError("forecast_date và generated_at phải là datetime")
         if d["predicted_qty"] < 0:
             raise ValueError(f"predicted_qty phải >= 0: {d}")
+        if not isinstance(d["action_tag"], str):
+            raise TypeError(f"action_tag phải là chuỗi (str): {d}")
     _preview(FORECAST_COLLECTION, docs, write)
     if not write:
         return 0
+    ensure_forecast_validator(db)
     coll = db[FORECAST_COLLECTION]
     for d in docs:
         key = {k: d[k] for k in ("item_code", "forecast_date", "model_version")}
