@@ -499,9 +499,19 @@ router.post(
           ? null
           : Number(req.body.durationHours ?? req.body.duration_hours ?? 4);
     const minHours = Number(req.body.minHours ?? req.body.min_hours ?? 1);
+    if (isNaN(minHours) || minHours < 1) {
+      return fail(res, 422, 'VALIDATION_ERROR', 'minHours phải lớn hơn hoặc bằng 1');
+    }
     const pkgCode =
       str(req.body.packageCode || req.body.package_code).toUpperCase() ||
       `PKG_${Date.now().toString(36).toUpperCase()}`;
+
+    const existingPkg = await req.app.locals.db.collection('packages').findOne({
+      package_code: pkgCode.slice(0, 30),
+    });
+    if (existingPkg) {
+      return fail(res, 409, 'DUPLICATE_CODE', 'Mã gói dịch vụ (package_code) đã tồn tại');
+    }
 
     const doc = {
       _id: new ObjectId(),
@@ -517,8 +527,15 @@ router.post(
       is_active: req.body.isActive !== undefined ? Boolean(req.body.isActive) : true,
     };
 
-    const { insertedId } = await req.app.locals.db.collection('packages').insertOne(doc);
-    res.status(201).json({ id: String(insertedId), package: doc });
+    try {
+      const { insertedId } = await req.app.locals.db.collection('packages').insertOne(doc);
+      res.status(201).json({ id: String(insertedId), package: doc });
+    } catch (e) {
+      if (isDup(e)) {
+        return fail(res, 409, 'DUPLICATE_CODE', 'Mã gói dịch vụ (package_code) đã tồn tại');
+      }
+      throw e;
+    }
   }),
 );
 
@@ -538,18 +555,46 @@ router.patch(
       'minHours',
       'duration_hours',
       'durationHours',
+      'package_type',
+      'packageType',
+      'pricing_unit',
+      'pricingUnit',
     ]);
     if ('name' in set) set.name = str(set.name).slice(0, 100);
     if ('isActive' in set) {
       set.is_active = Boolean(set.isActive);
       delete set.isActive;
     }
-    if ('minHours' in set) {
-      set.min_hours = Number(set.minHours);
+    const rawPkgType = set.packageType !== undefined ? set.packageType : set.package_type;
+    if (rawPkgType !== undefined) {
+      const pkgType = str(rawPkgType).toUpperCase();
+      if (!['FIXED', 'HOURLY'].includes(pkgType)) {
+        return fail(res, 422, 'VALIDATION_ERROR', 'packageType phải là FIXED hoặc HOURLY');
+      }
+      set.package_type = pkgType;
+      delete set.packageType;
+    }
+    const rawPricingUnit = set.pricingUnit !== undefined ? set.pricingUnit : set.pricing_unit;
+    if (rawPricingUnit !== undefined) {
+      const pricingUnit = str(rawPricingUnit).toUpperCase();
+      if (!['PER_SPACE', 'PER_PERSON'].includes(pricingUnit)) {
+        return fail(res, 422, 'VALIDATION_ERROR', 'pricingUnit phải là PER_SPACE hoặc PER_PERSON');
+      }
+      set.pricing_unit = pricingUnit;
+      delete set.pricingUnit;
+    }
+    if ('minHours' in set || 'min_hours' in set) {
+      const rawVal = set.minHours !== undefined ? set.minHours : set.min_hours;
+      const val = Number(rawVal);
+      if (!Number.isFinite(val) || val < 1) {
+        return fail(res, 422, 'VALIDATION_ERROR', 'minHours phải là số nguyên lớn hơn hoặc bằng 1');
+      }
+      set.min_hours = val;
       delete set.minHours;
     }
-    if ('durationHours' in set) {
-      set.duration_hours = set.durationHours === null ? null : Number(set.durationHours);
+    if ('durationHours' in set || 'duration_hours' in set) {
+      const rawDur = set.durationHours !== undefined ? set.durationHours : set.duration_hours;
+      set.duration_hours = rawDur === null ? null : Number(rawDur);
       delete set.durationHours;
     }
     if (!Object.keys(set).length) return fail(res, 422, 'VALIDATION_ERROR', 'Không có gì để cập nhật');
@@ -601,14 +646,28 @@ router.post(
     } catch (e) {
       return fail(res, 422, 'VALIDATION_ERROR', e.message);
     }
+    const existingPrice = await req.app.locals.db.collection('package_prices').findOne({
+      package_id: oid(packageId),
+      space_id: oid(spaceId),
+    });
+    if (existingPrice) {
+      return fail(res, 409, 'DUPLICATE_PRICING', 'Bảng giá cho cặp packageId và spaceId đã tồn tại');
+    }
     const doc = {
       _id: new ObjectId(),
       package_id: oid(packageId),
       space_id: oid(spaceId),
       price,
     };
-    const { insertedId } = await req.app.locals.db.collection('package_prices').insertOne(doc);
-    res.status(201).json({ id: String(insertedId), packagePrice: doc });
+    try {
+      const { insertedId } = await req.app.locals.db.collection('package_prices').insertOne(doc);
+      res.status(201).json({ id: String(insertedId), packagePrice: doc });
+    } catch (e) {
+      if (isDup(e)) {
+        return fail(res, 409, 'DUPLICATE_PRICING', 'Bảng giá cho cặp packageId và spaceId đã tồn tại');
+      }
+      throw e;
+    }
   }),
 );
 
@@ -665,6 +724,10 @@ router.post(
     const quantity = Number(req.body.quantity ?? 1);
     const quantityBasis = str(req.body.quantityBasis || req.body.quantity_basis || 'PER_GUEST').toUpperCase();
     if (!validId(packageId)) return fail(res, 422, 'VALIDATION_ERROR', 'packageId không hợp lệ');
+    const targetPackage = await req.app.locals.db.collection('packages').findOne({ _id: oid(packageId) });
+    if (!targetPackage) {
+      return fail(res, 422, 'VALIDATION_ERROR', 'packageId không tồn tại');
+    }
     if (!['STANDARD_DRINK', 'PASTRY', 'WATER', 'EQUIPMENT'].includes(itemType)) {
       return fail(res, 422, 'VALIDATION_ERROR', 'itemType không hợp lệ');
     }
@@ -716,6 +779,18 @@ router.get(
     if (category) filter.category = category;
     const products = await db.collection('products').find(filter).toArray();
     res.json(products);
+  }),
+);
+
+// GET /api/products/:id — Chi tiết món kèm variants
+router.get(
+  '/products/:id',
+  wrap(async (req, res) => {
+    const { id } = req.params;
+    if (!validId(id)) return badId(res);
+    const prod = await req.app.locals.db.collection('products').findOne({ _id: oid(id) });
+    if (!prod) return notFound(res, 'Product');
+    res.json(prod);
   }),
 );
 
@@ -837,6 +912,18 @@ router.get(
     const filter = req.session?.user?.role === 'ADMIN' && req.query.all === 'true' ? {} : { is_active: true };
     const addons = await db.collection('addons').find(filter).toArray();
     res.json(addons);
+  }),
+);
+
+// GET /api/addons/:id — Chi tiết Add-on
+router.get(
+  '/addons/:id',
+  wrap(async (req, res) => {
+    const { id } = req.params;
+    if (!validId(id)) return badId(res);
+    const addon = await req.app.locals.db.collection('addons').findOne({ _id: oid(id) });
+    if (!addon) return notFound(res, 'Addon');
+    res.json(addon);
   }),
 );
 

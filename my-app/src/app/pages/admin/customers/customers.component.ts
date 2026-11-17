@@ -154,14 +154,15 @@ export class CustomersComponent implements OnInit, OnDestroy {
   loadCustomers(preferredUserId?: string): void {
     if (!this.http) return;
     this.loading = true;
-    const params = new HttpParams().set('limit', '100').set('page', '1');
+    const params = new HttpParams().set('limit', '100').set('page', '1').set('role', 'CUSTOMER');
 
     this.http
       .get<any>('/api/admin/users', { params })
       .pipe(catchError(() => of(null)))
       .subscribe((res) => {
         this.loading = false;
-        const rows = Array.isArray(res) ? res : res?.items || res?.users || res?.data || [];
+        const rawRows = Array.isArray(res) ? res : res?.items || res?.users || res?.data || [];
+        const rows = rawRows.filter((u: any) => String(u.role || 'CUSTOMER').toUpperCase() !== 'ADMIN');
         if (rows.length > 0 || res !== null) {
           this.customers = rows.map((u: any, idx: number) => this.buildCustomerFromRaw(u, idx));
           const target =
@@ -486,6 +487,7 @@ export class CustomersComponent implements OnInit, OnDestroy {
 
   showToast(type: 'success' | 'error' | 'info', text: string): void {
     this.toast = { type, text };
+    this.cdr?.markForCheck();
     if (this.toastTimer) clearTimeout(this.toastTimer);
     this.toastTimer = setTimeout(() => {
       this.toast = null;

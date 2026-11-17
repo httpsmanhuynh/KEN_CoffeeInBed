@@ -132,8 +132,14 @@ export class OtpVerifyPage implements OnInit, OnDestroy {
       this.auth.verifyLogin2FA(this.code).subscribe({
         next: (res) => {
           try { sessionStorage.removeItem(SESSION_2FA_KEY); } catch {}
-          const defaultHome = res?.user?.role === 'ADMIN' ? '/admin/dashboard' : '/home-logged-in';
-          this.router.navigateByUrl(this.returnUrl ?? defaultHome);
+          const isAdmin = res?.user?.role === 'ADMIN';
+          const safeReturnUrl =
+            this.returnUrl &&
+            (isAdmin ? this.returnUrl.startsWith('/admin') : !this.returnUrl.startsWith('/admin'))
+              ? this.returnUrl
+              : null;
+          const destination = safeReturnUrl ?? (isAdmin ? '/admin/dashboard' : '/home-logged-in');
+          this.router.navigateByUrl(destination);
         },
         error: (err: HttpErrorResponse) => {
           this.loading = false;

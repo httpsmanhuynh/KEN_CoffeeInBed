@@ -43,6 +43,9 @@ export class Security implements OnInit, OnDestroy {
   twoFactorOtp = '';
   twoFactorStep: 'idle' | 'configuring' = 'idle';
   twoFactorLoading = false;
+  sending2FAOtp = false;
+  twoFactorOtpCooldown = 0;
+  private twoFactorTimer?: ReturnType<typeof setInterval>;
   twoFactorMessage = '';
 
   sessions: SessionItem[] = [
@@ -76,6 +79,7 @@ export class Security implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     clearInterval(this.timer);
+    clearInterval(this.twoFactorTimer);
   }
 
   startCooldown(): void {
@@ -145,6 +149,8 @@ export class Security implements OnInit, OnDestroy {
     }).subscribe({
       next: () => {
         this.submittingPassword = false;
+        clearInterval(this.timer);
+        this.otpCooldown = 0;
         this.pwMessageType = 'ok';
         this.pwMessage = 'Đã đổi mật khẩu thành công.';
         this.currentPassword = '';
@@ -167,15 +173,31 @@ export class Security implements OnInit, OnDestroy {
     this.twoFactorMessage = '';
   }
 
+  start2FACooldown(): void {
+    clearInterval(this.twoFactorTimer);
+    this.twoFactorOtpCooldown = 60;
+    this.twoFactorTimer = setInterval(() => {
+      if (--this.twoFactorOtpCooldown <= 0) {
+        this.twoFactorOtpCooldown = 0;
+        clearInterval(this.twoFactorTimer);
+      }
+      this.cdr?.markForCheck();
+    }, 1000);
+  }
+
   onSend2FAOtp(): void {
-    if (!this.api) return;
+    if (this.twoFactorOtpCooldown > 0 || this.sending2FAOtp || !this.api) return;
+    this.sending2FAOtp = true;
     this.twoFactorMessage = '';
     this.api.sendProfileOtp({ purpose: 'TOGGLE_2FA' }).subscribe({
       next: () => {
+        this.sending2FAOtp = false;
         this.twoFactorMessage = 'Đã gửi mã OTP đến email để xác nhận bật/tắt 2FA.';
+        this.start2FACooldown();
         this.cdr?.markForCheck();
       },
       error: (err) => {
+        this.sending2FAOtp = false;
         this.twoFactorMessage = err.error?.message || 'Không thể gửi mã OTP.';
         this.cdr?.markForCheck();
       },
@@ -195,6 +217,8 @@ export class Security implements OnInit, OnDestroy {
     }).subscribe({
       next: (res) => {
         this.twoFactorLoading = false;
+        clearInterval(this.twoFactorTimer);
+        this.twoFactorOtpCooldown = 0;
         this.twoFactorEnabled = res.twoFactorEnabled;
         this.twoFactorStep = 'idle';
         this.twoFactorPassword = '';

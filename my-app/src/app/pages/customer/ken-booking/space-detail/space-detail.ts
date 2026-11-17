@@ -124,7 +124,7 @@ export class KenBookingSpaceDetailPage implements OnInit {
       this.space = this.state.getSpace(params.get('id') || '');
     });
     this.route.queryParamMap?.subscribe(params => {
-      this.backPath = params.get('from') === 'booking' ? '/booking/spaces' : '/spaces';
+      this.backPath = '/spaces';
     });
   }
 

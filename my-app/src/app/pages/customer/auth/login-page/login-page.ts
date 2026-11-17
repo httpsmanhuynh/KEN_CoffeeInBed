@@ -103,8 +103,13 @@ export class LoginPage {
             },
           });
         } else {
-          const defaultHome = res?.user?.role === 'ADMIN' ? '/admin/dashboard' : '/home-logged-in';
-          const destination = this.returnUrl ?? defaultHome;
+          const isAdmin = res?.user?.role === 'ADMIN';
+          const safeReturnUrl =
+            this.returnUrl &&
+            (isAdmin ? this.returnUrl.startsWith('/admin') : !this.returnUrl.startsWith('/admin'))
+              ? this.returnUrl
+              : null;
+          const destination = safeReturnUrl ?? (isAdmin ? '/admin/dashboard' : '/home-logged-in');
           this.router.navigateByUrl(destination);
         }
       },

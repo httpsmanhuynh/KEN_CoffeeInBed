@@ -2,7 +2,7 @@
   <section class="kf-menu-hero kf-container">
     <div class="kf-menu-intro">
       <h1>Thực đơn của KÉN</h1>
-      <div class="kf-button-row"><a class="kf-btn kf-btn-gold" routerLink="/booking/spaces">Đặt không gian của tôi</a><button type="button" class="kf-btn kf-btn-light" (click)="scrollToMenu($event)">Xem thực đơn <lucide-icon class="kf-menu-arrow" name="arrow-down-right" [size]="20" [strokeWidth]="1.9" aria-hidden="true"></lucide-icon></button></div>
+      <div class="kf-button-row"><a class="kf-btn kf-btn-gold" routerLink="/spaces">Đặt không gian của tôi</a><button type="button" class="kf-btn kf-btn-light" (click)="scrollToMenu($event)">Xem thực đơn <lucide-icon class="kf-menu-arrow" name="arrow-down-right" [size]="20" [strokeWidth]="1.9" aria-hidden="true"></lucide-icon></button></div>
     </div>
     <div class="kf-menu-hero-images">
   <figure class="kf-menu-drink-card">
@@ -52,5 +52,5 @@
   </section>
 
   <section class="kf-menu-visit"><div class="kf-container kf-menu-visit-inner"><img src="/images/ken-flow/menu-cafe-visit.png" alt="Khu café dành cho những buổi gặp gỡ"><div><h2>Cứ ghé,<br>chúng mình có cà phê.</h2><p><lucide-icon class="kf-icon" name="clock" [size]="18" [strokeWidth]="1.8" color="#A9763F" aria-hidden="true"></lucide-icon> 08:00–22:00 hằng ngày</p><p><lucide-icon class="kf-icon" name="map-pin" [size]="18" [strokeWidth]="1.8" color="#E3A52F" aria-hidden="true"></lucide-icon> 123 Nguyễn Văn Cừ, Phường Chợ Lớn, TP.HCM</p></div></div></section>
-  <section class="kf-container kf-menu-zone"><div><h2>Không gian dành riêng cho bạn</h2></div><div class="kf-zone-links"><a routerLink="/booking/spaces"><img src="/images/ken-flow/listing-work.png" alt="KÉN Tập Trung"><strong>KÉN Tập Trung</strong><span>Đặt chỗ theo giờ →</span></a><a routerLink="/spaces/booking/single"><img src="/images/ken-flow/listing-single.png" alt="KÉN Tái Tạo"><strong>KÉN Tái Tạo</strong><span>Khám phá thêm →</span></a></div></section>
+  <section class="kf-container kf-menu-zone"><div><h2>Không gian dành riêng cho bạn</h2></div><div class="kf-zone-links"><a routerLink="/spaces" [queryParams]="{ zone: 'focus' }"><img src="/images/ken-flow/listing-work.png" alt="KÉN Tập Trung"><strong>KÉN Tập Trung</strong><span>Đặt chỗ theo giờ →</span></a><a routerLink="/spaces" [queryParams]="{ zone: 'rest' }"><img src="/images/ken-flow/listing-single.png" alt="KÉN Tái Tạo"><strong>KÉN Tái Tạo</strong><span>Khám phá thêm →</span></a></div></section>
 </main>

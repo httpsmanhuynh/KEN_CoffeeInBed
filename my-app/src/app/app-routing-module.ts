@@ -25,7 +25,6 @@ import { HomeGuestPage } from './pages/customer/home-page/home-guest/home-guest'
 import { HomeMemberPage } from './pages/customer/home-page/home-member/home-member';
 import { KenBookingShell } from './pages/customer/ken-booking/booking-shell/booking-shell';
 import { KenCafeCatalogPage } from './pages/customer/ken-booking/cafe-catalog/cafe-catalog';
-import { KenSpaceListingPage } from './pages/customer/ken-booking/space-listing/space-listing';
 import { KenOtherSpacePage } from './pages/customer/ken-booking/other-space-booking/other-space-booking';
 import { KenFocusPodPage } from './pages/customer/ken-booking/focus-pod/focus-pod';
 import { KenDrinkPickerPage } from './pages/customer/ken-booking/drink-picker/drink-picker';
@@ -47,11 +46,17 @@ import { CoworkPage } from './pages/customer/space-details/cowork-page/cowork-pa
 import { FocusPage } from './pages/customer/space-details/focus-page/focus-page';
 import { MeetingPage } from './pages/customer/space-details/meeting-page/meeting-page';
 import { adminRoutes } from './pages/admin/admin.routes';
+import { customerGuard } from './core/customer.guard';
 
 const routes: Routes = [
   ...adminRoutes,
-  // Home
-  { path: '', component: HomeGuestPage, pathMatch: 'full' },
+  {
+    path: '',
+    canActivate: [customerGuard],
+    canActivateChild: [customerGuard],
+    children: [
+      // Home
+      { path: '', component: HomeGuestPage, pathMatch: 'full' },
   { path: 'home-logged-in', component: HomeMemberPage },
 
   // Auth (pthao)
@@ -75,17 +80,14 @@ const routes: Routes = [
   { path: 'menu', component: KenCafeCatalogPage },
   { path: 'menu-intro', component: MenuPage },
   { path: 'top-trending', component: TopTrending },
-  { path: 'access-denied', component: AccessDenied },
-  { path: '403', component: AccessDenied },
-  { path: '404', component: NotFound },
 
   // 5-Step Booking Flow (ttrinh)
   {
     path: 'booking',
     component: KenBookingShell,
     children: [
-      { path: '', redirectTo: 'spaces', pathMatch: 'full' },
-      { path: 'spaces', component: KenSpaceListingPage },
+      { path: '', redirectTo: '/spaces', pathMatch: 'full' },
+      { path: 'spaces', redirectTo: '/spaces', pathMatch: 'full' },
       { path: 'focus-pod', component: KenFocusPodPage },
       { path: 'drinks', component: KenDrinkPickerPage },
       { path: 'review', component: KenBookingReviewPage },
@@ -116,7 +118,8 @@ const routes: Routes = [
   { path: 'spaces/work-lounge', component: CoworkPage },
   { path: 'spaces/focus-pod', component: FocusPage },
   { path: 'spaces/small-meeting-room', component: MeetingPage },
-  { path: 'spaces/booking/:id', component: KenBookingSpaceDetailPage },
+  { path: 'spaces/booking/:id', redirectTo: 'spaces/:id', pathMatch: 'full' },
+  { path: 'spaces/:id', component: KenBookingSpaceDetailPage },
   { path: 'spaces', component: SpacesPage },
 
   // Legacy redirects
@@ -136,7 +139,12 @@ const routes: Routes = [
   { path: 'khong-gian/o-tap-trung-ca-nhan', redirectTo: '/spaces/focus-pod', pathMatch: 'full' },
   { path: 'khong-gian/phong-hop-nho', redirectTo: '/spaces/small-meeting-room', pathMatch: 'full' },
   { path: 'khong-gian', redirectTo: '/spaces', pathMatch: 'full' },
+    ],
+  },
 
+  { path: 'access-denied', component: AccessDenied },
+  { path: '403', component: AccessDenied },
+  { path: '404', component: NotFound },
   { path: '**', component: NotFound },
 ];
 

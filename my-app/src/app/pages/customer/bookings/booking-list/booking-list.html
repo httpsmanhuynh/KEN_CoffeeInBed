@@ -100,16 +100,6 @@
                 </button>
               </div>
             </div>
-            @if (b.status === 'pending' && status === 'pending') {
-              <div class="next">
-                <p class="next__title">KÉN đang đối chiếu thông tin đặt chỗ</p>
-                <p class="next__text">Chưa xác nhận chỗ. Giữ biên lai nếu đã thanh toán.</p>
-                <div class="next__row">
-                  <a class="next__text" routerLink="/booking-reschedule">Đổi / Huỷ lịch →</a>
-                  <a class="next__contact" routerLink="/support">Liên hệ KÉN ↗</a>
-                </div>
-              </div>
-            }
           </div>
         } @empty {
           <p class="empty">Không có đơn đặt chỗ nào trong khoảng này.</p>
@@ -246,6 +236,20 @@
             </div>
           } @else {
             <p class="bl-modal__muted">Chưa có giao dịch thanh toán ghi nhận cho đơn này.</p>
+          }
+
+          @if (detailBooking.status === 'PENDING_PAYMENT') {
+            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;padding-top:14px;border-top:1px solid #eadfd1;">
+              @if (canResumeDetail(detailBooking)) {
+                <button type="button" class="btn-outline" style="background:#4a3123;color:#fffcf7;border-color:#4a3123;" (click)="resumePayment(detailBooking._id)">Thanh toán ngay →</button>
+              } @else {
+                <button type="button" class="btn-outline" (click)="rebookSpace()">Hết hạn giữ chỗ · Đặt lại mới →</button>
+              }
+            </div>
+          } @else if (detailBooking.status === 'EXPIRED') {
+            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;padding-top:14px;border-top:1px solid #eadfd1;">
+              <button type="button" class="btn-outline" (click)="rebookSpace()">Đặt lại chỗ mới →</button>
+            </div>
           }
         }
       </div>

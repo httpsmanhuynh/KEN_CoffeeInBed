@@ -30,7 +30,28 @@
     <section class="ksd-content">
       <div class="ksd-experience">
         <h2>Một góc dành cho nhu cầu của bạn</h2>
+        <p class="ksd-description">{{ content?.lead || item.description }}</p>
         <div class="ksd-amenities"><span class="ksd-amenity-icon">✦</span><span>{{ content?.amenities }}</span></div>
+
+        @if (content?.fit || content?.consider) {
+          <div class="ksd-advice">
+            @if (content?.fit) {
+              <div>
+                <h3>Phù hợp khi...</h3>
+                <p>{{ content?.fit }}</p>
+              </div>
+            }
+            @if (content?.fit && content?.consider) {
+              <div class="ksd-divider"></div>
+            }
+            @if (content?.consider) {
+              <div>
+                <h3>Cân nhắc trước khi chọn...</h3>
+                <p>{{ content?.consider }}</p>
+              </div>
+            }
+          </div>
+        }
       </div>
 
       <aside class="ksd-pricing">
@@ -43,7 +64,7 @@
           <p>{{ packageNote(rate.hours) }}</p>
         </article>
         <div class="ksd-booking"><a [routerLink]="bookingPath()">Kiểm tra lịch &amp; chọn gói</a></div>
-        <p class="ksd-pricing-note">Chưa giữ chỗ.</p>
+        <p class="ksd-pricing-note">{{ content?.bufferNote || 'Đặt trọn không gian.' }}</p>
       </aside>
     </section>
   </div>

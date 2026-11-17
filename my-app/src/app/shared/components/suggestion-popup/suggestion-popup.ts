@@ -30,6 +30,13 @@ function mapPopupImage(item: any): string {
   return '/images/addons/cf-den.png';
 }
 
+const FALLBACK_SLIDES: Slide[] = [
+  { id: 'matcha', name: 'Matcha Latte / Hojicha Latte', price: '55.000đ', image: '/images/addons/matcha-latte.png',
+    desc: 'Một chút trà thơm quyện cùng sữa dịu nhẹ. Vừa hay cho lúc bạn muốn chậm lại giữa buổi chiều.' },
+  { id: 'bacxiu', name: 'Bạc Xỉu / Salted Caramel Coffee', price: '45.000đ', image: '/images/addons/cf-bac-xiu.png',
+    desc: 'Cà phê quyện sữa, ngọt dịu vừa đủ. Một lựa chọn để nhâm nhi cùng câu chuyện còn đang dang dở.' },
+];
+
 @Component({
   selector: 'app-suggestion-popup',
   standalone: false,
@@ -44,19 +51,22 @@ export class SuggestionPopup implements OnInit, OnDestroy {
 
   @ViewChild('dialog') dialog?: ElementRef<HTMLElement>;
 
-  slides: Slide[] = [
-    { id: 'matcha', name: 'Matcha Latte / Hojicha Latte', price: '55.000đ', image: '/images/addons/matcha-latte.png',
-      desc: 'Một chút trà thơm quyện cùng sữa dịu nhẹ. Vừa hay cho lúc bạn muốn chậm lại giữa buổi chiều.' },
-    { id: 'bacxiu', name: 'Bạc Xỉu / Salted Caramel Coffee', price: '45.000đ', image: '/images/addons/cf-bac-xiu.png',
-      desc: 'Cà phê quyện sữa, ngọt dịu vừa đủ. Một lựa chọn để nhâm nhi cùng câu chuyện còn đang dang dở.' },
-  ];
+  slides: Slide[] = [];
 
   ngOnInit(): void {
-    if (!this.api) return;
+    if (!this.api) {
+      this.slides = FALLBACK_SLIDES;
+      this.go(0);
+      return;
+    }
     this.api.getRecommendations({ daypart: 'AFTERNOON', limit: '4' }).subscribe({
       next: (res) => {
         const items: any[] = Array.isArray(res?.items) ? res.items.filter((it: any) => it && it.unit !== 'PER_BOOKING') : [];
-        if (items.length === 0) return;
+        if (items.length === 0) {
+          this.slides = FALLBACK_SLIDES;
+          this.go(0);
+          return;
+        }
         this.slides = items.map((it, idx) => ({
           id: String(it.itemCode || it.productId || idx),
           name: String(it.name || 'Món gợi ý KÉN'),
@@ -66,7 +76,10 @@ export class SuggestionPopup implements OnInit, OnDestroy {
         }));
         this.go(0);
       },
-      error: () => {},
+      error: () => {
+        this.slides = FALLBACK_SLIDES;
+        this.go(0);
+      },
     });
   }
 
@@ -90,7 +103,7 @@ export class SuggestionPopup implements OnInit, OnDestroy {
   }
 
   /** Mảng 1 phần tử để @for dựng lại (và chạy animation) mỗi khi đổi món. */
-  current: Slide[] = [this.slides[0]];
+  current: Slide[] = [];
   get counter(): string { return `${String(this.index + 1).padStart(2, '0')} / ${String(this.slides.length).padStart(2, '0')} · Gợi ý buổi chiều`; }
 
   /** Độ rộng (%) phần đã chạy của thanh tiến trình thứ i. */
@@ -100,9 +113,10 @@ export class SuggestionPopup implements OnInit, OnDestroy {
     return 0;
   }
 
-  next(): void { this.go((this.index + 1) % this.slides.length); }
-  prev(): void { this.go((this.index - 1 + this.slides.length) % this.slides.length); }
+  next(): void { if (this.slides.length) this.go((this.index + 1) % this.slides.length); }
+  prev(): void { if (this.slides.length) this.go((this.index - 1 + this.slides.length) % this.slides.length); }
   private go(i: number): void {
+    if (!this.slides.length) return;
     this.index = i;
     this.progress = 0;
     this.current = [this.slides[i]];

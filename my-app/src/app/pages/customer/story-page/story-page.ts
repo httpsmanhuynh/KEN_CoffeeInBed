@@ -113,7 +113,7 @@ export class StoryPage implements OnInit, OnDestroy {
         'Ngay sau khi thanh toán thành công, mã đặt chỗ sẽ hiển thị tại mục Lịch sử đặt chỗ để bạn check-in nhanh tại quầy.'
       ],
       ctaLabel: 'Thử đặt không gian ngay',
-      ctaRoute: '/booking/spaces'
+      ctaRoute: '/spaces'
     },
     {
       id: 5,
@@ -203,7 +203,7 @@ export class StoryPage implements OnInit, OnDestroy {
         'Lưu ý: KÉN Tái Tạo phục vụ nghỉ ngơi theo giờ trong khung 08:00–22:00 dành cho khách từ đủ 18 tuổi và không phải mô hình lưu trú qua đêm.'
       ],
       ctaLabel: 'Xem KÉN nghỉ đơn',
-      ctaRoute: '/spaces/booking/single'
+      ctaRoute: '/spaces/single'
     }
   ];
 

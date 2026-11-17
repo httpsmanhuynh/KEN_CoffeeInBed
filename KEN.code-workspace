@@ -11,5 +11,6 @@
         "connectionString": "mongodb://localhost:27017",
       },
     ],
+    "js/ts.tsdk.path": "node_modules\\typescript\\lib",
   },
 }

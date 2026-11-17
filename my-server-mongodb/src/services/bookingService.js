@@ -531,6 +531,9 @@ async function buildBookingQuote(
     if (!addon) {
       throw new BookingError(404, 'ADDON_NOT_FOUND', 'Dịch vụ cộng thêm không tồn tại hoặc ngừng phục vụ');
     }
+    if (addon.unit === 'PER_BOOKING' && qty > 1) {
+      throw new BookingError(422, 'VALIDATION_ERROR', 'Add-on PER_BOOKING chỉ tính một lần mỗi Booking');
+    }
 
     let unitPrice = Number(addon.price);
     const variantStr = typeof item.variant === 'string' ? item.variant.trim() : '';
@@ -924,11 +927,14 @@ async function payBooking(db, { bookingId, user, result = 'SUCCESS', now = new D
 
   return runInTransaction(db, `booking:${String(bOid)}`, async (session) => {
     const opts = { session };
-    await db.collection('bookings').updateOne(
+    const upd = await db.collection('bookings').updateOne(
       { _id: bOid, status: 'PENDING_PAYMENT', payment_expires_at: { $gt: now } },
       { $set: { status: 'CONFIRMED', confirmed_at: now, updated_at: now } },
       opts,
     );
+    if (upd.matchedCount !== 1) {
+      throw new BookingError(409, 'BOOKING_NOT_PAYABLE', 'Đơn đặt chỗ đã được thanh toán hoặc đã hết hạn giữ chỗ');
+    }
 
     const txn = {
       _id: new ObjectId(),

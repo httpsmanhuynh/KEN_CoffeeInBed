@@ -1,4 +1,4 @@
-@if (popup.isOpen()) {
+@if (popup.isOpen() && current.length) {
   <div class="overlay" (click)="onBackdrop($event)">
     <div #dialog class="dialog" role="dialog" aria-modal="true" aria-labelledby="sg-title" tabindex="-1">
       @for (s of current; track s.id) {

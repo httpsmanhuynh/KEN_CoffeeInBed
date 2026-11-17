@@ -1,7 +1,7 @@
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../../core/auth.service';
-import { CustomerApiService } from '../../../../core/customer-api.service';
+import { ApiBooking, CustomerApiService } from '../../../../core/customer-api.service';
 import { KenBookingState, kenMoney } from '../booking-state';
 
 function tryInjectCustomerApi(): CustomerApiService | null {
@@ -15,22 +15,25 @@ function tryInjectCustomerApi(): CustomerApiService | null {
 @Component({ selector: 'app-ken-booking-payment', standalone: false, templateUrl: './booking-payment.html', styleUrl: './booking-payment.css' })
 export class KenBookingPaymentPage implements OnInit, OnDestroy {
   private readonly api = tryInjectCustomerApi();
-  now = Date.now();
+  private readonly route = inject(ActivatedRoute, { optional: true });
+  now = signal(Date.now());
   authorized = false;
   paying = false;
   payMessage = '';
   paymentOutcome: 'pending' | 'success' | 'failed' = 'pending';
   confirmedCode = '';
   paidAmount = 0;
+  resumedAmount: number | null = null;
   private timer?: ReturnType<typeof setInterval>;
   readonly money = kenMoney;
   get tierDiscountLabel(): string { return this.state.tierDiscountLabel || 'Ưu đãi thành viên'; }
+  get displayTotal(): number { return this.resumedAmount ?? this.state.total; }
   constructor(public state: KenBookingState, private router: Router, private auth: AuthService) {}
   ngOnInit(): void {
     this.auth.ensureSession().subscribe({
       next: user => {
         if (!user) {
-          this.router.navigate(['/login'], { queryParams: { returnUrl: '/booking/review' } });
+          this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url || '/booking/review' } });
           return;
         }
         this.authorized = true;
@@ -40,17 +43,47 @@ export class KenBookingPaymentPage implements OnInit, OnDestroy {
         if (!d.phone?.trim() && user?.phone) patch.phone = user.phone;
         if (!d.email?.trim() && user?.email) patch.email = user.email;
         if (Object.keys(patch).length > 0) this.state.set(patch);
-        if (this.state.draft().paymentStatus === 'CONFIRMED') {
+
+        const queryBookingId = this.route?.snapshot?.queryParamMap?.get('bookingId');
+        const targetId = queryBookingId || d.createdBookingId;
+        if (targetId && this.api) {
+          this.syncBookingFromServer(targetId);
+        } else if (this.state.draft().paymentStatus === 'CONFIRMED') {
           this.paymentOutcome = 'success';
           this.confirmedCode = this.state.draft().createdBookingCode || '';
         }
-        this.timer = setInterval(() => this.now = Date.now(), 1000);
+        this.timer = setInterval(() => this.now.set(Date.now()), 1000);
       },
       error: () => this.router.navigate(['/login'], { queryParams: { returnUrl: '/booking/review' } }),
     });
   }
+
+  private syncBookingFromServer(bookingId: string): void {
+    this.api?.getBookingDetail(bookingId).subscribe({
+      next: (booking: ApiBooking) => {
+        this.resumedAmount = booking.final_amount;
+        const expiresMs = booking.payment_expires_at ? new Date(booking.payment_expires_at).getTime() : 0;
+        const isDone = booking.status === 'CONFIRMED' || booking.status === 'CHECKED_IN' || booking.status === 'CHECKED_OUT';
+        const isClosed = booking.status === 'EXPIRED' || booking.status === 'CANCELLED';
+        this.state.set({
+          createdBookingId: booking._id,
+          createdBookingCode: booking.booking_code,
+          paymentStatus: booking.status,
+          holdUntil: isClosed ? 0 : expiresMs,
+        });
+        if (isDone) {
+          this.paymentOutcome = 'success';
+          this.confirmedCode = booking.booking_code;
+          this.paidAmount = booking.final_amount;
+        } else {
+          this.paymentOutcome = 'pending';
+        }
+      },
+      error: () => {},
+    });
+  }
   ngOnDestroy(): void { if (this.timer) clearInterval(this.timer); }
-  get remaining(): number { return Math.max(0, Math.ceil(((this.state.draft().holdUntil || 0) - this.now) / 1000)); }
+  get remaining(): number { return Math.max(0, Math.ceil(((this.state.draft().holdUntil || 0) - this.now()) / 1000)); }
   get countdown(): string { const r = this.remaining; return `${String(Math.floor(r / 60)).padStart(2, '0')}:${String(r % 60).padStart(2, '0')}`; }
   get isExpired(): boolean { return this.remaining === 0 && this.paymentOutcome !== 'success'; }
   get demoExpired(): boolean { return this.isExpired; }
@@ -65,12 +98,12 @@ export class KenBookingPaymentPage implements OnInit, OnDestroy {
       paymentStatus: null,
       agreed: false,
     });
-    this.router.navigateByUrl('/booking/spaces');
+    this.router.navigateByUrl('/spaces');
   }
 
   payNow(result: 'SUCCESS' | 'FAILED' = 'SUCCESS'): void {
     const id = this.state.draft().createdBookingId;
-    if (!this.api || !id || this.paying) return;
+    if (!this.api || !id || this.paying || this.paymentOutcome === 'success') return;
     this.paying = true;
     this.payMessage = '';
     this.api.payBooking(id, result).subscribe({

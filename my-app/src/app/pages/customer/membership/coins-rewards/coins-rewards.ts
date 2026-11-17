@@ -499,7 +499,7 @@ export class CoinsRewardsPage implements OnInit {
       this.bookingState.set({ voucher: code });
     }
     this.closeRewardModal();
-    this.router?.navigateByUrl('/booking/spaces');
+    this.router?.navigateByUrl('/spaces');
   }
 
   closeRewardModal(): void {

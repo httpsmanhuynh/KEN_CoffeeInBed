@@ -9,6 +9,8 @@ type StatusFilter = 'all' | BookingStatus;
 
 interface Booking {
   rawId?: string;
+  rawStatus?: string;
+  paymentExpiresAt?: string;
   id: string; space: string; zone: string;
   date: string;            // ISO yyyy-mm-dd
   time: string;            // "13:00–15:00 · 2 giờ · 01 khách"
@@ -51,15 +53,7 @@ export class BookingList implements OnInit {
   loadingDetail = false;
   detailError = '';
 
-  bookings: Booking[] = [
-    { id: '#KEN-261026-009', space: 'KÉN nghỉ đơn', zone: 'KÉN Nghỉ Ngơi', date: '2026-10-26', time: '13:00–15:00 · 2 giờ · 01 khách', pkg: 'Gói 2h · 90K', total: 90000, status: 'pending' },
-    { id: '#KEN-251026-024', space: 'Phòng họp nhỏ', zone: 'KÉN Tập Trung', date: '2026-10-25', time: '14:00–17:00 · 3 giờ · 04 khách', pkg: 'Họp nhóm nhỏ · 3h', total: 480000, status: 'pending' },
-    { id: '#KEN-241026-006', space: 'Ô tập trung cá nhân', zone: 'KÉN Tập Trung', date: '2026-10-24', time: '09:00–13:00 · 4 giờ · 01 khách', pkg: 'Nửa ngày · 4h', total: 140000, status: 'confirmed' },
-    { id: '#KEN-221026-018', space: 'Ô tập trung cá nhân', zone: 'KÉN Tập Trung', date: '2026-10-22', time: '09:00–13:00 · 4 giờ · 01 khách', pkg: 'Nửa ngày + up-size', total: 145000, status: 'completed' },
-    { id: '#KEN-181026-012', space: 'Phòng họp nhỏ', zone: 'KÉN Tập Trung', date: '2026-10-18', time: '10:00–12:00 · 2 giờ · 04 khách', pkg: 'Họp nhóm nhỏ · 3h', total: 355000, status: 'completed' },
-    { id: '#KEN-151026-003', space: 'Khu làm việc chung', zone: 'KÉN Tập Trung', date: '2026-10-15', time: '08:00–10:00 · 2 giờ · 01 khách', pkg: 'Linh hoạt · 2h', total: 80000, status: 'cancelled' },
-    { id: '#KEN-121026-005', space: 'KÉN nghỉ đôi', zone: 'KÉN Nghỉ Ngơi', date: '2026-10-12', time: '15:00–17:00 · 2 giờ · 02 khách', pkg: 'Gói 2h · 180K', total: 180000, status: 'noshow' },
-  ];
+  bookings: Booking[] = [];
 
   readonly tabs: { key: StatusFilter; label: string }[] = [
     { key: 'all', label: 'Tất cả' },
@@ -71,13 +65,12 @@ export class BookingList implements OnInit {
     { key: 'noshow', label: 'Không đến' },
   ];
 
-  // Mặc định như Figma: Tất cả, 01/10/2026 – 31/10/2026, mới nhất trước.
   status: StatusFilter = 'all';
-  fromDate = '2026-10-01';
-  toDate = '2026-10-31';
+  fromDate = '';
+  toDate = '';
   newestFirst = true;
   page = 1;
-  private applied = { from: this.fromDate, to: this.toDate };
+  private applied = { from: '0000-00-00', to: '9999-12-31' };
 
   ngOnInit(): void {
     if (!this.api || !this.auth) return;
@@ -120,12 +113,14 @@ export class BookingList implements OnInit {
       CONFIRMED: 'confirmed',
       CHECKED_IN: 'confirmed',
       CHECKED_OUT: 'completed',
-      CANCELLED: 'failed',
-      EXPIRED: 'cancelled',
+      CANCELLED: 'cancelled',
+      EXPIRED: 'failed',
       NO_SHOW: 'noshow',
     };
     return {
       rawId: b._id,
+      rawStatus: b.status,
+      paymentExpiresAt: b.payment_expires_at,
       id: `#${b.booking_code}`,
       space: sp?.name || 'Không gian KÉN',
       zone: sp?.space_code || 'KÉN',
@@ -137,10 +132,33 @@ export class BookingList implements OnInit {
     };
   }
 
+  canResumePayment(b: Booking): boolean {
+    if (!b.rawId || b.rawStatus !== 'PENDING_PAYMENT') return false;
+    if (!b.paymentExpiresAt) return true;
+    return new Date(b.paymentExpiresAt).getTime() > Date.now();
+  }
+
+  canResumeDetail(b: ApiBooking | null): boolean {
+    if (!b?._id || b.status !== 'PENDING_PAYMENT') return false;
+    if (!b.payment_expires_at) return true;
+    return new Date(b.payment_expires_at).getTime() > Date.now();
+  }
+
+  resumePayment(bookingId?: string, event?: Event): void {
+    event?.stopPropagation();
+    if (!bookingId) return;
+    this.detailBooking = null;
+    this.router?.navigate(['/booking/payment'], { queryParams: { bookingId } });
+  }
+
+  rebookSpace(): void {
+    this.detailBooking = null;
+    this.router?.navigateByUrl('/spaces');
+  }
+
   get detailStatusLabel(): string {
     if (!this.detailBooking) return '—';
-    const hasFailedTx = this.detailBooking.transactions?.some(t => (t.txn_type === 'PAYMENT' || t.type === 'PAYMENT') && t.status === 'FAILED');
-    if (this.detailBooking.status === 'CANCELLED' || hasFailedTx) return 'Thất bại';
+    if (this.detailBooking.status === 'CANCELLED') return 'Đã huỷ';
     if (this.detailBooking.status === 'CONFIRMED' || this.detailBooking.status === 'CHECKED_IN') return 'Đã xác nhận';
     if (this.detailBooking.status === 'CHECKED_OUT') return 'Hoàn thành';
     if (this.detailBooking.status === 'PENDING_PAYMENT') return 'Chờ xác nhận';
@@ -151,7 +169,7 @@ export class BookingList implements OnInit {
 
   get detailStatusColor(): string {
     const label = this.detailStatusLabel;
-    if (label === 'Thất bại') return '#b42318';
+    if (label === 'Thất bại' || label === 'Đã hết hạn') return '#b42318';
     if (label === 'Đã xác nhận' || label === 'Hoàn thành') return '#047857';
     if (label === 'Chờ xác nhận') return '#b54708';
     return '#4A3123';

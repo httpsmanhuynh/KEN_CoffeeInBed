@@ -19,19 +19,45 @@
 
       <div class="stack">
         @if (orders.length > 1) {
-          <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px">
-            @for (o of orders; track o.code) {
-              <button
-                type="button"
-                class="btn"
-                [class.btn--gold]="order?.code === o.code"
-                [class.btn--outline]="order?.code !== o.code"
-                (click)="selectOrder(o)"
-              >
-                {{ o.code }} · {{ o.name }}
-              </button>
+          <section class="order-selector" aria-label="Tìm đơn đặt chỗ">
+            <div class="order-search">
+              <lucide-icon
+                name="search"
+                [size]="16"
+                [strokeWidth]="1.8"
+                color="#7A6553"
+              ></lucide-icon>
+              <input
+                type="search"
+                [value]="searchQuery"
+                (input)="searchQuery = $any($event.target).value"
+                placeholder="Tìm theo mã booking, tên phòng hoặc ngày (VD: BK2611, 24/10)..."
+                aria-label="Tìm đơn đặt chỗ"
+              />
+            </div>
+
+            @if (searchQuery.trim()) {
+              <div class="order-dropdown" role="listbox" aria-label="Kết quả tìm kiếm đơn đặt chỗ">
+                @for (o of filteredOrders; track o.code) {
+                  <button
+                    type="button"
+                    role="option"
+                    class="order-option"
+                    [class.is-selected]="order?.code === o.code"
+                    [attr.aria-selected]="order?.code === o.code"
+                    (click)="selectOrder(o)"
+                  >
+                    <span class="order-option__main">
+                      <b>{{ o.code }}</b> · {{ o.name }}
+                    </span>
+                    <span class="order-option__meta">{{ o.date }} · {{ o.time }}</span>
+                  </button>
+                } @empty {
+                  <p class="order-empty" role="status">Không tìm thấy đơn phù hợp.</p>
+                }
+              </div>
             }
-          </div>
+          </section>
         }
         @if (order) {
           <section class="dialog" aria-labelledby="cancel-title">

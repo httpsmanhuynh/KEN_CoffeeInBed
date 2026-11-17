@@ -721,6 +721,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   showToast(type: 'success' | 'error' | 'info', text: string): void {
     this.toast = { type, text };
+    this.cdr?.markForCheck();
     if (this.toastTimer) clearTimeout(this.toastTimer);
     this.toastTimer = setTimeout(() => {
       this.toast = null;

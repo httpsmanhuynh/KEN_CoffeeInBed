@@ -1,5 +1,7 @@
-import { Component, ElementRef, HostListener, Input, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ChangeDetectorRef, Component, DestroyRef, ElementRef, HostListener, Input, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter } from 'rxjs';
 import { AuthService } from '../../../core/auth.service';
 import { MAIN_NAV, NavItem } from '../../../core/nav-links';
 
@@ -32,6 +34,11 @@ export class Header implements OnInit {
   loggingOut = false;
   showLogoutConfirm = false;
 
+  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly destroyRef = inject(DestroyRef);
+  private closeTimer?: ReturnType<typeof setTimeout>;
+  currentUrl = '';
+
   constructor(
     private host: ElementRef<HTMLElement>,
     private router: Router,
@@ -39,7 +46,22 @@ export class Header implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.currentUrl = this.normalizeUrl(this.router.url);
+    this.router.events
+      .pipe(
+        filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((e) => {
+        this.currentUrl = this.normalizeUrl(e.urlAfterRedirects || e.url);
+        this.closeAll();
+        this.cdr.markForCheck();
+      });
     this.auth?.ensureSession?.().subscribe({ error: () => {} });
+  }
+
+  private normalizeUrl(raw: string): string {
+    return (raw || '/').split(/[?#]/)[0].replace(/\/+$/, '') || '/';
   }
 
   get isMember(): boolean {
@@ -56,7 +78,7 @@ export class Header implements OnInit {
 
   /** Mục nav đang xem (gạch chân như Figma). */
   isActive(item: NavItem): boolean {
-    const url = this.router.url.split(/[?#]/)[0].replace(/\/+$/, '') || '/';
+    const url = this.currentUrl || this.normalizeUrl(this.router.url);
     if (item.path === '/') {
       return url === '/' || url === '/home-logged-in';
     }
@@ -67,14 +89,45 @@ export class Header implements OnInit {
     return paths.some(p => url === p || (p !== '/' && url.startsWith(p + '/')));
   }
 
-  // Chuột: hover mở/đóng. Cảm ứng: bỏ qua hover, chỉ dùng click (tránh mở rồi đóng ngay).
-  enter(e: PointerEvent, key: string): void { if (e.pointerType === 'mouse') this.open = key; }
-  leave(e: PointerEvent, key: string): void { if (e.pointerType === 'mouse' && this.open === key) this.open = null; }
-  toggle(key: string): void { this.open = this.open === key ? null : key; }
+  // Chuột: hover mở/đóng có vùng đệm + trễ đóng nhẹ để không tụt khi rê xuống menu con.
+  enter(e: PointerEvent, key: string): void {
+    if (e.pointerType !== 'mouse') return;
+    if (this.closeTimer) {
+      clearTimeout(this.closeTimer);
+      this.closeTimer = undefined;
+    }
+    this.open = key;
+  }
+  leave(e: PointerEvent, key: string): void {
+    if (e.pointerType !== 'mouse' || this.open !== key) return;
+    if (this.closeTimer) clearTimeout(this.closeTimer);
+    this.closeTimer = setTimeout(() => {
+      if (this.open === key) {
+        this.open = null;
+        this.cdr.markForCheck();
+      }
+      this.closeTimer = undefined;
+    }, 150);
+  }
+  toggle(key: string): void {
+    if (this.closeTimer) {
+      clearTimeout(this.closeTimer);
+      this.closeTimer = undefined;
+    }
+    this.open = this.open === key ? null : key;
+  }
   onNavClick(item: NavItem): void {
     this.closeAll();
   }
-  closeAll(): void { this.open = null; this.mobileOpen = false; this.accountOpen = false; }
+  closeAll(): void {
+    if (this.closeTimer) {
+      clearTimeout(this.closeTimer);
+      this.closeTimer = undefined;
+    }
+    this.open = null;
+    this.mobileOpen = false;
+    this.accountOpen = false;
+  }
 
   requestLogout(): void {
     this.closeAll();

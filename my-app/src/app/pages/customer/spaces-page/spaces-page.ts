@@ -128,7 +128,7 @@ export class SpacesPage implements OnInit {
       recommended: 'Nên chọn khi: nhóm 6–12 người cần họp lớn, trình bày hoặc workshop.',
       caution: 'Cân nhắc: cần ít nhất 6 khách; nhóm 3–6 người có thể xem Phòng họp nhỏ.',
       image: '/images/ken-figma/spaces-meetingbig.png',
-      route: '/spaces/booking/meeting-large',
+      route: '/spaces/meeting-large',
       bookingRoute: '/booking/meeting-large'
     },
     {
@@ -142,7 +142,7 @@ export class SpacesPage implements OnInit {
       recommended: 'Nên chọn khi: cần nghỉ trưa ngắn hoặc một khoảng riêng cho 1 người.',
       caution: 'Cân nhắc: chỉ dành cho 1 khách; hai người nên xem KÉN nghỉ đôi.',
       image: '/images/ken-figma/spaces-single.png',
-      route: '/spaces/booking/single',
+      route: '/spaces/single',
       bookingRoute: '/booking/single'
     },
     {
@@ -156,7 +156,7 @@ export class SpacesPage implements OnInit {
       recommended: 'Nên chọn khi: cặp đôi hoặc 2 người cần nghỉ ngắn cùng lúc.',
       caution: 'Cân nhắc: nhóm 3–4 người nên dùng Private Studio để rộng rãi hơn.',
       image: '/images/ken-figma/spaces-double.png',
-      route: '/spaces/booking/double',
+      route: '/spaces/double',
       bookingRoute: '/booking/double'
     },
     {
@@ -170,7 +170,7 @@ export class SpacesPage implements OnInit {
       recommended: 'Nên chọn khi: nhóm 2–4 người cần một phòng riêng để nghỉ ngơi.',
       caution: 'Cân nhắc: không nhận 1 khách; nếu cần học hoặc họp, hãy xem KÉN Tập Trung.',
       image: '/images/ken-figma/spaces-private.png',
-      route: '/spaces/booking/private',
+      route: '/spaces/private',
       bookingRoute: '/booking/private'
     }
   ];

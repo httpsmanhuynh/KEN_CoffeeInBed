@@ -5,6 +5,18 @@
       "destination": "https://ken-coffeeinbed.onrender.com/api/:path*"
     },
     {
+      "source": "/images/addons/:path*",
+      "destination": "https://ken-coffeeinbed.onrender.com/images/addons/:path*"
+    },
+    {
+      "source": "/images/spaces/:path*",
+      "destination": "https://ken-coffeeinbed.onrender.com/images/spaces/:path*"
+    },
+    {
+      "source": "/images/zones/:path*",
+      "destination": "https://ken-coffeeinbed.onrender.com/images/zones/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

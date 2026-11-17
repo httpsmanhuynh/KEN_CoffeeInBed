@@ -8,7 +8,7 @@
 
   <section class="kf-rec-bar kf-rec-bar--inclusion" *ngIf="state.clusterRecInclusionDrinks.length" aria-label="Gợi ý dành cho bạn">
     <div class="kf-rec-head">
-      <strong>✨ Gợi ý đồ uống dành cho bạn</strong>
+      <strong><lucide-icon name="sparkles" [size]="15" color="#A9763F" aria-hidden="true"></lucide-icon> Gợi ý đồ uống dành cho bạn</strong>
       <small class="kf-rec-persona-badge" *ngIf="state.clusterPersona || state.clusterId !== null">
         <ng-container *ngIf="state.clusterId !== null">Nhóm khách #{{ state.clusterId }}</ng-container>
         <ng-container *ngIf="state.clusterId !== null && state.clusterPersona"> · </ng-container>
@@ -16,11 +16,15 @@
       </small>
     </div>
     <div class="kf-rec-list">
-      <button type="button" class="kf-rec-chip" [class.is-selected]="state.inclusionItemQuantity(drink) > 0" *ngFor="let drink of state.clusterRecInclusionDrinks" (click)="state.addInclusionItem(drink, 1)" [disabled]="!state.canAddInclusionItem(drink)">
+      <div class="kf-rec-chip" [class.is-selected]="state.inclusionItemQuantity(drink) > 0" *ngFor="let drink of state.clusterRecInclusionDrinks">
         <img [src]="state.image(drink.image)" [alt]="drink.name">
-        <span>{{ drink.name }}<small>{{ state.inclusionSurcharge(drink) > 0 ? '+' + money(state.inclusionSurcharge(drink)) + ' phụ thu' : 'Trong gói (0đ)' }}</small></span>
-        <b>{{ state.inclusionItemQuantity(drink) ? '×' + state.inclusionItemQuantity(drink) : '+' }}</b>
-      </button>
+        <span class="kf-rec-info">{{ drink.name }}<small>{{ state.inclusionSurcharge(drink) > 0 ? '+' + money(state.inclusionSurcharge(drink)) + ' phụ thu' : 'Trong gói (0đ)' }}</small></span>
+        <div class="kf-rec-actions">
+          <button type="button" class="kf-rec-btn kf-rec-btn--minus" *ngIf="state.inclusionItemQuantity(drink) > 0" (click)="state.addInclusionItem(drink, -1)" [attr.aria-label]="'Bớt ' + drink.name"><lucide-icon name="minus" [size]="13" aria-hidden="true"></lucide-icon></button>
+          <span class="kf-rec-qty" *ngIf="state.inclusionItemQuantity(drink) > 0">{{ state.inclusionItemQuantity(drink) }}</span>
+          <button type="button" class="kf-rec-btn kf-rec-btn--plus" (click)="state.addInclusionItem(drink, 1)" [disabled]="!state.canAddInclusionItem(drink)" [attr.aria-label]="'Thêm ' + drink.name"><lucide-icon name="plus" [size]="13" aria-hidden="true"></lucide-icon></button>
+        </div>
+      </div>
     </div>
   </section>
 

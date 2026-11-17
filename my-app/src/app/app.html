@@ -5,35 +5,3 @@
 </main>
 <app-footer *ngIf="!isAdminRoute"></app-footer>
 <app-suggestion-popup *ngIf="!isAdminRoute"></app-suggestion-popup>
-<button
-  type="button"
-  class="ken-lucide-a-arrow-up-btn"
-  [class.is-scaled]="fontScaleLevel() > 0"
-  data-lucide-animated="a-arrow-up"
-  (click)="cycleFontScale($event)"
-  (pointerenter)="animateAArrowUp($event)"
-  (focus)="animateAArrowUp($event)"
-  [attr.aria-label]="'Tăng cỡ chữ hiển thị (' + fontScaleLabel + ')'"
-  [title]="'Cỡ chữ: ' + fontScaleLabel + ' (nhấn để đổi)'"
->
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="22"
-    height="22"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    stroke-width="2"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-    aria-hidden="true"
-  >
-    <path data-part="letter" d="M3.5 13h6" />
-    <path data-part="letter" d="m2 16 4.5-9 4.5 9" />
-    <path data-part="arrow" d="M18 16V7" />
-    <path data-part="arrow" d="m14 11 4-4 4 4" />
-  </svg>
-  @if (fontScaleLevel() > 0) {
-    <span class="ken-lucide-a-arrow-up-badge">{{ fontScaleLabel }}</span>
-  }
-</button>

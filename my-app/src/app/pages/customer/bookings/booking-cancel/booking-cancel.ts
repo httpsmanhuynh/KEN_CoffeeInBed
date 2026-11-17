@@ -24,17 +24,25 @@ export class BookingCancel implements OnInit {
   private readonly router = inject(Router, { optional: true });
   private readonly cdr = inject(ChangeDetectorRef, { optional: true });
 
-  orders: CancelOrder[] = [
-    { code: '#KEN-241026-006', name: 'Ô tập trung cá nhân (Focus Pod)', status: 'confirmed', date: '24/10/2026', time: '09:00–13:00', hours: 4, pkg: 'Nửa ngày', total: 140000 },
-    { code: '#KEN-261026-009', name: 'KÉN nghỉ đơn', status: 'pending', date: '26/10/2026', time: '13:00–15:00', hours: 2, pkg: '2h', total: 90000 },
-    { code: '#KEN-251026-024', name: 'Phòng họp nhỏ', status: 'pending', date: '25/10/2026', time: '14:00–17:00', hours: 3, pkg: 'Họp nhóm nhỏ', total: 480000 },
-  ];
+  orders: CancelOrder[] = [];
   readonly statusLabel: Record<CancelStatus, string> = { confirmed: 'Đã xác nhận', pending: 'Chờ xác nhận' };
 
   /** Chọn đơn qua ?code=KEN-xxxx (ví dụ từ trang Lịch sử đặt chỗ); mặc định đơn đầu tiên. */
   order: CancelOrder | null = this.pick(this.route.snapshot.queryParamMap.get('code'));
+  searchQuery = '';
   submitted = false;
   cancelError = '';
+
+  get filteredOrders(): CancelOrder[] {
+    const q = this.searchQuery.trim().toLowerCase();
+    if (!q) return this.orders;
+    return this.orders.filter(
+      (o) =>
+        o.code.toLowerCase().includes(q) ||
+        o.name.toLowerCase().includes(q) ||
+        o.date.toLowerCase().includes(q),
+    );
+  }
 
   ngOnInit(): void {
     if (!this.api || !this.auth) return;
@@ -86,6 +94,7 @@ export class BookingCancel implements OnInit {
 
   selectOrder(o: CancelOrder): void {
     this.order = o;
+    this.searchQuery = '';
     this.submitted = false;
     this.cancelError = '';
   }

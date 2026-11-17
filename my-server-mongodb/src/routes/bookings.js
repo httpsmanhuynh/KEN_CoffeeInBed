@@ -284,9 +284,11 @@ router.get(
 
     const enriched = await attachReviewsToBookings(db, bookings);
     const bookingIds = enriched.map((b) => b._id);
-    const userIds = [
-      ...new Set(enriched.map((b) => b.user_id).filter((id) => id && ObjectId.isValid(String(id))).map(String)),
-    ].map((id) => new ObjectId(id));
+    const rawUserIdStrings = [
+      ...new Set(enriched.map((b) => b.user_id).filter(Boolean).map(String)),
+    ];
+    const userOids = rawUserIdStrings.filter((id) => ObjectId.isValid(id)).map((id) => new ObjectId(id));
+    const userLookupIds = [...userOids, ...rawUserIdStrings];
 
     const [failedTxns, users] = await Promise.all([
       bookingIds.length
@@ -295,10 +297,10 @@ router.get(
             .find({ booking_id: { $in: bookingIds }, txn_type: 'PAYMENT', status: 'FAILED' })
             .toArray()
         : [],
-      userIds.length
+      userLookupIds.length
         ? db
             .collection('users')
-            .find({ _id: { $in: userIds } })
+            .find({ _id: { $in: userLookupIds } })
             .toArray()
         : [],
     ]);
@@ -311,11 +313,9 @@ router.get(
         b.has_failed_payment = true;
       }
       const u = b.user_id ? userById.get(String(b.user_id)) : null;
-      if (u) {
-        b.customer_name = b.contact_name || u.full_name || null;
-        b.customer_phone = b.contact_phone || u.phone || null;
-        b.customer_email = b.contact_email || u.email || null;
-      }
+      b.customer_name = b.contact_name || u?.full_name || u?.name || null;
+      b.customer_phone = b.contact_phone || u?.phone || null;
+      b.customer_email = b.contact_email || u?.email || null;
     }
     res.json(enriched);
   }),
@@ -364,6 +364,13 @@ router.get(
       return fail(res, 403, 'FORBIDDEN', 'Bạn không có quyền xem đơn này');
     }
 
+    const uidStr = booking.user_id ? String(booking.user_id) : '';
+    const userQuery = uidStr
+      ? ObjectId.isValid(uidStr)
+        ? { _id: { $in: [new ObjectId(uidStr), uidStr] } }
+        : { _id: uidStr }
+      : null;
+
     const [inclusions, addons, transactions, review, bookUser] = await Promise.all([
       db.collection('booking_inclusions').find({ booking_id: bOid }).toArray(),
       db.collection('booking_addons').find({ booking_id: bOid }).toArray(),
@@ -373,15 +380,15 @@ router.get(
         .sort({ created_at: 1 })
         .toArray(),
       db.collection('reviews').findOne({ booking_id: bOid }),
-      db.collection('users').findOne({ _id: booking.user_id }, { projection: { full_name: 1, email: 1, phone: 1 } }),
+      userQuery
+        ? db.collection('users').findOne(userQuery, { projection: { full_name: 1, name: 1, email: 1, phone: 1 } })
+        : Promise.resolve(null),
     ]);
 
     const enrichedResult = enrichBookingWithReview({ ...booking, inclusions, addons, transactions }, review);
-    if (bookUser) {
-      enrichedResult.contact_name = booking.contact_name || bookUser.full_name;
-      enrichedResult.contact_phone = booking.contact_phone || bookUser.phone;
-      enrichedResult.contact_email = booking.contact_email || bookUser.email;
-    }
+    enrichedResult.contact_name = booking.contact_name || bookUser?.full_name || bookUser?.name || null;
+    enrichedResult.contact_phone = booking.contact_phone || bookUser?.phone || null;
+    enrichedResult.contact_email = booking.contact_email || bookUser?.email || null;
     res.json(enrichedResult);
   }),
 );

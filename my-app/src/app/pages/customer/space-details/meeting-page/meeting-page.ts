@@ -18,7 +18,7 @@ export class MeetingPage implements OnInit {
   ngOnInit(): void {
     this.bookingState?.syncCatalogFromApi();
     this.route?.queryParamMap?.subscribe(params => {
-      this.backPath = params.get('from') === 'booking' ? '/booking/spaces' : '/spaces';
+      this.backPath = '/spaces';
     });
   }
 

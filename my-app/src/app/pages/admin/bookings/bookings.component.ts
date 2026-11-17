@@ -134,107 +134,9 @@ export class BookingsComponent implements OnInit, OnDestroy {
     { id: 'tai-tao', name: 'KÉN Tái Tạo' },
   ];
 
-  bookings: BookingRow[] = [
-    {
-      id: 'b1',
-      code: 'KEN-241026-001',
-      customerName: 'Trần Minh Anh',
-      customerEmail: 'minhanh@example.com',
-      customerPhone: '0901234567',
-      tierLabel: 'Bạc',
-      discountLabel: 'Giảm 5%',
-      spaceName: 'Focus Pod',
-      spaceType: 'EXCLUSIVE',
-      bufferMinutes: 15,
-      zoneId: 'tap-trung',
-      zoneName: 'KÉN Tập Trung',
-      packageName: 'Nửa ngày · 4 giờ',
-      startIso: '2026-10-24T09:00:00+07:00',
-      endIso: '2026-10-24T13:00:00+07:00',
-      date: '24/10/2026',
-      dateIso: '2026-10-24',
-      timeSlot: '09:00–13:00',
-      startHour: 9,
-      checkInEarliest: '08:45',
-      noShowThreshold: '09:30',
-      cleanupWindow: '13:00–13:15 (15 phút dọn ô)',
-      guestCount: 1,
-      packagePrice: 140000,
-      inclusionSurcharge: 5000,
-      addonTotal: 0,
-      voucherDiscount: 0,
-      tierDiscount: 7250,
-      finalAmount: 137750,
-      paymentStatus: 'PAID',
-      paymentLabel: 'Đã thanh toán',
-      paymentTime: '08:42 · 24/10/2026',
-      paymentMethod: 'Chuyển khoản QR',
-      txnCode: 'TXN-001-2026',
-      refundStatus: 'NONE',
-      refundNote: '',
-      refundAmount: 0,
-      status: 'CHECKED_IN',
-      statusLabel: 'Đang sử dụng',
-      statusBadgeClass: 'badge-checked-in',
-      inclusions: [{ name: 'Matcha Latte Đá', detail: 'Hỗ trợ 50.000đ · Phụ thu 5.000đ', amount: 5000 }],
-      addons: [],
-      statusLogs: [
-        { time: '24/10/2026 08:42', actor: 'Hệ thống', fromStatus: 'PENDING_PAYMENT', toStatus: 'CONFIRMED', note: 'Thanh toán thành công' },
-        { time: '24/10/2026 08:55', actor: 'Admin Quầy', fromStatus: 'CONFIRMED', toStatus: 'CHECKED_IN', note: 'Check-in đúng khung giờ' },
-      ],
-      estimatedPoints: 13,
-    },
-    {
-      id: 'b2',
-      code: 'KEN-241026-002',
-      customerName: 'Nguyễn Mai Anh',
-      customerEmail: 'mai@example.com',
-      customerPhone: '0909876543',
-      tierLabel: 'Chưa đạt hạng',
-      discountLabel: 'Không giảm',
-      spaceName: 'Work Lounge',
-      spaceType: 'SHARED',
-      bufferMinutes: 0,
-      zoneId: 'tap-trung',
-      zoneName: 'KÉN Tập Trung',
-      packageName: 'Linh hoạt · 1 giờ',
-      startIso: '2026-10-24T10:00:00+07:00',
-      endIso: '2026-10-24T11:00:00+07:00',
-      date: '24/10/2026',
-      dateIso: '2026-10-24',
-      timeSlot: '10:00–11:00',
-      startHour: 10,
-      checkInEarliest: '09:45',
-      noShowThreshold: '10:30',
-      cleanupWindow: '0 phút (Không gian SHARED)',
-      guestCount: 1,
-      packagePrice: 35000,
-      inclusionSurcharge: 0,
-      addonTotal: 0,
-      voucherDiscount: 0,
-      tierDiscount: 0,
-      finalAmount: 35000,
-      paymentStatus: 'PAID',
-      paymentLabel: 'Đã thanh toán',
-      paymentTime: '09:20 · 24/10/2026',
-      paymentMethod: 'Ví MoMo',
-      txnCode: 'TXN-002-2026',
-      refundStatus: 'NONE',
-      refundNote: '',
-      refundAmount: 0,
-      status: 'CONFIRMED',
-      statusLabel: 'Đã xác nhận',
-      statusBadgeClass: 'badge-confirmed',
-      inclusions: [{ name: 'Trà Đào Cam Sả', detail: 'Trong chuẩn 50.000đ', amount: 0 }],
-      addons: [],
-      statusLogs: [
-        { time: '24/10/2026 09:20', actor: 'Hệ thống', fromStatus: 'PENDING_PAYMENT', toStatus: 'CONFIRMED', note: 'Khách đã thanh toán' },
-      ],
-      estimatedPoints: 3,
-    },
-  ];
+  bookings: BookingRow[] = [];
 
-  selectedBooking: BookingRow | null = this.bookings[0];
+  selectedBooking: BookingRow | null = null;
 
   private readonly onAdminRefresh = () => {
     this.loadBookings();
@@ -344,16 +246,19 @@ export class BookingsComponent implements OnInit, OnDestroy {
     const tierInfo = TIER_MAP[tierRaw] || { name: tierRaw, pct: 'Theo hạng' };
 
     const finalAmount = Number(b.final_amount ?? 0);
-    const payStatus = String(b.payment_status || 'UNPAID').toUpperCase();
     const refundStatus = String(b.refund_status || 'NONE').toUpperCase();
+    const inferredPaid =
+      ['CONFIRMED', 'CHECKED_IN', 'CHECKED_OUT', 'NO_SHOW'].includes(rawStatus) ||
+      (rawStatus === 'CANCELLED' && refundStatus !== 'NONE');
+    const payStatus = String(b.payment_status || (inferredPaid ? 'PAID' : 'UNPAID')).toUpperCase();
 
     return {
       id: String(b._id || b.id),
       code: b.booking_code || String(b._id || '').slice(-8).toUpperCase(),
       customerId: b.user_id ? String(b.user_id) : undefined,
-      customerName: b.customer_name || b.user?.full_name || 'Khách hàng',
-      customerEmail: b.customer_email || b.user?.email || '—',
-      customerPhone: b.customer_phone || b.user?.phone || '—',
+      customerName: b.customer_name || b.contact_name || b.user?.full_name || b.user?.name || 'Khách hàng',
+      customerEmail: b.customer_email || b.contact_email || b.user?.email || '—',
+      customerPhone: b.customer_phone || b.contact_phone || b.user?.phone || '—',
       tierLabel: tierInfo.name,
       discountLabel: b.tier_discount ? `-${this.formatMoney(b.tier_discount)}` : tierInfo.pct,
       spaceName: b.space?.name || b.space_name || 'Không gian KÉN',
@@ -553,6 +458,12 @@ export class BookingsComponent implements OnInit, OnDestroy {
         if (!b || (!b._id && !b.id)) return;
         const mapped = this.mapApiBooking(b);
         const idx = this.bookings.findIndex((x) => x.id === mapped.id);
+        const prev = (idx >= 0 ? this.bookings[idx] : null) || (this.selectedBooking?.id === mapped.id ? this.selectedBooking : null);
+        if (prev && mapped.customerName === 'Khách hàng' && prev.customerName !== 'Khách hàng') {
+          mapped.customerName = prev.customerName;
+          mapped.customerPhone = prev.customerPhone;
+          mapped.customerEmail = prev.customerEmail;
+        }
         if (idx >= 0) this.bookings[idx] = mapped;
         if (this.selectedBooking?.id === mapped.id) {
           this.selectedBooking = mapped;
@@ -770,6 +681,7 @@ export class BookingsComponent implements OnInit, OnDestroy {
 
   showToast(type: 'success' | 'error' | 'info', text: string): void {
     this.toast = { type, text };
+    this.cdr?.markForCheck();
     if (this.toastTimer) clearTimeout(this.toastTimer);
     this.toastTimer = setTimeout(() => {
       this.toast = null;

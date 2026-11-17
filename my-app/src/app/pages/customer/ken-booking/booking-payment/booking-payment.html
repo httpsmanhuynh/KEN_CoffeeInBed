@@ -91,7 +91,7 @@
             <div><span>Tên người thụ hưởng</span><strong>KÉN Coffee In Bed</strong></div>
             <div><span>Nội dung chuyển khoản</span><strong>{{ state.draft().createdBookingCode || 'Tạo theo mã đặt chỗ' }}</strong></div>
           </div>
-          <hr><div class="kf-sum-row kf-total"><span>Số tiền cần thanh toán</span><strong>{{ money(state.total) }}</strong></div>
+          <hr><div class="kf-sum-row kf-total"><span>Số tiền cần thanh toán</span><strong>{{ money(displayTotal) }}</strong></div>
           @if (state.draft().createdBookingId && !isExpired) {
             <div class="kf-pay-actions">
               <button type="button" class="kf-btn kf-btn-gold" [disabled]="paying" (click)="payNow('SUCCESS')">

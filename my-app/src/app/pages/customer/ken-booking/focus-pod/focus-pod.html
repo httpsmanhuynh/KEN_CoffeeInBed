@@ -2,7 +2,7 @@
   <section class="kf-focus-hero"><img src="/images/ken-flow/listing-focus.png" alt="Ô tập trung cá nhân Focus Pod"><div class="kf-focus-hero-shade"></div><div class="kf-container kf-focus-hero-body"><div class="kf-focus-top-tags">
   <span>KÉN TẬP TRUNG</span>
   <span>Dùng riêng</span>
-</div><div class="kf-crumb kf-crumb-light"><a routerLink="/booking/spaces">Không gian</a> / KÉN Tập Trung / <strong>Ô tập trung cá nhân</strong></div><span class="kf-overline">KHÔNG GIAN RIÊNG · FOCUS POD</span><h1>Ô tập trung cá nhân</h1><p class="kf-script">Một góc riêng, cho những điều cần trọn vẹn.</p><div class="kf-hero-tags"><span>Wi-Fi</span><span>Ổ cắm</span><span>08:00–22:00</span><span>01 khách / ô</span></div><div class="kf-focus-hero-price"><small>Từ</small><strong>45.000đ</strong><span>/ giờ / ô riêng</span></div></div></section>
+</div><div class="kf-crumb kf-crumb-light"><a routerLink="/spaces">Không gian</a> / KÉN Tập Trung / <strong>Ô tập trung cá nhân</strong></div><span class="kf-overline">KHÔNG GIAN RIÊNG · FOCUS POD</span><h1>Ô tập trung cá nhân</h1><p class="kf-script">Một góc riêng, cho những điều cần trọn vẹn.</p><div class="kf-hero-tags"><span>Wi-Fi</span><span>Ổ cắm</span><span>08:00–22:00</span><span>01 khách / ô</span></div><div class="kf-focus-hero-price"><small>Từ</small><strong>45.000đ</strong><span>/ giờ / ô riêng</span></div></div></section>
   <div class="kf-focus-photo-strip">
   <div class="kf-focus-photo-tile">
     <img src="/images/ken-flow/focus-photo-2.png" alt="Một khoảng nghỉ giữa giờ">
@@ -79,7 +79,7 @@
 
     <section class="kf-rec-bar" *ngIf="state.clusterRecExtras.length" aria-label="Gợi ý Add-on dành cho bạn">
       <div class="kf-rec-head">
-        <strong>✨ Gợi ý Add-on dành cho bạn</strong>
+        <strong><lucide-icon name="sparkles" [size]="15" color="#A9763F" aria-hidden="true"></lucide-icon> Gợi ý Add-on dành cho bạn</strong>
         <small class="kf-rec-persona-badge" *ngIf="state.clusterPersona || state.clusterId !== null">
           <ng-container *ngIf="state.clusterId !== null">Nhóm khách #{{ state.clusterId }}</ng-container>
           <ng-container *ngIf="state.clusterId !== null && state.clusterPersona"> · </ng-container>
@@ -87,30 +87,39 @@
         </small>
       </div>
       <div class="kf-rec-list">
-        <button type="button" class="kf-rec-chip" [class.is-selected]="extrasCount(item.id) > 0" *ngFor="let item of state.clusterRecExtras" (click)="changeExtra(item.id,1)" [disabled]="extrasCount(item.id)>=state.maxExtraCount(item.id)">
-          <img [src]="state.image(item.image)" [alt]="item.title"><span>{{ item.title }}<small>+{{ money(state.getExtraPrice(item)) }}</small></span><b>{{ extrasCount(item.id) ? '×' + extrasCount(item.id) : '+' }}</b>
-        </button>
+        <div class="kf-rec-chip" [class.is-selected]="extrasCount(item.id) > 0" *ngFor="let item of state.clusterRecExtras">
+          <img [src]="state.image(item.image)" [alt]="item.title">
+          <span class="kf-rec-info">{{ item.title }}<small>+{{ money(state.getExtraPrice(item)) }}<ng-container *ngIf="state.getExtraVariant(item.id)"> · {{ state.getExtraVariant(item.id) }}</ng-container></small></span>
+          <div class="kf-rec-actions">
+            <button type="button" class="kf-rec-btn kf-rec-btn--minus" *ngIf="extrasCount(item.id) > 0" (click)="changeExtra(item.id, -1)" [attr.aria-label]="'Bớt ' + item.title"><lucide-icon name="minus" [size]="13" aria-hidden="true"></lucide-icon></button>
+            <span class="kf-rec-qty" *ngIf="extrasCount(item.id) > 0">{{ extrasCount(item.id) }}</span>
+            <button type="button" class="kf-rec-btn kf-rec-btn--plus" (click)="changeExtra(item.id, 1)" [disabled]="extrasCount(item.id) >= state.maxExtraCount(item.id)" [attr.aria-label]="'Thêm ' + item.title"><lucide-icon name="plus" [size]="13" aria-hidden="true"></lucide-icon></button>
+          </div>
+        </div>
       </div>
     </section>
     <div class="kf-tabs"><button [class.active]="extraCategory === 'all'" (click)="extraCategory = 'all'">Tất cả</button><button [class.active]="extraCategory === 'drink'" (click)="extraCategory = 'drink'">Đồ uống</button><button [class.active]="extraCategory === 'food'" (click)="extraCategory = 'food'">Bánh ngọt &amp; ăn nhẹ</button><button [class.active]="extraCategory === 'equipment'" (click)="extraCategory = 'equipment'">Tiện ích</button></div>
     <div class="kf-extras-grid">
-      <article *ngFor="let item of filteredExtras" class="kf-extra-card">
-        <img [src]="state.image(item.image)" [alt]="item.title" loading="lazy">
+      <article *ngFor="let item of filteredExtras" class="kf-extra-card" [class.is-selected]="extrasCount(item.id) > 0">
+        <div class="kf-extra-thumb"><img [src]="state.image(item.image)" [alt]="item.title" loading="lazy"></div>
         <strong>{{ item.title }}</strong>
         <small>+{{ money(state.getExtraPrice(item)) }}</small>
         <!-- Tùy chọn Biến thể Nóng / Lạnh và Size cho Add-on đồ uống -->
         <div class="kf-variant-selector" *ngIf="item.category === 'drink' && (state.hasTemperatureOptions(item.variants) || state.isSizeSelectable(item))">
           <div class="kf-variant-group" *ngIf="state.hasTemperatureOptions(item.variants) || state.isSizeSelectable(item)">
-            <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getExtraVariant(item.id)).temp === 'Nóng'" (click)="state.setExtraTemp(item.id, 'Nóng')">Nóng</button>
-            <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getExtraVariant(item.id)).temp === 'Lạnh'" (click)="state.setExtraTemp(item.id, 'Lạnh')">Lạnh</button>
+            <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getExtraVariant(item.id)).temp === 'Nóng'" (click)="state.setExtraTemp(item.id, 'Nóng')"><lucide-icon name="flame" [size]="11" aria-hidden="true"></lucide-icon> Nóng</button>
+            <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getExtraVariant(item.id)).temp === 'Lạnh'" (click)="state.setExtraTemp(item.id, 'Lạnh')"><lucide-icon name="snowflake" [size]="11" aria-hidden="true"></lucide-icon> Lạnh</button>
           </div>
           <div class="kf-variant-group" *ngIf="state.isSizeSelectable(item)">
-            <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getExtraVariant(item.id)).size === 'M'" (click)="state.setExtraSize(item.id, 'M')">M (55k)</button>
-            <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getExtraVariant(item.id)).size === 'L'" (click)="state.setExtraSize(item.id, 'L')">L (60k)</button>
+            <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getExtraVariant(item.id)).size === 'M'" (click)="state.setExtraSize(item.id, 'M')">M</button>
+            <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getExtraVariant(item.id)).size === 'L'" (click)="state.setExtraSize(item.id, 'L')">L</button>
           </div>
         </div>
         <div class="kf-single-temp-badge" *ngIf="item.category === 'drink' && !state.hasTemperatureOptions(item.variants) && !state.isSizeSelectable(item) && state.getTemperatureType(item.variants) !== 'none'">
-          <span class="kf-badge-tag">{{ state.getTemperatureType(item.variants) === 'cold' ? '❄️ Lạnh' : '♨️ Nóng' }}</span>
+          <span class="kf-badge-tag">
+            <lucide-icon [name]="state.getTemperatureType(item.variants) === 'cold' ? 'snowflake' : 'flame'" [size]="11" aria-hidden="true"></lucide-icon>
+            {{ state.getTemperatureType(item.variants) === 'cold' ? 'Lạnh' : 'Nóng' }}
+          </span>
         </div>
         <div class="kf-quantity">
           <button type="button" aria-label="Giảm số lượng" (click)="changeExtra(item.id,-1)" [disabled]="extrasCount(item.id)===0">−</button>

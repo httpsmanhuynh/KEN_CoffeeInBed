@@ -135,7 +135,7 @@ router.post(
     const now = new Date();
     await db.collection('payment_transactions').updateOne(
       { _id: new ObjectId(id) },
-      { $set: { status: PAYMENT_STATUSES.FAILED, completed_at: now, note: 'CANCELLED_BY_USER' } },
+      { $set: { status: PAYMENT_STATUSES.CANCELLED, completed_at: now, note: 'CANCELLED_BY_USER' } },
     );
     res.json({ status: PAYMENT_STATUSES.CANCELLED });
   }),

@@ -268,9 +268,9 @@
 
         <div class="review-recent-bottom" *ngIf="hasMoreReviews || canCollapseReviews">
           <button type="button" class="review-more" (click)="showMoreReviews()" [disabled]="loadingMore">
-            <img src="/images/review-icons/arrow-left.svg" alt="" />
+            <img *ngIf="!hasMoreReviews && !loadingMore" src="/images/review-icons/arrow-left.svg" alt="" />
             {{ loadingMore ? 'Đang tải thêm…' : hasMoreReviews ? 'Xem thêm đánh giá (' + recentReviews.length + '/' + formattedTotalReviews + ')' : 'Thu gọn danh sách' }}
-            <img src="/images/review-icons/arrow-right.svg" alt="" />
+            <img *ngIf="hasMoreReviews && !loadingMore" src="/images/review-icons/arrow-right.svg" alt="" />
           </button>
         </div>
       </div>

@@ -29,7 +29,7 @@
           <div class="field">
             <label class="field__label" for="pw-current">Mật khẩu hiện tại</label>
             <div class="box">
-              <input id="pw-current" [type]="showCurrent ? 'text' : 'password'" [(ngModel)]="currentPassword" autocomplete="current-password" placeholder="Nhập mật khẩu hiện tại" />
+              <input id="pw-current" [type]="showCurrent ? 'text' : 'password'" [(ngModel)]="currentPassword" autocomplete="new-password" placeholder="Nhập mật khẩu hiện tại" />
               <button type="button" class="box__btn" (click)="showCurrent = !showCurrent" [attr.aria-label]="showCurrent ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'">
                 <lucide-icon [name]="showCurrent ? 'eye' : 'eye-off'" [size]="18" [strokeWidth]="1.8" color="#4A3123"></lucide-icon>
               </button>
@@ -119,7 +119,9 @@
                   <div class="box box--grow">
                     <input id="tf-otp" type="text" [(ngModel)]="twoFactorOtp" maxlength="6" placeholder="Nhập 6 số OTP" />
                   </div>
-                  <button type="button" class="btn-gold" (click)="onSend2FAOtp()">Gửi mã OTP</button>
+                  <button type="button" class="btn-gold" [disabled]="twoFactorOtpCooldown > 0 || sending2FAOtp" (click)="onSend2FAOtp()">
+                    {{ sending2FAOtp ? 'Đang gửi…' : (twoFactorOtpCooldown > 0 ? 'Gửi lại (' + twoFactorOtpCooldown + 's)' : 'Gửi mã OTP') }}
+                  </button>
                 </div>
               </div>
               <div style="display: flex; gap: 8px;">

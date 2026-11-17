@@ -66,6 +66,10 @@ import {
   EyeOff,
   Key,
   Layout,
+  Flame,
+  Snowflake,
+  Plus,
+  Minus,
 } from 'lucide-angular';
 
 // Shared Components & Layouts
@@ -104,7 +108,6 @@ import { HomeGuestPage } from './pages/customer/home-page/home-guest/home-guest'
 import { HomeMemberPage } from './pages/customer/home-page/home-member/home-member';
 import { KenBookingShell } from './pages/customer/ken-booking/booking-shell/booking-shell';
 import { KenCafeCatalogPage } from './pages/customer/ken-booking/cafe-catalog/cafe-catalog';
-import { KenSpaceListingPage } from './pages/customer/ken-booking/space-listing/space-listing';
 import { KenOtherSpacePage } from './pages/customer/ken-booking/other-space-booking/other-space-booking';
 import { KenFocusPodPage } from './pages/customer/ken-booking/focus-pod/focus-pod';
 import { KenDrinkPickerPage } from './pages/customer/ken-booking/drink-picker/drink-picker';
@@ -168,7 +171,6 @@ import { Forecast } from './pages/admin/forecast/forecast';
     HomeMemberPage,
     KenBookingShell,
     KenCafeCatalogPage,
-    KenSpaceListingPage,
     KenOtherSpacePage,
     KenFocusPodPage,
     KenDrinkPickerPage,
@@ -264,6 +266,10 @@ import { Forecast } from './pages/admin/forecast/forecast';
       EyeOff,
       Key,
       Layout,
+      Flame,
+      Snowflake,
+      Plus,
+      Minus,
     }),
   ],
   providers: [

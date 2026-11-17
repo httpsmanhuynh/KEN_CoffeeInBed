@@ -27,11 +27,7 @@ export class BookingReschedule implements OnInit, OnDestroy {
   private readonly api = inject(CustomerApiService, { optional: true });
   private readonly router = inject(Router, { optional: true });
   private readonly cdr = inject(ChangeDetectorRef, { optional: true });
-  orders: Order[] = [
-    { id: 'o1', code: '#KEN-241026-006', name: 'Ô tập trung cá nhân (Focus Pod)', zone: 'Focus Pod', status: 'confirmed', date: '2026-10-24', start: '09:00', hours: 4, guests: 1, total: 140000 },
-    { id: 'o2', code: '#KEN-261026-009', name: 'KÉN nghỉ đơn', zone: 'KÉN Nghỉ Ngơi', status: 'pending', date: '2026-10-26', start: '13:00', hours: 2, guests: 1, total: 90000 },
-    { id: 'o3', code: '#KEN-251026-024', name: 'Phòng họp nhỏ', zone: 'KÉN Tập Trung', status: 'pending', date: '2026-10-25', start: '14:00', hours: 3, guests: 4, total: 480000 },
-  ];
+  orders: Order[] = [];
   readonly statusLabel: Record<OrderStatus, string> = { confirmed: 'Đã xác nhận', pending: 'Chờ xác nhận' };
   get slots(): string[] {
     const out: string[] = [];
@@ -44,11 +40,11 @@ export class BookingReschedule implements OnInit, OnDestroy {
   }
   readonly durations = [2, 3, 4, 5, 6];
 
-  selectedId = 'o1';
-  newDate = '2026-10-25';
-  hours = 4;
+  selectedId = '';
+  newDate = '';
+  hours = 0;
   start = '09:00';
-  note = 'Mình muốn dời sang Chủ nhật, giữ nguyên gói 4 giờ và 01 khách.';
+  note = '';
   acknowledged = false;
   rechecking = false;
   submitted = false;

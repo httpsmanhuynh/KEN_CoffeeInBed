@@ -31,6 +31,12 @@ async function ensureIndexes(db) {
   // Catalog & Booking indexes
   await db.collection('spaces').createIndex({ zone_id: 1, status: 1 });
   await db.collection('packages').createIndex({ zone_id: 1, is_active: 1 });
+  await db
+    .collection('packages')
+    .createIndex(
+      { package_code: 1 },
+      { unique: true, partialFilterExpression: { package_code: { $type: 'string' } } },
+    );
   await db.collection('package_prices').createIndex({ space_id: 1, package_id: 1 }, { unique: true });
   await db.collection('addons').createIndex({ is_active: 1 });
   await db.collection('products').createIndex({ is_active: 1, category: 1 });

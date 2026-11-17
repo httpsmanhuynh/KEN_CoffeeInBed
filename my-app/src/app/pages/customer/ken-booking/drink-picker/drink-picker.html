@@ -2,7 +2,7 @@
   <section class="kf-drink-top">
     <div class="kf-container kf-drink-head">
       <div>
-        <p class="kf-crumb"><a routerLink="/booking/spaces">Đặt chỗ KÉN</a> / <a [routerLink]="isFocusSpace ? '/booking/focus-pod' : '/booking/' + state.draft().spaceId">Chọn không gian &amp; lịch</a> / Chọn đồ uống</p>
+        <p class="kf-crumb"><a routerLink="/spaces">Đặt chỗ KÉN</a> / <a [routerLink]="isFocusSpace ? '/booking/focus-pod' : '/booking/' + state.draft().spaceId">Chọn không gian &amp; lịch</a> / Chọn đồ uống</p>
         <p class="kf-overline">BƯỚC 03 · CHỌN MÓN NƯỚC</p>
         <h1>Chọn đồ uống đi kèm</h1>
         <p class="kf-script">{{ state.requiredDrinkCount ? 'mỗi khách một món đi kèm, tùy chọn theo sở thích.' : 'gói không kèm nước; bạn có thể chọn thêm nếu muốn.' }}</p>
@@ -49,16 +49,19 @@
             <!-- Tùy chọn Biến thể Nóng / Lạnh và Size -->
             <div class="kf-variant-selector" *ngIf="state.hasTemperatureOptions(drink.variants) || state.isSizeSelectable(drink)">
               <div class="kf-variant-group" *ngIf="state.hasTemperatureOptions(drink.variants) || state.isSizeSelectable(drink)">
-                <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getDrinkVariant(drink.id)).temp === 'Nóng'" (click)="state.setDrinkTemp(drink.id, 'Nóng')">Nóng</button>
-                <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getDrinkVariant(drink.id)).temp === 'Lạnh'" (click)="state.setDrinkTemp(drink.id, 'Lạnh')">Lạnh</button>
+                <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getDrinkVariant(drink.id)).temp === 'Nóng'" (click)="state.setDrinkTemp(drink.id, 'Nóng')"><lucide-icon name="flame" [size]="11" aria-hidden="true"></lucide-icon> Nóng</button>
+                <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getDrinkVariant(drink.id)).temp === 'Lạnh'" (click)="state.setDrinkTemp(drink.id, 'Lạnh')"><lucide-icon name="snowflake" [size]="11" aria-hidden="true"></lucide-icon> Lạnh</button>
               </div>
               <div class="kf-variant-group" *ngIf="state.isSizeSelectable(drink)">
-                <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getDrinkVariant(drink.id)).size === 'M'" (click)="state.setDrinkSize(drink.id, 'M')">Size M (55k)</button>
-                <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getDrinkVariant(drink.id)).size === 'L'" (click)="state.setDrinkSize(drink.id, 'L')">Size L (60k)</button>
+                <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getDrinkVariant(drink.id)).size === 'M'" (click)="state.setDrinkSize(drink.id, 'M')">Size M</button>
+                <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getDrinkVariant(drink.id)).size === 'L'" (click)="state.setDrinkSize(drink.id, 'L')">Size L</button>
               </div>
             </div>
             <div class="kf-single-temp-badge" *ngIf="!state.hasTemperatureOptions(drink.variants) && !state.isSizeSelectable(drink) && state.getTemperatureType(drink.variants) !== 'none'">
-              <span class="kf-badge-tag">{{ state.getTemperatureType(drink.variants) === 'cold' ? '❄️ Chỉ phục vụ Lạnh' : '♨️ Chỉ phục vụ Nóng' }}</span>
+              <span class="kf-badge-tag">
+                <lucide-icon [name]="state.getTemperatureType(drink.variants) === 'cold' ? 'snowflake' : 'flame'" [size]="11" aria-hidden="true"></lucide-icon>
+                {{ state.getTemperatureType(drink.variants) === 'cold' ? 'Chỉ phục vụ Lạnh' : 'Chỉ phục vụ Nóng' }}
+              </span>
             </div>
 
             <div class="kf-product-bottom">
@@ -84,16 +87,19 @@
             <!-- Tùy chọn Biến thể Nóng / Lạnh và Size -->
             <div class="kf-variant-selector" *ngIf="state.hasTemperatureOptions(drink.variants) || state.isSizeSelectable(drink)">
               <div class="kf-variant-group" *ngIf="state.hasTemperatureOptions(drink.variants) || state.isSizeSelectable(drink)">
-                <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getDrinkVariant(drink.id)).temp === 'Nóng'" (click)="state.setDrinkTemp(drink.id, 'Nóng')">Nóng</button>
-                <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getDrinkVariant(drink.id)).temp === 'Lạnh'" (click)="state.setDrinkTemp(drink.id, 'Lạnh')">Lạnh</button>
+                <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getDrinkVariant(drink.id)).temp === 'Nóng'" (click)="state.setDrinkTemp(drink.id, 'Nóng')"><lucide-icon name="flame" [size]="11" aria-hidden="true"></lucide-icon> Nóng</button>
+                <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getDrinkVariant(drink.id)).temp === 'Lạnh'" (click)="state.setDrinkTemp(drink.id, 'Lạnh')"><lucide-icon name="snowflake" [size]="11" aria-hidden="true"></lucide-icon> Lạnh</button>
               </div>
               <div class="kf-variant-group" *ngIf="state.isSizeSelectable(drink)">
-                <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getDrinkVariant(drink.id)).size === 'M'" (click)="state.setDrinkSize(drink.id, 'M')">Size M (55k)</button>
-                <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getDrinkVariant(drink.id)).size === 'L'" (click)="state.setDrinkSize(drink.id, 'L')">Size L (60k)</button>
+                <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getDrinkVariant(drink.id)).size === 'M'" (click)="state.setDrinkSize(drink.id, 'M')">Size M</button>
+                <button type="button" class="kf-chip-btn" [class.active]="state.parseVariant(state.getDrinkVariant(drink.id)).size === 'L'" (click)="state.setDrinkSize(drink.id, 'L')">Size L</button>
               </div>
             </div>
             <div class="kf-single-temp-badge" *ngIf="!state.hasTemperatureOptions(drink.variants) && !state.isSizeSelectable(drink) && state.getTemperatureType(drink.variants) !== 'none'">
-              <span class="kf-badge-tag">{{ state.getTemperatureType(drink.variants) === 'cold' ? '❄️ Chỉ phục vụ Lạnh' : '♨️ Chỉ phục vụ Nóng' }}</span>
+              <span class="kf-badge-tag">
+                <lucide-icon [name]="state.getTemperatureType(drink.variants) === 'cold' ? 'snowflake' : 'flame'" [size]="11" aria-hidden="true"></lucide-icon>
+                {{ state.getTemperatureType(drink.variants) === 'cold' ? 'Chỉ phục vụ Lạnh' : 'Chỉ phục vụ Nóng' }}
+              </span>
             </div>
 
             <div class="kf-product-bottom">

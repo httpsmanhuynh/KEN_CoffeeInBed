@@ -218,7 +218,7 @@ router.patch(
   }),
 );
 
-// Xóa tài khoản trực tiếp (không cần admin duyệt): xóa user trong MongoDB và hủy session
+// Xóa tài khoản: khóa tài khoản và đánh dấu để bảo lưu lịch sử đơn đặt chỗ
 router.delete(
   '/me',
   ...guard,
@@ -226,7 +226,16 @@ router.delete(
   wrap(async (req, res) => {
     const db = req.app.locals.db;
     const user = req.user;
-    await db.collection('users').deleteOne({ _id: user._id });
+    await db.collection('users').updateOne(
+      { _id: user._id },
+      {
+        $set: {
+          status: 'LOCKED',
+          deleted_at: new Date(),
+          updated_at: new Date(),
+        },
+      },
+    );
     await destroySession(req, res);
     res.json({ deleted: true, message: 'Đã xóa tài khoản' });
   }),

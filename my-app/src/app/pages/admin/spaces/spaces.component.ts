@@ -439,6 +439,7 @@ export class SpacesComponent implements OnInit, OnDestroy {
   showToast(message: string, type: 'success' | 'info' = 'success'): void {
     this.toastMessage = message;
     this.toastType = type;
+    this.cdr?.markForCheck();
     if (this.toastTimer) clearTimeout(this.toastTimer);
     this.toastTimer = setTimeout(() => {
       this.toastMessage = null;

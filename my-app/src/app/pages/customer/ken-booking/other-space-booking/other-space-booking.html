@@ -8,7 +8,7 @@
         ><span>{{ item.capacity }}</span>
       </div>
       <div class="kf-crumb kf-crumb-light">
-        <a routerLink="/booking/spaces">Không gian</a> / {{ zoneLabel }} /
+        <a routerLink="/spaces">Không gian</a> / {{ zoneLabel }} /
         <strong>{{ item.name }}</strong>
       </div>
       <span class="kf-overline">CHỌN KHÔNG GIAN · ĐẶT CHỖ</span>
@@ -231,7 +231,7 @@
           aria-label="Gợi ý Add-on dành cho bạn"
         >
           <div class="kf-rec-head">
-            <strong>✨ Gợi ý Add-on dành cho bạn</strong>
+            <strong><lucide-icon name="sparkles" [size]="15" color="#A9763F" aria-hidden="true"></lucide-icon> Gợi ý Add-on dành cho bạn</strong>
             <small
               class="kf-rec-persona-badge"
               *ngIf="state.clusterPersona || state.clusterId !== null"
@@ -246,18 +246,39 @@
             </small>
           </div>
           <div class="kf-rec-list">
-            <button
-              type="button"
+            <div
               class="kf-rec-chip"
               [class.is-selected]="extrasCount(item.id) > 0"
               *ngFor="let item of state.clusterRecExtras"
-              (click)="changeExtra(item.id, 1)"
-              [disabled]="extrasCount(item.id) >= state.maxExtraCount(item.id)"
             >
-              <img [src]="state.image(item.image)" [alt]="item.title" /><span
-                >{{ item.title }}<small>+{{ money(state.getExtraPrice(item)) }}</small></span
-              ><b>{{ extrasCount(item.id) ? '×' + extrasCount(item.id) : '+' }}</b>
-            </button>
+              <img [src]="state.image(item.image)" [alt]="item.title" />
+              <span class="kf-rec-info"
+                >{{ item.title }}<small>+{{ money(state.getExtraPrice(item)) }}<ng-container *ngIf="state.getExtraVariant(item.id)"> · {{ state.getExtraVariant(item.id) }}</ng-container></small></span
+              >
+              <div class="kf-rec-actions">
+                <button
+                  type="button"
+                  class="kf-rec-btn kf-rec-btn--minus"
+                  *ngIf="extrasCount(item.id) > 0"
+                  (click)="changeExtra(item.id, -1)"
+                  [attr.aria-label]="'Bớt ' + item.title"
+                >
+                  <lucide-icon name="minus" [size]="13" aria-hidden="true"></lucide-icon>
+                </button>
+                <span class="kf-rec-qty" *ngIf="extrasCount(item.id) > 0">{{
+                  extrasCount(item.id)
+                }}</span>
+                <button
+                  type="button"
+                  class="kf-rec-btn kf-rec-btn--plus"
+                  (click)="changeExtra(item.id, 1)"
+                  [disabled]="extrasCount(item.id) >= state.maxExtraCount(item.id)"
+                  [attr.aria-label]="'Thêm ' + item.title"
+                >
+                  <lucide-icon name="plus" [size]="13" aria-hidden="true"></lucide-icon>
+                </button>
+              </div>
+            </div>
           </div>
         </section>
         <div class="kf-tabs">
@@ -291,8 +312,14 @@
           </button>
         </div>
         <div class="kf-extras-grid">
-          <article *ngFor="let extra of filteredExtras" class="kf-extra-card">
-            <img [src]="state.image(extra.image)" [alt]="extra.title" loading="lazy" />
+          <article
+            *ngFor="let extra of filteredExtras"
+            class="kf-extra-card"
+            [class.is-selected]="extrasCount(extra.id) > 0"
+          >
+            <div class="kf-extra-thumb">
+              <img [src]="state.image(extra.image)" [alt]="extra.title" loading="lazy" />
+            </div>
             <strong>{{ extra.title }}</strong>
             <small>+{{ money(state.getExtraPrice(extra)) }}</small>
             <!-- Tùy chọn Biến thể Nóng / Lạnh và Size cho Add-on đồ uống -->
@@ -315,7 +342,7 @@
                   "
                   (click)="state.setExtraTemp(extra.id, 'Nóng')"
                 >
-                  Nóng
+                  <lucide-icon name="flame" [size]="11" aria-hidden="true"></lucide-icon> Nóng
                 </button>
                 <button
                   type="button"
@@ -325,7 +352,7 @@
                   "
                   (click)="state.setExtraTemp(extra.id, 'Lạnh')"
                 >
-                  Lạnh
+                  <lucide-icon name="snowflake" [size]="11" aria-hidden="true"></lucide-icon> Lạnh
                 </button>
               </div>
               <div class="kf-variant-group" *ngIf="state.isSizeSelectable(extra)">
@@ -335,7 +362,7 @@
                   [class.active]="state.parseVariant(state.getExtraVariant(extra.id)).size === 'M'"
                   (click)="state.setExtraSize(extra.id, 'M')"
                 >
-                  M (55k)
+                  M
                 </button>
                 <button
                   type="button"
@@ -343,7 +370,7 @@
                   [class.active]="state.parseVariant(state.getExtraVariant(extra.id)).size === 'L'"
                   (click)="state.setExtraSize(extra.id, 'L')"
                 >
-                  L (60k)
+                  L
                 </button>
               </div>
             </div>
@@ -356,9 +383,14 @@
                 state.getTemperatureType(extra.variants) !== 'none'
               "
             >
-              <span class="kf-badge-tag">{{
-                state.getTemperatureType(extra.variants) === 'cold' ? '❄️ Lạnh' : '♨️ Nóng'
-              }}</span>
+              <span class="kf-badge-tag">
+                <lucide-icon
+                  [name]="state.getTemperatureType(extra.variants) === 'cold' ? 'snowflake' : 'flame'"
+                  [size]="11"
+                  aria-hidden="true"
+                ></lucide-icon>
+                {{ state.getTemperatureType(extra.variants) === 'cold' ? 'Lạnh' : 'Nóng' }}
+              </span>
             </div>
             <div class="kf-quantity">
               <button
@@ -494,6 +526,6 @@
 <ng-template #unavailable>
   <main class="kf-container">
     <h1>Không tìm thấy không gian</h1>
-    <a routerLink="/booking/spaces">Quay lại chọn không gian</a>
+    <a routerLink="/spaces">Quay lại chọn không gian</a>
   </main>
 </ng-template>
