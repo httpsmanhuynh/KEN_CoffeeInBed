@@ -86,7 +86,6 @@ export class KenHomeContent implements OnInit, OnDestroy {
     { question: 'KÉN khác gì một quán cà phê thông thường?', answer: 'KÉN không chỉ bán cà phê mà bán quyền sử dụng không gian và thời gian. Bạn có thể chọn làm việc yên tĩnh ở KÉN Tập Trung hoặc chợp mắt trong kén riêng ở KÉN Tái Tạo, tất cả ở cùng một điểm đến.' },
     { question: 'Tôi có cần đặt trước khi ghé KÉN Kết Nối không?', answer: 'Không. KÉN Kết Nối là khu café ghé trực tiếp, không nhận đặt bàn trực tuyến. Những khu vực làm việc hoặc nghỉ riêng mới sử dụng gói đặt chỗ.' },
     { question: 'Giá đặt chỗ được tính như thế nào?', answer: 'Bàn chung tính theo người và số giờ; phòng họp và kén nghỉ tính theo gói không gian. Các dịch vụ mua thêm sẽ được tách riêng.' },
-    { question: 'KÉN Tái Tạo có giới hạn độ tuổi không?', answer: 'KÉN Tái Tạo dành cho người từ đủ 18 tuổi. Vui lòng kiểm tra các điều khoản trước khi đặt.' },
     { question: 'Nếu tôi đặt chỗ nhưng chưa thanh toán thì sao?', answer: 'Xác nhận tóm tắt đặt chỗ mới giữ chỗ trong 15 phút. Nếu không hoàn tất thanh toán trong hạn, chỗ không còn được giữ.' },
     { question: 'Tôi có thể đặt nhiều không gian cùng lúc không?', answer: 'Bạn cần kiểm tra lịch trống và gói áp dụng cho từng không gian. Việc chọn khung giờ chưa tạo đơn đặt chỗ.' }
   ];
