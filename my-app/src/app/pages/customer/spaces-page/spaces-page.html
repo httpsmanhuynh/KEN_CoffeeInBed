@@ -1,11 +1,9 @@
 <main class="ken-spaces-page">
-
   <section class="ks-hero">
     <div class="ks-container">
-
       <div class="ks-hero-intro">
         <div>
-          <h1>Một góc vừa đủ,<br>cho nhịp riêng của bạn.</h1>
+          <h1>Một góc vừa đủ,<br />cho nhịp riêng của bạn.</h1>
         </div>
       </div>
 
@@ -13,7 +11,7 @@
         <img
           src="/images/ken-figma/spaces-hero.png"
           alt="Không gian café KÉN với bàn gỗ, cây xanh và ánh sáng tự nhiên"
-        >
+        />
       </figure>
 
       <div class="ks-zones" aria-label="Ba khu không gian KÉN">
@@ -81,7 +79,7 @@
           *ngFor="let space of filteredSpaces; trackBy: trackBySpace"
           [id]="'space-' + space.id"
         >
-          <img class="ks-card-photo" [src]="space.image" [alt]="space.title">
+          <img class="ks-card-photo" [src]="space.image" [alt]="space.title" />
 
           <div class="ks-card-body">
             <div class="ks-card-heading">
@@ -113,17 +111,12 @@
 
               <ng-template #detailOnly>
                 <details class="ks-expand">
-                  <summary class="ks-outline-button">
-                    Xem chi tiết
-                  </summary>
+                  <summary class="ks-outline-button">Xem chi tiết</summary>
                   <div class="ks-expanded-content">
                     <strong>{{ space.capacity }}</strong>
                     <p>{{ space.description }}</p>
                     <p>{{ space.price }}</p>
-                    <p>
-                      Để được tư vấn thêm về không gian này,
-                      vui lòng liên hệ KÉN.
-                    </p>
+                    <p>Để được tư vấn thêm về không gian này, vui lòng liên hệ KÉN.</p>
                     <a routerLink="/support">Đến Trung tâm hỗ trợ</a>
                   </div>
                 </details>
@@ -150,5 +143,4 @@
       </div>
     </div>
   </section>
-
 </main>

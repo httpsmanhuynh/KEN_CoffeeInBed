@@ -3,7 +3,12 @@ import { AuthService } from '../../../core/auth.service';
 
 export type AccountSection = 'points' | 'coins' | 'bookings' | 'reschedule' | 'account';
 
-interface SidebarItem { key: AccountSection; label: string; path: string; icon: string; }
+interface SidebarItem {
+  key: AccountSection;
+  label: string;
+  path: string;
+  icon: string;
+}
 
 const TIER_LABEL: Record<string, string> = {
   BASIC: 'Mới',
@@ -72,10 +77,15 @@ export class AccountSidebar {
   }
 
   readonly items: SidebarItem[] = [
-    { key: 'points',     label: 'KÉN Điểm',        path: '/points-tier',       icon: 'sparkles' },
-    { key: 'coins',      label: 'KÉN Coins',       path: '/coins-rewards',     icon: 'coins' },
-    { key: 'bookings',   label: 'Lịch sử đặt chỗ', path: '/booking-list',      icon: 'calendar-check' },
-    { key: 'reschedule', label: 'Đổi / Huỷ lịch',  path: '/booking-reschedule', icon: 'calendar-clock' },
-    { key: 'account',    label: 'Tài khoản',       path: '/user-profile',      icon: 'user-round' },
+    { key: 'points', label: 'KÉN Điểm', path: '/points-tier', icon: 'sparkles' },
+    { key: 'coins', label: 'KÉN Coins', path: '/coins-rewards', icon: 'coins' },
+    { key: 'bookings', label: 'Lịch sử đặt chỗ', path: '/booking-list', icon: 'calendar-check' },
+    {
+      key: 'reschedule',
+      label: 'Đổi / Huỷ lịch',
+      path: '/booking-reschedule',
+      icon: 'calendar-clock',
+    },
+    { key: 'account', label: 'Tài khoản', path: '/user-profile', icon: 'user-round' },
   ];
 }

@@ -16,7 +16,9 @@ export class SuggestionPopupService {
 
   show(): void {
     this.isOpen.set(true);
-    this.openVersion.update(version => version + 1);
+    this.openVersion.update((version) => version + 1);
   }
-  hide(): void { this.isOpen.set(false); }
+  hide(): void {
+    this.isOpen.set(false);
+  }
 }

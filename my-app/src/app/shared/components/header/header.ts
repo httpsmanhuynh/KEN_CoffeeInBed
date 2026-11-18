@@ -1,4 +1,13 @@
-import { ChangeDetectorRef, Component, DestroyRef, ElementRef, HostListener, Input, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  ElementRef,
+  HostListener,
+  Input,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
@@ -85,8 +94,9 @@ export class Header implements OnInit {
     if (item.path === '/spaces') {
       return url === '/spaces' || url.startsWith('/spaces/');
     }
-    const paths = item.match ?? (item.path ? [item.path] : item.children?.map(c => c.path) ?? []);
-    return paths.some(p => url === p || (p !== '/' && url.startsWith(p + '/')));
+    const paths =
+      item.match ?? (item.path ? [item.path] : (item.children?.map((c) => c.path) ?? []));
+    return paths.some((p) => url === p || (p !== '/' && url.startsWith(p + '/')));
   }
 
   // Chuột: hover mở/đóng có vùng đệm + trễ đóng nhẹ để không tụt khi rê xuống menu con.
@@ -165,7 +175,9 @@ export class Header implements OnInit {
     if (!this.host.nativeElement.contains(e.target as Node)) this.closeAll();
   }
   @HostListener('document:keydown.escape')
-  onEsc(): void { this.closeAll(); }
+  onEsc(): void {
+    this.closeAll();
+  }
 }
 
 export { Header as HeaderComponent };

@@ -76,7 +76,7 @@
   font-size: 14px;
   font-weight: 600;
   white-space: nowrap;
-  transition: background .2s;
+  transition: background 0.2s;
 }
 
 .kc-back-link img {
@@ -116,7 +116,7 @@
   font-size: 44px;
   font-weight: 700;
   line-height: 1.18;
-  letter-spacing: -.02em;
+  letter-spacing: -0.02em;
 }
 
 .kc-lead {
@@ -329,7 +329,7 @@
   font-weight: 600;
   cursor: pointer;
   list-style: none;
-  transition: background .2s;
+  transition: background 0.2s;
 }
 
 .kc-menu-button::-webkit-details-marker {
@@ -463,4 +463,7 @@
 }
 
 /* KEN_CTA_NAV_FIX_V1 */
-.kc-menu-action a.kc-menu-button { color: inherit; text-decoration: none; }
+.kc-menu-action a.kc-menu-button {
+  color: inherit;
+  text-decoration: none;
+}

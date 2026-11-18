@@ -106,8 +106,7 @@ export class SupportComponent implements OnInit {
     const query = this.searchQuery.toLowerCase().trim();
     return this.faqItems.filter(
       (item) =>
-        item.question.toLowerCase().includes(query) ||
-        item.answer.toLowerCase().includes(query),
+        item.question.toLowerCase().includes(query) || item.answer.toLowerCase().includes(query),
     );
   }
 
@@ -154,4 +153,3 @@ export class SupportComponent implements OnInit {
     return '';
   }
 }
-

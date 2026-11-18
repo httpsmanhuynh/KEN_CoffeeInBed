@@ -22,14 +22,16 @@ describe('App', () => {
   async function configure(authenticatedUser: AuthenticatedUser | null = null): Promise<void> {
     await TestBed.configureTestingModule({
       imports: [AppModule],
-      providers: [{
-        provide: AuthService,
-        useValue: {
-          isAuthenticated: authenticatedUser !== null,
-          user: authenticatedUser,
-          loadSession: () => of(authenticatedUser),
+      providers: [
+        {
+          provide: AuthService,
+          useValue: {
+            isAuthenticated: authenticatedUser !== null,
+            user: authenticatedUser,
+            loadSession: () => of(authenticatedUser),
+          },
         },
-      }],
+      ],
     }).compileComponents();
   }
 

@@ -36,7 +36,12 @@ describe('SpacesPage', () => {
     expect(page.filteredSpaces.map((s) => s.id)).toEqual(['connect']);
 
     page.selectZone('focus');
-    expect(page.filteredSpaces.map((s) => s.id)).toEqual(['cowork', 'focus', 'meeting', 'boardroom']);
+    expect(page.filteredSpaces.map((s) => s.id)).toEqual([
+      'cowork',
+      'focus',
+      'meeting',
+      'boardroom',
+    ]);
 
     page.selectZone('rest');
     expect(page.filteredSpaces.map((s) => s.id)).toEqual(['single', 'double', 'private']);

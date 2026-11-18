@@ -43,21 +43,23 @@ describe('Header', () => {
     fixture.detectChanges();
     (el().querySelector('.account__toggle') as HTMLButtonElement).click();
     fixture.detectChanges();
-    const items = Array.from(el().querySelectorAll('.sub--account li')).map(item => item.textContent?.trim());
+    const items = Array.from(el().querySelectorAll('.sub--account li')).map((item) =>
+      item.textContent?.trim(),
+    );
     expect(items).toEqual(['Tài khoản', 'Lịch sử đặt chỗ', 'Đăng xuất']);
     expect(el().querySelector('.sub--account button')).toBeTruthy();
   });
 
   it('uses the ▾ character for the three dropdown items, like the design', () => {
     fixture.detectChanges();
-    const carets = Array.from(el().querySelectorAll('.caret')).map(c => c.textContent);
+    const carets = Array.from(el().querySelectorAll('.caret')).map((c) => c.textContent);
     expect(carets).toEqual(['▾', '▾', '▾']);
-    expect(MAIN_NAV.filter(i => i.children).length).toBe(3);
+    expect(MAIN_NAV.filter((i) => i.children).length).toBe(3);
   });
 
   it('highlights Menu and Top Trending as separate header links', async () => {
-    const menu = MAIN_NAV.find(i => i.label === 'Menu')!;
-    const trending = MAIN_NAV.find(i => i.label === 'Top Trending')!;
+    const menu = MAIN_NAV.find((i) => i.label === 'Menu')!;
+    const trending = MAIN_NAV.find((i) => i.label === 'Top Trending')!;
     const router = TestBed.inject(Router);
     await router.navigateByUrl('/menu');
     expect(component.isActive(menu)).toBe(true);
@@ -72,15 +74,16 @@ describe('Header', () => {
 
   it('includes Top Trending as a direct header link', () => {
     fixture.detectChanges();
-    const link = Array.from(el().querySelectorAll<HTMLAnchorElement>('.nav__link'))
-      .find(anchor => anchor.textContent?.trim() === 'Top Trending');
+    const link = Array.from(el().querySelectorAll<HTMLAnchorElement>('.nav__link')).find(
+      (anchor) => anchor.textContent?.trim() === 'Top Trending',
+    );
 
     expect(link?.getAttribute('href')).toBe('/top-trending');
   });
 
   it('does not open the trending suggestion when Menu is clicked', () => {
     const popup = TestBed.inject(SuggestionPopupService);
-    const menu = MAIN_NAV.find(item => item.label === 'Menu')!;
+    const menu = MAIN_NAV.find((item) => item.label === 'Menu')!;
 
     component.onNavClick(menu);
 

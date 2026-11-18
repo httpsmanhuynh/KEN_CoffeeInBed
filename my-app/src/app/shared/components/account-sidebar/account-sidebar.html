@@ -4,7 +4,14 @@
       @if (displayAvatar) {
         <img class="avatar__photo" [src]="displayAvatar" alt="Ảnh đại diện" />
       } @else {
-        <lucide-icon class="avatar__default-icon" name="user-round" [size]="24" [strokeWidth]="1.8" color="#4A3123" aria-hidden="true"></lucide-icon>
+        <lucide-icon
+          class="avatar__default-icon"
+          name="user-round"
+          [size]="24"
+          [strokeWidth]="1.8"
+          color="#4A3123"
+          aria-hidden="true"
+        ></lucide-icon>
       }
     </div>
     <p class="profile__name">{{ displayName }}</p>
@@ -16,11 +23,22 @@
 
   <nav class="menu">
     @for (it of items; track it.key) {
-      <a class="item" [class.is-active]="it.key === active" [routerLink]="it.path"
-         [attr.aria-current]="it.key === active ? 'page' : null">
-        <lucide-icon [name]="it.icon" [size]="20" [strokeWidth]="1.8" aria-hidden="true"></lucide-icon>
+      <a
+        class="item"
+        [class.is-active]="it.key === active"
+        [routerLink]="it.path"
+        [attr.aria-current]="it.key === active ? 'page' : null"
+      >
+        <lucide-icon
+          [name]="it.icon"
+          [size]="20"
+          [strokeWidth]="1.8"
+          aria-hidden="true"
+        ></lucide-icon>
         <span>{{ it.label }}</span>
-        @if (it.key === active) { <i class="item__bar" aria-hidden="true"></i> }
+        @if (it.key === active) {
+          <i class="item__bar" aria-hidden="true"></i>
+        }
       </a>
     }
     <button type="button" class="item item--logout" (click)="requestLogout()">

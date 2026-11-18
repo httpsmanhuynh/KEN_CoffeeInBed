@@ -14,9 +14,14 @@ export class Footer {
 
   /** Logo đối tác: đặt file vào public/images/payments/<id>.png */
   readonly payments = [
-    { id: 'momo', name: 'MoMo' }, { id: 'acb', name: 'ACB' }, { id: 'hsbc', name: 'HSBC' },
-    { id: 'vietcombank', name: 'Vietcombank' }, { id: 'mb', name: 'MB' }, { id: 'citibank', name: 'Citibank' },
-    { id: 'vietinbank', name: 'VietinBank' }, { id: 'tpbank', name: 'TPBank' }, { id: 'bidv', name: 'BIDV' },
+    { id: 'momo', name: 'MoMo' },
+    { id: 'acb', name: 'ACB' },
+    { id: 'hsbc', name: 'HSBC' },
+    { id: 'vietcombank', name: 'Vietcombank' },
+    { id: 'mb', name: 'MB' },
+    { id: 'citibank', name: 'Citibank' },
+    { id: 'vietinbank', name: 'VietinBank' },
+    { id: 'tpbank', name: 'TPBank' },
+    { id: 'bidv', name: 'BIDV' },
   ];
-
 }

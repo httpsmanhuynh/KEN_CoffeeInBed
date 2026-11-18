@@ -28,7 +28,7 @@ export class App implements OnInit, OnDestroy {
 
   constructor() {
     this.auth.loadSession().subscribe({
-      error: error => console.error('Không thể kiểm tra phiên đăng nhập.', error),
+      error: (error) => console.error('Không thể kiểm tra phiên đăng nhập.', error),
     });
   }
 

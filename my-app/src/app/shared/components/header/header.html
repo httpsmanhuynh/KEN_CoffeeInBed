@@ -89,7 +89,11 @@
             aria-label="Tài khoản của tôi"
             (click)="closeAll()"
           >
-            <img [src]="displayAvatar" alt="" [class.has-photo]="displayAvatar !== '/images/figma/nguoi-dung.svg'" />
+            <img
+              [src]="displayAvatar"
+              alt=""
+              [class.has-photo]="displayAvatar !== '/images/figma/nguoi-dung.svg'"
+            />
           </a>
           <a class="account__name" routerLink="/user-profile" (click)="closeAll()">{{
             displayUserName
@@ -102,13 +106,22 @@
             [attr.aria-expanded]="accountOpen"
             (click)="accountOpen = !accountOpen"
           >
-            <lucide-icon name="chevron-down" [size]="16" [strokeWidth]="1.8" color="#4A3123"></lucide-icon>
+            <lucide-icon
+              name="chevron-down"
+              [size]="16"
+              [strokeWidth]="1.8"
+              color="#4A3123"
+            ></lucide-icon>
           </button>
           @if (accountOpen) {
             <ul class="sub sub--account">
               <li><a routerLink="/user-profile" (click)="closeAll()">Tài khoản</a></li>
               <li><a routerLink="/booking-list" (click)="closeAll()">Lịch sử đặt chỗ</a></li>
-              <li><button type="button" (click)="requestLogout()" [disabled]="loggingOut">{{ loggingOut ? 'Đang đăng xuất…' : 'Đăng xuất' }}</button></li>
+              <li>
+                <button type="button" (click)="requestLogout()" [disabled]="loggingOut">
+                  {{ loggingOut ? 'Đang đăng xuất…' : 'Đăng xuất' }}
+                </button>
+              </li>
             </ul>
           }
         </div>

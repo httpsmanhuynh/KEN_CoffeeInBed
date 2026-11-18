@@ -43,4 +43,3 @@ describe('SupportComponent', () => {
     expect(component.supportForm.get('fullName')?.value).toBeNull();
   });
 });
-

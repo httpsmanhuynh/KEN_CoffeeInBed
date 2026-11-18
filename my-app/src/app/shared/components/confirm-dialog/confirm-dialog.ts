@@ -15,8 +15,8 @@ export interface ConfirmDialogConfig {
   selector: 'app-confirm-dialog',
   templateUrl: './confirm-dialog.html',
   styleUrls: ['./confirm-dialog.css'],
-  standalone: true,        // Thêm standalone để có thể đưa vào mảng `imports`
-  imports: [CommonModule]  // Sửa lỗi NG8002 cho [ngClass] và *ngIf
+  standalone: true, // Thêm standalone để có thể đưa vào mảng `imports`
+  imports: [CommonModule], // Sửa lỗi NG8002 cho [ngClass] và *ngIf
 })
 export class ConfirmDialog {
   @Input() isOpen = false;
@@ -25,7 +25,7 @@ export class ConfirmDialog {
     title: 'Xác nhận đăng xuất',
     message: 'Bạn có chắc chắn muốn đăng xuất?',
     confirmText: 'Đăng xuất',
-    cancelText: 'Hủy'
+    cancelText: 'Hủy',
   };
 
   @Output() confirmed = new EventEmitter<void>();
