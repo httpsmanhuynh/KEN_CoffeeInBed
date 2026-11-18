@@ -63,6 +63,25 @@ function tryInjectCustomerApi(): CustomerApiService | null {
   }
 }
 
+export interface UserVoucherOption {
+  code: string;
+  desc: string;
+  used: boolean;
+  discountType: 'PERCENT' | 'FIXED_AMOUNT' | string;
+  discountValue: number;
+  minOrderValue: number;
+  maxDiscount: number | null;
+  validFrom?: string;
+  validTo?: string;
+  usageCount?: number;
+  usageLimit?: number;
+}
+
+export interface UsableVoucherView extends UserVoucherOption {
+  estimatedDiscount: number;
+  isBest: boolean;
+}
+
 @Component({ selector: 'app-ken-booking-review', standalone: false, templateUrl: './booking-review.html', styleUrl: './booking-review.css' })
 export class KenBookingReviewPage {
   private readonly api = tryInjectCustomerApi();
@@ -72,6 +91,8 @@ export class KenBookingReviewPage {
   private readonly cdr = (() => { try { return inject(ChangeDetectorRef); } catch { return { markForCheck: () => {} } as ChangeDetectorRef; } })();
   appliedVoucherCode = '';
   appliedVoucherDiscount = 0;
+  userVoucherList: UserVoucherOption[] = [];
+  voucherDropdownOpen = false;
   checkingSession = false;
   submitting = false;
   readonly money = kenMoney;
@@ -85,7 +106,7 @@ export class KenBookingReviewPage {
   }
 
   get finalTotal(): number {
-    return Math.max(0, this.state.total - this.appliedVoucherDiscount);
+    return Math.max(0, this.state.subtotal - this.memberDiscount - this.appliedVoucherDiscount);
   }
 
   ngOnInit(): void {
@@ -127,10 +148,15 @@ export class KenBookingReviewPage {
   setContact(key: 'fullName' | 'phone' | 'email' | 'note' | 'voucher', value: string): void {
     this.state.set({ [key]: value } as Pick<KenBookingDraft, typeof key>);
     this.feedback = '';
-    if (key === 'voucher' && !value.trim()) {
+    if (key === 'voucher' && value.trim().toUpperCase() !== this.appliedVoucherCode.toUpperCase()) {
+      const hadApplied = !!(this.appliedVoucherCode || this.appliedVoucherDiscount > 0);
       this.appliedVoucherCode = '';
       this.appliedVoucherDiscount = 0;
+      this.voucherSuccess = false;
       this.voucherMessage = '';
+      if (hadApplied) {
+        this.state.clearAppliedVoucher();
+      }
     }
   }
   setAgreed(value: boolean): void { this.state.set({ agreed: value }); this.feedback = ''; }
@@ -304,6 +330,75 @@ export class KenBookingReviewPage {
     );
   }
 
+  toggleVoucherDropdown(): void {
+    this.voucherDropdownOpen = !this.voucherDropdownOpen;
+  }
+
+  get usableVoucherList(): UsableVoucherView[] {
+    const subtotal = this.state.subtotal;
+    const nowMs = Date.now();
+    const eligible = this.userVoucherList
+      .filter((item) => this.isVoucherUsable(item, subtotal, nowMs))
+      .map((item) => ({
+        ...item,
+        estimatedDiscount: this.computeEstimatedDiscount(item, subtotal),
+        isBest: false,
+      }));
+
+    eligible.sort((a, b) => {
+      if (b.estimatedDiscount !== a.estimatedDiscount) {
+        return b.estimatedDiscount - a.estimatedDiscount;
+      }
+      const aRaw = a.discountType === 'PERCENT' ? Math.floor((subtotal * a.discountValue) / 100) : a.discountValue;
+      const bRaw = b.discountType === 'PERCENT' ? Math.floor((subtotal * b.discountValue) / 100) : b.discountValue;
+      if (aRaw !== bRaw) return aRaw - bRaw;
+      return a.code.localeCompare(b.code);
+    });
+
+    if (eligible.length > 0 && eligible[0].estimatedDiscount > 0) {
+      eligible[0].isBest = true;
+    }
+    return eligible;
+  }
+
+  private computeEstimatedDiscount(item: UserVoucherOption, subtotal: number): number {
+    if (subtotal <= 0) return 0;
+    const raw =
+      item.discountType === 'PERCENT'
+        ? Math.floor((subtotal * item.discountValue) / 100)
+        : item.discountValue;
+    const cappedByMax = item.maxDiscount && item.maxDiscount > 0 ? Math.min(raw, item.maxDiscount) : raw;
+    return Math.min(subtotal, Math.max(0, cappedByMax));
+  }
+
+  private isVoucherUsable(item: UserVoucherOption, subtotal: number, nowMs: number): boolean {
+    if (item.used) return false;
+    if (subtotal < item.minOrderValue) return false;
+    if (item.validFrom) {
+      const fromMs = new Date(item.validFrom).getTime();
+      if (Number.isFinite(fromMs) && nowMs < fromMs) return false;
+    }
+    if (item.validTo) {
+      const toMs = new Date(item.validTo).getTime();
+      if (Number.isFinite(toMs) && nowMs > toMs) return false;
+    }
+    if (
+      item.usageLimit !== undefined &&
+      item.usageCount !== undefined &&
+      item.usageCount >= item.usageLimit
+    ) {
+      return false;
+    }
+    return true;
+  }
+
+  selectVoucherItem(item: { code: string; used: boolean }): void {
+    if (item.used) return;
+    this.state.set({ voucher: item.code });
+    this.voucherDropdownOpen = false;
+    this.checkVoucher(false);
+  }
+
   checkVoucher(silent = false): void {
     const code = this.state.draft().voucher.trim();
     if (!code) { this.voucherMessage = 'Vui lòng nhập mã khuyến mãi.'; this.voucherSuccess = false; return; }
@@ -328,6 +423,7 @@ export class KenBookingReviewPage {
       next: (q) => {
         this.appliedVoucherCode = q.voucherCode || code;
         this.appliedVoucherDiscount = q.pricing?.voucherDiscount || 0;
+        this.state.applyQuoteWithVoucher(this.appliedVoucherCode, q);
         this.voucherSuccess = true;
         this.voucherMessage = 'Áp dụng thành công';
         this.cdr.markForCheck();
@@ -335,32 +431,99 @@ export class KenBookingReviewPage {
       error: (err) => {
         this.appliedVoucherCode = '';
         this.appliedVoucherDiscount = 0;
+        this.state.clearAppliedVoucher();
         this.voucherSuccess = false;
-        this.voucherMessage = silent ? '' : (err?.error?.message || 'Mã voucher không hợp lệ hoặc chưa đủ điều kiện áp dụng.');
+        const errCode = err?.error?.code;
+        const errMsg = err?.error?.message || 'Mã voucher không hợp lệ hoặc chưa đủ điều kiện áp dụng.';
+        const isUsedError = errCode === 'VOUCHER_ALREADY_USED';
+        this.voucherMessage = (!silent || isUsedError) ? errMsg : '';
         if (silent) this.state.set({ voucher: '' });
         this.cdr.markForCheck();
       },
     });
   }
 
-  /** Tự động áp dụng mã đã chọn từ trang đổi Coins, hoặc voucher chưa dùng mới đổi gần nhất trong ví. */
+  private formatVoucherDesc(v: any): string {
+    const discountPart =
+      v.discount_type === 'PERCENT'
+        ? `Giảm ${Number(v.discount_value || 0)}%`
+        : `Giảm ${this.money(Number(v.discount_value || 0))}`;
+    const minVal = Number(v.min_order_value || 0);
+    return minVal > 0 ? `${discountPart} · Đơn từ ${this.money(minVal)}` : discountPart;
+  }
+
+  /** Tải ví voucher (kèm trạng thái đã dùng/chưa dùng) và tự động áp dụng mã chưa dùng nếu phù hợp. */
   private autoApplyVoucher(): void {
-    if (this.state.draft().voucher?.trim()) {
-      this.checkVoucher(true);
-      return;
-    }
     if (!this.api) return;
     forkJoin({
       wallet: this.api.getMyVouchers().pipe(catchError(() => of(null as any))),
       vouchers: this.api.getVouchers().pipe(catchError(() => of([] as any[]))),
     }).subscribe(({ wallet, vouchers }) => {
       const list: any[] = Array.isArray(wallet) ? wallet : (wallet?.vouchers ?? []);
+      const allVouchers: any[] = Array.isArray(vouchers) ? vouchers : [];
+
+      const built: UserVoucherOption[] = [];
+      for (const v of allVouchers) {
+        if (!v?.code || (v.status && v.status !== 'ACTIVE')) continue;
+        const baseMeta = {
+          code: String(v.code),
+          desc: this.formatVoucherDesc(v),
+          discountType: v.discount_type || 'FIXED_AMOUNT',
+          discountValue: Number(v.discount_value || 0),
+          minOrderValue: Number(v.min_order_value || 0),
+          maxDiscount: v.max_discount != null ? Number(v.max_discount) : null,
+          validFrom: v.valid_from,
+          validTo: v.valid_to,
+          usageCount: v.usage_count != null ? Number(v.usage_count) : undefined,
+          usageLimit: v.usage_limit != null ? Number(v.usage_limit) : undefined,
+        };
+        const isCoin = Number(v.coins_cost || 0) > 0;
+        if (!isCoin) {
+          built.push({
+            ...baseMeta,
+            used: Boolean(v.used_by_user),
+          });
+        } else {
+          const owned = list.filter((w) => String(w.voucher_id) === String(v._id));
+          if (owned.length > 0 || Number(v.owned_unused_count || 0) > 0 || v.used_by_user) {
+            const hasUnused =
+              owned.length > 0
+                ? owned.some((w) => !w.used_booking_id)
+                : Number(v.owned_unused_count || 0) > 0;
+            built.push({
+              ...baseMeta,
+              used: !hasUnused,
+            });
+          }
+        }
+      }
+      built.sort((a, b) => Number(a.used) - Number(b.used));
+      this.userVoucherList = built;
+
+      const draftCode = this.state.draft().voucher?.trim();
+      if (draftCode) {
+        const matched = built.find((item) => item.code.toUpperCase() === draftCode.toUpperCase());
+        if (matched?.used) {
+          this.appliedVoucherCode = '';
+          this.appliedVoucherDiscount = 0;
+          this.voucherSuccess = false;
+          this.voucherMessage = 'Mã ưu đãi này đã được bạn sử dụng.';
+          this.state.set({ voucher: '' });
+          this.state.clearAppliedVoucher();
+          this.cdr.markForCheck();
+          return;
+        }
+        this.cdr.markForCheck();
+        this.checkVoucher(true);
+        return;
+      }
+
       const now = Date.now();
       for (const item of list) {
         if (item.used_booking_id) continue;
         const redeemedAt = new Date(item.redeemed_at).getTime();
         if (Number.isFinite(redeemedAt) && now - redeemedAt > 30 * 24 * 3600 * 1000) continue;
-        const v = (vouchers as any[]).find((x) => String(x._id) === String(item.voucher_id));
+        const v = allVouchers.find((x) => String(x._id) === String(item.voucher_id));
         if (v?.code) {
           this.state.set({ voucher: v.code });
           this.cdr.markForCheck();
@@ -368,6 +531,7 @@ export class KenBookingReviewPage {
           return;
         }
       }
+      this.cdr.markForCheck();
     });
   }
   confirm(): void {
@@ -442,13 +606,15 @@ export class KenBookingReviewPage {
             guestCount: d.guests,
             inclusions: mappedInclusions,
             addons: mappedAddons,
-            voucherCode: d.voucher.trim() || undefined,
+            voucherCode: this.appliedVoucherCode || undefined,
           });
         }),
       ).subscribe({
         next: (booking) => {
           this.submitting = false;
+          this.state.syncQuoteFromBooking(booking);
           this.state.set({
+            voucher: '',
             holdUntil: booking.payment_expires_at ? new Date(booking.payment_expires_at).getTime() : Date.now() + 15 * 60000,
             createdBookingId: booking._id,
             createdBookingCode: booking.booking_code,

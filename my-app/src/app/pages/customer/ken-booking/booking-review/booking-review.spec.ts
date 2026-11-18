@@ -81,4 +81,33 @@ describe('KenBookingReviewPage', () => {
     expect(state.draft().fullName).toBe(user.fullName);
     expect(state.draft().holdUntil).not.toBeNull();
   });
+
+  it('filters usable vouchers and pushes the best-value voucher to the top', () => {
+    const state = new KenBookingState();
+    const router = {} as unknown as Router;
+    const auth = { ensureSession: () => of(null) } as unknown as AuthService;
+    const page = new KenBookingReviewPage(state, router, auth);
+    // Stub subtotal = 70,000đ
+    Object.defineProperty(state, 'subtotal', { get: () => 70000 });
+
+    page.userVoucherList = [
+      { code: 'KEN30K', desc: 'Giảm 30.000đ', used: false, discountType: 'FIXED_AMOUNT', discountValue: 30000, minOrderValue: 0, maxDiscount: null },
+      { code: 'KEN7PCT', desc: 'Giảm 7%', used: false, discountType: 'PERCENT', discountValue: 7, minOrderValue: 0, maxDiscount: null },
+      { code: 'KEN50K', desc: 'Giảm 50.000đ', used: false, discountType: 'FIXED_AMOUNT', discountValue: 50000, minOrderValue: 0, maxDiscount: null },
+      { code: 'FREE100', desc: 'Giảm 100%', used: false, discountType: 'PERCENT', discountValue: 100, minOrderValue: 0, maxDiscount: null },
+      { code: 'WELCOME10', desc: 'Giảm 10% · Đơn từ 100.000đ', used: false, discountType: 'PERCENT', discountValue: 10, minOrderValue: 100000, maxDiscount: null },
+      { code: 'USED50K', desc: 'Giảm 50.000đ', used: true, discountType: 'FIXED_AMOUNT', discountValue: 50000, minOrderValue: 0, maxDiscount: null },
+    ];
+
+    const usable = page.usableVoucherList;
+    expect(usable.map((v) => v.code)).toEqual(['FREE100', 'KEN50K', 'KEN30K', 'KEN7PCT']);
+    expect(usable[0].isBest).toBe(true);
+    expect(usable[0].estimatedDiscount).toBe(70000);
+    expect(usable[1].isBest).toBe(false);
+    expect(usable[1].estimatedDiscount).toBe(50000);
+
+    expect(page.voucherDropdownOpen).toBe(false);
+    page.toggleVoucherDropdown();
+    expect(page.voucherDropdownOpen).toBe(true);
+  });
 });

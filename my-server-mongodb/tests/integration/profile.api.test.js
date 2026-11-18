@@ -665,7 +665,7 @@ test('TC-PF-05..15\tAUTO-PF-02: Đổi SĐT (/me/phone), cập nhật họ tên 
   }
 });
 
-test('DELETE /api/profile/me: Xóa tài khoản trực tiếp trong DB và hủy session', async () => {
+test('DELETE /api/profile/me: Khóa mềm tài khoản trong DB để bảo lưu lịch sử và hủy session', async () => {
   const db = createProfileTestDb();
   const srv = await startTestServer(db);
   try {
@@ -675,7 +675,9 @@ test('DELETE /api/profile/me: Xóa tài khoản trực tiếp trong DB và hủy
     const res = await srv.request('DELETE', '/api/profile/me', { cookie });
     assert.equal(res.status, 200);
     assert.equal(res.body.deleted, true);
-    assert.equal(db._raw.users.some((u) => String(u._id) === String(user._id)), false);
+    const storedUser = db._raw.users.find((u) => String(u._id) === String(user._id));
+    assert.equal(storedUser.status, 'LOCKED');
+    assert.ok(storedUser.deleted_at instanceof Date);
 
     // Session cũ không còn hiệu lực
     const meAfter = await srv.request('GET', '/api/profile', { cookie });

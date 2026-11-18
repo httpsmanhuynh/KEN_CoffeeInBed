@@ -1034,7 +1034,56 @@ router.get(
     const db = req.app.locals.db;
     const filter = req.session?.user?.role === 'ADMIN' && req.query.all === 'true' ? {} : { status: 'ACTIVE' };
     const vouchers = await db.collection('vouchers').find(filter).toArray();
-    res.json(vouchers);
+
+    const userIdStr = req.session?.user?.id;
+    if (!userIdStr || !ObjectId.isValid(userIdStr)) {
+      return res.json(vouchers);
+    }
+
+    const userOid = new ObjectId(userIdStr);
+    let usedGeneralIds = new Set();
+    let userVouchers = [];
+    try {
+      const [userBookings, uvList] = await Promise.all([
+        db
+          .collection('bookings')
+          .find({
+            user_id: userOid,
+            voucher_usage_released: { $ne: true },
+            status: { $in: ['PENDING_PAYMENT', 'CONFIRMED', 'CHECKED_IN', 'CHECKED_OUT', 'NO_SHOW'] },
+          })
+          .toArray(),
+        db.collection('user_vouchers').find({ user_id: userOid }).toArray(),
+      ]);
+      usedGeneralIds = new Set(
+        userBookings.filter((b) => b.voucher_id).map((b) => String(b.voucher_id)),
+      );
+      userVouchers = Array.isArray(uvList) ? uvList : [];
+    } catch (_) {
+      return res.json(vouchers);
+    }
+
+    const enriched = vouchers.map((v) => {
+      const vid = String(v._id);
+      const isCoinVoucher = Number(v.coins_cost || 0) > 0;
+      if (isCoinVoucher) {
+        const owned = userVouchers.filter((uv) => String(uv.voucher_id) === vid);
+        const unusedCount = owned.filter((uv) => !uv.used_booking_id).length;
+        return {
+          ...v,
+          used_by_user: owned.length > 0 && unusedCount === 0,
+          owned_unused_count: unusedCount,
+        };
+      }
+      const usedGeneral = usedGeneralIds.has(vid);
+      return {
+        ...v,
+        used_by_user: usedGeneral,
+        owned_unused_count: usedGeneral ? 0 : 1,
+      };
+    });
+
+    res.json(enriched);
   }),
 );
 

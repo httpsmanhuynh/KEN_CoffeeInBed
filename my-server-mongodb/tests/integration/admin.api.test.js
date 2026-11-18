@@ -132,6 +132,7 @@ function runAggregate(cols, name, pipeline) {
         addon: b.addon_total ?? b.addons_total ?? 0,
         voucherDiscount: b.voucher_discount ?? 0,
         tierDiscount: b.tier_discount ?? 0,
+        discountAmount: b.discount_amount ?? 0,
       };
     });
   }
@@ -147,13 +148,17 @@ function runAggregate(cols, name, pipeline) {
   const groupStage = pipeline.find((st) => st.$group);
   if (name === 'bookings' && groupStage && groupStage.$group._id === '$user_id') {
     const matched = rows.filter((b) => matches(b, firstMatch));
+    const paidStatuses = ['CONFIRMED', 'CHECKED_IN', 'CHECKED_OUT', 'NO_SHOW'];
     const map = new Map();
     for (const b of matched) {
       const k = String(b.user_id);
-      const cur = map.get(k) || { _id: b.user_id, bookingCount: 0, lastBookingAt: null };
+      const cur = map.get(k) || { _id: b.user_id, bookingCount: 0, lastBookingAt: null, totalSpent: 0 };
       cur.bookingCount += 1;
       if (!cur.lastBookingAt || new Date(b.created_at) > new Date(cur.lastBookingAt)) {
         cur.lastBookingAt = b.created_at;
+      }
+      if (paidStatuses.includes(b.status)) {
+        cur.totalSpent += Number(b.final_amount) || 0;
       }
       map.set(k, cur);
     }

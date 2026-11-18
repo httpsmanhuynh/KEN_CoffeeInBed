@@ -58,8 +58,10 @@ export class AccountSidebar {
 
   get displayTier(): string {
     if (this.tier) return this.tier;
-    const pts = this.auth?.user?.tierPoints ?? 0;
-    let code = this.auth?.user?.membershipTier || 'BASIC';
+    const user = this.auth?.user;
+    if (!user) return TIER_LABEL['BASIC'];
+    const pts = Number(user.tierPoints ?? 0) || 0;
+    let code = 'BASIC';
     if (pts >= 10000) code = 'DIAMOND';
     else if (pts >= 5000) code = 'GOLD';
     else if (pts >= 1000) code = 'SILVER';

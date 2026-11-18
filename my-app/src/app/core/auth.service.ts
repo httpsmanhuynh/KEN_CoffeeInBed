@@ -16,6 +16,7 @@ export interface AuthenticatedUser {
   fullName: string;
   phone: string;
   email: string | null;
+  dateOfBirth?: string | null;
   role: string;
   twoFactorEnabled: boolean;
   membershipTier: string;
@@ -51,11 +52,11 @@ export class AuthService {
 
   private normalizeUser(user: AuthenticatedUser | null): AuthenticatedUser | null {
     if (!user) return null;
-    const pts = Number(user.tierPoints || 0);
+    const pts = Number(user.tierPoints ?? 0) || 0;
     if (pts >= 10000) return { ...user, membershipTier: 'DIAMOND' };
     if (pts >= 5000) return { ...user, membershipTier: 'GOLD' };
     if (pts >= 1000) return { ...user, membershipTier: 'SILVER' };
-    return user;
+    return { ...user, membershipTier: 'BASIC' };
   }
 
   /** Tải danh tính từ phiên cookie hiện tại; 401 chỉ có nghĩa là khách vãng lai. */

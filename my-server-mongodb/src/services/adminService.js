@@ -39,6 +39,7 @@ const BOOKING_SNAPSHOT = Object.freeze({
   addon: ['addon_total', 'addons_total'],
   voucherDiscount: ['voucher_discount'],
   tierDiscount: ['tier_discount'],
+  discountAmount: ['discount_amount'],
 });
 
 /* ---------------------------------------------------------------- helpers */
@@ -92,12 +93,23 @@ async function listUsers(db, query = {}) {
     col.countDocuments(filter),
   ]);
 
-  // Gắn số đơn & lần đặt gần nhất cho từng user của trang hiện tại
+  // Gắn số đơn, lần đặt gần nhất & tổng chi tiêu thực tế (PAID_STATUSES) cho từng user của trang hiện tại
   const ids = items.map((u) => u._id);
   const stats = ids.length
     ? await db.collection('bookings').aggregate([
       { $match: { user_id: { $in: ids } } },
-      { $group: { _id: '$user_id', bookingCount: { $sum: 1 }, lastBookingAt: { $max: '$created_at' } } },
+      {
+        $group: {
+          _id: '$user_id',
+          bookingCount: { $sum: 1 },
+          lastBookingAt: { $max: '$created_at' },
+          totalSpent: {
+            $sum: {
+              $cond: [{ $in: ['$status', PAID_STATUSES] }, { $ifNull: ['$final_amount', 0] }, 0],
+            },
+          },
+        },
+      },
     ]).toArray()
     : [];
   const statById = new Map(stats.map((s) => [String(s._id), s]));
@@ -110,6 +122,7 @@ async function listUsers(db, query = {}) {
         loyalty: loyaltyOf(u),
         bookingCount: s ? s.bookingCount : 0,
         lastBookingAt: s ? s.lastBookingAt : null,
+        totalSpent: s ? s.totalSpent : 0,
       };
     }),
     page, limit, total, totalPages: Math.ceil(total / limit),
@@ -236,6 +249,7 @@ async function revenueTransactions(db, range) {
       addon: snap(BOOKING_SNAPSHOT.addon),
       voucherDiscount: snap(BOOKING_SNAPSHOT.voucherDiscount),
       tierDiscount: snap(BOOKING_SNAPSHOT.tierDiscount),
+      discountAmount: snap(BOOKING_SNAPSHOT.discountAmount),
     } },
   ]).toArray();
 }

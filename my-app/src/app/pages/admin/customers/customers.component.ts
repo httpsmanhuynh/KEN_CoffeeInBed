@@ -187,7 +187,7 @@ export class CustomersComponent implements OnInit, OnDestroy {
     const tierInfo = this.resolveTierInfo(points, u.loyalty?.tier || u.tier);
 
     const totalOrders = Number(u.bookingCount ?? u.totalOrders ?? 0);
-    const totalSpend = Number(u.totalSpend ?? u.totalSpent ?? points * 10000);
+    const totalSpend = Number(u.totalSpent ?? u.totalSpend ?? points * 10000);
 
     return {
       id,

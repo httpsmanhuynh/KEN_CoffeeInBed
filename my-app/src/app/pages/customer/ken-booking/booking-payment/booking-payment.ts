@@ -62,6 +62,7 @@ export class KenBookingPaymentPage implements OnInit, OnDestroy {
     this.api?.getBookingDetail(bookingId).subscribe({
       next: (booking: ApiBooking) => {
         this.resumedAmount = booking.final_amount;
+        this.state.syncQuoteFromBooking(booking);
         const expiresMs = booking.payment_expires_at ? new Date(booking.payment_expires_at).getTime() : 0;
         const isDone = booking.status === 'CONFIRMED' || booking.status === 'CHECKED_IN' || booking.status === 'CHECKED_OUT';
         const isClosed = booking.status === 'EXPIRED' || booking.status === 'CANCELLED';
@@ -92,12 +93,14 @@ export class KenBookingPaymentPage implements OnInit, OnDestroy {
 
   startNewBooking(): void {
     this.state.set({
+      voucher: '',
       holdUntil: null,
       createdBookingId: null,
       createdBookingCode: null,
       paymentStatus: null,
       agreed: false,
     });
+    this.state.clearAppliedVoucher();
     this.router.navigateByUrl('/spaces');
   }
 

@@ -192,6 +192,17 @@ router.patch(
         return fail(res, 422, 'VALIDATION_ERROR', 'Họ tên không hợp lệ');
       set.full_name = fullName;
     }
+    if ('dateOfBirth' in req.body) {
+      const dobRaw = req.body.dateOfBirth === null ? '' : str(req.body.dateOfBirth);
+      if (!dobRaw) {
+        set.date_of_birth = null;
+      } else {
+        const dob = new Date(dobRaw);
+        if (Number.isNaN(dob.getTime()) || dob > new Date())
+          return fail(res, 422, 'VALIDATION_ERROR', 'Ngày sinh không hợp lệ');
+        set.date_of_birth = dob;
+      }
+    }
     if ('email' in req.body) {
       const email = str(req.body.email).toLowerCase();
       if (email && (!EMAIL_RE.test(email) || email.length > 100))

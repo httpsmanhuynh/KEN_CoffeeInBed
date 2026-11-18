@@ -183,7 +183,7 @@
           </div>
 
           <div class="columns-track">
-            <div *ngFor="let col of hourlyData" class="bar-col" [title]="col.fullDate + ': ' + formatMoney(col.revenue) + (col.bookingsCount ? ' (' + col.bookingsCount + ' đơn)' : '')">
+            <div *ngFor="let col of hourlyData" class="bar-col" [title]="col.fullDate + ': Thuần ' + formatMoney(col.revenue) + ' (Thu: ' + formatMoney(col.payment) + ' · Hoàn: ' + formatMoney(col.refund) + ')'">
               <span class="bar-val">{{ col.formattedRevenue }}</span>
               <div
                 class="bar-fill"

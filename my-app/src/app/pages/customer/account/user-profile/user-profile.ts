@@ -64,7 +64,11 @@ export class UserProfile implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.auth?.ensureSession().subscribe({
+    if (!this.auth) return;
+    const session$ = typeof this.auth.loadSession === 'function'
+      ? this.auth.loadSession(true)
+      : this.auth.ensureSession();
+    session$.subscribe({
       next: (user) => {
         if (!user) {
           this.router?.navigate(['/login'], { queryParams: { returnUrl: this.router?.url } });
@@ -75,16 +79,19 @@ export class UserProfile implements OnInit, OnDestroy {
           const raw = localStorage.getItem(`ken-profile-extra-${user.id}`);
           if (raw) extra = JSON.parse(raw);
         } catch {}
+        const rawDob = user.dateOfBirth || (user as any).date_of_birth || '';
+        const userDob = rawDob ? String(rawDob).slice(0, 10) : '';
         this.saved = {
           ...this.saved,
           ...extra,
           name: user.fullName,
           email: user.email || '',
+          birthday: userDob || extra.birthday || '',
         };
         this.form = { ...this.saved };
         this.phoneMasked = user.phone.length >= 4 ? `•••• •• ${user.phone.slice(-4)}` : user.phone;
-        const pts = user.tierPoints ?? 0;
-        let code = user.membershipTier || 'BASIC';
+        const pts = Number(user.tierPoints ?? 0) || 0;
+        let code = 'BASIC';
         if (pts >= 10000) code = 'DIAMOND';
         else if (pts >= 5000) code = 'GOLD';
         else if (pts >= 1000) code = 'SILVER';
@@ -92,6 +99,7 @@ export class UserProfile implements OnInit, OnDestroy {
         this.tier = TIER_LABEL[code] ?? code;
         this.points = pts.toLocaleString('vi-VN');
         this.avatarUrl = this.auth?.avatarUrl() ?? null;
+        this.cdr.markForCheck();
       },
       error: () => {},
     });
@@ -144,13 +152,18 @@ export class UserProfile implements OnInit, OnDestroy {
           }),
         );
       } catch {}
-      const payload: { fullName?: string; email?: string } = { fullName: name };
+      const payload: { fullName?: string; email?: string; dateOfBirth?: string | null } = {
+        fullName: name,
+        dateOfBirth: this.form.birthday || '',
+      };
       if (emailChanged) payload.email = email;
       this.api.updateProfile(payload).subscribe({
         next: (updated) => {
           this.ngZone.run(() => {
             this.auth?.setUser(updated);
-            this.form = { ...this.form, name: updated.fullName, email: updated.email || '' };
+            const rawUpdatedDob = updated.dateOfBirth || (updated as any).date_of_birth || '';
+            const updatedDob = rawUpdatedDob ? String(rawUpdatedDob).slice(0, 10) : this.form.birthday;
+            this.form = { ...this.form, name: updated.fullName, email: updated.email || '', birthday: updatedDob };
             this.saved = { ...this.form };
             this.messageType = 'ok';
             this.message = 'Đã cập nhật thông tin của bạn vào hệ thống.';

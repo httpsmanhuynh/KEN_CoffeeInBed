@@ -15,6 +15,8 @@ export interface ApiVoucher {
   status: string;
   valid_from?: string;
   valid_to?: string;
+  used_by_user?: boolean;
+  owned_unused_count?: number;
 }
 
 export interface ApiBooking {
@@ -94,7 +96,7 @@ export class CustomerApiService {
   constructor(private http: HttpClient) {}
 
   // ─── Profile ───
-  updateProfile(body: { fullName?: string; email?: string; currentPassword?: string }): Observable<AuthenticatedUser> {
+  updateProfile(body: { fullName?: string; email?: string; dateOfBirth?: string | null; currentPassword?: string }): Observable<AuthenticatedUser> {
     return this.http.patch<AuthenticatedUser>('/api/profile/me', body, { withCredentials: true });
   }
 

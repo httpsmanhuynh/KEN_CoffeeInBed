@@ -356,6 +356,7 @@ export class KenBookingState {
   readonly spacesSignal = signal<KenBookingSpace[]>([...KEN_BOOKING_SPACES]);
   readonly quoteSignal = signal<ApiBookingQuote | null>(null);
   readonly isQuotingSignal = signal<boolean>(false);
+  readonly appliedVoucherSignal = signal<string>('');
   private catalogSynced = false;
 
   rawSpaces: any[] = [];
@@ -935,8 +936,53 @@ export class KenBookingState {
       startAt,
       inclusions: mappedInclusions,
       addons: mappedAddons,
-      voucherCode: d.voucher.trim() || undefined,
+      voucherCode: this.appliedVoucherSignal() || undefined,
     };
+  }
+
+  applyQuoteWithVoucher(code: string, q: ApiBookingQuote): void {
+    this.appliedVoucherSignal.set(code);
+    this.quoteSignal.set(q);
+  }
+
+  clearAppliedVoucher(): void {
+    this.appliedVoucherSignal.set('');
+    this.fetchQuote();
+  }
+
+  syncQuoteFromBooking(booking: any): void {
+    if (!booking) return;
+    const prev = this.quoteSignal();
+    const subtotal = Number(booking.subtotal ?? prev?.pricing?.subtotal ?? this.subtotal);
+    const voucherDiscount = Number(booking.voucher_discount ?? 0);
+    const tierDiscount = Number(booking.tier_discount ?? 0);
+    const finalAmount = Number(booking.final_amount ?? Math.max(0, subtotal - voucherDiscount - tierDiscount));
+    this.appliedVoucherSignal.set(booking.voucher_code ? String(booking.voucher_code) : '');
+    this.quoteSignal.set({
+      spaceId: String(booking.space_id ?? prev?.spaceId ?? ''),
+      spaceName: String(booking.space_name ?? prev?.spaceName ?? this.space.name),
+      packageId: String(booking.package_id ?? prev?.packageId ?? ''),
+      packageName: String(booking.package_name ?? prev?.packageName ?? this.packageName),
+      startAt: booking.start_at ? String(booking.start_at) : (prev?.startAt ?? ''),
+      endAt: booking.end_at ? String(booking.end_at) : (prev?.endAt ?? ''),
+      durationHours: prev?.durationHours ?? this.draft().hours,
+      guestCount: Number(booking.guest_count ?? prev?.guestCount ?? this.draft().guests),
+      voucherCode: booking.voucher_code ? String(booking.voucher_code) : null,
+      tierCode: String(booking.tier_code ?? prev?.tierCode ?? this.currentTierCode),
+      tierRate:
+        booking.tier_rate !== undefined && booking.tier_rate !== null
+          ? Number(booking.tier_rate)
+          : (prev?.tierRate ?? this.currentTierRate),
+      pricing: {
+        packagePrice: Number(booking.package_price ?? prev?.pricing?.packagePrice ?? this.base),
+        inclusionSurcharge: Number(booking.inclusion_surcharge ?? prev?.pricing?.inclusionSurcharge ?? this.drinkSurcharge),
+        addonTotal: Number(booking.addon_total ?? prev?.pricing?.addonTotal ?? this.extrasTotal),
+        subtotal,
+        voucherDiscount,
+        tierDiscount,
+        finalAmount,
+      },
+    });
   }
 
   fetchQuote(): void {
@@ -1067,7 +1113,7 @@ export class KenBookingState {
     }
 
     // Huy thoi han giu cho cu neu noi dung dat cho thay doi.
-    const selectionChanged =
+    const itemSelectionChanged =
       (change.date !== undefined && change.date !== previous.date) ||
       (change.startHour !== undefined && change.startHour !== previous.startHour) ||
       (change.hours !== undefined && change.hours !== previous.hours) ||
@@ -1083,19 +1129,24 @@ export class KenBookingState {
       (change.extras !== undefined &&
        JSON.stringify(change.extras) !== JSON.stringify(previous.extras)) ||
       (change.extraVariants !== undefined &&
-       JSON.stringify(change.extraVariants) !== JSON.stringify(previous.extraVariants)) ||
-      (change.voucher !== undefined && change.voucher !== previous.voucher);
+       JSON.stringify(change.extraVariants) !== JSON.stringify(previous.extraVariants));
 
-    if (selectionChanged) {
+    if (change.voucher !== undefined && change.voucher !== previous.voucher) {
+      this.appliedVoucherSignal.set('');
+    }
+    if (itemSelectionChanged) {
       next.holdUntil = null;
       next.createdBookingId = null;
       next.createdBookingCode = null;
       next.paymentStatus = null;
+      this.quoteSignal.set(null);
     }
     if (next.startHour + next.hours > 22) next.startHour = 22 - next.hours;
     this.draft.set(next);
     try { localStorage.setItem(this.storageKey, JSON.stringify(next)); } catch { /* non-persistent preview */ }
-    this.fetchQuote();
+    if (itemSelectionChanged) {
+      this.fetchQuote();
+    }
   }
 
   maxExtraCount(id: string): number {
@@ -1556,7 +1607,7 @@ export class KenBookingState {
     if (q?.pricing?.tierDiscount !== undefined && q?.pricing?.tierDiscount !== null) {
       return q.pricing.tierDiscount;
     }
-    return Math.round(this.subtotal * this.currentTierRate);
+    return Math.floor(Math.max(0, this.subtotal - this.voucherDiscount) * this.currentTierRate);
   }
   get silverDiscount(): number {
     return this.tierDiscount;

@@ -55,11 +55,9 @@ export class PointsTierPage implements OnInit {
           this.router?.navigate(['/login'], { queryParams: { returnUrl: this.router?.url } });
           return;
         }
-        this.tierPoints = Number(user.tierPoints) || 0;
-        this.coinsBalance = Number(user.coinsBalance) || 0;
-        this.tierCode = this.tierPoints >= 1000
-          ? codeForPoints(this.tierPoints)
-          : (user.membershipTier || 'BASIC');
+        this.tierPoints = Number(user.tierPoints ?? 0) || 0;
+        this.coinsBalance = Number(user.coinsBalance ?? 0) || 0;
+        this.tierCode = codeForPoints(this.tierPoints);
         this.cdr.markForCheck();
       },
       error: () => {},

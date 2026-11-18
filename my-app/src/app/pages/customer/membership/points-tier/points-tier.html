@@ -15,8 +15,8 @@
 
       <!-- 3 thẻ tổng quan -->
       <div class="overview">
-        <article class="ov ov--points">
-          <div class="ov__head"><span class="ov__label">KÉN ĐIỂM</span><lucide-icon name="sparkles" [size]="18" [strokeWidth]="1.8" color="#A9763F"></lucide-icon></div>
+        <article class="ov ov--points ov--rank-{{ tierCode.toLowerCase() }}">
+          <div class="ov__head"><span class="ov__label">KÉN ĐIỂM</span><lucide-icon name="sparkles" [size]="18" [strokeWidth]="1.8" [color]="tierCode === 'DIAMOND' ? '#FFFFFF' : '#A9763F'"></lucide-icon></div>
           <div class="ov__value"><strong>{{ tierPoints.toLocaleString('vi-VN') }}</strong><span>KÉN Điểm xét hạng</span></div>
           <hr class="ov__line" />
           <div class="progress">
@@ -37,7 +37,7 @@
           <a class="btn-gold" routerLink="/coins-rewards">Xem Voucher →</a>
         </article>
 
-        <article class="ov ov--tier">
+        <article class="ov ov--tier ov--rank-{{ tierCode.toLowerCase() }}">
           <div class="ov__head"><span class="ov__label">HẠNG THÀNH VIÊN</span><span class="badge-now">Hạng hiện tại</span></div>
           <strong class="tier-name">{{ tierInfo.name }}</strong>
           <hr class="ov__line" />

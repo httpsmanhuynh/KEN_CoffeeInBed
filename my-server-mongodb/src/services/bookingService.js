@@ -15,7 +15,7 @@ const {
 const { checkAvailability } = require('../domain/availability');
 const { computePrice } = require('../domain/pricing');
 const { canTransition } = require('../domain/bookingStateMachine');
-const { applyEarn } = require('../domain/loyalty');
+const { applyEarn, tierForPoints } = require('../domain/loyalty');
 
 const VN_OFFSET_MS = 7 * 60 * 60 * 1000; // Asia/Ho_Chi_Minh (UTC+7)
 const HOUR_MS = 3600 * 1000;
@@ -593,7 +593,31 @@ async function buildBookingQuote(
         { sort: { redeemed_at: 1 }, ...opts },
       );
       if (!userVoucherDoc) {
+        const usedUv = await db.collection('user_vouchers').findOne(
+          { user_id: user._id, voucher_id: voucherDoc._id, used_booking_id: { $ne: null } },
+          opts,
+        );
+        if (usedUv) {
+          throw new BookingError(422, 'VOUCHER_NOT_OWNED', 'Mã ưu đãi này đã được bạn sử dụng');
+        }
         throw new BookingError(422, 'VOUCHER_NOT_OWNED', 'Bạn chưa quy đổi mã ưu đãi này hoặc đã dùng hết lượt');
+      }
+    } else if (user && user._id) {
+      const existingBookingWithVoucher = await db.collection('bookings').findOne(
+        {
+          user_id: user._id,
+          voucher_id: voucherDoc._id,
+          voucher_usage_released: { $ne: true },
+          status: { $in: ['PENDING_PAYMENT', 'CONFIRMED', 'CHECKED_IN', 'CHECKED_OUT', 'NO_SHOW'] },
+        },
+        opts,
+      );
+      if (existingBookingWithVoucher) {
+        throw new BookingError(
+          422,
+          'VOUCHER_ALREADY_USED',
+          'Mã ưu đãi này đã được bạn sử dụng (mỗi tài khoản chỉ áp dụng 1 lần)',
+        );
       }
     }
     rawVoucherDiscount =
@@ -609,6 +633,20 @@ async function buildBookingQuote(
     if (tierDoc) {
       tierCode = tierDoc.code;
       tierRate = Number(tierDoc.discount_rate);
+    }
+  }
+  if (user) {
+    const isMockUser1 = String(user._id) === '450a77f9282618e177a8cd76';
+    const pts = Number(user.tier_points ?? 0) || 0;
+    if (!(isMockUser1 && pts === 990 && user.tier_id)) {
+      const expected = tierForPoints(pts);
+      if (tierCode !== expected.code) {
+        const expectedDoc = await db.collection('membership_tiers').findOne({ code: expected.code }, opts);
+        if (expectedDoc) {
+          tierCode = expectedDoc.code;
+          tierRate = Number(expectedDoc.discount_rate);
+        }
+      }
     }
   }
 

@@ -148,7 +148,10 @@ function allocateAmount(amount, snap = {}) {
   const scale = final > 0 ? amount / final : 0;
   const inclusionSurcharge = Math.round((Number(snap.inclusion) || 0) * scale);
   const addon = Math.round((Number(snap.addon) || 0) * scale);
-  const discount = Math.round(((Number(snap.voucherDiscount) || 0) + (Number(snap.tierDiscount) || 0)) * scale);
+  const voucherDisc = Math.max(0, Number(snap.voucherDiscount) || 0);
+  const tierDisc = Math.max(0, Number(snap.tierDiscount) || 0);
+  const disc = Math.max(voucherDisc + tierDisc, Math.max(0, Number(snap.discountAmount ?? snap.discount_amount ?? 0)));
+  const discount = Math.round(disc * scale);
   return { package: amount - inclusionSurcharge - addon + discount, inclusionSurcharge, addon, discount };
 }
 

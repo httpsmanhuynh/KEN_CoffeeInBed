@@ -40,6 +40,31 @@ p, h1, h2, h3, hr { margin: 0; }
 .ov--tier { background: #E3A52F; border-color: #4A3123; color: #4A3123; }
 .ov--tier .ov__line { background: rgba(74,49,35,.19); }
 .badge-now { padding: 4px 10px; border-radius: 999px; background: rgba(74,49,35,.13); font-size: 11px; font-weight: 600; white-space: nowrap; }
+
+/* Đổi màu khung KÉN Điểm và khung Hạng thành viên theo hạng hiện tại */
+.ov--rank-basic { background: #F7EFE2; border-color: #A9763F; color: #4A3123; }
+.ov--rank-basic .ov__line { background: rgba(169, 118, 63, 0.22); }
+.ov--rank-basic .progress__bar { background: rgba(74, 49, 35, 0.12); }
+.ov--rank-basic .progress__bar i { background: #A9763F; }
+.ov--rank-basic .badge-now { background: rgba(169, 118, 63, 0.16); color: #4A3123; }
+
+.ov--rank-silver { background: #D9E1E8; border-color: #253647; color: #253647; }
+.ov--rank-silver .ov__line { background: rgba(37, 54, 71, 0.19); }
+.ov--rank-silver .progress__bar { background: rgba(37, 54, 71, 0.15); }
+.ov--rank-silver .progress__bar i { background: #253647; }
+.ov--rank-silver .badge-now { background: rgba(37, 54, 71, 0.14); color: #253647; }
+
+.ov--rank-gold { background: #E3A52F; border-color: #4A3123; color: #4A3123; }
+.ov--rank-gold .ov__line { background: rgba(74, 49, 35, 0.19); }
+.ov--rank-gold .progress__bar { background: rgba(74, 49, 35, 0.18); }
+.ov--rank-gold .progress__bar i { background: #4A3123; }
+.ov--rank-gold .badge-now { background: rgba(74, 49, 35, 0.13); color: #4A3123; }
+
+.ov--rank-diamond { background: #315E66; border-color: #1F3F45; color: #FFFFFF; }
+.ov--rank-diamond .ov__line { background: rgba(255, 255, 255, 0.22); }
+.ov--rank-diamond .progress__bar { background: rgba(255, 255, 255, 0.22); }
+.ov--rank-diamond .progress__bar i { background: #E3A52F; }
+.ov--rank-diamond .badge-now { background: rgba(255, 255, 255, 0.18); color: #FFFFFF; }
 .tier-info { display: flex; flex-direction: column; gap: 6px; width: 100%; white-space: nowrap; }
 .tier-info b { font-size: 14px; font-weight: 700; }
 .tier-info span { font-size: 12px; }

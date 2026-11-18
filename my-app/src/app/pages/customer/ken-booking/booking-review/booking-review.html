@@ -122,6 +122,56 @@
           <div><input type="text" [value]="state.draft().voucher" (input)="setContact('voucher',$any($event.target).value)" placeholder="Nhập mã ưu đãi"><button type="button" (click)="checkVoucher()">Áp dụng</button></div>
         </label>
         <small class="kf-inline-feedback" [class.kf-inline-success]="voucherSuccess" role="status" *ngIf="voucherMessage">{{ voucherMessage }}</small>
+        <div class="kf-voucher-picker" *ngIf="userVoucherList.length">
+          <button
+            type="button"
+            class="kf-voucher-trigger"
+            [class.is-open]="voucherDropdownOpen"
+            [attr.aria-expanded]="voucherDropdownOpen"
+            (click)="toggleVoucherDropdown()"
+          >
+            <span class="kf-voucher-trigger__left">
+              <strong>Voucher của tôi</strong>
+              <small *ngIf="appliedVoucherCode">
+                Đang dùng: {{ appliedVoucherCode }}<ng-container *ngIf="appliedVoucherDiscount > 0"> (−{{ money(appliedVoucherDiscount) }})</ng-container>
+              </small>
+              <small *ngIf="!appliedVoucherCode && usableVoucherList.length">
+                {{ usableVoucherList.length }} ưu đãi có thể dùng · Hời nhất: {{ usableVoucherList[0].code }}
+              </small>
+              <small *ngIf="!appliedVoucherCode && !usableVoucherList.length">
+                Chưa có ưu đãi phù hợp đơn này
+              </small>
+            </span>
+            <span class="kf-voucher-trigger__right">
+              <span class="kf-voucher-trigger__badge" *ngIf="usableVoucherList.length">{{ usableVoucherList.length }} khả dụng</span>
+              <span class="kf-voucher-trigger__chevron" aria-hidden="true">▾</span>
+            </span>
+          </button>
+
+          <div class="kf-voucher-dropdown" *ngIf="voucherDropdownOpen">
+            <ng-container *ngIf="usableVoucherList.length; else noUsableVouchers">
+              <button
+                type="button"
+                class="kf-voucher-chip"
+                *ngFor="let item of usableVoucherList"
+                [class.is-active]="appliedVoucherCode.toUpperCase() === item.code.toUpperCase()"
+                (click)="selectVoucherItem(item)"
+              >
+                <span class="kf-voucher-chip__main">
+                  <span class="kf-voucher-chip__head">
+                    <strong>{{ item.code }}</strong>
+                    <span class="kf-voucher-chip__best" *ngIf="item.isBest">Hời nhất</span>
+                  </span>
+                  <small>{{ item.desc }}<ng-container *ngIf="item.estimatedDiscount > 0"> · Tiết kiệm {{ money(item.estimatedDiscount) }}</ng-container></small>
+                </span>
+                <span class="kf-voucher-chip__status">{{ appliedVoucherCode.toUpperCase() === item.code.toUpperCase() ? 'Đang áp dụng' : 'Áp dụng' }}</span>
+              </button>
+            </ng-container>
+            <ng-template #noUsableVouchers>
+              <p class="kf-voucher-empty">Hiện chưa có voucher nào đủ điều kiện cho đơn hàng này.</p>
+            </ng-template>
+          </div>
+        </div>
         <div class="kf-sum-row"><span>Tạm tính</span><strong class="kf-large-money">{{ money(state.subtotal) }}</strong></div>
         <div class="kf-sum-row" *ngIf="memberDiscount > 0"><span>{{ tierDiscountLabel }}</span><strong>−{{ money(memberDiscount) }}</strong></div>
         <div class="kf-sum-row" *ngIf="appliedVoucherDiscount > 0"><span>Mã giảm giá ({{ appliedVoucherCode }})</span><strong>−{{ money(appliedVoucherDiscount) }}</strong></div>

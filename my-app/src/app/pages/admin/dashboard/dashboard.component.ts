@@ -8,6 +8,8 @@ export interface DailyRevenueBar {
   label: string;
   fullDate: string;
   revenue: number;
+  payment: number;
+  refund: number;
   bookingsCount: number;
   formattedRevenue: string;
   heightPercent: number;
@@ -123,7 +125,7 @@ interface DashboardApiResponse {
     availableHours?: number;
     revenue?: number | { total?: number };
   }>;
-  daily?: Array<{ date?: string; bookingsCount?: number; revenue?: number }>;
+  daily?: Array<{ date?: string; bookingsCount?: number; revenue?: number; payment?: number; refund?: number }>;
 }
 
 const STATUS_META: Array<{ key: string; label: string; color: string }> = [
@@ -183,11 +185,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   yAxisTicks = ['900.000', '600.000', '300.000', '0đ'];
   hourlyData: DailyRevenueBar[] = [
-    { label: '20/10', fullDate: '2026-10-20', revenue: 420000, bookingsCount: 4, formattedRevenue: '420.000đ', heightPercent: 47 },
-    { label: '21/10', fullDate: '2026-10-21', revenue: 360000, bookingsCount: 3, formattedRevenue: '360.000đ', heightPercent: 40 },
-    { label: '22/10', fullDate: '2026-10-22', revenue: 620000, bookingsCount: 6, formattedRevenue: '620.000đ', heightPercent: 69 },
-    { label: '23/10', fullDate: '2026-10-23', revenue: 400000, bookingsCount: 4, formattedRevenue: '400.000đ', heightPercent: 44 },
-    { label: '24/10', fullDate: '2026-10-24', revenue: 637750, bookingsCount: 7, formattedRevenue: '637.750đ', heightPercent: 71, isPeak: true },
+    { label: '20/10', fullDate: '2026-10-20', revenue: 420000, payment: 420000, refund: 0, bookingsCount: 4, formattedRevenue: '420.000đ', heightPercent: 47 },
+    { label: '21/10', fullDate: '2026-10-21', revenue: 360000, payment: 360000, refund: 0, bookingsCount: 3, formattedRevenue: '360.000đ', heightPercent: 40 },
+    { label: '22/10', fullDate: '2026-10-22', revenue: 620000, payment: 620000, refund: 0, bookingsCount: 6, formattedRevenue: '620.000đ', heightPercent: 69 },
+    { label: '23/10', fullDate: '2026-10-23', revenue: 400000, payment: 400000, refund: 0, bookingsCount: 4, formattedRevenue: '400.000đ', heightPercent: 44 },
+    { label: '24/10', fullDate: '2026-10-24', revenue: 637750, payment: 837750, refund: 200000, bookingsCount: 7, formattedRevenue: '637.750đ', heightPercent: 71, isPeak: true },
   ];
 
   donutSegments: DonutSegment[] = [];
@@ -446,6 +448,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     this.hourlyData = slicedDaily.map((d) => {
       const amount = Number(d.revenue || 0);
+      const payment = Number(d.payment || 0);
+      const refund = Number(d.refund || 0);
       const dateStr = String(d.date || '');
       const parts = dateStr.split('-');
       const shortLabel = parts.length === 3 ? `${parts[2]}/${parts[1]}` : dateStr;
@@ -453,6 +457,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
         label: shortLabel,
         fullDate: dateStr,
         revenue: amount,
+        payment,
+        refund,
         bookingsCount: Number(d.bookingsCount || 0),
         formattedRevenue: this.formatCompactMoney(amount),
         heightPercent: amount > 0 ? Math.max(6, Math.round((amount / niceCeiling) * 100)) : 2,
@@ -687,8 +693,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
         String(z.revenue),
       ]),
       [],
-      ['Ngày', 'Số booking', 'Doanh thu thuần (VND)'],
-      ...this.hourlyData.map((d) => [d.fullDate, String(d.bookingsCount), String(d.revenue)]),
+      ['Ngày', 'Đã thu (VND)', 'Đã hoàn (VND)', 'Doanh thu thuần (VND)'],
+      ...this.hourlyData.map((d) => [d.fullDate, String(d.payment), String(d.refund), String(d.revenue)]),
     ];
 
     const csv = '\uFEFF' + rows.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
@@ -708,8 +714,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private formatCompactMoney(val: number): string {
     const n = Math.round(val || 0);
-    if (n >= 1000000) return `${(n / 1000000).toFixed(1).replace(/\.0$/, '')}tr`;
-    if (n >= 1000) return `${Math.round(n / 1000)}k`;
+    const abs = Math.abs(n);
+    const sign = n < 0 ? '-' : '';
+    if (abs >= 1000000) return `${sign}${(abs / 1000000).toFixed(1).replace(/\.0$/, '')}tr`;
+    if (abs >= 1000) return `${sign}${Math.round(abs / 1000)}k`;
     return `${n}đ`;
   }
 
