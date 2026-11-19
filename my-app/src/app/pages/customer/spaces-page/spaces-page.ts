@@ -220,11 +220,13 @@ export class SpacesPage implements OnInit {
 
   setZoneFilter(zone: KenZoneFilter): void {
     this.activeZone = zone;
+    this.smoothScroll?.revealFiltered('.ks-space-card');
   }
 
   selectZone(zone: Exclude<KenZoneFilter, 'all'>, event?: Event): void {
     event?.preventDefault();
     this.activeZone = this.activeZone === zone ? 'all' : zone;
+    this.smoothScroll?.revealFiltered('.ks-space-card');
     if (this.smoothScroll) {
       this.smoothScroll.scrollTo('#spaces-overview', { offset: -88, duration: 0.9 });
       return;
