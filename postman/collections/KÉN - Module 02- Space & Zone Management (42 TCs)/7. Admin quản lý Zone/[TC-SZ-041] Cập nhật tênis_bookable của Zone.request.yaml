@@ -1,0 +1,41 @@
+$kind: http-request
+name: '[TC-SZ-041] Cập nhật tên/is_bookable của Zone'
+description: '**Mã TC:** TC-SZ-041
+
+  **Nhóm:** Admin quản lý Zone
+
+  **API / Thành phần:** PATCH /api/zones/:id
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed zones/spaces/packages.
+
+  **Dữ liệu vào:** {"name": "Zone đổi tên", "is_bookable": false}
+
+  **Các bước thực hiện:**
+
+  1) PATCH /api/zones/<id>
+
+  **Kết quả mong đợi:** 200; giá trị mới lưu (HTTP: 200)
+
+  **Nhánh code bao phủ:** SPC-B30
+
+  '
+url: '{{baseUrl}}/api/zones/{{zoneId}}'
+method: PATCH
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 41000
+body:
+  type: json
+  raw: "{\n  \"name\": \"Zone đổi tên\",\n  \"is_bookable\": false\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-SZ-041] Cập nhật tên/is_bookable của Zone\npm.test(\"[TC-SZ-041] Status\
+    \ code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-SZ-041] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

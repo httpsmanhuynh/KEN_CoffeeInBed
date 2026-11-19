@@ -1,0 +1,210 @@
+<div class="wrap">
+  <nav class="crumb" aria-label="breadcrumb">
+    <a routerLink="/">Trang chủ</a>　/　<a routerLink="/user-profile">Tài khoản của tôi</a> /
+    <span aria-current="page">Đổi / Huỷ lịch</span>
+  </nav>
+
+  <div class="layout">
+    <app-account-sidebar active="reschedule" (logout)="logout()"></app-account-sidebar>
+
+    <main class="content">
+      <header class="intro">
+        <h1 class="intro__title">Đổi / Huỷ lịch</h1>
+      </header>
+
+      <nav class="tabs" aria-label="Đổi hoặc huỷ lịch">
+        <a class="tab" routerLink="/booking-reschedule">Đổi lịch</a>
+        <a class="tab is-active" routerLink="/booking-cancel" aria-current="page">Huỷ lịch</a>
+      </nav>
+
+      <div class="stack">
+        @if (orders.length > 1) {
+          <section class="order-selector" aria-label="Tìm đơn đặt chỗ">
+            <div class="order-search">
+              <lucide-icon
+                name="search"
+                [size]="16"
+                [strokeWidth]="1.8"
+                color="#7A6553"
+              ></lucide-icon>
+              <input
+                type="search"
+                [value]="searchQuery"
+                (input)="searchQuery = $any($event.target).value"
+                placeholder="Tìm theo mã booking, tên phòng hoặc ngày (VD: BK2611, 24/10)..."
+                aria-label="Tìm đơn đặt chỗ"
+              />
+            </div>
+
+            @if (searchQuery.trim()) {
+              <div class="order-dropdown" role="listbox" aria-label="Kết quả tìm kiếm đơn đặt chỗ">
+                @for (o of filteredOrders; track o.code) {
+                  <button
+                    type="button"
+                    role="option"
+                    class="order-option"
+                    [class.is-selected]="order?.code === o.code"
+                    [attr.aria-selected]="order?.code === o.code"
+                    (click)="selectOrder(o)"
+                  >
+                    <span class="order-option__main">
+                      <b>{{ o.code }}</b> · {{ o.name }}
+                    </span>
+                    <span class="order-option__meta">{{ o.date }} · {{ o.time }}</span>
+                  </button>
+                } @empty {
+                  <p class="order-empty" role="status">Không tìm thấy đơn phù hợp.</p>
+                }
+              </div>
+            }
+          </section>
+        }
+        @if (order) {
+          <section class="dialog" aria-labelledby="cancel-title">
+            <header class="dialog__head">
+              <h2 id="cancel-title">Xác nhận huỷ booking</h2>
+            </header>
+
+            <hr class="line" />
+
+            <div class="ident">
+              <div class="ident__row">
+                <lucide-icon
+                  name="calendar-check"
+                  [size]="18"
+                  [strokeWidth]="1.8"
+                  color="#4A3123"
+                ></lucide-icon>
+                <div class="ident__text">
+                  <span class="ident__label">Mã Booking</span>
+                  <b>{{ order.code }} · {{ order.name }}</b>
+                </div>
+                <span class="badge badge--{{ order.status }}">{{ statusLabel[order.status] }}</span>
+              </div>
+
+              <dl class="details">
+                <div class="details__row">
+                  <lucide-icon
+                    name="calendar"
+                    [size]="16"
+                    [strokeWidth]="1.8"
+                    color="#7A6553"
+                  ></lucide-icon>
+                  <dt>Ngày sử dụng</dt>
+                  <dd>{{ order.date }}</dd>
+                </div>
+                <div class="details__row">
+                  <lucide-icon
+                    name="clock"
+                    [size]="16"
+                    [strokeWidth]="1.8"
+                    color="#7A6553"
+                  ></lucide-icon>
+                  <dt>Khung giờ</dt>
+                  <dd>{{ order.time }} · {{ order.hours }} giờ</dd>
+                </div>
+                <div class="details__row">
+                  <lucide-icon
+                    name="tag"
+                    [size]="16"
+                    [strokeWidth]="1.8"
+                    color="#7A6553"
+                  ></lucide-icon>
+                  <dt>Gói đặt</dt>
+                  <dd>{{ order.pkg }} · {{ fmtMoney(order.total) }}</dd>
+                </div>
+              </dl>
+            </div>
+
+            <hr class="line" />
+
+            <section class="block" aria-labelledby="cond-title">
+              <h3 id="cond-title">Trạng thái & Điều kiện huỷ</h3>
+              <p class="status" [class.status--pending]="!isConfirmed">
+                <i class="status__dot" aria-hidden="true"></i>{{ conditionLine }}
+              </p>
+              <div class="notice">
+                <lucide-icon
+                  name="alert-circle"
+                  [size]="18"
+                  [strokeWidth]="1.8"
+                  color="#B45309"
+                ></lucide-icon>
+                <p>{{ conditionNote }}</p>
+              </div>
+            </section>
+
+            <section class="block" aria-labelledby="refund-title">
+              <h3 id="refund-title">Thông tin hoàn tiền</h3>
+              <div class="refund">
+                <div class="refund__row">
+                  <span>Đã thanh toán</span><b>{{ paidText }}</b>
+                </div>
+                <div class="refund__row"><span>Khoản hoàn dự kiến</span><b>Chờ kiểm tra</b></div>
+              </div>
+              <div class="note">
+                <lucide-icon
+                  name="check"
+                  [size]="16"
+                  [strokeWidth]="1.8"
+                  color="#047857"
+                ></lucide-icon>
+                <p>Số tiền hoàn sẽ được thông báo sau khi xử lý.</p>
+              </div>
+              <a class="policy" routerLink="/policy">Xem điều kiện đặt chỗ ↗</a>
+            </section>
+
+            <hr class="line" />
+
+            <div class="cta">
+              <a class="btn btn--outline" routerLink="/booking-list">Quay lại</a>
+              <button
+                type="button"
+                class="btn btn--gold"
+                [disabled]="submitted"
+                (click)="confirmCancel()"
+              >
+                {{ submitted ? 'Đã gửi yêu cầu' : 'Xác nhận huỷ' }}
+              </button>
+            </div>
+            @if (cancelError) {
+              <p
+                class="foot"
+                style="
+                  color: #9b1c1c;
+                  background: #fde8e8;
+                  padding: 10px 12px;
+                  border-radius: 8px;
+                  margin-top: 8px;
+                "
+                role="alert"
+              >
+                {{ cancelError }}
+              </p>
+            }
+            <p class="foot" [class.foot--ok]="submitted" role="status" aria-live="polite">
+              {{ submitted ? 'Đã huỷ đơn thành công.' : 'Xác nhận huỷ đơn đặt chỗ này.' }}
+            </p>
+          </section>
+        } @else {
+          <section class="dialog" style="text-align: center; padding: 40px 24px">
+            <p style="color: #776659; font-size: 15px">
+              Bạn hiện không có đơn đặt chỗ nào có thể huỷ.
+            </p>
+            <a
+              class="btn btn--outline"
+              routerLink="/booking-list"
+              style="margin-top: 12px; display: inline-flex"
+              >Xem lịch sử đặt chỗ</a
+            >
+          </section>
+        }
+
+        <aside class="suggest">
+          <p class="suggest__title">Đổi ngày thay vì huỷ?</p>
+          <a class="suggest__link" routerLink="/booking-reschedule">Chuyển sang Đổi lịch →</a>
+        </aside>
+      </div>
+    </main>
+  </div>
+</div>

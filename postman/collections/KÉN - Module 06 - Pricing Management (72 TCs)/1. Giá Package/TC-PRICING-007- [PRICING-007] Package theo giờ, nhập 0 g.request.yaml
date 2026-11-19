@@ -1,0 +1,43 @@
+$kind: http-request
+name: "TC-PRICING-007: [PRICING-007] Package theo giờ, nhập 0 giờ bị từ chối (Branch: PKG-B07)"
+description: |-
+  **Mã TC:** PRICING-007 (TC-PRICING-007)
+  **Nhóm:** Giá Package
+  **API / Thành phần:** POST /api/bookings (UI Checkout / Tóm tắt đơn (Customer))
+  **Loại:** Negative
+  **Điều kiện tiên quyết:** Server chạy (http://localhost:3002) và ứng dụng giao diện chạy; đã chạy npm run setup (có hạng thành viên); dữ liệu giá/Inclusion/Add-on/Voucher theo cột 'Dữ liệu vào' đã có trong MongoDB (tạo bằng Compass nếu chưa có).
+  **Dữ liệu vào:** Tài khoản: Customer hạng BASIC&#10;Package theo giờ, tính theo không gian, đơn giá 100.000đ&#10;Số giờ: 0
+  **Các bước thực hiện:**
+  1) Đăng nhập UI bằng Customer hạng BASIC.&#10;2) Chọn Package theo giờ 100.000đ.&#10;3) Nhập số giờ = 0 rồi tiếp tục tới Checkout.&#10;4) Quan sát UI và kiểm tra Compass collection bookings.
+  **Kết quả mong đợi:** Không thể hoàn tất đặt với 0 giờ. Backend từ chối yêu cầu: không tạo Booking (collection bookings không có bản ghi mới), không trừ lượt Voucher; người dùng nhận thông báo lỗi (nội dung thông báo: TBD – chưa có trong tài liệu). (HTTP: 400/422)
+  **Nhánh code bao phủ:** PKG-B07
+  **Ghi chú:** CẦN XEM XÉT – ánh xạ không 1-1 (AUTO-PRICING-007 dùng chung cho 2 Manual TC). Automated TC ứng viên (chưa xác nhận, chỉ để truy vết, KHÔNG phải kết quả Manual): AUTO-PRICING-007: thiếu hours / guestCount bị từ chối
+url: "{{baseUrl}}/api/bookings"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "spaceId": "{{spaceWorkLoungeId}}",
+      "packageId": "{{pkgWlFlexId}}",
+      "startAt": "2026-12-20T02:00:00.000Z",
+      "hours": 0,
+      "guestCount": 1
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-PRICING-007] Package theo giờ, nhập 0 giờ bị từ chối
+      pm.test("[TC-PRICING-007] Status code is 400 or 422", function () {
+          pm.expect(pm.response.code).to.be.oneOf([400,422]);
+      });
+      pm.test("[TC-PRICING-007] Phản hồi từ chối hợp lệ kèm mã lỗi nghiệp vụ", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.have.property("code");
+          pm.expect(["INVALID_DURATION","INVALID_HOURS"]).to.include(json.code);
+          pm.expect(json).to.have.property("message");
+      });
+    language: text/javascript
+order: 7000

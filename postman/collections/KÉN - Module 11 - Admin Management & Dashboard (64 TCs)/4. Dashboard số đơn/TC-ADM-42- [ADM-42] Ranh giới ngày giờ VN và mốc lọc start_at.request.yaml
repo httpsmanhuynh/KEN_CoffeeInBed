@@ -1,0 +1,25 @@
+$kind: http-request
+name: "TC-ADM-42: [ADM-42] Ranh giới ngày giờ VN và mốc lọc start_at (Branch: ADM-B42)"
+description: |-
+  **Mã TC:** ADM-42 (TC-ADM-42)
+  **Nhóm:** Dashboard số đơn
+  **API / Thành phần:** GET /api/admin/dashboard?from&to
+  **Loại:** Boundary
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đơn A start_at 2026-10-31T17:00:00Z; đơn B 2026-11-01T16:59:00Z; đơn C 2026-11-01T17:00:00Z; đơn D start_at ngày 01/11 VN nhưng created_at tháng 10; mỗi đơn có PAYMENT SUCCESS 100.000 lúc 2026-10-20 (ngoài kỳ).
+  **Dữ liệu vào:** ?from=2026-11-01&to=2026-11-01
+  **Các bước thực hiện:**
+  1) GET /api/admin/dashboard?from=2026-11-01&to=2026-11-01
+  **Kết quả mong đợi:** 200 bookings.total tính A, B, D; không tính C (00:00 VN ngày 02/11); lọc số đơn theo start_at chứ không theo created_at; revenue.total = 0 vì không có giao dịch nào trong kỳ (doanh thu lọc theo thời điểm giao dịch, không theo start_at) (HTTP: 200)
+  **Nhánh code bao phủ:** ADM-B42
+  **Ghi chú:** Đã chốt: số đơn, occupancy, Top Add-on lọc theo bookings.start_at (decisions.md §5); doanh thu lọc theo thời điểm giao dịch (xem ADM-54).
+url: "{{baseUrl}}/api/admin/dashboard?from=2026-11-01&to=2026-11-01"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-42] Ranh giới ngày giờ VN và mốc lọc start_at
+      pm.test("[TC-ADM-42] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 5000

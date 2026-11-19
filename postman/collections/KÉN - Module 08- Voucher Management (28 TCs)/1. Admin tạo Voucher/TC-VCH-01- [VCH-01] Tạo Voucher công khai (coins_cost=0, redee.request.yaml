@@ -1,0 +1,40 @@
+$kind: http-request
+name: "TC-VCH-01: [VCH-01] Tạo Voucher công khai (coins_cost=0, redeem_limit=0, redeem_valid_to=null) (Branch: VCH-B01)"
+description: |-
+  **Mã TC:** VCH-01 (TC-VCH-01)
+  **Nhóm:** Admin tạo Voucher
+  **API / Thành phần:** POST /api/vouchers
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed vouchers.
+  **Dữ liệu vào:** {"code": "KEN10K", "discount_type": "FIXED_AMOUNT", "discount_value": 10000, "min_order_value": 100000, "usage_limit": 50, "valid_from": "<ISO>", "valid_to": "<ISO>", "coins_cost": 0}
+  **Các bước thực hiện:**
+  1) POST /api/vouchers&#10;2) Kiểm tra Atlas
+  **Kết quả mong đợi:** 201; status=ACTIVE; usage_count=0; đúng validator vouchers (HTTP: 201)
+  **Nhánh code bao phủ:** VCH-B01
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/vouchers"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "code": "KEN10K",
+      "discount_type": "FIXED_AMOUNT",
+      "discount_value": 10000,
+      "min_order_value": 100000,
+      "usage_limit": 50,
+      "valid_from": "2026-12-31T23:59:59.000Z",
+      "valid_to": "2026-12-31T23:59:59.000Z",
+      "coins_cost": 0
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-VCH-01] Tạo Voucher công khai (coins_cost=0, redeem_limit=0, redeem_valid_to=null)
+      pm.test("[TC-VCH-01] Status code is 201", function () {
+          pm.expect(pm.response.code).to.be.oneOf([201]);
+      });
+    language: text/javascript
+order: 1000

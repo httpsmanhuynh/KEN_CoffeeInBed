@@ -1,0 +1,27 @@
+$kind: http-request
+name: "[TC-MW-07] startSession: regenerate lỗi → reject"
+description: |-
+  **Mã TC:** TC-MW-07
+  **Loại:** Negative
+  **Nhóm:** Middleware
+  **Tiền điều kiện:** Unit test
+  **Các bước:** npm test (node --test test/*.test.js)
+  **Kết quả mong đợi:** Promise bị reject với lỗi
+  **Nhánh code:** MW-B06
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/test"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: session.regenerate gọi cb(err)
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-MW-07] startSession: regenerate lỗi → reject
+      pm.test("[TC-MW-07] Status code is —", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 7000

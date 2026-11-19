@@ -1,0 +1,32 @@
+$kind: http-request
+name: "TC-ADM-03: [ADM-03] Admin xem hồ sơ chi tiết một khách (hạng, điểm, trạng thái) kèm thống kê đơn (Branch: ADM-B03)"
+description: |-
+  **Mã TC:** ADM-03 (TC-ADM-03)
+  **Nhóm:** Xem hồ sơ & lịch sử Booking
+  **API / Thành phần:** GET /api/admin/users/:id
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed users/bookings.
+  **Dữ liệu vào:** id user
+  **Các bước thực hiện:**
+  1) GET /api/admin/users/<id>
+  **Kết quả mong đợi:** 200 { user, bookingStats }; user không lộ password_hash/OTP/token; có status và loyalty { tier, tierName, points, coins } (HTTP: 200)
+  **Nhánh code bao phủ:** ADM-B03
+  **Ghi chú:** Cập nhật theo Report (UC-29): hồ sơ có loyalty (points = users.tier_points, coins = users.coin_balance; hạng lấy users.tier, thiếu thì suy từ điểm theo bảng hạng). Cần xác nhận users trên Atlas có 2 field tier_points và coin_balance. Chi tiết ở ADM-63.
+url: "{{baseUrl}}/api/admin/users/{{userId}}"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-03] Admin xem hồ sơ chi tiết một khách (hạng, điểm, trạng thái) kèm thống kê đơn
+      pm.test("[TC-ADM-03] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+      pm.test("[TC-ADM-03] Hồ sơ khách có user.loyalty và bookingStats, không lộ password_hash", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.have.all.keys("user", "bookingStats");
+          pm.expect(json.user).to.not.have.property("password_hash");
+          pm.expect(json.user).to.have.property("loyalty");
+          pm.expect(json.user.loyalty).to.include.all.keys("tier", "tierName", "points", "coins");
+      });
+    language: text/javascript
+order: 1000

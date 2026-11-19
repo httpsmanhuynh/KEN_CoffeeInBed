@@ -1,0 +1,39 @@
+$kind: http-request
+name: "TC-REC-23: [REC-23] Chặn xuất kho vượt tồn (balance_after < 0) hoặc truyền sai dấu quantityChange → 422 (Branch: REC-B23)"
+description: |-
+  **Mã TC:** REC-23 (TC-REC-23)
+  **Nhóm:** Admin Forecast nguyên vật liệu & món
+  **API / Thành phần:** POST /api/admin/forecast/ingredients/:id/movements
+  **Loại:** Negative
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin.
+  **Dữ liệu vào:** { "movementType": "OUT", "quantityChange": -99999999, "reason": "Xuất quá tồn kho" }
+  **Các bước thực hiện:**
+  1) POST /api/admin/forecast/ingredients/{{ingredientId}}/movements với số lượng xuất lớn hơn current_stock
+  **Kết quả mong đợi:** 422 INSUFFICIENT_STOCK (hoặc VALIDATION_ERROR); tồn kho không đổi (HTTP: 422)
+  **Nhánh code bao phủ:** REC-B23
+url: "{{baseUrl}}/api/admin/forecast/ingredients/{{ingredientId}}/movements"
+method: POST
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "movementType": "OUT",
+      "quantityChange": -99999999,
+      "reason": "Xuất quá tồn kho"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-REC-23] Chặn xuất kho vượt tồn kho
+      pm.test("[TC-REC-23] Status code is 422", function () {
+          pm.expect(pm.response.code).to.eql(422);
+      });
+      pm.test("[TC-REC-23] Trả về lỗi INSUFFICIENT_STOCK hoặc VALIDATION_ERROR", function () {
+          const json = pm.response.json();
+          pm.expect(["INSUFFICIENT_STOCK", "VALIDATION_ERROR"]).to.include(json.code || json.error);
+      });
+    language: text/javascript
+order: 8000

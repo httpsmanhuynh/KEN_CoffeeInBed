@@ -1,0 +1,31 @@
+$kind: http-request
+name: "TC-LOY-11: [LOY-11] Mốc 5.000 → GOLD, 10.000 → DIAMOND (15%) (Branch: LOY-B11)"
+description: |-
+  **Mã TC:** LOY-11 (TC-LOY-11)
+  **Nhóm:** Nâng hạng
+  **API / Thành phần:** POST /api/bookings/:id/check-out
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed membership_tiers.
+  **Dữ liệu vào:** tier_points sát mốc
+  **Các bước thực hiện:**
+  1) Check-out vượt từng mốc
+  **Kết quả mong đợi:** Lên đúng hạng, % giảm 10% và 15% (HTTP: 200)
+  **Nhánh code bao phủ:** LOY-B11
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/bookings/{{bookingId}}/check-out"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {}
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-LOY-11] Mốc 5.000 → GOLD, 10.000 → DIAMOND (15%)
+      pm.test("[TC-LOY-11] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 4000

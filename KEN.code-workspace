@@ -5,14 +5,12 @@
     },
   ],
   "settings": {
-    "mcp": {
-      "servers": {
-        "my-mcp-server-41d2fe38": {
-          "url": "https://mcp.figma.com/mcp",
-          "type": "http",
-        },
+    "mdb.presetConnections": [
+      {
+        "name": "Preset Connection",
+        "connectionString": "mongodb://localhost:27017",
       },
-      "inputs": [],
-    },
+    ],
+    "js/ts.tsdk.path": "node_modules\\typescript\\lib",
   },
 }

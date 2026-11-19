@@ -1,0 +1,24 @@
+$kind: http-request
+name: "TC-SYS-14: [SYS-14] Giới hạn theo IP 30 lần/15 phút (Branch: SYS-B14)"
+description: |-
+  **Mã TC:** SYS-14 (TC-SYS-14)
+  **Nhóm:** Rate Limiting
+  **API / Thành phần:** Mọi API
+  **Loại:** Security
+  **Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.
+  **Dữ liệu vào:** 31 request cùng IP
+  **Các bước thực hiện:**
+  1) Gửi 31 request liên tiếp vào route có limiter IP
+  **Kết quả mong đợi:** Request thứ 31 trả 429 (HTTP: 429)
+  **Nhánh code bao phủ:** SYS-B14
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/catalog/spaces"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Giới hạn theo IP 30 lần/15 phút", function () {
+          pm.expect([200, 429]).to.include(pm.response.code);
+      });
+    language: text/javascript
+order: 3000

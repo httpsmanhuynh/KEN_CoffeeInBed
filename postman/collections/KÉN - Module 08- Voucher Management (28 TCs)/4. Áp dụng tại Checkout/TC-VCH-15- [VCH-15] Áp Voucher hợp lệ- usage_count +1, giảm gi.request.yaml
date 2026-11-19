@@ -1,0 +1,37 @@
+$kind: http-request
+name: "TC-VCH-15: [VCH-15] Áp Voucher hợp lệ: usage_count +1, giảm giá vào price_snapshot (Branch: VCH-B13)"
+description: |-
+  **Mã TC:** VCH-15 (TC-VCH-15)
+  **Nhóm:** Áp dụng tại Checkout
+  **API / Thành phần:** POST /api/bookings
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; đã seed vouchers/spaces/packages.
+  **Dữ liệu vào:** voucherCode hợp lệ
+  **Các bước thực hiện:**
+  1) POST /api/bookings&#10;2) Kiểm tra vouchers.usage_count
+  **Kết quả mong đợi:** 201; voucher_discount đúng; usage_count tăng 1 (HTTP: 201)
+  **Nhánh code bao phủ:** VCH-B13
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/bookings"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "spaceId": "{{spaceId}}",
+      "packageId": "{{packageId}}",
+      "startAt": "2026-12-20T02:00:00.000Z",
+      "guestCount": 1,
+      "voucherCode": "WELCOME10"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-VCH-15] Áp Voucher hợp lệ: usage_count +1, giảm giá vào price_snapshot
+      pm.test("[TC-VCH-15] Status code is 201", function () {
+          pm.expect(pm.response.code).to.be.oneOf([201]);
+      });
+    language: text/javascript
+order: 1000

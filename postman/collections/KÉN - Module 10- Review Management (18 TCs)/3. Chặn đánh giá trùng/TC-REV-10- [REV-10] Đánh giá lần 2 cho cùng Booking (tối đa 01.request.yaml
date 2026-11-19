@@ -1,0 +1,35 @@
+$kind: http-request
+name: "TC-REV-10: [REV-10] Đánh giá lần 2 cho cùng Booking (tối đa 01 đánh giá/Booking) (Branch: REV-B10)"
+description: |-
+  **Mã TC:** REV-10 (TC-REV-10)
+  **Nhóm:** Chặn đánh giá trùng
+  **API / Thành phần:** POST /api/reviews
+  **Loại:** Negative
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; có đơn CHECKED_OUT của Customer.
+  **Dữ liệu vào:** Cùng bookingId đã có đánh giá
+  **Các bước thực hiện:**
+  1) POST /api/reviews lần 2
+  **Kết quả mong đợi:** 409 từ chối; chỉ còn 1 bản ghi reviews cho Booking đó (HTTP: 409)
+  **Nhánh code bao phủ:** REV-B10
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/reviews"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "bookingId": "{{bookingId}}",
+      "rating": 5,
+      "comment": "Không gian rất ổn"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-REV-10] Đánh giá lần 2 cho cùng Booking (tối đa 01 đánh giá/Booking)
+      pm.test("[TC-REV-10] Status code is 409", function () {
+          pm.expect(pm.response.code).to.be.oneOf([409]);
+      });
+    language: text/javascript
+order: 1000

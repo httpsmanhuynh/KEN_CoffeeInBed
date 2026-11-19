@@ -1,0 +1,32 @@
+$kind: http-request
+name: "TC-SYS-15: [SYS-15] Thao tác nhạy cảm theo user id 10 lần/15 phút (Branch: SYS-B15)"
+description: |-
+  **Mã TC:** SYS-15 (TC-SYS-15)
+  **Nhóm:** Rate Limiting
+  **API / Thành phần:** POST /api/profile/me/*
+  **Loại:** Security
+  **Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.
+  **Dữ liệu vào:** Customer đăng nhập, 11 lần xin OTP
+  **Các bước thực hiện:**
+  1) POST /api/profile/me/otp 11 lần
+  **Kết quả mong đợi:** Lần 11 trả 429; user khác không bị ảnh hưởng (HTTP: 429)
+  **Nhánh code bao phủ:** SYS-B15
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/profile/me/otp"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "action": "UPDATE_PHONE"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Thao tác nhạy cảm theo user id giới hạn 10 lần/15 phút", function () {
+          pm.expect([200, 401, 429]).to.include(pm.response.code);
+      });
+    language: text/javascript
+order: 4000

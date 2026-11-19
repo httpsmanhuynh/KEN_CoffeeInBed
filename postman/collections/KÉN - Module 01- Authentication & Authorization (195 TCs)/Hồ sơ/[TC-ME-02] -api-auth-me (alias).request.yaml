@@ -1,0 +1,24 @@
+$kind: http-request
+name: "[TC-ME-02] /api/auth/me (alias)"
+description: |-
+  **Mã TC:** TC-ME-02
+  **Loại:** Positive
+  **Nhóm:** Hồ sơ
+  **Tiền điều kiện:** Đã đăng nhập thành công (Postman giữ cookie connect.sid).
+  **Các bước:** 1) GET /api/auth/me
+  **Kết quả mong đợi:** 200, nội dung giống /api/profile
+  **Nhánh code:** ME-B03; GLB-B07
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/me"
+method: GET
+headers:
+  Content-Type: application/json
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ME-02] /api/auth/me (alias)
+      pm.test("[TC-ME-02] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 2000

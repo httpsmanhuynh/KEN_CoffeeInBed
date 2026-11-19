@@ -1,0 +1,43 @@
+$kind: http-request
+name: '[TC-AD-026] Xóa mềm Add-on: is_active=false'
+description: '**Mã TC:** TC-AD-026
+
+  **Nhóm:** Xóa mềm Product/Add-on
+
+  **API / Thành phần:** DELETE /api/addons/:id
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed products/addons.
+
+  **Dữ liệu vào:** id Add-on
+
+  **Các bước thực hiện:**
+
+  1) DELETE /api/addons/<id>
+
+  2) Kiểm tra Atlas
+
+  **Kết quả mong đợi:** 200/204; is_active=false; bản ghi vẫn còn (HTTP: 200)
+
+  **Nhánh code bao phủ:** ADD-B22
+
+  '
+url: '{{baseUrl}}/api/addons/{{addonId}}'
+method: DELETE
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 26000
+body:
+  type: json
+  raw: '{"data": "id Add-on"}'
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-AD-026] Xóa mềm Add-on: is_active=false\npm.test(\"[TC-AD-026] Status\
+    \ code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-AD-026] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

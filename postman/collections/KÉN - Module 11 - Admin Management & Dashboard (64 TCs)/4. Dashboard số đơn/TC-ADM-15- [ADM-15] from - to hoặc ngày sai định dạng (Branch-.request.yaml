@@ -1,0 +1,29 @@
+$kind: http-request
+name: "TC-ADM-15: [ADM-15] from > to hoặc ngày sai định dạng (Branch: ADM-B15)"
+description: |-
+  **Mã TC:** ADM-15 (TC-ADM-15)
+  **Nhóm:** Dashboard số đơn
+  **API / Thành phần:** GET /api/admin/dashboard
+  **Loại:** Negative
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed users/bookings.
+  **Dữ liệu vào:** from=2026-12-31&to=2026-01-01 ; from=abc ; from=2026-01-01T00:00:00Z ; from=2025-11-09&to=2026-11-10 (367 ngày)
+  **Các bước thực hiện:**
+  1) GET lần lượt từng bộ tham số
+  **Kết quả mong đợi:** 422 { error, message } với error lần lượt INVALID_RANGE, INVALID_DATE, INVALID_DATE, RANGE_TOO_LARGE; không chạm DB (HTTP: 422)
+  **Nhánh code bao phủ:** ADM-B15
+  **Ghi chú:** Review: mã lỗi thực tế là INVALID_RANGE / INVALID_DATE / RANGE_TOO_LARGE, không có VALIDATION_ERROR.
+url: "{{baseUrl}}/api/admin/dashboard?from=2026-12-31&to=2026-01-01"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-15] from > to hoặc ngày sai định dạng
+      pm.test("[TC-ADM-15] Status code is 422", function () {
+          pm.expect(pm.response.code).to.be.oneOf([422]);
+      });
+      pm.test("[TC-ADM-15] Mã lỗi thuộc INVALID_RANGE / INVALID_DATE / RANGE_TOO_LARGE", function () {
+          const json = pm.response.json();
+          pm.expect(["INVALID_RANGE", "INVALID_DATE", "RANGE_TOO_LARGE"]).to.include(json.error);
+      });
+    language: text/javascript
+order: 3000

@@ -1,0 +1,36 @@
+$kind: http-request
+description: |-
+  **Mã TC:** TC-VER-06
+  **Loại:** Negative
+  **Nhóm:** Xác minh OTP đăng ký
+  **Tiền điều kiện:** Đã gọi register với SĐT 0909123456 và lấy OTP từ terminal ([SMS mock]).
+  **Các bước:** 1) POST /api/auth/verify-otp (Body: phone + code)
+  2) Quan sát phản hồi
+  3) Kiểm tra users/otp_codes trên Atlas
+  **Kết quả mong đợi:** 422 OTP_INVALID (str() trả rỗng)
+  **Nhánh code:** VER-B02; OTP-B06
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/verify-otp"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "phone": "0909123456",
+      "code": 123456
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-VER-06] code là số (không phải chuỗi)
+      pm.test("[TC-VER-06] Status code is 422", function () {
+          pm.expect(pm.response.code).to.be.oneOf([422]);
+      });
+      pm.test("[TC-VER-06] Response contains expected code or keyword: OTP_INVALID", function () {
+          var resText = pm.response.text();
+          pm.expect(resText).to.include("OTP_INVALID");
+      });
+    language: text/javascript
+order: 6000

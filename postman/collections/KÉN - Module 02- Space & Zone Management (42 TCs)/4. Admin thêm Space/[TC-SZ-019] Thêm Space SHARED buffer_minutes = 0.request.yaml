@@ -1,0 +1,46 @@
+$kind: http-request
+name: '[TC-SZ-019] Thêm Space SHARED: buffer_minutes = 0'
+description: '**Mã TC:** TC-SZ-019
+
+  **Nhóm:** Admin thêm Space
+
+  **API / Thành phần:** POST /api/spaces
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed zones/spaces/packages.
+
+  **Dữ liệu vào:** {"zone_id": "<_id Zone>", "space_code": "SPC-T02", "name": "Phòng
+  test", "space_type": "ROOM", "booking_mode": "SHARED", "capacity": 10, "min_guests":
+  1, "max_guests": 10, "open_time": "08:00", "close_time": "22:00", "image_url": "/img/t.png"}
+
+  **Các bước thực hiện:**
+
+  1) POST /api/spaces
+
+  **Kết quả mong đợi:** 201; buffer_minutes=0 (HTTP: 201)
+
+  **Nhánh code bao phủ:** SPC-B15
+
+  '
+url: '{{baseUrl}}/api/spaces'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 19000
+body:
+  type: json
+  raw: "{\n  \"zone_id\": \"<_id Zone>\",\n  \"space_code\": \"SPC-T02\",\n  \"name\"\
+    : \"Phòng test\",\n  \"space_type\": \"ROOM\",\n  \"booking_mode\": \"SHARED\"\
+    ,\n  \"capacity\": 10,\n  \"min_guests\": 1,\n  \"max_guests\": 10,\n  \"open_time\"\
+    : \"08:00\",\n  \"close_time\": \"22:00\",\n  \"image_url\": \"/img/t.png\"\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-SZ-019] Thêm Space SHARED: buffer_minutes = 0\npm.test(\"[TC-SZ-019]\
+    \ Status code is 201\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([201]);\n\
+    });\npm.test(\"[TC-SZ-019] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

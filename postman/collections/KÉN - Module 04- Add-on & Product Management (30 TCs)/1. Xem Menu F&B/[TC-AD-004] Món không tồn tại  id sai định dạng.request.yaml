@@ -1,0 +1,38 @@
+$kind: http-request
+name: '[TC-AD-004] Món không tồn tại / id sai định dạng'
+description: '**Mã TC:** TC-AD-004
+
+  **Nhóm:** Xem Menu F&B
+
+  **API / Thành phần:** GET /api/products/:id
+
+  **Loại:** Negative
+
+  **Điều kiện tiên quyết:** Server chạy; đã seed products/addons; không cần đăng nhập.
+
+  **Dữ liệu vào:** id = 000000000000000000000000 ; id = abc!@#
+
+  **Các bước thực hiện:**
+
+  1) GET lần 1 id không tồn tại
+
+  2) GET lần 2 id sai định dạng
+
+  **Kết quả mong đợi:** 404 cả hai lần; không lỗi 500, không lộ stack (HTTP: 404)
+
+  **Nhánh code bao phủ:** ADD-B04
+
+  '
+url: '{{baseUrl}}/api/products/{{productId}}'
+method: GET
+headers:
+- key: Content-Type
+  value: application/json
+order: 4000
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-AD-004] Món không tồn tại / id sai định dạng\npm.test(\"[TC-AD-004]\
+    \ Status code is 404\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([404]);\n\
+    });\npm.test(\"[TC-AD-004] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

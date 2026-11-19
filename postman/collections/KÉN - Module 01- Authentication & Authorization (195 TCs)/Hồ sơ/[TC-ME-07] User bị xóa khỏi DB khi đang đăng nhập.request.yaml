@@ -1,0 +1,27 @@
+$kind: http-request
+description: |-
+  **Mã TC:** TC-ME-07
+  **Loại:** Negative
+  **Nhóm:** Hồ sơ
+  **Tiền điều kiện:** Đã đăng nhập thành công (Postman giữ cookie connect.sid). Sau đó xóa user trên Atlas.
+  **Các bước:** 1) GET /api/profile
+  **Kết quả mong đợi:** 401 UNAUTHENTICATED
+  **Nhánh code:** ME-B02
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/me"
+method: GET
+headers:
+  Content-Type: application/json
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ME-07] User bị xóa khỏi DB khi đang đăng nhập
+      pm.test("[TC-ME-07] Status code is 401", function () {
+          pm.expect(pm.response.code).to.be.oneOf([401]);
+      });
+      pm.test("[TC-ME-07] Response contains expected code or keyword: UNAUTHENTICATED", function () {
+          var resText = pm.response.text();
+          pm.expect(resText).to.include("UNAUTHENTICATED");
+      });
+    language: text/javascript
+order: 7000

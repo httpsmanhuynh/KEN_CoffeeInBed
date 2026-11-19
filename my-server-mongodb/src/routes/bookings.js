@@ -1,0 +1,586 @@
+'use strict';
+// Các API Đặt không gian theo chuẩn BR-D01:
+// Bước 1 (UC-04): Khám phá & Kiểm tra chỗ trống (chọn Ngày, Giờ bắt đầu, Số khách) -> xem catalog.js
+// Bước 2 (UC-05): Chọn Không gian (Space) & Gói dịch vụ (Package) + Book Now qua Auth Guard (POST /api/bookings/select-package)
+// Bước 3 (UC-06): Chọn món trong gói (Inclusion) & Dịch vụ mua thêm (Add-on) (POST /api/bookings/quote)
+// Bước 4 (UC-07, UC-08): Checkout — Áp dụng Voucher, Xem Booking Summary & Xác nhận giữ chỗ 15 phút (POST /api/bookings)
+// Bước 5 (UC-09, UC-10, UC-25, UC-26): Payment -> Confirmation -> Check-in -> Sử dụng -> Check-out -> Review (UC-16).
+const express = require('express');
+const { ObjectId } = require('mongodb');
+const { requireAuth, requireRole } = require('../middleware/auth');
+const { wrap, fail, str } = require('../utils/http');
+const {
+  BookingError,
+  selectSpaceAndPackage,
+  buildBookingQuote,
+  createBooking,
+  payBooking,
+  cancelBooking,
+  rescheduleBooking,
+  checkInBooking,
+  checkOutBooking,
+  markNoShowBooking,
+  expirePendingBookings,
+  reconcileRefund,
+} = require('../services/bookingService');
+const {
+  attachReviewsToBookings,
+  getBookingReviewStatus,
+  createReview,
+} = require('../services/reviewService');
+const { enrichBookingWithReview } = require('../domain/review');
+const { AdminError } = require('../domain/adminError');
+const { getBookingMenuRecommendations } = require('../services/forecastService');
+const { resolveOptionalUser } = require('./forecast');
+
+const router = express.Router();
+
+const handleErr = (res, err) => {
+  if (err instanceof BookingError || err instanceof AdminError) {
+    return res.status(err.status).json({
+      code: err.code,
+      message: err.message,
+      ...(err.details ? { details: err.details } : {}),
+    });
+  }
+  throw err;
+};
+
+// POST /api/bookings/select-package — Bước 2 (UC-05, BR-A04): Chọn Space & Package và nhấn Book Now (qua Auth Guard)
+router.post(
+  '/select-package',
+  requireAuth,
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    try {
+      const sel = await selectSpaceAndPackage(db, {
+        spaceId: req.body.spaceId,
+        packageId: req.body.packageId,
+        startAt: req.body.startAt,
+        endAt: req.body.endAt,
+        hours: req.body.hours,
+        guestCount: req.body.guestCount ?? req.body.guests,
+      });
+      res.json({
+        ok: true,
+        spaceId: String(sel.space._id),
+        spaceName: sel.space.name,
+        zoneId: String(sel.zone._id),
+        zoneName: sel.zone.name,
+        packageId: String(sel.pkg._id),
+        packageName: sel.pkg.name,
+        packageType: sel.pkg.package_type,
+        pricingUnit: sel.pkg.pricing_unit,
+        guestCount: sel.guestCount,
+        startAt: sel.startAt,
+        endAt: sel.endAt,
+        blockedUntil: sel.blockedUntil,
+        durationHours: sel.durationHours,
+        remainingCapacity: sel.remainingCapacity,
+        baseUnitPrice: sel.baseUnitPrice,
+        packagePrice: sel.packagePrice,
+        fixedInclusionsSnapshot: sel.fixedInclusionsSnapshot,
+        selectableInclusions: sel.selectableInclusions,
+      });
+    } catch (err) {
+      return handleErr(res, err);
+    }
+  }),
+);
+
+// POST /api/bookings/quote — Bước 3 & Bước 4 (UC-06, UC-07): Chọn Inclusion & Add-on, áp dụng Voucher và xem Booking Summary
+router.post(
+  '/quote',
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    try {
+      let user = null;
+      if (req.session && req.session.user && ObjectId.isValid(req.session.user.id)) {
+        user = await db
+          .collection('users')
+          .findOne({ _id: new ObjectId(req.session.user.id), status: 'ACTIVE' });
+      }
+      const quote = await buildBookingQuote(db, {
+        spaceId: req.body.spaceId,
+        packageId: req.body.packageId,
+        startAt: req.body.startAt,
+        endAt: req.body.endAt,
+        hours: req.body.hours,
+        guestCount: req.body.guestCount ?? req.body.guests,
+        inclusions: req.body.inclusions,
+        addons: req.body.addons,
+        voucherCode: req.body.voucherCode,
+        user,
+      });
+      res.json({
+        spaceId: String(quote.space._id),
+        spaceName: quote.space.name,
+        packageId: String(quote.pkg._id),
+        packageName: quote.pkg.name,
+        startAt: quote.timeWindow.startAt,
+        endAt: quote.timeWindow.endAt,
+        blockedUntil: quote.timeWindow.blockedUntil,
+        durationHours: quote.timeWindow.durationHours,
+        guestCount: quote.guests,
+        fixedInclusionsSnapshot: quote.fixedInclusionsSnapshot,
+        inclusions: quote.inclusionDocs,
+        addons: quote.addonDocs,
+        voucherCode: quote.voucherDoc ? quote.voucherDoc.code : null,
+        tierCode: quote.tierCode,
+        tierRate: quote.tierRate,
+        pricing: quote.pricing,
+      });
+    } catch (err) {
+      return handleErr(res, err);
+    }
+  }),
+);
+
+// POST /api/bookings — Bước 4 (UC-08): Checkout — Xác nhận Booking Summary, tạo đơn PENDING_PAYMENT giữ chỗ 15 phút
+router.post(
+  '/',
+  requireAuth,
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    try {
+      const booking = await createBooking(db, {
+        user: req.user,
+        spaceId: req.body.spaceId,
+        packageId: req.body.packageId,
+        startAt: req.body.startAt,
+        endAt: req.body.endAt,
+        hours: req.body.hours,
+        guestCount: req.body.guestCount ?? req.body.guests,
+        inclusions: req.body.inclusions,
+        addons: req.body.addons,
+        voucherCode: req.body.voucherCode,
+        expectedFinalAmount: req.body.expectedFinalAmount,
+      });
+      res.status(201).json(booking);
+    } catch (err) {
+      return handleErr(res, err);
+    }
+  }),
+);
+
+// GET /api/bookings/me — Lịch sử đặt chỗ của khách đang đăng nhập kèm lời nhắc đánh giá (UC-11, UC-16, FR-4.3, BR-H01)
+router.get(
+  '/me',
+  requireAuth,
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    const filter = { user_id: req.user._id };
+    if (typeof req.query.status === 'string' && req.query.status.trim()) {
+      filter.status = req.query.status.trim().toUpperCase();
+    }
+    const bookings = await db
+      .collection('bookings')
+      .find(filter)
+      .sort({ created_at: -1 })
+      .toArray();
+    const enriched = await attachReviewsToBookings(db, bookings);
+    const bookingIds = enriched.map((b) => b._id);
+    const failedTxns = bookingIds.length
+      ? await db
+          .collection('payment_transactions')
+          .find({ booking_id: { $in: bookingIds }, txn_type: 'PAYMENT', status: 'FAILED' })
+          .project({ booking_id: 1 })
+          .toArray()
+      : [];
+    const failedIdSet = new Set(failedTxns.map((t) => String(t.booking_id)));
+    for (const b of enriched) {
+      if (b.status === 'PENDING_PAYMENT' && failedIdSet.has(String(b._id))) {
+        b.has_failed_payment = true;
+      }
+    }
+    res.json(enriched);
+  }),
+);
+
+// GET /api/bookings — Admin xem danh sách toàn bộ đơn đặt chỗ (UC-24)
+router.get(
+  '/',
+  requireRole('ADMIN'),
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    const filter = {};
+    if (typeof req.query.status === 'string' && req.query.status.trim()) {
+      filter.status = req.query.status.trim().toUpperCase();
+    }
+    if (req.query.spaceId && ObjectId.isValid(req.query.spaceId)) {
+      filter.space_id = new ObjectId(req.query.spaceId);
+    }
+    if (req.query.zoneId && ObjectId.isValid(req.query.zoneId)) {
+      filter.zone_id = new ObjectId(req.query.zoneId);
+    }
+    if (req.query.userId && ObjectId.isValid(req.query.userId)) {
+      filter.user_id = new ObjectId(req.query.userId);
+    }
+    const refundStatus = str(req.query.refundStatus).toUpperCase();
+    if (refundStatus === 'NEEDS_RECONCILE') {
+      filter.status = 'CANCELLED';
+      filter.refund_status = { $in: ['FAILED', 'PROCESSING'] };
+    } else if (refundStatus) {
+      filter.refund_status = refundStatus;
+    }
+
+    const vnOffsetMs = 7 * 60 * 60 * 1000;
+    const parseVnDayStart = (ymd) => {
+      const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(ymd || '').trim());
+      if (!m) return null;
+      return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]) - vnOffsetMs);
+    };
+    const dateParam = str(req.query.date);
+    const fromParam = str(req.query.from);
+    const toParam = str(req.query.to);
+    if (dateParam) {
+      const dStart = parseVnDayStart(dateParam);
+      if (dStart) {
+        filter.start_at = { $gte: dStart, $lt: new Date(dStart.getTime() + 86400000) };
+      }
+    } else if (fromParam || toParam) {
+      const range = {};
+      const fStart = fromParam ? parseVnDayStart(fromParam) : null;
+      const tStart = toParam ? parseVnDayStart(toParam) : null;
+      if (fStart) range.$gte = fStart;
+      if (tStart) range.$lt = new Date(tStart.getTime() + 86400000);
+      if (Object.keys(range).length) filter.start_at = range;
+    }
+
+    const q = str(req.query.q);
+    if (q) {
+      const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const rx = new RegExp(escaped, 'i');
+      const matchingUsers = await db
+        .collection('users')
+        .find({ $or: [{ full_name: rx }, { phone: rx }, { email: rx }, { original_phone: rx }, { original_email: rx }] })
+        .project({ _id: 1 })
+        .limit(50)
+        .toArray();
+      const orConds = [
+        { booking_code: rx },
+        { space_name: rx },
+        { zone_name: rx },
+        { package_name: rx },
+        { contact_name: rx },
+        { contact_phone: rx },
+        { contact_email: rx },
+      ];
+      if (matchingUsers.length) {
+        orConds.push({ user_id: { $in: matchingUsers.map((u) => u._id) } });
+      }
+      filter.$or = orConds;
+    }
+
+    const rawLimit = Number(req.query.limit || 200);
+    const limit = Number.isInteger(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, 500) : 200;
+
+    let bookingsCursor = db.collection('bookings').find(filter).sort({ created_at: -1 });
+    if (typeof bookingsCursor.limit === 'function') {
+      bookingsCursor = bookingsCursor.limit(limit);
+    }
+    const rawBookings = await bookingsCursor.toArray();
+    const bookings = rawBookings.slice(0, limit);
+
+    const enriched = await attachReviewsToBookings(db, bookings);
+    const bookingIds = enriched.map((b) => b._id);
+    const rawUserIdStrings = [
+      ...new Set(enriched.map((b) => b.user_id).filter(Boolean).map(String)),
+    ];
+    const userOids = rawUserIdStrings.filter((id) => ObjectId.isValid(id)).map((id) => new ObjectId(id));
+    const userLookupIds = [...userOids, ...rawUserIdStrings];
+
+    const [failedTxns, users] = await Promise.all([
+      bookingIds.length
+        ? db
+            .collection('payment_transactions')
+            .find({ booking_id: { $in: bookingIds }, txn_type: 'PAYMENT', status: 'FAILED' })
+            .toArray()
+        : [],
+      userLookupIds.length
+        ? db
+            .collection('users')
+            .find({ _id: { $in: userLookupIds } })
+            .toArray()
+        : [],
+    ]);
+
+    const failedIdSet = new Set(failedTxns.map((t) => String(t.booking_id)));
+    const userById = new Map(users.map((u) => [String(u._id), u]));
+
+    for (const b of enriched) {
+      if (b.status === 'PENDING_PAYMENT' && failedIdSet.has(String(b._id))) {
+        b.has_failed_payment = true;
+      }
+      const u = b.user_id ? userById.get(String(b.user_id)) : null;
+      b.customer_name = b.contact_name || u?.full_name || u?.name || null;
+      b.customer_phone = b.contact_phone || u?.original_phone || u?.phone || null;
+      b.customer_email = b.contact_email || u?.original_email || u?.email || null;
+    }
+    res.json(enriched);
+  }),
+);
+
+// POST /api/bookings/expire-holds — Quét & chuyển các đơn giữ chỗ quá hạn sang EXPIRED (UC-36)
+router.post(
+  '/expire-holds',
+  requireRole('ADMIN'),
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    const result = await expirePendingBookings(db);
+    res.json(result);
+  }),
+);
+
+// GET /api/bookings/recommendations — Bước 3 (UC-06): Gợi ý sản phẩm Inclusion & Add-ons theo nhóm khách hàng (ml_cluster_id)
+router.get(
+  '/recommendations',
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    try {
+      const user = await resolveOptionalUser(req);
+      const data = await getBookingMenuRecommendations(db, req.query, user);
+      res.json(data);
+    } catch (err) {
+      return handleErr(res, err);
+    }
+  }),
+);
+
+// GET /api/bookings/:id — Chi tiết đơn đặt chỗ kèm Inclusions, Add-ons, Giao dịch thanh toán & Trạng thái đánh giá
+router.get(
+  '/:id',
+  requireAuth,
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    const id = req.params.id;
+    if (!ObjectId.isValid(id) || id.length !== 24) {
+      return fail(res, 400, 'INVALID_BOOKING_ID', 'Mã đơn đặt chỗ không hợp lệ');
+    }
+    const bOid = new ObjectId(id);
+    const booking = await db.collection('bookings').findOne({ _id: bOid });
+    if (!booking) return fail(res, 404, 'BOOKING_NOT_FOUND', 'Không tìm thấy đơn đặt chỗ');
+    if (req.user.role !== 'ADMIN' && String(booking.user_id) !== String(req.user._id)) {
+      return fail(res, 403, 'FORBIDDEN', 'Bạn không có quyền xem đơn này');
+    }
+
+    const uidStr = booking.user_id ? String(booking.user_id) : '';
+    const userQuery = uidStr
+      ? ObjectId.isValid(uidStr)
+        ? { _id: { $in: [new ObjectId(uidStr), uidStr] } }
+        : { _id: uidStr }
+      : null;
+
+    const [inclusions, addons, transactions, review, bookUser] = await Promise.all([
+      db.collection('booking_inclusions').find({ booking_id: bOid }).toArray(),
+      db.collection('booking_addons').find({ booking_id: bOid }).toArray(),
+      db
+        .collection('payment_transactions')
+        .find({ booking_id: bOid })
+        .sort({ created_at: 1 })
+        .toArray(),
+      db.collection('reviews').findOne({ booking_id: bOid }),
+      userQuery
+        ? db.collection('users').findOne(userQuery, {
+            projection: { full_name: 1, name: 1, email: 1, phone: 1, original_email: 1, original_phone: 1 },
+          })
+        : Promise.resolve(null),
+    ]);
+
+    const enrichedResult = enrichBookingWithReview({ ...booking, inclusions, addons, transactions }, review);
+    enrichedResult.contact_name = booking.contact_name || bookUser?.full_name || bookUser?.name || null;
+    enrichedResult.contact_phone = booking.contact_phone || bookUser?.original_phone || bookUser?.phone || null;
+    enrichedResult.contact_email = booking.contact_email || bookUser?.original_email || bookUser?.email || null;
+    res.json(enrichedResult);
+  }),
+);
+
+// GET /api/bookings/:id/review — Kiểm tra điều kiện đánh giá & xem đánh giá của đơn đặt chỗ (UC-16)
+router.get(
+  '/:id/review',
+  requireAuth,
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    try {
+      const status = await getBookingReviewStatus(db, {
+        user: req.user,
+        bookingId: req.params.id,
+      });
+      res.json(status);
+    } catch (err) {
+      return handleErr(res, err);
+    }
+  }),
+);
+
+// POST /api/bookings/:id/review — Gửi đánh giá cho đơn đặt chỗ đã CHECKED_OUT (UC-16, BR-H01)
+router.post(
+  '/:id/review',
+  requireAuth,
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    try {
+      const review = await createReview(db, {
+        user: req.user,
+        bookingId: req.params.id,
+        rating: req.body.rating,
+        comment: req.body.comment,
+      });
+      res.status(201).json(review);
+    } catch (err) {
+      return handleErr(res, err);
+    }
+  }),
+);
+
+// POST /api/bookings/:id/pay — Thanh toán đơn giữ chỗ (Bước 5, UC-09, UC-10)
+router.post(
+  '/:id/pay',
+  requireAuth,
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    try {
+      const out = await payBooking(db, {
+        bookingId: req.params.id,
+        user: req.user,
+        result: req.body.result || 'SUCCESS',
+      });
+      res.json(out);
+    } catch (err) {
+      return handleErr(res, err);
+    }
+  }),
+);
+
+// POST /api/bookings/:id/cancel — Khách hàng hủy đơn (UC-12, UC-14)
+router.post(
+  '/:id/cancel',
+  requireAuth,
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    try {
+      const out = await cancelBooking(db, {
+        bookingId: req.params.id,
+        user: req.user,
+        refundResult: req.body.refundResult || 'SUCCESS',
+      });
+      res.json(out);
+    } catch (err) {
+      return handleErr(res, err);
+    }
+  }),
+);
+
+// POST /api/bookings/:id/reschedule — Khách hàng đổi giờ đặt chỗ (UC-13, UC-15)
+router.post(
+  '/:id/reschedule',
+  requireAuth,
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    try {
+      const updated = await rescheduleBooking(db, {
+        bookingId: req.params.id,
+        user: req.user,
+        newStartAt: req.body.newStartAt || req.body.startAt,
+      });
+      res.json(updated);
+    } catch (err) {
+      return handleErr(res, err);
+    }
+  }),
+);
+
+// POST /api/bookings/:id/check-in — Admin Check-in tại quầy (UC-25)
+router.post(
+  '/:id/check-in',
+  requireRole('ADMIN'),
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    try {
+      const updated = await checkInBooking(db, { bookingId: req.params.id });
+      res.json(updated);
+    } catch (err) {
+      return handleErr(res, err);
+    }
+  }),
+);
+
+// POST /api/bookings/:id/check-out — Admin Check-out & cộng điểm thưởng (UC-26)
+router.post(
+  '/:id/check-out',
+  requireRole('ADMIN'),
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    try {
+      const updated = await checkOutBooking(db, { bookingId: req.params.id });
+      res.json(updated);
+    } catch (err) {
+      return handleErr(res, err);
+    }
+  }),
+);
+
+// POST /api/bookings/:id/no-show — Admin đánh dấu No-show (UC-27)
+router.post(
+  '/:id/no-show',
+  requireRole('ADMIN'),
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    try {
+      const updated = await markNoShowBooking(db, { bookingId: req.params.id });
+      res.json(updated);
+    } catch (err) {
+      return handleErr(res, err);
+    }
+  }),
+);
+
+// POST /api/bookings/:id/refund-reconcile — Admin xử lý hoàn tiền lỗi hoặc báo chênh lệch (UC-28)
+router.post(
+  '/:id/refund-reconcile',
+  requireRole('ADMIN'),
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    try {
+      if (str(req.body.action).toUpperCase() === 'REPORT_DISCREPANCY') {
+        const id = req.params.id;
+        if (!ObjectId.isValid(id) || id.length !== 24) {
+          return fail(res, 400, 'INVALID_BOOKING_ID', 'Mã đơn đặt chỗ không hợp lệ');
+        }
+        const note = str(req.body.note);
+        if (!note) {
+          return fail(res, 422, 'VALIDATION_ERROR', 'Vui lòng nhập ghi chú chênh lệch');
+        }
+        const bOid = new ObjectId(id);
+        const booking = await db.collection('bookings').findOne({ _id: bOid });
+        if (!booking) return fail(res, 404, 'BOOKING_NOT_FOUND', 'Không tìm thấy đơn đặt chỗ');
+        if (booking.status !== 'CANCELLED' || !['FAILED', 'PROCESSING'].includes(booking.refund_status)) {
+          return fail(
+            res,
+            409,
+            'INVALID_REFUND_STATE',
+            'Chỉ đơn đã hủy có trạng thái hoàn tiền FAILED hoặc PROCESSING mới được báo chênh lệch',
+          );
+        }
+        const now = new Date();
+        await db.collection('bookings').updateOne(
+          { _id: bOid },
+          { $set: { refund_note: note, updated_at: now } },
+        );
+        const updated = await db.collection('bookings').findOne({ _id: bOid });
+        return res.json(updated);
+      }
+
+      const updated = await reconcileRefund(db, {
+        bookingId: req.params.id,
+        adminUser: req.user,
+        note: req.body.note,
+      });
+      res.json(updated);
+    } catch (err) {
+      return handleErr(res, err);
+    }
+  }),
+);
+
+module.exports = router;

@@ -1,0 +1,43 @@
+$kind: http-request
+name: '[TC-PM-019] Customer / Guest đối soát'
+description: '**Mã TC:** TC-PM-019
+
+  **Nhóm:** Đối soát hoàn tiền
+
+  **API / Thành phần:** POST /api/bookings/:id/refund-reconcile
+
+  **Loại:** Security
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer.
+
+  **Dữ liệu vào:** id đơn
+
+  **Các bước thực hiện:**
+
+  1) POST bằng Customer
+
+  2) Lặp lại không cookie
+
+  **Kết quả mong đợi:** Customer 403; Guest 401 (HTTP: 403)
+
+  **Nhánh code bao phủ:** PAY-B19
+
+  '
+url: '{{baseUrl}}/api/bookings/{{bookingId}}/refund-reconcile'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: CUSTOMER
+order: 19000
+body:
+  type: json
+  raw: '{"data": "id đơn"}'
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PM-019] Customer / Guest đối soát\npm.test(\"[TC-PM-019] Status code\
+    \ is 403\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([403]);\n\
+    });\npm.test(\"[TC-PM-019] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

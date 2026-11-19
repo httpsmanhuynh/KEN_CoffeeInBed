@@ -1,0 +1,45 @@
+$kind: http-request
+name: '[TC-PK-008] Thêm gói FIXED Cả ngày (is_full_day = true)'
+description: '**Mã TC:** TC-PK-008
+
+  **Nhóm:** Admin thêm gói
+
+  **API / Thành phần:** POST /api/packages
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed spaces/packages/package_prices/package_inclusions.
+
+  **Dữ liệu vào:** {"package_code": "PKG-T03", "name": "Gói test", "pricing_type":
+  "FIXED", "unit": "PER_SPACE", "duration_hours": null, "min_hours": 2, "is_full_day":
+  true, "is_active": true}
+
+  **Các bước thực hiện:**
+
+  1) POST /api/packages
+
+  **Kết quả mong đợi:** 201; gói hợp lệ không cần duration_hours (HTTP: 201)
+
+  **Nhánh code bao phủ:** PKG-B08
+
+  '
+url: '{{baseUrl}}/api/packages'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 8000
+body:
+  type: json
+  raw: "{\n  \"package_code\": \"PKG-T03\",\n  \"name\": \"Gói test\",\n  \"pricing_type\"\
+    : \"FIXED\",\n  \"unit\": \"PER_SPACE\",\n  \"duration_hours\": null,\n  \"min_hours\"\
+    : 2,\n  \"is_full_day\": true,\n  \"is_active\": true\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PK-008] Thêm gói FIXED Cả ngày (is_full_day = true)\npm.test(\"[TC-PK-008]\
+    \ Status code is 201\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([201]);\n\
+    });\npm.test(\"[TC-PK-008] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

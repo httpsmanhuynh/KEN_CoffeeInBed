@@ -1,0 +1,29 @@
+$kind: http-request
+name: "TC-ADM-12: [ADM-12] Admin tự khóa chính mình (Branch: ADM-B12)"
+description: |-
+  **Mã TC:** ADM-12 (TC-ADM-12)
+  **Nhóm:** Khóa/Mở khóa tài khoản
+  **API / Thành phần:** POST /api/admin/users/:id/lock
+  **Loại:** Negative
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed users/bookings.
+  **Dữ liệu vào:** id của chính Admin đang đăng nhập
+  **Các bước thực hiện:**
+  1) POST /api/admin/users/<id-admin>/lock
+  **Kết quả mong đợi:** 403 CANNOT_LOCK_SELF; status Admin vẫn ACTIVE (HTTP: 403)
+  **Nhánh code bao phủ:** ADM-B12
+  **Ghi chú:** Review: code trả 403 (không phải 409); đã chốt tại decisions.md §5. Khóa Admin khác tách sang ADM-36.
+url: "{{baseUrl}}/api/admin/users/{{adminId}}/lock"
+method: POST
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-12] Admin tự khóa chính mình
+      pm.test("[TC-ADM-12] Status code is 403", function () {
+          pm.expect(pm.response.code).to.be.oneOf([403]);
+      });
+      pm.test("[TC-ADM-12] Trả về 403 CANNOT_LOCK_SELF", function () {
+          const json = pm.response.json();
+          pm.expect(json.error).to.eql("CANNOT_LOCK_SELF");
+      });
+    language: text/javascript
+order: 6000

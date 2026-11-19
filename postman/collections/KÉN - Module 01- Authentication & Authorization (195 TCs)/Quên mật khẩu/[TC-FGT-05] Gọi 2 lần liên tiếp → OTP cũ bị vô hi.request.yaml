@@ -1,0 +1,33 @@
+$kind: http-request
+name: "[TC-FGT-05] Gọi 2 lần liên tiếp → OTP cũ bị vô hiệu"
+description: |-
+  **Mã TC:** TC-FGT-05
+  **Loại:** Positive
+  **Nhóm:** Quên mật khẩu
+  **Tiền điều kiện:** Đã đăng ký + xác minh OTP thành công cho SĐT 0909123456 (mật khẩu password123).
+  **Các bước:** 1) POST /api/auth/forgot-password (Body: phone)
+  2) Quan sát phản hồi và terminal
+  3) Kiểm tra otp_codes
+  4) Gọi lần 2
+  **Kết quả mong đợi:** OTP lần 1 is_used=true; OTP lần 2 is_used=false; chỉ OTP lần 2 đặt lại mật khẩu được
+  **Nhánh code:** FGT-B01; OTP-B14
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/forgot-password"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "phone": "0909123456"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-FGT-05] Gọi 2 lần liên tiếp → OTP cũ bị vô hiệu
+      pm.test("[TC-FGT-05] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 5000

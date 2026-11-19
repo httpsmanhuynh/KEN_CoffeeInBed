@@ -1,0 +1,34 @@
+$kind: http-request
+description: |-
+  **Mã TC:** TC-OTP-09
+  **Loại:** Boundary
+  **Nhóm:** Dịch vụ OTP
+  **Tiền điều kiện:** Đã gọi register với SĐT 0909123456 và lấy OTP từ terminal ([SMS mock]). Đặt OTP_MAX_ATTEMPTS=3.
+  **Các bước:** 1) Gọi verify-otp sai 3 lần
+  **Kết quả mong đợi:** Lần 1-2: 422 OTP_INVALID; lần 3: 429 OTP_TOO_MANY_ATTEMPTS
+  **Nhánh code:** OTP-B12; OTP-B13
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/test"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "phone": "0909123456",
+      "code": "000000"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-OTP-09] OTP_MAX_ATTEMPTS=3
+      pm.test("[TC-OTP-09] Status code is 429", function () {
+          pm.expect(pm.response.code).to.be.oneOf([429]);
+      });
+      pm.test("[TC-OTP-09] Response contains expected code or keyword: OTP_INVALID", function () {
+          var resText = pm.response.text();
+          pm.expect(resText).to.include("OTP_INVALID");
+      });
+    language: text/javascript
+order: 9000

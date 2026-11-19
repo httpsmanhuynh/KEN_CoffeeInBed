@@ -1,0 +1,41 @@
+$kind: http-request
+name: '[TC-AD-021] price âm / không nguyên'
+description: '**Mã TC:** TC-AD-021
+
+  **Nhóm:** Admin quản lý Add-on
+
+  **API / Thành phần:** POST /api/addons
+
+  **Loại:** Negative
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed products/addons.
+
+  **Dữ liệu vào:** {"price": -5} ; {"price": 99.5}
+
+  **Các bước thực hiện:**
+
+  1) POST /api/addons 2 lần
+
+  **Kết quả mong đợi:** Cả 2 lần 422 VALIDATION_ERROR (HTTP: 422)
+
+  **Nhánh code bao phủ:** ADD-B17
+
+  '
+url: '{{baseUrl}}/api/addons'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 21000
+body:
+  type: json
+  raw: '{"price": -5} ; {"price": 99.5}'
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-AD-021] price âm / không nguyên\npm.test(\"[TC-AD-021] Status code\
+    \ is 422\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([422]);\n\
+    });\npm.test(\"[TC-AD-021] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

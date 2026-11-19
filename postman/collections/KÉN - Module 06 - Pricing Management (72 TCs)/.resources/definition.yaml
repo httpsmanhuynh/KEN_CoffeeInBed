@@ -1,0 +1,3 @@
+$kind: collection
+name: "KÉN - Module 06: Pricing Management (72 TCs)"
+description: "Bộ kiểm thử 72 test cases của Phân hệ 06: Quản lý Giá & Tính tiền (Giá Package FIXED/HOURLY × PER_SPACE/PER_PERSON, Phụ phí Inclusion vượt hạn mức 50.000đ, Dịch vụ mua thêm Add-on, Giảm giá Voucher trước – Hạng thành viên sau, Làm tròn xuống đến đồng bằng basis points, Price Snapshot đóng băng, Đối chiếu UI – Backend, Bảo mật Never Trust the Client, Thanh toán đơn 0đ, Cộng Điểm & Coin từ số thực trả, Kiểm soát quyền truy cập). Đồng bộ với TC_06_Pricing_Management.xlsx."

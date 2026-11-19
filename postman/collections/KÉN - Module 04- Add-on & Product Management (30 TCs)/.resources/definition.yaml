@@ -1,0 +1,3 @@
+$kind: collection
+name: "KÉN - Module 04: Add-on & Product Management (30 TCs)"
+description: "Bộ kiểm thử 30 test cases của Phân hệ 04: Quản lý Thực đơn & Dịch vụ cộng thêm (Add-on & Product). Bao gồm danh mục món F&B, biến thể kích cỡ/giá, tồn kho và danh mục add-on. Đồng bộ với KEN_TestCase_5_Modules.xlsx."

@@ -1,0 +1,41 @@
+$kind: http-request
+name: '[TC-PK-030] EQUIPMENT tự ghi vào fixed_inclusions_snapshot'
+description: '**Mã TC:** TC-PK-030
+
+  **Nhóm:** Cấu hình Inclusion
+
+  **API / Thành phần:** POST /api/bookings/quote
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; đã seed spaces/packages/package_prices/package_inclusions.
+
+  **Dữ liệu vào:** Gói có EQUIPMENT
+
+  **Các bước thực hiện:**
+
+  1) POST /api/bookings/quote
+
+  **Kết quả mong đợi:** fixed_inclusions_snapshot chứa EQUIPMENT của gói (HTTP: 200)
+
+  **Nhánh code bao phủ:** PKG-B27
+
+  '
+url: '{{baseUrl}}/api/bookings/quote'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: CUSTOMER
+order: 30000
+body:
+  type: json
+  raw: '{"data": "Gói có EQUIPMENT"}'
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PK-030] EQUIPMENT tự ghi vào fixed_inclusions_snapshot\npm.test(\"\
+    [TC-PK-030] Status code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-PK-030] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

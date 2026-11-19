@@ -1,0 +1,31 @@
+$kind: http-request
+name: "TC-LOY-09: [LOY-09] Nhảy nhiều bậc khi đủ điểm (BASIC → GOLD) (Branch: LOY-B09)"
+description: |-
+  **Mã TC:** LOY-09 (TC-LOY-09)
+  **Nhóm:** Nâng hạng
+  **API / Thành phần:** POST /api/bookings/:id/check-out
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed membership_tiers.
+  **Dữ liệu vào:** tier_points=4.900, đơn +200 điểm
+  **Các bước thực hiện:**
+  1) POST check-out
+  **Kết quả mong đợi:** tier_points=5.100 → GOLD (10%) (HTTP: 200)
+  **Nhánh code bao phủ:** LOY-B09
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/bookings/{{bookingId}}/check-out"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {}
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-LOY-09] Nhảy nhiều bậc khi đủ điểm (BASIC → GOLD)
+      pm.test("[TC-LOY-09] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 2000

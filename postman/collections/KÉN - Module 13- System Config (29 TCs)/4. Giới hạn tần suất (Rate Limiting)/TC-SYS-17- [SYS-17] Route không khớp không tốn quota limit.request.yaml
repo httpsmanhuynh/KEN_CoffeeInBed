@@ -1,0 +1,24 @@
+$kind: http-request
+name: "TC-SYS-17: [SYS-17] Route không khớp không tốn quota limiter (Branch: SYS-B17)"
+description: |-
+  **Mã TC:** SYS-17 (TC-SYS-17)
+  **Nhóm:** Rate Limiting
+  **API / Thành phần:** Mọi API
+  **Loại:** Negative
+  **Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.
+  **Dữ liệu vào:** GET /api/khong-ton-tai nhiều lần
+  **Các bước thực hiện:**
+  1) Gọi route lạ 40 lần&#10;2) Gọi 1 route đăng nhập hợp lệ
+  **Kết quả mong đợi:** Route lạ trả 404; limiter đăng nhập không bị tính (HTTP: 404)
+  **Nhánh code bao phủ:** SYS-B17
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/route-khong-ton-tai-kiem-tra-limiter"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Route không tồn tại trả 404 và không hao hụt quota limiter", function () {
+          pm.response.to.have.status(404);
+      });
+    language: text/javascript
+order: 6000

@@ -1,0 +1,30 @@
+$kind: http-request
+description: |-
+  **Mã TC:** TC-OTP-10
+  **Loại:** Positive
+  **Nhóm:** Dịch vụ OTP
+  **Tiền điều kiện:** Đã gọi register với SĐT 0909123456 và lấy OTP từ terminal ([SMS mock]).
+  **Các bước:** 1) Gọi verify-otp với OTP đúng
+  **Kết quả mong đợi:** 200; không ném lỗi khi độ dài buffer khác nhau (OTP sai vẫn trả 422)
+  **Nhánh code:** OTP-B10
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/test"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "phone": "0909123456",
+      "code": "<OTP>"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-OTP-10] So sánh hash an toàn thời gian (timingSafeEqual)
+      pm.test("[TC-OTP-10] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 10000

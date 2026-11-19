@@ -1,0 +1,32 @@
+$kind: http-request
+name: "TC-ADM-44: [ADM-44] Tách theo Zone: tổng các Zone khớp toàn hệ thống; zoneId nhận cả _id và zone_code (Branch: ADM-B44)"
+description: |-
+  **Mã TC:** ADM-44 (TC-ADM-44)
+  **Nhóm:** Dashboard số đơn
+  **API / Thành phần:** GET /api/admin/dashboard
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; nhiều Zone có đơn.
+  **Dữ liệu vào:** ?zoneId=<_id> và ?zoneId=<zone_code> của cùng một Zone
+  **Các bước thực hiện:**
+  1) GET dashboard (không lọc Zone)&#10;2) Cộng zones[].bookings.total và zones[].revenue.total&#10;3) GET ?zoneId=<_id>, rồi ?zoneId=<zone_code>
+  **Kết quả mong đợi:** 200 Σ zones[] = bookings.total và revenue.total; lọc bằng _id và zone_code cho kết quả giống nhau (HTTP: 200)
+  **Nhánh code bao phủ:** ADM-B44
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/admin/dashboard"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-44] Tách theo Zone: tổng các Zone khớp toàn hệ thống; zoneId nhận cả _id và zone_code
+      pm.test("[TC-ADM-44] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+      pm.test("[TC-ADM-44] Tổng bookings.total và revenue.total của các Zone khớp toàn hệ thống", function () {
+          const json = pm.response.json();
+          const sumBookings = json.zones.reduce(function (a, z) { return a + z.bookings.total; }, 0);
+          const sumRevenue = json.zones.reduce(function (a, z) { return a + z.revenue.total; }, 0);
+          pm.expect(sumBookings).to.eql(json.bookings.total);
+          pm.expect(sumRevenue).to.eql(json.revenue.total);
+      });
+    language: text/javascript
+order: 7000

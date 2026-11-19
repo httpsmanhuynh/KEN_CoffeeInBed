@@ -1,0 +1,30 @@
+$kind: http-request
+name: "TC-REC-04: [REC-04] Không gợi ý món đã hết hàng / đã ẩn is_active=false (Branch: REC-B04)"
+description: |-
+  **Mã TC:** REC-04 (TC-REC-04)
+  **Nhóm:** Customer Recommend
+  **API / Thành phần:** GET /api/recommendations & GET /api/recommendations/booking
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; có món/addon is_active=false trong DB.
+  **Dữ liệu vào:** ?limit=20
+  **Các bước thực hiện:**
+  1) GET /api/recommendations?limit=20
+  **Kết quả mong đợi:** 200 món đã ẩn (is_active=false hoặc addon trỏ vào product is_active=false) tuyệt đối không xuất hiện trong items[] (HTTP: 200)
+  **Nhánh code bao phủ:** REC-B04
+url: "{{baseUrl}}/api/recommendations?limit=20"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("[TC-REC-04] Status code is 200", function () {
+          pm.expect(pm.response.code).to.eql(200);
+      });
+      pm.test("[TC-REC-04] Mọi mục trong danh sách gợi ý đều có is_active = true", function () {
+          const json = pm.response.json();
+          pm.expect(json.items).to.be.an("array");
+          json.items.forEach(function (item) {
+              pm.expect(item.is_active).to.eql(true);
+          });
+      });
+    language: text/javascript
+order: 4000

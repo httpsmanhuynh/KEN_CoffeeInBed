@@ -1,0 +1,3 @@
+$kind: collection
+name: "KÉN - Module 09: Loyalty Management (20 TCs)"
+description: "Bộ kiểm thử 20 test cases của Phân hệ 09: Quản lý Điểm thưởng & Hạng thành viên (Bảng 4 hạng, Cộng Điểm & Coins khi Check-out, Nâng hạng, Bảo toàn hạng trong năm, Rollover đầu năm 01/01, Lịch sử biến động loyalty_transactions). Đồng bộ với Test_Module09_Loyalty_Management.xlsx."

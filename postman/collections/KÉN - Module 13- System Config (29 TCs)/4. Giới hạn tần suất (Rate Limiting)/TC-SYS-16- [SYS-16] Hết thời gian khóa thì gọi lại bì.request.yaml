@@ -1,0 +1,24 @@
+$kind: http-request
+name: "TC-SYS-16: [SYS-16] Hết thời gian khóa thì gọi lại bình thường (Branch: SYS-B16)"
+description: |-
+  **Mã TC:** SYS-16 (TC-SYS-16)
+  **Nhóm:** Rate Limiting
+  **API / Thành phần:** Mọi API
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.
+  **Dữ liệu vào:** Sau khi bị 429, chờ hết cửa sổ
+  **Các bước thực hiện:**
+  1) Bị 429&#10;2) Chờ hết cửa sổ&#10;3) Gọi lại
+  **Kết quả mong đợi:** Request được xử lý bình thường (HTTP: 200)
+  **Nhánh code bao phủ:** SYS-B16
+  **Ghi chú:** Cần chờ thật hoặc giảm cửa sổ thời gian khi test
+url: "{{baseUrl}}/"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Hết thời gian khóa gọi lại bình thường 200", function () {
+          pm.response.to.have.status(200);
+      });
+    language: text/javascript
+order: 5000

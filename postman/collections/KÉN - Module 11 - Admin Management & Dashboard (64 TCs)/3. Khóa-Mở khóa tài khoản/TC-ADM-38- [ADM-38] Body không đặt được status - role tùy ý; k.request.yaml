@@ -1,0 +1,41 @@
+$kind: http-request
+name: "TC-ADM-38: [ADM-38] Body không đặt được status/role tùy ý; không có route PATCH …/status (Branch: ADM-B38)"
+description: |-
+  **Mã TC:** ADM-38 (TC-ADM-38)
+  **Nhóm:** Khóa/Mở khóa tài khoản
+  **API / Thành phần:** POST /api/admin/users/:id/lock
+  **Loại:** Security
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed users/bookings.
+  **Dữ liệu vào:** Body {"status":"DELETED","role":"ADMIN"}; id khách ACTIVE
+  **Các bước thực hiện:**
+  1) POST /api/admin/users/<id>/lock kèm body trên&#10;2) PATCH /api/admin/users/<id>/status {"status":"LOCKED"}
+  **Kết quả mong đợi:** Bước 1: 200, chỉ đổi ACTIVE → LOCKED, role không đổi (body bị bỏ qua). Bước 2: 404 (route không tồn tại) (HTTP: 200)
+  **Nhánh code bao phủ:** ADM-B38
+  **Ghi chú:** Code: setUserStatus chỉ $set status.
+url: "{{baseUrl}}/api/admin/users/{{userId}}/lock"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "status": "DELETED",
+      "role": "ADMIN"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-38] Body không đặt được status/role tùy ý; không có route PATCH …/status
+      pm.test("[TC-ADM-38] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200,404]);
+      });
+      pm.test("[TC-ADM-38] Body tùy ý bị bỏ qua, chỉ đổi status sang LOCKED và giữ nguyên role CUSTOMER", function () {
+          if (pm.response.code === 200) {
+              const u = pm.response.json().user;
+              pm.expect(u.status).to.eql("LOCKED");
+              pm.expect(u.role).to.not.eql("ADMIN");
+          }
+      });
+    language: text/javascript
+order: 10000

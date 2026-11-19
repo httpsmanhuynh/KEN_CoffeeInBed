@@ -1,0 +1,34 @@
+$kind: http-request
+name: "TC-ADM-08: [ADM-08] Tài khoản LOCKED không đăng nhập được (Branch: ADM-B08)"
+description: |-
+  **Mã TC:** ADM-08 (TC-ADM-08)
+  **Nhóm:** Khóa/Mở khóa tài khoản
+  **API / Thành phần:** POST /api/login
+  **Loại:** Negative
+  **Điều kiện tiên quyết:** Server chạy; tài khoản đã bị Admin khóa.
+  **Dữ liệu vào:** SĐT + mật khẩu đúng
+  **Các bước thực hiện:**
+  1) POST /api/login
+  **Kết quả mong đợi:** 403 tài khoản bị khóa; không tạo session (HTTP: 403)
+  **Nhánh code bao phủ:** ADM-B08
+  **Ghi chú:** Review: luồng login (auth.js) không nằm trong gói đã nộp nên chưa đối chiếu được mã 403; xác nhận với module Auth.
+url: "{{baseUrl}}/api/login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "identifier": "{{testPhone}}",
+      "password": "{{testPassword}}"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-08] Tài khoản LOCKED không đăng nhập được
+      pm.test("[TC-ADM-08] Status code is 403", function () {
+          pm.expect(pm.response.code).to.be.oneOf([403]);
+      });
+    language: text/javascript
+order: 2000

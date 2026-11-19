@@ -1,0 +1,36 @@
+$kind: http-request
+description: |-
+  **Mã TC:** TC-REG-22
+  **Loại:** Positive
+  **Nhóm:** Đăng ký
+  **Tiền điều kiện:** Đã gọi register với SĐT 0909123456 và lấy OTP từ terminal ([SMS mock]).
+  **Các bước:** 1) POST /api/auth/register (Body: raw JSON)
+  2) Quan sát phản hồi
+  3) Kiểm tra otp_codes/users trên Atlas
+  4) So sánh 2 bản ghi otp_codes
+  **Kết quả mong đợi:** 201; OTP cũ is_used=true, OTP mới is_used=false; chỉ OTP mới xác minh được
+  **Nhánh code:** REG-B08; OTP-B14
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/register"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "fullName": "Ngô Thị Phương Thảo",
+      "phone": "0909123456",
+      "email": "ngothiphuongthao@uel.edu.vn",
+      "dateOfBirth": "2004-01-15",
+      "password": "password123"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-REG-22] Đăng ký lại cùng SĐT khi chưa xác minh OTP
+      pm.test("[TC-REG-22] Status code is 201", function () {
+          pm.expect(pm.response.code).to.be.oneOf([201]);
+      });
+    language: text/javascript
+order: 22000

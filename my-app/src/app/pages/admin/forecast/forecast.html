@@ -1,0 +1,633 @@
+<div class="forecast-page">
+  <div *ngIf="toast" class="toast" [class.toast-err]="toastType === 'err'">{{ toast }}</div>
+
+  <main class="forecast-content">
+    <header class="forecast-heading">
+      <div class="title-row">
+        <div>
+          <div class="title-with-icon" data-name="Title with icon">
+            <lucide-icon name="sparkles" [size]="18" [strokeWidth]="1.8" color="#4A3123" class="title-icon"></lucide-icon>
+            <h1>Dự báo Nhu cầu &amp; Phân tích Gợi ý AI</h1>
+          </div>
+          <p class="subtitle">
+            Dự báo sản lượng tiêu thụ món ăn, tính nhu cầu nguyên vật liệu &amp; phân tích hành vi
+            gợi ý mua kèm bằng AI.
+          </p>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <div class="tab-switch">
+          <button
+            type="button"
+            [class.active]="activeTab === 'FORECAST'"
+            (click)="switchTab('FORECAST')"
+          >
+            Dự báo món &amp; Nguyên liệu
+          </button>
+          <button
+            type="button"
+            [class.active]="activeTab === 'RECOMMEND'"
+            (click)="switchTab('RECOMMEND')"
+          >
+            Gợi ý bán kèm AI
+          </button>
+        </div>
+        <button type="button" class="btn-export" (click)="exportCsv()">Xuất CSV</button>
+      </div>
+    </header>
+
+    <ng-container *ngIf="activeTab === 'FORECAST'">
+      <section class="date-panel">
+        <label>
+          <span>Từ ngày</span>
+          <div class="date-input">
+            <lucide-icon name="calendar" [size]="16" [strokeWidth]="1.8" color="#4A3123"></lucide-icon>
+            <input type="date" [value]="fromDate" (change)="onDateChange('fromDate', $event)" />
+          </div>
+        </label>
+
+        <label>
+          <span>Đến ngày</span>
+          <div class="date-input">
+            <lucide-icon name="calendar" [size]="16" [strokeWidth]="1.8" color="#4A3123"></lucide-icon>
+            <input type="date" [value]="toDate" (change)="onDateChange('toDate', $event)" />
+          </div>
+        </label>
+      </section>
+
+      <div *ngIf="dateError" class="banner-error">{{ dateError }}</div>
+      <div *ngIf="sourceMode === 'HISTORICAL_FALLBACK'" class="banner-info">
+        <strong>Tổng hợp từ lịch sử bán hàng:</strong> Khoảng ngày đang chọn chưa có bản ghi dự
+        báo AI mới, hệ thống tự động ước tính theo mức tiêu thụ trung bình gần nhất.
+      </div>
+
+      <section class="kpi-grid">
+        <article class="kpi-card kpi-dark">
+          <span>Tổng sản lượng dự báo ({{ formatDateVi(fromDate) }} – {{ formatDateVi(toDate) }})</span>
+          <strong>{{ totalPredictedDishes | number }}</strong>
+          <small>{{ drinkPredictedQty | number }} đồ uống · {{ foodPredictedQty | number }} bánh &amp; món khác</small>
+        </article>
+
+        <article class="kpi-card">
+          <span>Món dự báo cao nhất</span>
+          <strong class="featured">{{ topDish?.name || 'Chưa có dữ liệu' }}</strong>
+          <small>
+            {{
+              topDish
+                ? topDish.predictedQty + ' phần (' + topDish.itemCode + ')'
+                : 'Chọn khoảng ngày hợp lệ'
+            }}
+          </small>
+        </article>
+
+        <article class="kpi-card kpi-confidence">
+          <span>Biên độ dự báo tổng thể</span>
+          <strong>{{ filteredDishLowerSum | number }} – {{ filteredDishUpperSum | number }}</strong>
+          <div class="progress"><i></i></div>
+          <small>{{ dishes.length }} món đang được theo dõi dự báo</small>
+        </article>
+
+        <article class="kpi-card" [class.kpi-alert]="openAlertsCount > 0 || restockNeededCount > 0">
+          <span>Nguyên vật liệu cần chú ý</span>
+          <strong>{{ restockNeededCount }} NVL · {{ openAlertsCount }} cảnh báo</strong>
+          <small>
+            {{
+              restockNeededCount > 0
+                ? 'Có nguyên liệu dưới mức an toàn hoặc thiếu hụt'
+                : 'Tồn kho đang đáp ứng đủ nhu cầu'
+            }}
+          </small>
+        </article>
+      </section>
+
+      <section class="forecast-card trend-card">
+        <div class="section-heading">
+          <h2>
+            <lucide-icon name="table" [size]="18" [strokeWidth]="1.8" color="#4A3123"></lucide-icon> Xu hướng tiêu thụ thực tế gần đây
+          </h2>
+          <p>
+            <span class="legend actual"></span> Tổng số lượng món bán ra theo ngày (từ lịch sử giao
+            dịch gần nhất)
+          </p>
+        </div>
+        <div class="chart" *ngIf="trend.length > 0">
+          <div class="axis">
+            <span *ngFor="let tick of trendAxisTicks">{{ tick }}</span>
+          </div>
+          <div class="bars">
+            <div *ngFor="let point of trend; let last = last" class="bar-item">
+              <strong>{{ point.qty }}</strong>
+              <div
+                class="bar"
+                [class.forecast-bar]="last"
+                [style.height.%]="barHeight(point.qty)"
+                [title]="point.date + ': ' + point.qty + ' món · ' + formatCurrency(point.revenueVnd)"
+              ></div>
+              <small>{{ point.label }}</small>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="forecast-card plan-card">
+        <div class="section-heading plan-heading">
+          <h2><lucide-icon name="table" [size]="18" [strokeWidth]="1.8" color="#4A3123"></lucide-icon> Kế hoạch chuẩn bị theo món</h2>
+          <small>
+            Khoảng {{ formatDateVi(fromDate) }} – {{ formatDateVi(toDate) }} ·
+            {{ filteredDishes.length }} / {{ dishes.length }} món
+          </small>
+        </div>
+
+        <div class="plan-filters">
+          <label class="plan-search">
+            <lucide-icon name="search" [size]="16" [strokeWidth]="1.8" color="#4A3123"></lucide-icon>
+            <input
+              type="text"
+              [value]="search"
+              (input)="onSearchInput($event)"
+              placeholder="Tìm tên món, mã món hoặc nguyên liệu..."
+            />
+          </label>
+          <select [value]="category" (change)="onCategoryChange($event)">
+            <option *ngFor="let cat of availableCategories" [value]="cat">
+              {{ cat === 'Tất cả' ? 'Tất cả nhóm món' : categoryLabel(cat) }}
+            </option>
+          </select>
+          <select [value]="sort" (change)="onSortChange($event)">
+            <option value="default">Mặc định</option>
+            <option value="qty_desc">Số lượng giảm dần</option>
+            <option value="qty_asc">Số lượng tăng dần</option>
+            <option value="name_asc">Tên món A–Z</option>
+          </select>
+        </div>
+
+        <div class="plan-table-wrap">
+          <table class="plan-table">
+            <thead>
+              <tr>
+                <th>Mã món</th>
+                <th>Tên món &amp; Phân loại</th>
+                <th>Dự báo tiêu thụ</th>
+                <th>Khoảng tin cậy [Min–Max]</th>
+                <th>Hành động đề xuất</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                *ngFor="let item of paged('dish', filteredDishes)"
+                class="clickable-row"
+                [class.is-selected]="selectedDish?.itemCode === item.itemCode"
+                tabindex="0"
+                (click)="selectDish(item)"
+                (keydown.enter)="selectDish(item)"
+              >
+                <td><span class="date-pill">{{ item.itemCode }}</span></td>
+                <td>
+                  <strong>{{ item.name }}</strong>
+                  <small>{{ categoryLabel(item.category) }} · {{ formatCurrency(item.price) }}</small>
+                </td>
+                <td>
+                  <strong>{{ item.predictedQty | number }} phần</strong>
+                </td>
+                <td>{{ item.lowerQty | number }} – {{ item.upperQty | number }} phần</td>
+                <td
+                  [class.action-up]="item.actionTag === 'Tăng lượng'"
+                  [class.action-down]="item.actionTag === 'Giảm lượng'"
+                >
+                  <strong>{{ item.actionTag }}</strong>
+                </td>
+              </tr>
+              <tr *ngIf="filteredDishes.length === 0">
+                <td colspan="5" class="empty-cell">Không có món nào khớp với từ khóa lọc.</td>
+              </tr>
+            </tbody>
+            <tfoot *ngIf="filteredDishes.length > 0">
+              <tr>
+                <td colspan="2">
+                  <strong>Tổng hợp ({{ filteredDishes.length }} món)</strong>
+                </td>
+                <td><strong>{{ filteredDishSum | number }} phần</strong></td>
+                <td>{{ filteredDishLowerSum | number }} – {{ filteredDishUpperSum | number }}</td>
+                <td>Khoảng ngày {{ formatDateVi(fromDate) }} – {{ formatDateVi(toDate) }}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div id="dish-detail" class="dish-detail-panel" *ngIf="selectedDish as sd">
+          <div class="dish-detail-head">
+            <div>
+              <span class="date-pill">{{ sd.itemCode }}</span>
+              <strong>{{ sd.name }}</strong>
+              <small>{{ categoryLabel(sd.category) }} · Giá bán {{ formatCurrency(sd.price) }}</small>
+            </div>
+            <button type="button" class="btn-close-link" (click)="selectedDish = null">Đóng</button>
+          </div>
+          <div class="dish-detail-grid">
+            <div><span>Dự báo tiêu thụ</span><strong>{{ sd.predictedQty | number }} phần</strong></div>
+            <div><span>Khoảng tin cậy</span><strong>{{ sd.lowerQty | number }} – {{ sd.upperQty | number }} phần</strong></div>
+            <div><span>Hành động đề xuất</span><strong>{{ sd.actionTag }}</strong></div>
+            <div><span>Ngày dự báo</span><strong>{{ formatDateVi(sd.forecastDate) }}</strong></div>
+          </div>
+        </div>
+
+        <div class="admin-pagination-bar" *ngIf="filteredDishes.length > 0">
+          <span class="admin-pagination-info">
+            Hiển thị {{ pageFrom('dish', filteredDishes.length) }}–{{ pageTo('dish', filteredDishes.length) }} / {{ filteredDishes.length }} món
+          </span>
+          <div class="admin-pagination-controls" *ngIf="totalPages(filteredDishes.length) > 1">
+            <button type="button" class="btn-page-nav" [disabled]="curPage('dish', filteredDishes.length) <= 1" (click)="goPage('dish', curPage('dish', filteredDishes.length) - 1, filteredDishes.length)">‹ Trước</button>
+            <button
+              *ngFor="let p of pageNumbers('dish', filteredDishes.length)"
+              type="button"
+              class="btn-page-num"
+              [class.active]="p === curPage('dish', filteredDishes.length)"
+              (click)="goPage('dish', p, filteredDishes.length)"
+            >
+              {{ p }}
+            </button>
+            <button type="button" class="btn-page-nav" [disabled]="curPage('dish', filteredDishes.length) >= totalPages(filteredDishes.length)" (click)="goPage('dish', curPage('dish', filteredDishes.length) + 1, filteredDishes.length)">Tiếp ›</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="forecast-card" *ngIf="alerts.length > 0">
+        <div class="section-heading alerts-heading">
+          <div>
+            <h2>
+              <lucide-icon name="info" [size]="16" [strokeWidth]="1.8" color="#4A3123"></lucide-icon> Cảnh báo Tồn kho Safety Stock
+              ({{ alerts.length }})
+            </h2>
+            <small>Xác nhận hoặc đánh dấu đã xử lý sau khi nhập bổ sung nguyên liệu.</small>
+          </div>
+        </div>
+        <div class="alert-list">
+          <article *ngFor="let al of paged('alert', alerts)" class="alert-row" [class.critical]="al.severity === 'CRITICAL'">
+            <div class="alert-main">
+              <span class="sev-badge" [class.crit]="al.severity === 'CRITICAL'">{{ al.severity }}</span>
+              <div>
+                <strong>{{ al.ingredientName }} ({{ al.ingredientCode }})</strong>
+                <p>{{ al.message }}</p>
+              </div>
+            </div>
+            <div class="alert-actions">
+              <button
+                type="button"
+                class="btn-ack"
+                (click)="updateAlertStatus(al, 'ACKNOWLEDGED')"
+              >
+                Đã tiếp nhận
+              </button>
+              <button
+                type="button"
+                class="btn-resolve"
+                (click)="updateAlertStatus(al, 'RESOLVED')"
+              >
+                Đánh dấu Đã xử lý
+              </button>
+            </div>
+          </article>
+        </div>
+        <div class="admin-pagination-bar" *ngIf="totalPages(alerts.length) > 1">
+          <span class="admin-pagination-info">
+            Hiển thị {{ pageFrom('alert', alerts.length) }}–{{ pageTo('alert', alerts.length) }} / {{ alerts.length }} cảnh báo
+          </span>
+          <div class="admin-pagination-controls">
+            <button type="button" class="btn-page-nav" [disabled]="curPage('alert', alerts.length) <= 1" (click)="goPage('alert', curPage('alert', alerts.length) - 1, alerts.length)">‹ Trước</button>
+            <button
+              *ngFor="let p of pageNumbers('alert', alerts.length)"
+              type="button"
+              class="btn-page-num"
+              [class.active]="p === curPage('alert', alerts.length)"
+              (click)="goPage('alert', p, alerts.length)"
+            >
+              {{ p }}
+            </button>
+            <button type="button" class="btn-page-nav" [disabled]="curPage('alert', alerts.length) >= totalPages(alerts.length)" (click)="goPage('alert', curPage('alert', alerts.length) + 1, alerts.length)">Tiếp ›</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="forecast-card">
+        <div class="section-heading ing-heading">
+          <div>
+            <h2><lucide-icon name="tag" [size]="16" [strokeWidth]="1.8" color="#4A3123"></lucide-icon> Dự báo Nguyên vật liệu &amp; Nhập kho</h2>
+            <small>Quy đổi từ kế hoạch món qua công thức (Recipes) để đề xuất nhập hàng.</small>
+          </div>
+          <div class="ing-filter-pills">
+            <button
+              type="button"
+              [class.active]="ingredientFilter === 'ALL'"
+              (click)="setIngredientFilter('ALL')"
+            >
+              Tất cả ({{ ingredients.length }})
+            </button>
+            <button
+              type="button"
+              [class.active]="ingredientFilter === 'RESTOCK'"
+              (click)="setIngredientFilter('RESTOCK')"
+            >
+              Cần nhập bổ sung ({{ restockNeededCount }})
+            </button>
+          </div>
+        </div>
+
+        <div id="movement-drawer" *ngIf="activeMovementIngredient" class="movement-drawer">
+          <div class="movement-header">
+            <strong>
+              Cập nhật kho: {{ activeMovementIngredient.name }}
+              ({{ activeMovementIngredient.currentStock }} {{ activeMovementIngredient.unit }})
+            </strong>
+            <button type="button" class="btn-close-link" (click)="closeMovementForm()">Đóng</button>
+          </div>
+          <div class="movement-fields">
+            <label>
+              Loại giao dịch
+              <select [value]="movementType" (change)="onMovementTypeChange($event)">
+                <option value="IN">Nhập kho (+IN)</option>
+                <option value="OUT">Xuất kho (-OUT)</option>
+                <option value="ADJUST">Điều chỉnh kiểm kê (ADJUST)</option>
+                <option value="DISCARD">Hủy hỏng (-DISCARD)</option>
+              </select>
+            </label>
+            <label>
+              Số lượng ({{ activeMovementIngredient.unit }})
+              <input
+                type="number"
+                step="0.5"
+                [value]="movementQty"
+                (input)="onMovementQtyInput($event)"
+              />
+            </label>
+            <label class="reason-field">
+              Lý do / Ghi chú phiếu kho
+              <input
+                type="text"
+                [value]="movementReason"
+                (input)="onMovementReasonInput($event)"
+                placeholder="VD: Nhập lô hàng nhà cung cấp sáng nay"
+              />
+            </label>
+            <button
+              type="button"
+              class="btn-submit-movement"
+              [disabled]="savingMovement"
+              (click)="submitStockMovement()"
+            >
+              {{ savingMovement ? 'Đang lưu...' : 'Xác nhận phiếu kho' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="plan-table-wrap">
+          <table class="plan-table ing-table">
+            <thead>
+              <tr>
+                <th>Mã NVL</th>
+                <th>Tên nguyên liệu &amp; Bảo quản</th>
+                <th>Tồn hiện tại / Min</th>
+                <th>Nhu cầu dự báo</th>
+                <th>Đề xuất nhập</th>
+                <th>Thao tác kho</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                *ngFor="let ing of paged('ing', filteredIngredients)"
+                class="clickable-row"
+                [class.is-selected]="activeMovementIngredient?.id === ing.id"
+                tabindex="0"
+                (click)="openMovementForm(ing)"
+                (keydown.enter)="openMovementForm(ing)"
+              >
+                <td><span class="date-pill">{{ ing.ingredientCode }}</span></td>
+                <td>
+                  <strong>{{ ing.name }}</strong>
+                  <small>{{ storageLabel(ing.storageType) }} · Đơn vị: {{ ing.unit }}</small>
+                </td>
+                <td>
+                  <strong>{{ ing.currentStock }} {{ ing.unit }}</strong>
+                  <small>Mức an toàn: {{ ing.minStockLevel }} {{ ing.unit }}</small>
+                </td>
+                <td>
+                  <strong>{{ ing.predictedDemand }} {{ ing.unit }}</strong>
+                  <small [class.down]="ing.shortfallQty > 0">
+                    {{
+                      ing.shortfallQty > 0
+                        ? 'Thiếu ' + ing.shortfallQty + ' ' + ing.unit
+                        : 'Còn sau kỳ: ' + ing.projectedRemainingStock + ' ' + ing.unit
+                    }}
+                  </small>
+                </td>
+                <td>
+                  <span
+                    class="restock-pill"
+                    [class.warn]="ing.needsRestock"
+                    [class.ok]="!ing.needsRestock"
+                  >
+                    {{
+                      ing.recommendedOrderQty > 0
+                        ? 'Đề xuất nhập +' + ing.recommendedOrderQty + ' ' + ing.unit
+                        : 'Đủ đáp ứng'
+                    }}
+                  </span>
+                </td>
+                <td>
+                  <button type="button" class="btn-move" (click)="openMovementForm(ing); $event.stopPropagation()">
+                    Nhập / Điều chỉnh
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="filteredIngredients.length === 0">
+                <td colspan="6" class="empty-cell">Không có nguyên vật liệu nào khớp bộ lọc.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="admin-pagination-bar" *ngIf="filteredIngredients.length > 0">
+          <span class="admin-pagination-info">
+            Hiển thị {{ pageFrom('ing', filteredIngredients.length) }}–{{ pageTo('ing', filteredIngredients.length) }} / {{ filteredIngredients.length }} nguyên liệu
+          </span>
+          <div class="admin-pagination-controls" *ngIf="totalPages(filteredIngredients.length) > 1">
+            <button type="button" class="btn-page-nav" [disabled]="curPage('ing', filteredIngredients.length) <= 1" (click)="goPage('ing', curPage('ing', filteredIngredients.length) - 1, filteredIngredients.length)">‹ Trước</button>
+            <button
+              *ngFor="let p of pageNumbers('ing', filteredIngredients.length)"
+              type="button"
+              class="btn-page-num"
+              [class.active]="p === curPage('ing', filteredIngredients.length)"
+              (click)="goPage('ing', p, filteredIngredients.length)"
+            >
+              {{ p }}
+            </button>
+            <button type="button" class="btn-page-nav" [disabled]="curPage('ing', filteredIngredients.length) >= totalPages(filteredIngredients.length)" (click)="goPage('ing', curPage('ing', filteredIngredients.length) + 1, filteredIngredients.length)">Tiếp ›</button>
+          </div>
+        </div>
+      </section>
+    </ng-container>
+
+    <ng-container *ngIf="activeTab === 'RECOMMEND'">
+      <section class="kpi-grid">
+        <article class="kpi-card kpi-dark">
+          <span>Đơn đặt đã phân tích</span>
+          <strong>{{ recommendSummary.totalBookingsAnalyzed | number }}</strong>
+          <small>Tổng hợp Inclusion &amp; Add-on</small>
+        </article>
+        <article class="kpi-card">
+          <span>Đơn có mua kèm đa món</span>
+          <strong>{{ recommendSummary.multiItemBookings | number }}</strong>
+          <small>Tỷ lệ {{ recommendSummary.multiItemRate }}% tổng số đơn</small>
+        </article>
+        <article class="kpi-card">
+          <span>Số cặp món kết hợp</span>
+          <strong>{{ recommendSummary.totalPairsFound | number }}</strong>
+          <small>Cơ sở tạo combo ưu đãi</small>
+        </article>
+        <article class="kpi-card">
+          <span>Độ sâu giỏ hàng &amp; ML</span>
+          <strong>{{ recommendSummary.avgBasketItems }} món/đơn</strong>
+          <small>
+            {{ recommendSummary.mlClusterCount }} nhóm ML · {{ recommendSummary.mlGlobalCount }} gợi ý chung
+          </small>
+        </article>
+      </section>
+
+      <section class="forecast-card">
+        <div class="section-heading">
+          <h2>
+            <lucide-icon name="sparkles" [size]="16" [strokeWidth]="1.8" color="#4A3123"></lucide-icon> Cặp món &amp; Add-on thường được đặt
+            cùng nhau (Co-occurrence)
+          </h2>
+          <small>Chỉ số Support, Confidence và Lift đo mức độ liên kết giữa hai sản phẩm.</small>
+        </div>
+        <div class="plan-table-wrap">
+          <table class="plan-table pair-table">
+            <thead>
+              <tr>
+                <th>Hạng</th>
+                <th>Món A + Món B</th>
+                <th>Tần suất cùng giỏ</th>
+                <th>Support / Confidence</th>
+                <th>Chỉ số Lift</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let pair of paged('pair', coOccurringPairs)">
+                <td><span class="date-pill">#{{ pair.rank }}</span></td>
+                <td>
+                  <strong>{{ pair.itemA.name }} + {{ pair.itemB.name }}</strong>
+                  <small>{{ pair.itemA.code }} · {{ pair.itemB.code }}</small>
+                </td>
+                <td>
+                  <div class="pair-bar-wrap">
+                    <strong>{{ pair.pairCount }} đơn</strong>
+                    <div class="pair-bar-bg">
+                      <div class="pair-bar-fill" [style.width.%]="pairBarWidth(pair.pairCount)"></div>
+                    </div>
+                  </div>
+                </td>
+                <td>Support {{ pair.supportPct }}% · Conf {{ pair.confidencePct }}%</td>
+                <td>
+                  <span class="lift-badge" [class.strong]="pair.lift >= 1.5">
+                    {{ pair.lift }}x {{ pair.lift >= 1.5 ? '· Kết hợp mạnh' : '' }}
+                  </span>
+                </td>
+              </tr>
+              <tr *ngIf="coOccurringPairs.length === 0">
+                <td colspan="5" class="empty-cell">Chưa đủ dữ liệu đa món để thống kê cặp kết hợp.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="admin-pagination-bar" *ngIf="totalPages(coOccurringPairs.length) > 1">
+          <span class="admin-pagination-info">
+            Hiển thị {{ pageFrom('pair', coOccurringPairs.length) }}–{{ pageTo('pair', coOccurringPairs.length) }} / {{ coOccurringPairs.length }} cặp món
+          </span>
+          <div class="admin-pagination-controls">
+            <button type="button" class="btn-page-nav" [disabled]="curPage('pair', coOccurringPairs.length) <= 1" (click)="goPage('pair', curPage('pair', coOccurringPairs.length) - 1, coOccurringPairs.length)">‹ Trước</button>
+            <button
+              *ngFor="let p of pageNumbers('pair', coOccurringPairs.length)"
+              type="button"
+              class="btn-page-num"
+              [class.active]="p === curPage('pair', coOccurringPairs.length)"
+              (click)="goPage('pair', p, coOccurringPairs.length)"
+            >
+              {{ p }}
+            </button>
+            <button type="button" class="btn-page-nav" [disabled]="curPage('pair', coOccurringPairs.length) >= totalPages(coOccurringPairs.length)" (click)="goPage('pair', curPage('pair', coOccurringPairs.length) + 1, coOccurringPairs.length)">Tiếp ›</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="recommend-bottom-grid">
+        <article class="forecast-card">
+          <div class="section-heading">
+            <h2><lucide-icon name="table" [size]="18" [strokeWidth]="1.8" color="#4A3123"></lucide-icon> Top Trending Add-on &amp; Món bán chạy</h2>
+            <small>Xếp hạng theo sản lượng thực tế cho Pop-up gợi ý.</small>
+          </div>
+          <div class="cluster-list">
+            <div *ngFor="let t of paged('trend', topTrending); let idx = index" class="trending-row">
+              <div class="trending-left">
+                <span class="rank-circle">{{ t.rank || (pageFrom('trend', topTrending.length) + idx) }}</span>
+                <div>
+                  <strong>{{ t.name }}</strong>
+                  <small>{{ t.code }} · {{ categoryLabel(t.category) }}</small>
+                </div>
+              </div>
+              <div class="trending-right">
+                <ng-container *ngIf="t.trendingScore; else qtyFallback">
+                  <strong>Điểm: {{ t.trendingScore | number: '1.2-4' }}</strong>
+                  <small>{{ t.qty ? (t.qty | number) + ' lượt' : 'ml_global_trending' }}</small>
+                </ng-container>
+                <ng-template #qtyFallback>
+                  <strong>{{ t.qty | number }} lượt</strong>
+                  <small>{{ formatCurrency(t.revenueVnd) }}</small>
+                </ng-template>
+              </div>
+            </div>
+            <div *ngIf="topTrending.length === 0" class="empty-box">Chưa có dữ liệu Top Trending.</div>
+          </div>
+          <div class="admin-pagination-bar" *ngIf="totalPages(topTrending.length) > 1">
+            <span class="admin-pagination-info">
+              Hiển thị {{ pageFrom('trend', topTrending.length) }}–{{ pageTo('trend', topTrending.length) }} / {{ topTrending.length }}
+            </span>
+            <div class="admin-pagination-controls">
+              <button type="button" class="btn-page-nav" [disabled]="curPage('trend', topTrending.length) <= 1" (click)="goPage('trend', curPage('trend', topTrending.length) - 1, topTrending.length)">‹ Trước</button>
+              <button
+                *ngFor="let p of pageNumbers('trend', topTrending.length)"
+                type="button"
+                class="btn-page-num"
+                [class.active]="p === curPage('trend', topTrending.length)"
+                (click)="goPage('trend', p, topTrending.length)"
+              >
+                {{ p }}
+              </button>
+              <button type="button" class="btn-page-nav" [disabled]="curPage('trend', topTrending.length) >= totalPages(topTrending.length)" (click)="goPage('trend', curPage('trend', topTrending.length) + 1, topTrending.length)">Tiếp ›</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="forecast-card">
+          <div class="section-heading">
+            <h2><lucide-icon name="sparkles" [size]="16" [strokeWidth]="1.8" color="#4A3123"></lucide-icon> Phân khúc Khách hàng ML Clusters</h2>
+            <small>Nhóm hành vi dùng để cá nhân hóa gợi ý tại bước Booking Menu.</small>
+          </div>
+          <div class="cluster-list">
+            <div *ngFor="let cl of clusters" class="cluster-box">
+              <div class="cluster-head">
+                <strong>{{ cl.persona_name || cl.name }}</strong>
+                <span class="date-pill">{{ cl.size }} thành viên</span>
+              </div>
+              <div class="cluster-items">
+                <span *ngFor="let ci of cl.items" class="cluster-chip">
+                  {{ ci.name }}<ng-container *ngIf="ci.score > 0"> ({{ ci.score | number: '1.2-2' }})</ng-container>
+                </span>
+              </div>
+            </div>
+            <div *ngIf="clusters.length === 0" class="empty-box">Chưa có cấu hình ML Clusters.</div>
+          </div>
+        </article>
+      </section>
+    </ng-container>
+  </main>
+</div>

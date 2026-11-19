@@ -1,0 +1,43 @@
+$kind: http-request
+name: '[TC-SZ-042] Xóa mềm Zone: is_active=false'
+description: '**Mã TC:** TC-SZ-042
+
+  **Nhóm:** Admin quản lý Zone
+
+  **API / Thành phần:** DELETE /api/zones/:id
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed zones/spaces/packages.
+
+  **Dữ liệu vào:** id Zone
+
+  **Các bước thực hiện:**
+
+  1) DELETE /api/zones/<id>
+
+  2) Kiểm tra Atlas
+
+  **Kết quả mong đợi:** 200/204; is_active=false, bản ghi vẫn còn (HTTP: 200)
+
+  **Nhánh code bao phủ:** SPC-B31
+
+  '
+url: '{{baseUrl}}/api/zones/{{zoneId}}'
+method: DELETE
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 42000
+body:
+  type: json
+  raw: '{"data": "id Zone"}'
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-SZ-042] Xóa mềm Zone: is_active=false\npm.test(\"[TC-SZ-042] Status\
+    \ code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-SZ-042] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

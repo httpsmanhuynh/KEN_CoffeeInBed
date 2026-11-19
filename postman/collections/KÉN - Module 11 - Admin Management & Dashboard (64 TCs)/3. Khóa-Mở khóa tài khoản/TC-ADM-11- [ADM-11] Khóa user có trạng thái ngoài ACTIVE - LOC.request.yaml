@@ -1,0 +1,29 @@
+$kind: http-request
+name: "TC-ADM-11: [ADM-11] Khóa user có trạng thái ngoài ACTIVE/LOCKED (dữ liệu lạ) (Branch: ADM-B11)"
+description: |-
+  **Mã TC:** ADM-11 (TC-ADM-11)
+  **Nhóm:** Khóa/Mở khóa tài khoản
+  **API / Thành phần:** POST /api/admin/users/:id/lock
+  **Loại:** Negative
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; 1 user có users.status khác ACTIVE/LOCKED (sửa tay trên Atlas, nếu validator cho phép).
+  **Dữ liệu vào:** id user có status lạ (vd. DELETED)
+  **Các bước thực hiện:**
+  1) POST /api/admin/users/<id>/lock
+  **Kết quả mong đợi:** 409 INVALID_USER_STATE; DB không đổi (HTTP: 409)
+  **Nhánh code bao phủ:** ADM-B11
+  **Ghi chú:** Review: không còn body { status } để validate nên 422 VALIDATION_ERROR không xảy ra; luật hiện tại là máy trạng thái ACTIVE ↔ LOCKED. Nếu validator users không cho status lạ thì ghi N/A.
+url: "{{baseUrl}}/api/admin/users/{{userWeirdId}}/lock"
+method: POST
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-11] Khóa user có trạng thái ngoài ACTIVE/LOCKED (dữ liệu lạ)
+      pm.test("[TC-ADM-11] Status code is 409", function () {
+          pm.expect(pm.response.code).to.be.oneOf([409]);
+      });
+      pm.test("[TC-ADM-11] Trả về 409 INVALID_USER_STATE", function () {
+          const json = pm.response.json();
+          pm.expect(json.error).to.eql("INVALID_USER_STATE");
+      });
+    language: text/javascript
+order: 5000

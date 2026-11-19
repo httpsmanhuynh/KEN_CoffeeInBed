@@ -1,0 +1,32 @@
+$kind: http-request
+name: "TC-SYS-01: [SYS-01] Origin hợp lệ (CORS_ORIGIN) được phép, kèm credentials (Branch: SYS-B01)"
+description: |-
+  **Mã TC:** SYS-01 (TC-SYS-01)
+  **Nhóm:** CORS
+  **API / Thành phần:** Mọi API
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.
+  **Dữ liệu vào:** Origin: http://localhost:4200
+  **Các bước thực hiện:**
+  1) Gửi request từ Postman/trình duyệt kèm header Origin hợp lệ&#10;2) Xem header phản hồi
+  **Kết quả mong đợi:** Có Access-Control-Allow-Origin đúng origin và Allow-Credentials=true (HTTP: 200)
+  **Nhánh code bao phủ:** SYS-B01
+  **Ghi chú:** 
+url: "{{baseUrl}}/"
+method: GET
+headers:
+  Origin: http://localhost:4200
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", function () {
+          pm.response.to.have.status(200);
+      });
+      pm.test("CORS origin and credentials headers present", function () {
+          pm.response.to.have.header("Access-Control-Allow-Origin");
+          pm.expect(pm.response.headers.get("Access-Control-Allow-Origin")).to.eql("http://localhost:4200");
+          pm.response.to.have.header("Access-Control-Allow-Credentials");
+          pm.expect(pm.response.headers.get("Access-Control-Allow-Credentials")).to.eql("true");
+      });
+    language: text/javascript
+order: 1000

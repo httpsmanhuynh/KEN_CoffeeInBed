@@ -1,0 +1,38 @@
+$kind: http-request
+name: '[TC-PK-002] Xem chi tiết một gói'
+description: '**Mã TC:** TC-PK-002
+
+  **Nhóm:** Xem gói theo Space
+
+  **API / Thành phần:** GET /api/packages/:id
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đã seed packages/package_prices/package_inclusions;
+  không cần đăng nhập.
+
+  **Dữ liệu vào:** id = _id Package
+
+  **Các bước thực hiện:**
+
+  1) GET /api/packages/<id>
+
+  **Kết quả mong đợi:** 200 chi tiết gói kèm cấu hình thời lượng và đơn vị tính (HTTP:
+  200)
+
+  **Nhánh code bao phủ:** PKG-B02
+
+  '
+url: '{{baseUrl}}/api/packages/{{packageId}}'
+method: GET
+headers:
+- key: Content-Type
+  value: application/json
+order: 2000
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PK-002] Xem chi tiết một gói\npm.test(\"[TC-PK-002] Status code is\
+    \ 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-PK-002] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

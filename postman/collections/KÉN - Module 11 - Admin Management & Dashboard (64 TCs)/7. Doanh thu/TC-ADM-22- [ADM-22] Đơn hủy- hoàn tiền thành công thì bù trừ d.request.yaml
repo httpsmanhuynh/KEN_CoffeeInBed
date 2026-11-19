@@ -1,0 +1,25 @@
+$kind: http-request
+name: "TC-ADM-22: [ADM-22] Đơn hủy: hoàn tiền thành công thì bù trừ doanh thu; hoàn một phần thì doanh thu chỉ giảm đúng số tiền đã hoàn (Branch: ADM-B22)"
+description: |-
+  **Mã TC:** ADM-22 (TC-ADM-22)
+  **Nhóm:** Doanh thu
+  **API / Thành phần:** GET /api/admin/dashboard
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed users/bookings/payment_transactions; có đơn CONFIRMED đã thanh toán hủy trước Cut-off được hoàn đủ (đơn A) và đơn hủy bị giữ phí hủy, hoàn một phần (đơn B).
+  **Dữ liệu vào:** Đơn A: CONFIRMED 600.000 hủy, REFUND SUCCESS 600.000. Đơn B: CONFIRMED 500.000 hủy, REFUND SUCCESS 400.000 (phí hủy giữ lại 100.000)
+  **Các bước thực hiện:**
+  1) GET dashboard, ghi revenue.total&#10;2) POST /api/bookings/<id-A>/cancel rồi GET dashboard&#10;3) POST /api/bookings/<id-B>/cancel rồi GET dashboard
+  **Kết quả mong đợi:** Sau bước 2: revenue.total giảm đúng 600.000 (đơn A bù trừ về 0). Sau bước 3: giảm đúng 400.000 (số đã hoàn), phần phí hủy 100.000 vẫn là doanh thu; bookings.byStatus.CANCELLED tăng 1 sau mỗi lần hủy; revenue.refunded.amount tăng đúng số đã hoàn (HTTP: 200)
+  **Nhánh code bao phủ:** ADM-B22
+  **Ghi chú:** Đã có đáp án theo Report: doanh thu chỉ giảm đúng số tiền đã hoàn, không giảm bằng final_amount. Hoàn tiền thất bại / đang xử lý xem ADM-59, ADM-60. Cần xác nhận bookingService.cancel ghi REFUND một phần khi có phí hủy (code bookingService không nằm trong gói đã nộp); nếu chưa hỗ trợ thì ghi Blocked cho đơn B và seed REFUND một phần trên Atlas.
+url: "{{baseUrl}}/api/admin/dashboard"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-22] Đơn hủy: hoàn tiền thành công thì bù trừ doanh thu; hoàn một phần thì doanh thu chỉ giảm đúng số tiền đã hoàn
+      pm.test("[TC-ADM-22] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 3000

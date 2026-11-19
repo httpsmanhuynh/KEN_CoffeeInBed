@@ -1,0 +1,68 @@
+$kind: http-request
+name: "TC-PRICING-055: [PRICING-055] Booking vừa tạo lưu price_snapshot đủ trường tiền và chi tiết dòng (Branch: SNP-B01; SNP-B02)"
+description: |-
+  **Mã TC:** PRICING-055 (TC-PRICING-055)
+  **Nhóm:** Price Snapshot
+  **API / Thành phần:** POST /api/bookings (MongoDB Compass: collection bookings (price_snapshot))
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy (http://localhost:3002) và ứng dụng giao diện chạy; đã chạy npm run setup (có hạng thành viên); dữ liệu giá/Inclusion/Add-on/Voucher theo cột 'Dữ liệu vào' đã có trong MongoDB (tạo bằng Compass nếu chưa có).
+  **Dữ liệu vào:** Tài khoản: Customer hạng Vàng (giảm 10%)&#10;Package: trọn gói, tính theo không gian, đơn giá 140.000đ&#10;Inclusion: giá 55.000đ × 1, định mức 50.000đ&#10;Add-on: 40.000đ × 1; 25.000đ × 2&#10;Voucher: giảm cố định 30.000đ
+  **Các bước thực hiện:**
+  1) Đăng nhập UI bằng tài khoản ở 'Dữ liệu vào'.&#10;2) Chọn Package theo 'Dữ liệu vào' (nhập số khách/số giờ nếu có).&#10;3) Chọn các Inclusion theo 'Dữ liệu vào'.&#10;4) Chọn Add-on và nhập số lượng theo 'Dữ liệu vào'.&#10;5) Nhập/chọn Voucher theo 'Dữ liệu vào'.&#10;6) Mở màn hình Checkout/Tóm tắt đơn, ghi lại Tạm tính, Giảm Voucher, Giảm hạng, Thành tiền.&#10;7) Đối chiếu từng dòng với 'Kết quả mong đợi' (tính tay theo công thức, không dùng số do UI tự tính làm chuẩn).&#10;8) Hoàn tất tạo Booking.&#10;9) Compass: mở collection bookings, tìm bản ghi vừa tạo, xem trường price_snapshot.
+  **Kết quả mong đợi:** Tạm tính 235.000đ (Package 140.000đ + phụ phí Inclusion 5.000đ + Add-on 90.000đ); Giảm Voucher 30.000đ; Giảm hạng 20.500đ; Tổng giảm 50.500đ; Thành tiền 184.500đ. UI hiển thị đúng các số này, không có phần thập phân. price_snapshot có các trường: package_price, inclusion_surcharge, addon_total, subtotal, voucher_discount, tier_rate, tier_discount, discount_amount, final_amount; kèm danh sách dòng Inclusion (đơn giá, số lượng, định mức, phụ phí) và dòng Add-on (đơn giá, số lượng, thành tiền dòng). Giá trị khớp số hiển thị ở Checkout; tier_rate = 0.1. (Vị trí lưu: bookings.price_snapshot theo mô tả mới – xem mục vấn đề TBD.) (HTTP: 201)
+  **Nhánh code bao phủ:** SNP-B01; SNP-B02
+  **Ghi chú:** CẦN XEM XÉT – ánh xạ không 1-1 (1 Manual TC ↔ 2 Automated TC; AUTO-PRICING-041 dùng chung cho 4 Manual TC; AUTO-PRICING-042 dùng chung cho 2 Manual TC). Automated TC ứng viên (chưa xác nhận, chỉ để truy vết, KHÔNG phải kết quả Manual): AUTO-PRICING-041: toPriceSnapshot: đóng băng sâu, có chi tiết dòng, khớp trường phẳng | AUTO-PRICING-042: toBookingSnapshot map đúng tên trường của collection bookings
+url: "{{baseUrl}}/api/bookings"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "spaceId": "{{spaceId}}",
+      "packageId": "{{packageId}}",
+      "startAt": "2026-12-21T02:00:00.000Z",
+      "guestCount": 1,
+      "inclusions": [
+        {
+          "packageInclusionId": "{{incFpDrinkId}}",
+          "productId": "{{prodMatchaId}}",
+          "quantity": 1
+        }
+      ],
+      "addons": [
+        {
+          "addonId": "{{addon40kId}}",
+          "quantity": 1
+        },
+        {
+          "addonId": "{{addon25kId}}",
+          "quantity": 2
+        }
+      ],
+      "voucherCode": "KEN30K"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-PRICING-055] Booking vừa tạo lưu price_snapshot đủ trường tiền và chi tiết dòng
+      pm.test("[TC-PRICING-055] Status code is 201", function () {
+          pm.expect(pm.response.code).to.be.oneOf([201]);
+      });
+      pm.test("[TC-PRICING-055] Snapshot giá trên Booking khớp đúng dữ liệu đóng băng từ DB", function () {
+          const json = pm.response.json();
+          pm.expect(json.package_price).to.eql(140000);
+          pm.expect(json.inclusion_surcharge).to.eql(5000);
+          pm.expect(json.addon_total).to.eql(90000);
+          pm.expect(json.subtotal).to.eql(235000);
+          pm.expect(json.voucher_discount).to.eql(30000);
+          pm.expect(json.tier_rate).to.eql(0.1);
+          pm.expect(json.tier_discount).to.eql(20500);
+          pm.expect(json.discount_amount).to.eql(50500);
+          pm.expect(json.final_amount).to.eql(184500);
+          pm.expect(Number.isInteger(json.final_amount) && json.final_amount >= 0).to.be.true;
+          if (json._id) { pm.collectionVariables.set("lastCreatedBookingId", String(json._id)); }
+      });
+    language: text/javascript
+order: 1000

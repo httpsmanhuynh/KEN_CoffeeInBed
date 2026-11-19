@@ -1,0 +1,28 @@
+$kind: http-request
+name: "[TC-SS-08] Schema Validator trên Atlas chấp nhận trường password_changed_at"
+description: |-
+  **Mã TC:** TC-SS-08
+  **Loại:** Positive
+  **Nhóm:** Thu hồi session
+  **Tiền điều kiện:** Đã chạy script cập nhật validator của collection users trên Atlas.
+  **Các bước:** 1) Thực hiện đổi mật khẩu qua API /me/password hoặc /auth/reset-password
+  2) Kiểm tra document user trên Atlas
+  **Kết quả mong đợi:** Cập nhật thành công không bị lỗi MongoServerError 121 (Document failed validation); document có trường password_changed_at kiểu Date.
+  **Nhánh code:** SES-B06
+  **Ghi chú:** Tham chiếu SS-08 (BR-A05)
+url: "{{baseUrl}}/api/auth/test"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: (thực hiện đổi mật khẩu hoặc reset mật khẩu)
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-SS-08] Schema Validator trên Atlas chấp nhận trường password_changed_at
+      pm.test("[TC-SS-08] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 6000

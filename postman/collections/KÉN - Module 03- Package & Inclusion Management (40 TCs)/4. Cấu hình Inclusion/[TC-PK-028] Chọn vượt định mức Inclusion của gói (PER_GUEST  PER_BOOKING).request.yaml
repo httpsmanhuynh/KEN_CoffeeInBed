@@ -1,0 +1,41 @@
+$kind: http-request
+name: '[TC-PK-028] Chọn vượt định mức Inclusion của gói (PER_GUEST / PER_BOOKING)'
+description: '**Mã TC:** TC-PK-028
+
+  **Nhóm:** Cấu hình Inclusion
+
+  **API / Thành phần:** POST /api/bookings/quote
+
+  **Loại:** Negative
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; đã seed spaces/packages/package_prices/package_inclusions.
+
+  **Dữ liệu vào:** Số món > định mức
+
+  **Các bước thực hiện:**
+
+  1) POST /api/bookings/quote
+
+  **Kết quả mong đợi:** 422 INCLUSION_QUOTA_EXCEEDED (HTTP: 422)
+
+  **Nhánh code bao phủ:** PKG-B25
+
+  '
+url: '{{baseUrl}}/api/bookings/quote'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: CUSTOMER
+order: 28000
+body:
+  type: json
+  raw: '{"data": "Số món > định mức"}'
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PK-028] Chọn vượt định mức Inclusion của gói (PER_GUEST / PER_BOOKING)\n\
+    pm.test(\"[TC-PK-028] Status code is 422\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([422]);\n\
+    });\npm.test(\"[TC-PK-028] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

@@ -1,0 +1,36 @@
+$kind: http-request
+name: "[TC-PF-03] Trường enabled không phải kiểu boolean ('true', 1, null, thiếu)"
+description: |-
+  **Mã TC:** TC-PF-03
+  **Loại:** Negative
+  **Nhóm:** Hồ sơ cá nhân
+  **Tiền điều kiện:** User đã đăng nhập.
+  **Các bước:** 1) Gửi POST /api/profile/me/2fa với enabled='true' (chuỗi), 1 (số), hoặc bỏ trống
+  **Kết quả mong đợi:** Trả 422 {code:'VALIDATION_ERROR', message:'Giá trị enabled phải là true hoặc false'}.
+  **Nhánh code:** PRF-B08
+  **Ghi chú:** Tham chiếu PF-03 (BR-A06)
+url: "{{baseUrl}}/api/profile/me/2fa"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "enabled": "true",
+      "currentPassword": "password123",
+      "code": "123456"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-PF-03] Trường enabled không phải kiểu boolean ('true', 1, null, thiếu)
+      pm.test("[TC-PF-03] Status code is 422", function () {
+          pm.expect(pm.response.code).to.be.oneOf([422]);
+      });
+      pm.test("[TC-PF-03] Response contains expected code or keyword: VALIDATION_ERROR", function () {
+          var resText = pm.response.text();
+          pm.expect(resText).to.include("VALIDATION_ERROR");
+      });
+    language: text/javascript
+order: 3000

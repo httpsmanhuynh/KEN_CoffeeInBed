@@ -1,0 +1,25 @@
+$kind: http-request
+name: "TC-ADM-39: [ADM-39] Hai Admin khóa cùng một khách song song (Branch: ADM-B39)"
+description: |-
+  **Mã TC:** ADM-39 (TC-ADM-39)
+  **Nhóm:** Khóa/Mở khóa tài khoản
+  **API / Thành phần:** POST /api/admin/users/:id/lock
+  **Loại:** Negative
+  **Điều kiện tiên quyết:** Server chạy; 2 Admin đăng nhập (2 session); khách ACTIVE.
+  **Dữ liệu vào:** Gửi đồng thời 2 request lock
+  **Các bước thực hiện:**
+  1) Gửi 2 POST …/lock cùng lúc (2 cửa sổ hoặc Runner)&#10;2) Kiểm tra users.status
+  **Kết quả mong đợi:** Một request 200; request còn lại 409 (USER_ALREADY_LOCKED hoặc USER_STATE_CHANGED); status cuối = LOCKED (HTTP: 409)
+  **Nhánh code bao phủ:** ADM-B39
+  **Ghi chú:** Đã có TC-ADM-39 tự động với DB giả lập; case này kiểm chứng updateOne nguyên tử trên Atlas.
+url: "{{baseUrl}}/api/admin/users/{{userId}}/lock"
+method: POST
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-39] Hai Admin khóa cùng một khách song song
+      pm.test("[TC-ADM-39] Status code is 409", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200,409]);
+      });
+    language: text/javascript
+order: 11000

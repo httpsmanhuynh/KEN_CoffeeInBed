@@ -1,0 +1,29 @@
+$kind: http-request
+name: "TC-ADM-20: [ADM-20] Doanh thu = tổng PAYMENT thành công − tổng REFUND thành công, tính theo thời điểm giao dịch (Branch: ADM-B20)"
+description: |-
+  **Mã TC:** ADM-20 (TC-ADM-20)
+  **Nhóm:** Doanh thu
+  **API / Thành phần:** GET /api/admin/dashboard
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed users/bookings/payment_transactions (có PAYMENT và REFUND ở nhiều trạng thái).
+  **Dữ liệu vào:** Giao dịch trong kỳ: PAYMENT SUCCESS 600.000 và 300.000; REFUND SUCCESS 200.000; thêm PAYMENT FAILED 100.000 và REFUND FAILED 50.000; đơn ở đủ 7 trạng thái
+  **Các bước thực hiện:**
+  1) GET /api/admin/dashboard?from=<YYYY-MM-DD>&to=<YYYY-MM-DD>&#10;2) Trên Atlas lấy payment_transactions có thời điểm giao dịch trong kỳ: cộng PAYMENT SUCCESS, trừ REFUND SUCCESS
+  **Kết quả mong đợi:** 200 revenue.total = 600.000 + 300.000 − 200.000 = 700.000; revenue.collected { amount: 900.000, count: 2 }; revenue.refunded { amount: 200.000, count: 1 }; giao dịch FAILED không tính; kết quả không phụ thuộc trạng thái đơn (HTTP: 200)
+  **Nhánh code bao phủ:** ADM-B20
+  **Ghi chú:** Cập nhật theo Report (B.3.30, UC-29, UC-31): trước đây cộng final_amount của 4 trạng thái theo start_at. Nếu revenue.total = 0 dù có giao dịch → tên field trong PAYMENT_TX (adminService.js) chưa khớp validator.
+url: "{{baseUrl}}/api/admin/dashboard?from=2026-11-01&to=2026-11-30"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-20] Doanh thu = tổng PAYMENT thành công − tổng REFUND thành công, tính theo thời điểm giao dịch
+      pm.test("[TC-ADM-20] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+      pm.test("[TC-ADM-20] revenue.total = collected.amount - refunded.amount", function () {
+          const rev = pm.response.json().revenue;
+          pm.expect(rev.total).to.eql(rev.collected.amount - rev.refunded.amount);
+      });
+    language: text/javascript
+order: 1000

@@ -1,0 +1,33 @@
+$kind: http-request
+name: "TC-LOY-05: [LOY-05] Cộng điểm trùng cho cùng đơn (idempotent theo booking_id) (Branch: LOY-B05)"
+description: |-
+  **Mã TC:** LOY-05 (TC-LOY-05)
+  **Nhóm:** Cộng Điểm & Coins
+  **API / Thành phần:** POST /api/loyalty/earn
+  **Loại:** Security
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; đơn đã CHECKED_OUT và đã cộng.
+  **Dữ liệu vào:** {"bookingId": "<id>"}
+  **Các bước thực hiện:**
+  1) POST /api/loyalty/earn lần 2&#10;2) Kiểm tra loyalty_transactions
+  **Kết quả mong đợi:** Không cộng lần 2 (200 idempotent hoặc 409); chỉ 1 bản ghi EARN (HTTP: 200/409)
+  **Nhánh code bao phủ:** LOY-B05
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/loyalty/earn"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "bookingId": "{{bookingId}}"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-LOY-05] Cộng điểm trùng cho cùng đơn (idempotent theo booking_id)
+      pm.test("[TC-LOY-05] Status code is 200/409", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200, 409]);
+      });
+    language: text/javascript
+order: 4000

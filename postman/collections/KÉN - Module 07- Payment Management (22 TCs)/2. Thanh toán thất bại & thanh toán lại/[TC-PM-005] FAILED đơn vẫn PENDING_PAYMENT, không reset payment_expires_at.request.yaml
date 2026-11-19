@@ -1,0 +1,47 @@
+$kind: http-request
+name: '[TC-PM-005] FAILED: đơn vẫn PENDING_PAYMENT, không reset payment_expires_at'
+description: '**Mã TC:** TC-PM-005
+
+  **Nhóm:** Thanh toán thất bại & thanh toán lại
+
+  **API / Thành phần:** POST /api/bookings/:id/pay
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; có đơn PENDING_PAYMENT
+  còn hạn.
+
+  **Dữ liệu vào:** {"result": "FAILED"}
+
+  **Các bước thực hiện:**
+
+  1) Ghi lại payment_expires_at
+
+  2) POST pay FAILED
+
+  3) So sánh payment_expires_at
+
+  **Kết quả mong đợi:** 200; 1 bản ghi FAILED; đơn giữ PENDING_PAYMENT; payment_expires_at
+  không đổi (HTTP: 200)
+
+  **Nhánh code bao phủ:** PAY-B05
+
+  '
+url: '{{baseUrl}}/api/bookings/{{bookingId}}/pay'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: CUSTOMER
+order: 5000
+body:
+  type: json
+  raw: "{\n  \"result\": \"FAILED\"\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PM-005] FAILED: đơn vẫn PENDING_PAYMENT, không reset payment_expires_at\n\
+    pm.test(\"[TC-PM-005] Status code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-PM-005] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

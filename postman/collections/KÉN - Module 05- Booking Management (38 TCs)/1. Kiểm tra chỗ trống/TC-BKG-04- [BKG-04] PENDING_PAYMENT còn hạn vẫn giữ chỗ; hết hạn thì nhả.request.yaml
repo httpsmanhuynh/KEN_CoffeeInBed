@@ -1,0 +1,37 @@
+$kind: http-request
+name: "TC-BKG-04- [BKG-04] PENDING_PAYMENT còn hạn vẫn giữ chỗ; hết hạn thì nhả (Branch"
+description: |-
+          **Mã TC:** BKG-04 (TC-BKG-04)
+          **Nhóm:** Kiểm tra chỗ trống
+          **API / Thành phần:** POST /api/availability
+          **Loại:** Positive
+          **Điều kiện tiên quyết:** Server chạy; có đơn PENDING_PAYMENT.
+          **Dữ liệu vào:** Đơn PENDING còn hạn / quá 15 phút
+          **Các bước thực hiện:**
+          1) Kiểm tra availability khi đơn còn hạn
+  2) Chờ quá 15 phút rồi kiểm tra lại
+          **Kết quả mong đợi:** Còn hạn: không khả dụng; sau EXPIRED: khả dụng lại (HTTP: 200)
+          **Nhánh code bao phủ:** BKG-B04
+          **Ghi chú:** 
+url: "{{baseUrl}}/api/availability"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "spaceId": "{{spaceId}}",
+      "startAt": "{{bookingStartAt}}",
+      "hours": 1,
+      "guestCount": 2
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-BKG-04] PENDING_PAYMENT còn hạn vẫn giữ chỗ; hết hạn thì nhả
+      pm.test("[TC-BKG-04] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 4000

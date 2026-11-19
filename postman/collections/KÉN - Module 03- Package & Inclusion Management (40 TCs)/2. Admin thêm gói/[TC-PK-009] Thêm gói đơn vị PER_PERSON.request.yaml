@@ -1,0 +1,45 @@
+$kind: http-request
+name: '[TC-PK-009] Thêm gói đơn vị PER_PERSON'
+description: '**Mã TC:** TC-PK-009
+
+  **Nhóm:** Admin thêm gói
+
+  **API / Thành phần:** POST /api/packages
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed spaces/packages/package_prices/package_inclusions.
+
+  **Dữ liệu vào:** {"package_code": "PKG-T04", "name": "Gói test", "pricing_type":
+  "HOURLY", "unit": "PER_PERSON", "duration_hours": null, "min_hours": 2, "is_full_day":
+  false, "is_active": true}
+
+  **Các bước thực hiện:**
+
+  1) POST /api/packages
+
+  **Kết quả mong đợi:** 201; unit=PER_PERSON (HTTP: 201)
+
+  **Nhánh code bao phủ:** PKG-B09
+
+  '
+url: '{{baseUrl}}/api/packages'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 9000
+body:
+  type: json
+  raw: "{\n  \"package_code\": \"PKG-T04\",\n  \"name\": \"Gói test\",\n  \"pricing_type\"\
+    : \"HOURLY\",\n  \"unit\": \"PER_PERSON\",\n  \"duration_hours\": null,\n  \"\
+    min_hours\": 2,\n  \"is_full_day\": false,\n  \"is_active\": true\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PK-009] Thêm gói đơn vị PER_PERSON\npm.test(\"[TC-PK-009] Status code\
+    \ is 201\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([201]);\n\
+    });\npm.test(\"[TC-PK-009] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

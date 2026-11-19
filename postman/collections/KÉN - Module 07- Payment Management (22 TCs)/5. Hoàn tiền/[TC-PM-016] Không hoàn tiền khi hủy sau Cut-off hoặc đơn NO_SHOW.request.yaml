@@ -1,0 +1,41 @@
+$kind: http-request
+name: '[TC-PM-016] Không hoàn tiền khi hủy sau Cut-off hoặc đơn NO_SHOW'
+description: '**Mã TC:** TC-PM-016
+
+  **Nhóm:** Hoàn tiền
+
+  **API / Thành phần:** POST /api/bookings/:id/cancel
+
+  **Loại:** Negative
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer.
+
+  **Dữ liệu vào:** Đơn còn < 120 phút
+
+  **Các bước thực hiện:**
+
+  1) POST cancel
+
+  **Kết quả mong đợi:** Bị từ chối; không phát sinh REFUND (HTTP: 409)
+
+  **Nhánh code bao phủ:** PAY-B16
+
+  '
+url: '{{baseUrl}}/api/bookings/{{bookingId}}/cancel'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: CUSTOMER
+order: 16000
+body:
+  type: json
+  raw: '{"data": "Đơn còn < 120 phút"}'
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PM-016] Không hoàn tiền khi hủy sau Cut-off hoặc đơn NO_SHOW\npm.test(\"\
+    [TC-PM-016] Status code is 409\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([409]);\n\
+    });\npm.test(\"[TC-PM-016] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

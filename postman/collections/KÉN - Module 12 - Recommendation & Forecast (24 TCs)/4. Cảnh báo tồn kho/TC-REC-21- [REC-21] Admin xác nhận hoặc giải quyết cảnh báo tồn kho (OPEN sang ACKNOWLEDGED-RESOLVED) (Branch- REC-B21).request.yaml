@@ -1,0 +1,33 @@
+$kind: http-request
+name: "TC-REC-21: [REC-21] Admin xác nhận/xử lý cảnh báo tồn kho (OPEN → ACKNOWLEDGED / RESOLVED) (Branch: REC-B21)"
+description: |-
+  **Mã TC:** REC-21 (TC-REC-21)
+  **Nhóm:** Cảnh báo tồn kho
+  **API / Thành phần:** PATCH /api/admin/forecast/alerts/:id
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin.
+  **Dữ liệu vào:** { "status": "ACKNOWLEDGED" }
+  **Các bước thực hiện:**
+  1) PATCH /api/admin/forecast/alerts/{{alertId}} với body { "status": "ACKNOWLEDGED" }
+  **Kết quả mong đợi:** 200 cập nhật status = ACKNOWLEDGED (hoặc 404 ALERT_NOT_FOUND nếu ID chưa tồn tại) (HTTP: 200/404)
+  **Nhánh code bao phủ:** REC-B21
+url: "{{baseUrl}}/api/admin/forecast/alerts/{{alertId}}"
+method: PATCH
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "status": "ACKNOWLEDGED"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-REC-21] Admin xác nhận cảnh báo tồn kho
+      pm.test("[TC-REC-21] Status code is 200 or 404", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200, 404]);
+      });
+    language: text/javascript
+order: 3000

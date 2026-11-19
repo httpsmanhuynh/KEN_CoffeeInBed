@@ -1,0 +1,37 @@
+$kind: http-request
+name: "TC-ADM-58: [ADM-58] Tài khoản đã bị khóa không đặt chỗ mới được (BR-A05) (Branch: ADM-B58)"
+description: |-
+  **Mã TC:** ADM-58 (TC-ADM-58)
+  **Nhóm:** Khóa/Mở khóa tài khoản
+  **API / Thành phần:** POST /api/bookings
+  **Loại:** Security
+  **Điều kiện tiên quyết:** Server chạy; Customer ACTIVE đang đăng nhập và đã chọn Space/Package; Admin khóa Customer đó.
+  **Dữ liệu vào:** Body checkout hợp lệ (spaceId, packageId, startAt, hours, guestCount); cookie session cũ của Customer
+  **Các bước thực hiện:**
+  1) Customer đăng nhập, hoàn tất bước chọn Space + Package&#10;2) Admin POST /api/admin/users/<id>/lock&#10;3) Customer POST /api/bookings bằng session cũ&#10;4) Customer POST /api/login rồi thử đặt lại&#10;5) Kiểm tra bookings của khách trên Atlas
+  **Kết quả mong đợi:** Bước 3: 401, session bị thu hồi, không tạo Booking. Bước 4: 403 tài khoản bị khóa, không tạo session. Bước 5: không có Booking mới; các đơn cũ giữ nguyên (HTTP: 401)
+  **Nhánh code bao phủ:** ADM-B58
+  **Ghi chú:** Test mới theo Report (BR-A05: tài khoản LOCKED không đăng nhập và không đặt chỗ mới). Chặn đặt chỗ nhờ requireAuth đọc lại DB nên mọi route cần đăng nhập (kể cả POST /api/bookings) trả 401. Code requireAuth/bookingService không nằm trong gói đã nộp nên chưa đối chiếu; nếu đặt chỗ vẫn thành công thì ghi Fail và báo dev.
+url: "{{baseUrl}}/api/bookings"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "spaceId": "{{spaceId}}",
+      "packageId": "{{packageId}}",
+      "startAt": "2026-12-20T02:00:00.000Z",
+      "hours": 2,
+      "guestCount": 1
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-58] Tài khoản đã bị khóa không đặt chỗ mới được (BR-A05)
+      pm.test("[TC-ADM-58] Status code is 401", function () {
+          pm.expect(pm.response.code).to.be.oneOf([401,403]);
+      });
+    language: text/javascript
+order: 13000

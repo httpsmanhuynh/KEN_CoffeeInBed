@@ -1,0 +1,28 @@
+$kind: http-request
+name: "TC-ADM-27: [ADM-27] Lọc theo status không hợp lệ (Branch: ADM-B27)"
+description: |-
+  **Mã TC:** ADM-27 (TC-ADM-27)
+  **Nhóm:** Xem danh sách khách
+  **API / Thành phần:** GET /api/admin/users?status
+  **Loại:** Negative
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed users/bookings.
+  **Dữ liệu vào:** ?status=DELETED
+  **Các bước thực hiện:**
+  1) GET /api/admin/users?status=DELETED
+  **Kết quả mong đợi:** 422 INVALID_STATUS { error, message } (HTTP: 422)
+  **Nhánh code bao phủ:** ADM-B27
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/admin/users?status=DELETED"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-27] Lọc theo status không hợp lệ
+      pm.test("[TC-ADM-27] Status code is 422", function () {
+          pm.expect(pm.response.code).to.be.oneOf([422]);
+      });
+      pm.test("[TC-ADM-27] Trả về 422 INVALID_STATUS", function () {
+          pm.expect(pm.response.json().error).to.eql("INVALID_STATUS");
+      });
+    language: text/javascript
+order: 4000

@@ -1,0 +1,48 @@
+$kind: http-request
+name: "TC-PRICING-066: [PRICING-066] Client gửi giá trị Voucher giả: Backend dùng giá trị Voucher trong DB (Branch: VCH-B06; SNP-B02)"
+description: |-
+  **Mã TC:** PRICING-066 (TC-PRICING-066)
+  **Nhóm:** Bảo mật phía Client
+  **API / Thành phần:** POST /api/bookings (Backend – API tạo Booking (endpoint TBD) – Postman)
+  **Loại:** Security
+  **Điều kiện tiên quyết:** Server chạy (http://localhost:3002); Postman bật Cookie jar và đã đăng nhập Customer; dữ liệu theo cột 'Dữ liệu vào' đã có trong MongoDB. Endpoint tạo Booking: TBD (chưa có trong tài liệu được cấp) – điền endpoint thực tế vào bước 2 trước khi chạy.
+  **Dữ liệu vào:** Tài khoản: Customer hạng BASIC&#10;Package trọn gói 200.000đ&#10;Voucher có mã hợp lệ (giá trị DB giảm 30.000đ); body thêm "discountValue": 200000
+  **Các bước thực hiện:**
+  1) Postman: gọi API tạo Booking với mã Voucher hợp lệ và thêm trường giả discountValue = 200000.&#10;2) Ghi lại HTTP status/body.&#10;3) Compass: xem price_snapshot của Booking vừa tạo.
+  **Kết quả mong đợi:** Nếu tạo thành công: voucher_discount = 30.000đ (theo DB), final_amount = 170.000đ. (HTTP: 201)
+  **Nhánh code bao phủ:** VCH-B06; SNP-B02
+  **Ghi chú:** Không có Automated Test tương ứng – chỉ kiểm tra thủ công.
+url: "{{baseUrl}}/api/bookings"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "spaceId": "{{spaceId}}",
+      "packageId": "{{pkgFixedSpace200kId}}",
+      "startAt": "2026-12-26T02:00:00.000Z",
+      "guestCount": 1,
+      "voucherCode": "KEN30K",
+      "discountValue": 200000
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-PRICING-066] Client gửi giá trị Voucher giả: Backend dùng giá trị Voucher trong DB
+      pm.test("[TC-PRICING-066] Status code is 201", function () {
+          pm.expect(pm.response.code).to.be.oneOf([201]);
+      });
+      pm.test("[TC-PRICING-066] Snapshot giá trên Booking khớp đúng dữ liệu đóng băng từ DB", function () {
+          const json = pm.response.json();
+          pm.expect(json.package_price).to.eql(200000);
+          pm.expect(json.subtotal).to.eql(200000);
+          pm.expect(json.voucher_discount).to.eql(30000);
+          pm.expect(json.discount_amount).to.eql(30000);
+          pm.expect(json.final_amount).to.eql(170000);
+          pm.expect(Number.isInteger(json.final_amount) && json.final_amount >= 0).to.be.true;
+          if (json._id) { pm.collectionVariables.set("lastCreatedBookingId", String(json._id)); }
+      });
+    language: text/javascript
+order: 4000

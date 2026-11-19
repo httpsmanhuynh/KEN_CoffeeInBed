@@ -1,0 +1,529 @@
+<div class="bookings-page" data-name="02 · Đặt chỗ">
+  <!-- Inline Toast -->
+  <div *ngIf="toast" class="admin-toast" [class.toast-error]="toast.type === 'error'" [class.toast-success]="toast.type === 'success'">
+    <span>{{ toast.text }}</span>
+    <button type="button" class="toast-close" (click)="toast = null">×</button>
+  </div>
+
+  <!-- Page Title & Top Actions -->
+  <div class="page-title-block" data-name="PageTitle">
+    <div>
+      <div class="title-with-icon" data-name="Title with icon">
+        <lucide-icon name="calendar-check" [size]="18" [strokeWidth]="1.8" color="#4A3123" class="title-icon"></lucide-icon>
+        <h1 class="page-title">Theo dõi &amp; Xử lý Đặt chỗ</h1>
+      </div>
+      <p class="page-subtitle">Quản lý trạng thái đặt chỗ, tiếp nhận Check-in / Check-out tại quầy và đối soát hoàn tiền</p>
+    </div>
+    <div class="top-actions-row">
+      <button type="button" class="btn-secondary-pill" (click)="expireHolds()" [disabled]="actionLoading">
+        Quét giữ chỗ quá hạn
+      </button>
+      <button type="button" class="btn-secondary-pill" (click)="exportCsv()">
+        Xuất CSV ↗
+      </button>
+    </div>
+  </div>
+
+  <!-- Status Cards (7 Statuses + Refund Reconcile Alert) -->
+  <div class="status-cards-row" data-name="StatusCards">
+    <div class="status-card" [class.active]="selectedFilter === 'ALL'" (click)="filterByStatus('ALL')">
+      <span class="status-card-label">Tất cả</span>
+      <span class="status-card-val">{{ statusCounts.all }}</span>
+    </div>
+    <div class="status-card" [class.active]="selectedFilter === 'PENDING_PAYMENT'" (click)="filterByStatus('PENDING_PAYMENT')">
+      <span class="status-card-label">Chờ thanh toán</span>
+      <span class="status-card-val">{{ statusCounts.pendingPayment }}</span>
+    </div>
+    <div class="status-card" [class.active]="selectedFilter === 'CONFIRMED'" (click)="filterByStatus('CONFIRMED')">
+      <span class="status-card-label">Đã xác nhận</span>
+      <span class="status-card-val">{{ statusCounts.confirmed }}</span>
+    </div>
+    <div class="status-card" [class.active]="selectedFilter === 'CHECKED_IN'" (click)="filterByStatus('CHECKED_IN')">
+      <span class="status-card-label">Đang sử dụng</span>
+      <span class="status-card-val">{{ statusCounts.checkedIn }}</span>
+    </div>
+    <div class="status-card" [class.active]="selectedFilter === 'CHECKED_OUT'" (click)="filterByStatus('CHECKED_OUT')">
+      <span class="status-card-label">Hoàn thành</span>
+      <span class="status-card-val">{{ statusCounts.checkedOut }}</span>
+    </div>
+    <div class="status-card" [class.active]="selectedFilter === 'CANCELLED'" (click)="filterByStatus('CANCELLED')">
+      <span class="status-card-label">Đã huỷ</span>
+      <span class="status-card-val">{{ statusCounts.cancelled }}</span>
+    </div>
+    <div class="status-card" [class.active]="selectedFilter === 'NO_SHOW'" (click)="filterByStatus('NO_SHOW')">
+      <span class="status-card-label">No-show</span>
+      <span class="status-card-val">{{ statusCounts.noShow }}</span>
+    </div>
+    <div class="status-card" [class.active]="selectedFilter === 'EXPIRED'" (click)="filterByStatus('EXPIRED')">
+      <span class="status-card-label">Hết hạn</span>
+      <span class="status-card-val">{{ statusCounts.expired }}</span>
+    </div>
+    <div
+      class="status-card status-card-alert"
+      [class.active]="selectedFilter === 'REFUND_PENDING'"
+      (click)="filterByStatus('REFUND_PENDING')"
+    >
+      <span class="status-card-label">Chờ đối soát hoàn tiền</span>
+      <span class="status-card-val">{{ statusCounts.refundPending }}</span>
+    </div>
+  </div>
+
+  <!-- Main Booking List Block -->
+  <div class="booking-list-block" data-name="BookingListBlock">
+    <div class="block-header" data-name="BlockHeader">
+      <lucide-icon name="calendar-check" [size]="18" [strokeWidth]="1.8" color="#4A3123" class="block-header-icon"></lucide-icon>
+      <h2 class="block-title">Danh sách đặt chỗ</h2>
+      <span class="block-header-count">
+        {{ loading ? 'Đang tải dữ liệu...' : (filteredBookings.length + ' đơn phù hợp · ' + bookings.length + ' tổng đơn đã nạp') }}
+      </span>
+    </div>
+
+    <!-- Real Functional Filters -->
+    <div class="filters-container" data-name="Filters">
+      <div class="filter-row" data-name="FilterRow1">
+        <div class="search-box">
+          <lucide-icon name="search" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="search-icon"></lucide-icon>
+          <input
+            type="text"
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="currentPage = 1"
+            placeholder="Tìm mã đơn, tên, SĐT, không gian hoặc email khách…"
+            class="search-input"
+          />
+        </div>
+
+        <label class="native-filter-field">
+          <span class="native-filter-label">Ngày:</span>
+          <input
+            type="date"
+            [(ngModel)]="selectedDate"
+            (ngModelChange)="loadBookings()"
+            class="native-filter-control"
+          />
+        </label>
+
+        <label class="native-filter-field">
+          <span class="native-filter-label">Khung giờ:</span>
+          <select [(ngModel)]="selectedTimeSlot" (ngModelChange)="currentPage = 1" class="native-filter-control">
+            <option value="ALL">Cả ngày</option>
+            <option value="MORNING">Sáng (&lt; 12:00)</option>
+            <option value="AFTERNOON">Chiều (12:00 – 16:59)</option>
+            <option value="EVENING">Tối (&gt;= 17:00)</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="filter-row" data-name="FilterRow2">
+        <label class="native-filter-field flex-1">
+          <span class="native-filter-label">Khu vực:</span>
+          <select [(ngModel)]="selectedZone" (ngModelChange)="currentPage = 1" class="native-filter-control">
+            <option value="ALL">Tất cả khu vực</option>
+            <option *ngFor="let z of zones" [value]="z.id">{{ z.name }}</option>
+          </select>
+        </label>
+
+        <label class="native-filter-field flex-1">
+          <span class="native-filter-label">Thanh toán:</span>
+          <select [(ngModel)]="selectedPaymentFilter" (ngModelChange)="currentPage = 1" class="native-filter-control">
+            <option value="ALL">Tất cả</option>
+            <option value="PAID">Đã thanh toán</option>
+            <option value="UNPAID">Chưa thanh toán / Hoàn tiền</option>
+            <option value="REFUND_PENDING">Hoàn tiền chờ đối soát</option>
+          </select>
+        </label>
+
+        <button type="button" class="btn-reset-filters" (click)="resetFilters()">
+          Đặt lại bộ lọc
+        </button>
+      </div>
+    </div>
+
+    <!-- Table Section -->
+    <div class="table-wrap" data-name="Table">
+      <div class="table-header" data-name="TableHeader">
+        <div class="col col-id">Mã đơn</div>
+        <div class="col col-cus">Khách hàng</div>
+        <div class="col col-space">Không gian / Gói</div>
+        <div class="col col-time">Ngày / Giờ</div>
+        <div class="col col-guest">Khách</div>
+        <div class="col col-amt">Tổng cuối</div>
+        <div class="col col-pay">Thanh toán</div>
+        <div class="col col-status">Trạng thái</div>
+        <div class="col col-act">Thao tác quầy</div>
+      </div>
+
+      <div *ngIf="paginatedBookings.length === 0" class="empty-table-state">
+        Không tìm thấy đơn đặt chỗ nào khớp bộ lọc hiện tại.
+      </div>
+
+      <div
+        *ngFor="let b of paginatedBookings"
+        class="table-row"
+        [class.selected]="selectedBooking?.id === b.id"
+        tabindex="0"
+        (click)="selectBooking(b, true)"
+        (keydown.enter)="selectBooking(b, true)"
+      >
+        <div class="col col-id">
+          <span class="cell-code">{{ b.code }}</span>
+          <span *ngIf="selectedBooking?.id === b.id" class="badge-selecting">Đang chọn</span>
+        </div>
+
+        <div class="col col-cus">
+          <span class="cell-cus-name">{{ b.customerName }}</span>
+          <span class="cell-cus-email">{{ b.customerEmail }}</span>
+        </div>
+
+        <div class="col col-space">
+          <span class="cell-space-name">{{ b.spaceName }}</span>
+          <span class="cell-space-pkg">{{ b.packageName }}</span>
+        </div>
+
+        <div class="col col-time">
+          <span class="cell-date">{{ b.date }}</span>
+          <span class="cell-time-slot">{{ b.timeSlot }}</span>
+        </div>
+
+        <div class="col col-guest">
+          <span class="cell-guest-num">{{ b.guestCount }}</span>
+        </div>
+
+        <div class="col col-amt">
+          <span class="cell-amount">{{ formatMoney(b.finalAmount) }}</span>
+        </div>
+
+        <div class="col col-pay">
+          <span class="cell-pay-status">{{ b.paymentLabel }}</span>
+          <span *ngIf="b.refundStatus !== 'NONE'" class="cell-refund-sub">{{ b.refundStatus }}</span>
+        </div>
+
+        <div class="col col-status">
+          <span class="status-badge" [ngClass]="b.statusBadgeClass">
+            {{ b.statusLabel }}
+          </span>
+        </div>
+
+        <div class="col col-act" (click)="$event.stopPropagation()">
+          <button
+            *ngIf="b.status === 'CONFIRMED'"
+            type="button"
+            class="btn-row-action btn-gold"
+            (click)="handleCheckIn(b)"
+            [disabled]="actionLoading"
+          >
+            CHECK-IN
+          </button>
+          <button
+            *ngIf="b.status === 'CHECKED_IN'"
+            type="button"
+            class="btn-row-action btn-outline"
+            (click)="handleCheckOut(b)"
+            [disabled]="actionLoading"
+          >
+            CHECK-OUT
+          </button>
+          <button
+            *ngIf="b.status === 'CANCELLED' && (b.refundStatus === 'PROCESSING' || b.refundStatus === 'FAILED')"
+            type="button"
+            class="btn-row-action btn-warning"
+            (click)="selectBooking(b)"
+          >
+            ĐỐI SOÁT HOÀN TIỀN
+          </button>
+          <span
+            *ngIf="b.status !== 'CONFIRMED' && b.status !== 'CHECKED_IN' && !(b.status === 'CANCELLED' && (b.refundStatus === 'PROCESSING' || b.refundStatus === 'FAILED'))"
+            class="cell-action-note"
+          >
+            {{ b.statusLabel }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Real Table Pagination -->
+    <div class="table-pagination" data-name="Pagination">
+      <span class="pagination-info">
+        Hiển thị {{ pageStartIndex }}–{{ pageEndIndex }} / {{ filteredBookings.length }} đơn · Trang {{ currentPage }} / {{ totalPages }} ({{ pageSize }} đơn/trang)
+      </span>
+      <div class="pagination-controls">
+        <button type="button" class="btn-page-arrow" [disabled]="currentPage <= 1" (click)="goToPage(1)" title="Trang đầu">«</button>
+        <button type="button" class="btn-page-arrow" [disabled]="currentPage <= 1" (click)="goToPage(currentPage - 1)">‹ Trước</button>
+        <button
+          *ngFor="let p of pageNumbers"
+          type="button"
+          class="btn-page-num"
+          [class.active]="p === currentPage"
+          (click)="goToPage(p)"
+        >
+          {{ p }}
+        </button>
+        <button type="button" class="btn-page-arrow" [disabled]="currentPage >= totalPages" (click)="goToPage(currentPage + 1)">Tiếp ›</button>
+        <button type="button" class="btn-page-arrow" [disabled]="currentPage >= totalPages" (click)="goToPage(totalPages)" title="Trang cuối">»</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dynamic Detail Block: Selected Booking -->
+  <div id="booking-detail-panel" class="detail-block" *ngIf="selectedBooking as sel" data-name="DetailBlock">
+    <div class="detail-header" data-name="DetailHeader">
+      <lucide-icon name="eye" [size]="18" [strokeWidth]="1.8" color="#4A3123" class="detail-header-icon"></lucide-icon>
+      <h2 class="detail-title">Đơn đang chọn · {{ sel.code }}</h2>
+      <div class="detail-header-badges">
+        <span class="status-badge" [ngClass]="sel.statusBadgeClass">{{ sel.statusLabel }}</span>
+        <span class="badge-paid">{{ sel.paymentLabel }}</span>
+        <span *ngIf="sel.refundStatus !== 'NONE'" class="badge-tag">{{ sel.refundStatus }}</span>
+      </div>
+    </div>
+
+    <div class="detail-body-grid">
+      <!-- Card 1: Khách hàng & Không gian -->
+      <div class="detail-subcard">
+        <span class="subcard-tag">KHÁCH HÀNG / KHÔNG GIAN</span>
+        <div class="cust-info">
+          <h3 class="cust-name">{{ sel.customerName }}</h3>
+          <p class="cust-sub">{{ sel.customerEmail }} · {{ sel.customerPhone }}</p>
+        </div>
+        <div class="cust-badges">
+          <span class="badge-tag">{{ sel.tierLabel }}</span>
+          <span class="badge-tag badge-tag-highlight">{{ sel.discountLabel }}</span>
+        </div>
+        <div class="subcard-divider"></div>
+        <div class="space-specs">
+          <h4 class="specs-title">{{ sel.spaceName }} ({{ sel.spaceType }})</h4>
+          <div class="spec-row">
+            <span class="spec-label">Khu vực</span>
+            <span class="spec-val">{{ sel.zoneName }}</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Ngày / Giờ</span>
+            <span class="spec-val text-brand">{{ sel.date }} · {{ sel.timeSlot }}</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Số khách</span>
+            <span class="spec-val">{{ sel.guestCount }} người</span>
+          </div>
+        </div>
+        <a class="btn-subcard-link" (click)="viewCustomerProfile(sel)">Xem hồ sơ khách →</a>
+      </div>
+
+      <!-- Card 2: Gói & Snapshot giá -->
+      <div class="detail-subcard">
+        <span class="subcard-tag">GÓI / SNAPSHOT GIÁ</span>
+        <h3 class="package-name">{{ sel.packageName }}</h3>
+        <div class="price-breakdown">
+          <div class="price-line">
+            <span class="price-label">Giá gói</span>
+            <span class="price-val">{{ formatMoney(sel.packagePrice) }}</span>
+          </div>
+          <div class="price-line">
+            <span class="price-label">Phụ phí đồ uống vượt chuẩn</span>
+            <span class="price-val">+{{ formatMoney(sel.inclusionSurcharge) }}</span>
+          </div>
+          <div class="price-line">
+            <span class="price-label">Dịch vụ thêm (Add-on)</span>
+            <span class="price-val">+{{ formatMoney(sel.addonTotal) }}</span>
+          </div>
+          <div class="price-line" *ngIf="sel.voucherDiscount > 0">
+            <span class="price-label">Giảm Voucher</span>
+            <span class="price-val">−{{ formatMoney(sel.voucherDiscount) }}</span>
+          </div>
+          <div class="price-line" *ngIf="sel.tierDiscount > 0">
+            <span class="price-label">Giảm hạng ({{ sel.tierLabel }})</span>
+            <span class="price-val">−{{ formatMoney(sel.tierDiscount) }}</span>
+          </div>
+          <div class="subcard-divider"></div>
+          <div class="price-line total-line">
+            <span class="price-label font-bold">Tổng thanh toán cuối</span>
+            <span class="price-val font-bold text-brand">{{ formatMoney(sel.finalAmount) }}</span>
+          </div>
+        </div>
+        <p class="subcard-footer-note">Giá được chốt cố định tại thời điểm đặt chỗ · Không bị ảnh hưởng khi bảng giá thay đổi</p>
+      </div>
+
+      <!-- Card 3: Bao gồm & Add-on -->
+      <div class="detail-subcard">
+        <span class="subcard-tag">BAO GỒM / ADD-ON</span>
+        <div class="inclusions-group">
+          <h4 class="group-title">Món bao gồm trong gói</h4>
+          <ng-container *ngIf="sel.inclusions.length > 0; else noInclusions">
+            <div *ngFor="let inc of sel.inclusions" class="inclusion-item">
+              <img src="/images/ken-home/icons/addon-coffee.svg" alt="" class="inc-icon" />
+              <span class="inc-text">{{ inc.name }} · {{ inc.detail }}</span>
+            </div>
+          </ng-container>
+          <ng-template #noInclusions>
+            <p class="group-text">Bao gồm tiện ích tiêu chuẩn của không gian.</p>
+          </ng-template>
+        </div>
+        <div class="subcard-divider"></div>
+        <div class="addons-group">
+          <h4 class="group-title">Dịch vụ thêm (Add-on)</h4>
+          <ng-container *ngIf="sel.addons.length > 0; else noAddons">
+            <div *ngFor="let add of sel.addons" class="inclusion-item">
+              <span class="inc-text">{{ add.name }} ({{ add.detail }}) = <strong>{{ formatMoney(add.amount) }}</strong></span>
+            </div>
+          </ng-container>
+          <ng-template #noAddons>
+            <p class="group-text">Không có add-on đi kèm.</p>
+          </ng-template>
+        </div>
+        <div class="cleanup-group">
+          <h4 class="group-title">Thời gian dọn phòng &amp; chuẩn bị</h4>
+          <p class="group-text">{{ sel.cleanupWindow }}</p>
+        </div>
+      </div>
+
+      <!-- Card 4: Thanh toán & Hoàn tiền -->
+      <div class="detail-subcard">
+        <span class="subcard-tag">THANH TOÁN / HOÀN TIỀN</span>
+        <div class="pay-status-row">
+          <span class="badge-paid">{{ sel.paymentLabel }}</span>
+          <span class="pay-time">{{ sel.paymentTime }}</span>
+        </div>
+        <div class="pay-details-list">
+          <div class="spec-row">
+            <span class="spec-label">Phương thức</span>
+            <span class="spec-val">{{ sel.paymentMethod }}</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Mã giao dịch</span>
+            <span class="spec-val">{{ sel.txnCode }}</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Số tiền</span>
+            <span class="spec-val text-brand font-bold">{{ formatMoney(sel.finalAmount) }}</span>
+          </div>
+        </div>
+        <div class="subcard-divider"></div>
+        <div class="refund-section">
+          <h4 class="group-title">Trạng thái hoàn tiền</h4>
+          <span class="badge-tag">{{ sel.refundStatus === 'NONE' ? 'Không phát sinh hoàn tiền' : sel.refundStatus }}</span>
+          <p *ngIf="sel.refundAmount > 0" class="group-text">Số tiền hoàn: <strong>{{ formatMoney(sel.refundAmount) }}</strong></p>
+          <p *ngIf="sel.refundNote" class="group-text">Ghi chú: {{ sel.refundNote }}</p>
+        </div>
+        <p class="subcard-footer-note">Khi hoàn tất Check-out: cộng +{{ sel.estimatedPoints }} KÉN Điểm &amp; +{{ sel.estimatedPoints }} KÉN Xu.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Counter Operations Block -->
+  <div class="ops-block" *ngIf="selectedBooking as sel" data-name="OpsBlock">
+    <div class="ops-header" data-name="OpsHeader">
+      <lucide-icon name="filter" [size]="16" [strokeWidth]="1.8" color="#4A3123" class="ops-header-icon"></lucide-icon>
+      <h2 class="ops-title">Thao tác quầy &amp; Đối soát hoàn tiền</h2>
+      <span class="ops-subtitle">Đang xem: {{ sel.code }} ({{ sel.status }})</span>
+    </div>
+
+    <div class="ops-body" data-name="OpsBody">
+      <!-- Dynamic Operational Rules -->
+      <div class="ops-rules-card" data-name="Conditions">
+        <span class="subcard-tag">QUY TẮC VẬN HÀNH ĐƠN {{ sel.code }}</span>
+        <div class="rules-list">
+          <div class="rule-item">
+            <span class="rule-dot dot-green"></span>
+            <span class="rule-text">Mở Check-in sớm nhất (-15 phút): <strong>{{ sel.checkInEarliest }}</strong></span>
+          </div>
+          <div class="rule-item">
+            <span class="rule-dot dot-gold"></span>
+            <span class="rule-text">Quá hạn (+30 phút) → chuyển NO_SHOW: <strong>{{ sel.noShowThreshold }}</strong> (phí 100%, 0 điểm)</span>
+          </div>
+          <div class="rule-item">
+            <span class="rule-dot dot-brown"></span>
+            <span class="rule-text">Không gian {{ sel.spaceType }} · Buffer dọn ô: <strong>{{ sel.cleanupWindow }}</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inline No-show Confirmation Box -->
+      <div *ngIf="confirmAction?.type === 'NO_SHOW'" class="inline-confirm-box">
+        <span>Xác nhận đánh dấu <strong>NO_SHOW</strong> cho đơn <strong>{{ sel.code }}</strong> (thu 100% giá trị, 0 điểm)?</span>
+        <div class="inline-confirm-actions">
+          <button type="button" class="btn-ops btn-ops-danger" (click)="confirmNoShow()" [disabled]="actionLoading">Xác nhận No-show</button>
+          <button type="button" class="btn-ops btn-ops-cancel" (click)="confirmAction = null">Huỷ</button>
+        </div>
+      </div>
+
+      <!-- Dynamic Action Buttons -->
+      <div class="ops-action-buttons" data-name="ActionButtons">
+        <button
+          type="button"
+          class="btn-ops"
+          [ngClass]="sel.status === 'CONFIRMED' ? 'btn-ops-primary' : 'btn-ops-outline'"
+          [disabled]="sel.status !== 'CONFIRMED' || actionLoading"
+          (click)="handleCheckIn(sel)"
+        >
+          Check-in
+        </button>
+        <button
+          type="button"
+          class="btn-ops"
+          [ngClass]="sel.status === 'CHECKED_IN' ? 'btn-ops-primary' : 'btn-ops-outline'"
+          [disabled]="sel.status !== 'CHECKED_IN' || actionLoading"
+          (click)="handleCheckOut(sel)"
+        >
+          Check-out (+{{ sel.estimatedPoints }}đ)
+        </button>
+        <button
+          type="button"
+          class="btn-ops"
+          [ngClass]="sel.status === 'CONFIRMED' ? 'btn-ops-danger-outline' : 'btn-ops-outline'"
+          [disabled]="sel.status !== 'CONFIRMED' || actionLoading"
+          (click)="requestNoShow(sel)"
+        >
+          Xác nhận No-show
+        </button>
+        <span class="ops-btn-hint">
+          {{ sel.status === 'CONFIRMED' ? 'Đơn CONFIRMED sẵn sàng Check-in hoặc đánh dấu No-show.' : sel.status === 'CHECKED_IN' ? 'Khách đang sử dụng, sẵn sàng Check-out.' : 'Đơn đã kết thúc vòng đời sử dụng (' + sel.status + ').' }}
+        </span>
+      </div>
+
+      <!-- Manual Refund Reconciliation Panel -->
+      <div *ngIf="needsRefundReconcile" class="reconcile-panel">
+        <h4 class="history-title">Đối soát hoàn tiền thủ công (Trạng thái: {{ sel.refundStatus }})</h4>
+        <p class="reconcile-desc">
+          Giao dịch hoàn tiền chưa hoàn tất qua cổng thanh toán. Sau khi chuyển khoản thủ công hoặc phát hiện sai lệch, nhập ghi chú / mã tham chiếu bên dưới:
+        </p>
+        <textarea
+          [(ngModel)]="reconcileNote"
+          rows="2"
+          placeholder="Nhập mã giao dịch chuyển khoản hoàn tiền hoặc mô tả sai lệch đối soát..."
+          class="reconcile-textarea"
+        ></textarea>
+        <div class="reconcile-actions">
+          <button type="button" class="btn-ops btn-ops-primary" (click)="submitRefundReconcile('MANUAL_RESOLVE')" [disabled]="actionLoading">
+            Xác nhận đã hoàn tiền thủ công
+          </button>
+          <button type="button" class="btn-ops btn-ops-danger-outline" (click)="submitRefundReconcile('REPORT_DISCREPANCY')" [disabled]="actionLoading">
+            Báo sai lệch đối soát
+          </button>
+        </div>
+      </div>
+
+      <!-- Dynamic Status History Table -->
+      <div class="status-history-block" data-name="StatusHistory">
+        <h4 class="history-title">Lịch sử trạng thái</h4>
+        <div class="history-table" *ngIf="sel.statusLogs.length > 0; else emptyLogs">
+          <div class="history-header" data-name="HistHeader">
+            <div class="hist-col col-time">Thời điểm</div>
+            <div class="hist-col col-act">Người / Ghi chú</div>
+            <div class="hist-col col-prev">Trước</div>
+            <div class="hist-col col-next">Sau</div>
+          </div>
+          <div *ngFor="let log of sel.statusLogs" class="history-row" data-name="HistRow">
+            <div class="hist-col col-time">{{ log.time }}</div>
+            <div class="hist-col col-act font-semibold">{{ log.actor }}{{ log.note ? ' · ' + log.note : '' }}</div>
+            <div class="hist-col col-prev">
+              <span class="history-badge badge-confirmed">{{ log.fromStatus }}</span>
+            </div>
+            <div class="hist-col col-next">
+              <span class="history-badge badge-checked-in">{{ log.toStatus }}</span>
+            </div>
+          </div>
+        </div>
+        <ng-template #emptyLogs>
+          <div class="empty-table-state">Đơn hiện ở trạng thái <strong>{{ sel.status }}</strong> (chưa có bản ghi log chi tiết thêm).</div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+</div>

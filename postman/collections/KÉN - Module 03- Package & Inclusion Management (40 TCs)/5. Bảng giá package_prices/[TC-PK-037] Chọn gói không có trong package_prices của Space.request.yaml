@@ -1,0 +1,41 @@
+$kind: http-request
+name: '[TC-PK-037] Chọn gói không có trong package_prices của Space'
+description: '**Mã TC:** TC-PK-037
+
+  **Nhóm:** Bảng giá package_prices
+
+  **API / Thành phần:** POST /api/bookings/select-package
+
+  **Loại:** Negative
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; đã seed spaces/packages/package_prices/package_inclusions.
+
+  **Dữ liệu vào:** Space A + Gói chỉ có giá ở Space B
+
+  **Các bước thực hiện:**
+
+  1) POST /api/bookings/select-package
+
+  **Kết quả mong đợi:** 422 PACKAGE_INCOMPATIBLE (HTTP: 422)
+
+  **Nhánh code bao phủ:** PKG-B33
+
+  '
+url: '{{baseUrl}}/api/bookings/select-package'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: CUSTOMER
+order: 37000
+body:
+  type: json
+  raw: '{"data": "Space A + Gói chỉ có giá ở Space B"}'
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PK-037] Chọn gói không có trong package_prices của Space\npm.test(\"\
+    [TC-PK-037] Status code is 422\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([422]);\n\
+    });\npm.test(\"[TC-PK-037] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

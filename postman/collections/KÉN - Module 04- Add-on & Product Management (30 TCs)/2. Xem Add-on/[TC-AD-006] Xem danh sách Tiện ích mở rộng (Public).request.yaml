@@ -1,0 +1,37 @@
+$kind: http-request
+name: '[TC-AD-006] Xem danh sách Tiện ích mở rộng (Public)'
+description: '**Mã TC:** TC-AD-006
+
+  **Nhóm:** Xem Add-on
+
+  **API / Thành phần:** GET /api/addons
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đã seed products/addons; không cần đăng nhập.
+
+  **Dữ liệu vào:** —
+
+  **Các bước thực hiện:**
+
+  1) GET /api/addons
+
+  **Kết quả mong đợi:** 200 mảng addon có name, price, unit (PER_ITEM/PER_BOOKING),
+  variants[] (HTTP: 200)
+
+  **Nhánh code bao phủ:** ADD-B06
+
+  '
+url: '{{baseUrl}}/api/addons'
+method: GET
+headers:
+- key: Content-Type
+  value: application/json
+order: 6000
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-AD-006] Xem danh sách Tiện ích mở rộng (Public)\npm.test(\"[TC-AD-006]\
+    \ Status code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-AD-006] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

@@ -1,0 +1,41 @@
+$kind: http-request
+name: '[TC-SZ-029] Giảm capacity thấp hơn max_guests'
+description: '**Mã TC:** TC-SZ-029
+
+  **Nhóm:** Admin cập nhật Space
+
+  **API / Thành phần:** PATCH /api/spaces/:id
+
+  **Loại:** Negative
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed zones/spaces/packages.
+
+  **Dữ liệu vào:** {"capacity": 2}
+
+  **Các bước thực hiện:**
+
+  1) PATCH /api/spaces/<id> (max_guests=6)
+
+  **Kết quả mong đợi:** 422 VALIDATION_ERROR; dữ liệu không đổi (HTTP: 422)
+
+  **Nhánh code bao phủ:** SPC-B16
+
+  '
+url: '{{baseUrl}}/api/spaces/{{spaceId}}'
+method: PATCH
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 29000
+body:
+  type: json
+  raw: "{\n  \"capacity\": 2\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-SZ-029] Giảm capacity thấp hơn max_guests\npm.test(\"[TC-SZ-029] Status\
+    \ code is 422\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([422]);\n\
+    });\npm.test(\"[TC-SZ-029] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

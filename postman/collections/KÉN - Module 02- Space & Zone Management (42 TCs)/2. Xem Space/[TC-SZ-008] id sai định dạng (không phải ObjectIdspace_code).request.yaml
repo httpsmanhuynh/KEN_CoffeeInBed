@@ -1,0 +1,37 @@
+$kind: http-request
+name: '[TC-SZ-008] id sai định dạng (không phải ObjectId/space_code)'
+description: '**Mã TC:** TC-SZ-008
+
+  **Nhóm:** Xem Space
+
+  **API / Thành phần:** GET /api/spaces/:id
+
+  **Loại:** Negative
+
+  **Điều kiện tiên quyết:** Server chạy; đã seed zones/spaces/packages; không cần
+  đăng nhập.
+
+  **Dữ liệu vào:** id = "abc!@#"
+
+  **Các bước thực hiện:**
+
+  1) GET /api/spaces/abc!@#
+
+  **Kết quả mong đợi:** 404 (không lỗi 500, không lộ stack) (HTTP: 404)
+
+  **Nhánh code bao phủ:** SPC-B06
+
+  '
+url: '{{baseUrl}}/api/spaces/{{spaceId}}'
+method: GET
+headers:
+- key: Content-Type
+  value: application/json
+order: 8000
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-SZ-008] id sai định dạng (không phải ObjectId/space_code)\npm.test(\"\
+    [TC-SZ-008] Status code is 404\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([404]);\n\
+    });\npm.test(\"[TC-SZ-008] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

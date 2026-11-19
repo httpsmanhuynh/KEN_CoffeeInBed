@@ -1,0 +1,30 @@
+$kind: http-request
+name: "TC-ADM-28: [ADM-28] Biên phân trang (Branch: ADM-B28)"
+description: |-
+  **Mã TC:** ADM-28 (TC-ADM-28)
+  **Nhóm:** Xem danh sách khách
+  **API / Thành phần:** GET /api/admin/users?page&limit
+  **Loại:** Boundary
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed users/bookings.
+  **Dữ liệu vào:** ?page=0&limit=0 ; ?page=abc ; ?limit=1000 ; ?page=9999
+  **Các bước thực hiện:**
+  1) GET lần lượt từng bộ tham số&#10;2) Với tham số hợp lệ, so sánh trang 1 và trang 2
+  **Kết quả mong đợi:** 200 không lỗi: page/limit sai → page=1, limit=20; limit>100 → 100; page vượt tổng → items rỗng, total giữ nguyên; trang 1 và 2 không trùng, không sót user (HTTP: 200)
+  **Nhánh code bao phủ:** ADM-B28
+  **Ghi chú:** Code: parsePaging (tham số sai không trả 422).
+url: "{{baseUrl}}/api/admin/users?page=0&limit=1000"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-28] Biên phân trang
+      pm.test("[TC-ADM-28] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+      pm.test("[TC-ADM-28] Chuẩn hóa page=1 và trần limit=100", function () {
+          const json = pm.response.json();
+          pm.expect(json.page).to.eql(1);
+          pm.expect(json.limit).to.eql(100);
+      });
+    language: text/javascript
+order: 5000

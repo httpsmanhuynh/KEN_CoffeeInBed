@@ -1,0 +1,28 @@
+$kind: http-request
+description: |-
+  **Mã TC:** TC-OUT-01
+  **Loại:** Positive
+  **Nhóm:** Đăng xuất
+  **Tiền điều kiện:** Đã đăng nhập thành công (Postman giữ cookie connect.sid).
+  **Các bước:** 1) POST /api/auth/logout
+  2) Quan sát phản hồi/Set-Cookie
+  3) GET /api/profile
+  **Kết quả mong đợi:** 204 không nội dung; header Set-Cookie xóa connect.sid; /profile → 401
+  **Nhánh code:** OUT-B01
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/logout"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: "{}"
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-OUT-01] Đăng xuất khi đã đăng nhập
+      pm.test("[TC-OUT-01] Status code is 204", function () {
+          pm.expect(pm.response.code).to.be.oneOf([204]);
+      });
+    language: text/javascript
+order: 1000

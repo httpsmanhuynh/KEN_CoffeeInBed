@@ -1,0 +1,39 @@
+$kind: http-request
+name: '[TC-PM-004] Guest thanh toán'
+description: '**Mã TC:** TC-PM-004
+
+  **Nhóm:** Thanh toán thành công
+
+  **API / Thành phần:** POST /api/bookings/:id/pay
+
+  **Loại:** Security
+
+  **Điều kiện tiên quyết:** Server chạy; không cookie.
+
+  **Dữ liệu vào:** {"result": "SUCCESS"}
+
+  **Các bước thực hiện:**
+
+  1) POST pay không cookie
+
+  **Kết quả mong đợi:** 401 (HTTP: 401)
+
+  **Nhánh code bao phủ:** PAY-B04
+
+  '
+url: '{{baseUrl}}/api/bookings/{{bookingId}}/pay'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+order: 4000
+body:
+  type: json
+  raw: "{\n  \"result\": \"SUCCESS\"\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PM-004] Guest thanh toán\npm.test(\"[TC-PM-004] Status code is 401\"\
+    , function () {\n    pm.expect(pm.response.code).to.be.oneOf([401]);\n});\npm.test(\"\
+    [TC-PM-004] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

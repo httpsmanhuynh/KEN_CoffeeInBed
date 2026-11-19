@@ -1,0 +1,25 @@
+$kind: http-request
+name: "TC-ADM-40: [ADM-40] Khóa chỉ đổi users.status, không đổi dữ liệu khác và các đơn của khách (Branch: ADM-B40)"
+description: |-
+  **Mã TC:** ADM-40 (TC-ADM-40)
+  **Nhóm:** Khóa/Mở khóa tài khoản
+  **API / Thành phần:** POST /api/admin/users/:id/lock
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; khách ACTIVE có đơn CONFIRMED sắp tới.
+  **Dữ liệu vào:** Khách có đơn CONFIRMED
+  **Các bước thực hiện:**
+  1) Ghi lại users và bookings của khách&#10;2) POST …/lock&#10;3) So sánh lại
+  **Kết quả mong đợi:** 200; chỉ users.status đổi; bookings của khách (kể cả CONFIRMED) giữ nguyên; không có field mới (locked_at, reason) (HTTP: 200)
+  **Nhánh code bao phủ:** ADM-B40
+  **Ghi chú:** Đã chốt theo Report: khóa không đổi trạng thái các Booking đã có của khách; kỳ vọng hiện tại đúng, code không đụng đến đơn. Khách bị khóa không đặt chỗ mới được: xem ADM-58.
+url: "{{baseUrl}}/api/admin/users/{{userId}}/lock"
+method: POST
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-40] Khóa chỉ đổi users.status, không đổi dữ liệu khác và các đơn của khách
+      pm.test("[TC-ADM-40] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 12000

@@ -1,0 +1,37 @@
+$kind: http-request
+name: '[TC-PK-005] Gói đã ẩn (is_active=false) không hiển thị cho khách'
+description: '**Mã TC:** TC-PK-005
+
+  **Nhóm:** Xem gói theo Space
+
+  **API / Thành phần:** GET /api/packages
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đã seed packages/package_prices/package_inclusions;
+  không cần đăng nhập. Có 1 gói is_active=false.
+
+  **Dữ liệu vào:** —
+
+  **Các bước thực hiện:**
+
+  1) GET /api/packages
+
+  **Kết quả mong đợi:** 200 danh sách không chứa gói đã ẩn (HTTP: 200)
+
+  **Nhánh code bao phủ:** PKG-B05
+
+  '
+url: '{{baseUrl}}/api/packages'
+method: GET
+headers:
+- key: Content-Type
+  value: application/json
+order: 5000
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PK-005] Gói đã ẩn (is_active=false) không hiển thị cho khách\npm.test(\"\
+    [TC-PK-005] Status code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-PK-005] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

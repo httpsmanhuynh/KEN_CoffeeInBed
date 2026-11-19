@@ -1,0 +1,33 @@
+$kind: http-request
+name: "TC-LOY-17: [LOY-17] Chạy rollover qua 2 năm liên tiếp khi không tích thêm điểm (DIAMOND → GOLD → SILVER) (Branch: LOY-B17)"
+description: |-
+  **Mã TC:** LOY-17 (TC-LOY-17)
+  **Nhóm:** Reset đầu năm
+  **API / Thành phần:** POST /api/loyalty/year-rollover
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; khách hạng DIAMOND (tier_points=15000, coin_balance=100).
+  **Dữ liệu vào:** Lần 1: {"year": 2027}; Lần 2: {"year": 2028}
+  **Các bước thực hiện:**
+  1) POST /api/loyalty/year-rollover (năm 2027)&#10;2) POST /api/loyalty/year-rollover (năm 2028)&#10;3) Kiểm tra users và loyalty_transactions
+  **Kết quả mong đợi:** 200; sau năm 1 xuống GOLD (5.000 điểm, 0 Coins); sau năm 2 xuống SILVER (1.000 điểm, 0 Coins) (HTTP: 200)
+  **Nhánh code bao phủ:** LOY-B17
+  **Ghi chú:** Mỗi kỳ rollover hạ đúng 1 bậc theo BR-H04
+url: "{{baseUrl}}/api/loyalty/year-rollover"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "year": 2027
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-LOY-17] Chạy rollover qua 2 năm liên tiếp khi không tích thêm điểm (DIAMOND → GOLD → SILVER)
+      pm.test("[TC-LOY-17] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 4000

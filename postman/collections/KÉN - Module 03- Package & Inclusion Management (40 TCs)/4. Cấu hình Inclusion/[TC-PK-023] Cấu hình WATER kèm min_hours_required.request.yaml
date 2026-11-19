@@ -1,0 +1,44 @@
+$kind: http-request
+name: '[TC-PK-023] Cấu hình WATER kèm min_hours_required'
+description: '**Mã TC:** TC-PK-023
+
+  **Nhóm:** Cấu hình Inclusion
+
+  **API / Thành phần:** POST /api/package-inclusions
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed spaces/packages/package_prices/package_inclusions.
+
+  **Dữ liệu vào:** {"package_id": "<_id>", "type": "WATER", "min_hours_required":
+  2}
+
+  **Các bước thực hiện:**
+
+  1) POST /api/package-inclusions
+
+  **Kết quả mong đợi:** 201; nước lọc chỉ cấp khi thời lượng ≥ min_hours_required
+  (HTTP: 201)
+
+  **Nhánh code bao phủ:** PKG-B20
+
+  '
+url: '{{baseUrl}}/api/package-inclusions'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 23000
+body:
+  type: json
+  raw: "{\n  \"package_id\": \"<_id>\",\n  \"type\": \"WATER\",\n  \"min_hours_required\"\
+    : 2\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PK-023] Cấu hình WATER kèm min_hours_required\npm.test(\"[TC-PK-023]\
+    \ Status code is 201\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([201]);\n\
+    });\npm.test(\"[TC-PK-023] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

@@ -1,0 +1,38 @@
+$kind: http-request
+name: '[TC-PM-020] Xem lịch sử giao dịch của đơn (chủ đơn / Admin)'
+description: '**Mã TC:** TC-PM-020
+
+  **Nhóm:** Transaction & Lịch sử
+
+  **API / Thành phần:** GET /api/payments/booking/:bookingId
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; đơn có FAILED + SUCCESS.
+
+  **Dữ liệu vào:** id đơn
+
+  **Các bước thực hiện:**
+
+  1) GET /api/payments/booking/<id>
+
+  **Kết quả mong đợi:** 200 danh sách giao dịch theo thời gian (HTTP: 200)
+
+  **Nhánh code bao phủ:** PAY-B20
+
+  '
+url: '{{baseUrl}}/api/payments/booking/{{bookingId}}'
+method: GET
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: CUSTOMER
+order: 20000
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PM-020] Xem lịch sử giao dịch của đơn (chủ đơn / Admin)\npm.test(\"\
+    [TC-PM-020] Status code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-PM-020] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

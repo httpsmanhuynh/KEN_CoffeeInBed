@@ -1,0 +1,38 @@
+$kind: http-request
+name: '[TC-PM-021] Customer xem giao dịch của đơn người khác'
+description: '**Mã TC:** TC-PM-021
+
+  **Nhóm:** Transaction & Lịch sử
+
+  **API / Thành phần:** GET /api/payments/booking/:bookingId
+
+  **Loại:** Security
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer B.
+
+  **Dữ liệu vào:** id đơn của A
+
+  **Các bước thực hiện:**
+
+  1) GET bằng B
+
+  **Kết quả mong đợi:** 403/404 (HTTP: 403)
+
+  **Nhánh code bao phủ:** PAY-B21
+
+  '
+url: '{{baseUrl}}/api/payments/booking/{{bookingId}}'
+method: GET
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: CUSTOMER
+order: 21000
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PM-021] Customer xem giao dịch của đơn người khác\npm.test(\"[TC-PM-021]\
+    \ Status code is 403\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([403]);\n\
+    });\npm.test(\"[TC-PM-021] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

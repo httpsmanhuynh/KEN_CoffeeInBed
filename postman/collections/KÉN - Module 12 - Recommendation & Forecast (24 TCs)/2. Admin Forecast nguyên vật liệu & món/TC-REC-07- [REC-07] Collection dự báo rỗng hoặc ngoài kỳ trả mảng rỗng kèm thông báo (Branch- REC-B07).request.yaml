@@ -1,0 +1,30 @@
+$kind: http-request
+name: "TC-REC-07: [REC-07] Collection dự báo rỗng → trả mảng rỗng kèm thông báo, không lỗi 500 (Branch: REC-B07)"
+description: |-
+  **Mã TC:** REC-07 (TC-REC-07)
+  **Nhóm:** Admin Forecast nguyên vật liệu & món
+  **API / Thành phần:** GET /api/admin/forecast/ingredients
+  **Loại:** Negative
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; demand_forecasts rỗng (hoặc truy vấn khoảng ngày 2027-12-01..2027-12-07).
+  **Dữ liệu vào:** ?from=2027-12-01&to=2027-12-07
+  **Các bước thực hiện:**
+  1) GET /api/admin/forecast/ingredients?from=2027-12-01&to=2027-12-07
+  **Kết quả mong đợi:** 200 trả items=[] và dishes=[] kèm message thông báo rõ ràng; không lỗi 500 (HTTP: 200)
+  **Nhánh code bao phủ:** REC-B07
+url: "{{baseUrl}}/api/admin/forecast/ingredients?from=2027-12-01&to=2027-12-07"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-REC-07] Collection dự báo rỗng -> 200 mảng rỗng kèm thông báo
+      pm.test("[TC-REC-07] Status code is 200", function () {
+          pm.expect(pm.response.code).to.eql(200);
+      });
+      pm.test("[TC-REC-07] Trả mảng items và dishes rỗng kèm message thông báo", function () {
+          const json = pm.response.json();
+          pm.expect(json.items).to.be.an("array").that.is.empty;
+          pm.expect(json.dishes).to.be.an("array").that.is.empty;
+          pm.expect(json.message).to.be.a("string").and.not.empty;
+      });
+    language: text/javascript
+order: 3000

@@ -1,0 +1,43 @@
+$kind: http-request
+name: '[TC-AD-025] Xóa mềm Product: is_active=false, không xóa vật lý'
+description: '**Mã TC:** TC-AD-025
+
+  **Nhóm:** Xóa mềm Product/Add-on
+
+  **API / Thành phần:** DELETE /api/products/:id
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed products/addons.
+
+  **Dữ liệu vào:** id Product
+
+  **Các bước thực hiện:**
+
+  1) DELETE /api/products/<id>
+
+  2) Kiểm tra Atlas
+
+  **Kết quả mong đợi:** 200/204; is_active=false; bản ghi vẫn còn (HTTP: 200)
+
+  **Nhánh code bao phủ:** ADD-B21
+
+  '
+url: '{{baseUrl}}/api/products/{{productId}}'
+method: DELETE
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 25000
+body:
+  type: json
+  raw: '{"data": "id Product"}'
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-AD-025] Xóa mềm Product: is_active=false, không xóa vật lý\npm.test(\"\
+    [TC-AD-025] Status code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-AD-025] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

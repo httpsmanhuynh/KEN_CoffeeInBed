@@ -1,0 +1,25 @@
+$kind: http-request
+name: "TC-BKG-16- [BKG-16] Hủy PENDING_PAYMENT còn hạn- CANCELLED (Branch- BKG-B16)"
+description: |-
+  **Mã TC:** BKG-16 (TC-BKG-16)
+  **Nhóm:** Hủy đơn chờ
+  **API / Thành phần:** POST /api/bookings/:id/cancel
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; có đơn PENDING_PAYMENT còn hạn.
+  **Dữ liệu vào:** bookingId hợp lệ
+  **Các bước thực hiện:**
+  1) POST cancel
+  **Kết quả mong đợi:** 200 CANCELLED; hoàn Voucher nếu có (HTTP: 200)
+  **Nhánh code bao phủ:** BKG-B16
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/bookings/{{bookingId}}/cancel"
+method: POST
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-BKG-16] Hủy PENDING_PAYMENT còn hạn- CANCELLED
+      pm.test("[TC-BKG-16] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 16000

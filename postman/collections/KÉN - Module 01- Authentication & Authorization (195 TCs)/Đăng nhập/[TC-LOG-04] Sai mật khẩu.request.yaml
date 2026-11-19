@@ -1,0 +1,36 @@
+$kind: http-request
+description: |-
+  **Mã TC:** TC-LOG-04
+  **Loại:** Negative
+  **Nhóm:** Đăng nhập
+  **Tiền điều kiện:** Đã đăng ký + xác minh OTP thành công cho SĐT 0909123456 (mật khẩu password123).
+  **Các bước:** 1) POST /api/auth/login (Body: identifier + password)
+  2) Quan sát phản hồi và header Set-Cookie
+  3) GET /api/profile để xác nhận phiên
+  **Kết quả mong đợi:** 401 {code:'INVALID_CREDENTIALS', message:'Sai thông tin đăng nhập'}; không có session; /profile → 401
+  **Nhánh code:** LOG-B01
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "identifier": "0909123456",
+      "password": "saimatkhau"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-LOG-04] Sai mật khẩu
+      pm.test("[TC-LOG-04] Status code is 401", function () {
+          pm.expect(pm.response.code).to.be.oneOf([401]);
+      });
+      pm.test("[TC-LOG-04] Response contains expected code or keyword: INVALID_CREDENTIALS", function () {
+          var resText = pm.response.text();
+          pm.expect(resText).to.include("INVALID_CREDENTIALS");
+      });
+    language: text/javascript
+order: 4000

@@ -1,0 +1,41 @@
+$kind: http-request
+name: '[TC-PM-002] Thanh toán đơn không thuộc về mình'
+description: '**Mã TC:** TC-PM-002
+
+  **Nhóm:** Thanh toán thành công
+
+  **API / Thành phần:** POST /api/bookings/:id/pay
+
+  **Loại:** Negative
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer B; đơn thuộc A.
+
+  **Dữ liệu vào:** {"result": "SUCCESS"}
+
+  **Các bước thực hiện:**
+
+  1) POST pay bằng B
+
+  **Kết quả mong đợi:** 403/404; đơn A không đổi (HTTP: 403)
+
+  **Nhánh code bao phủ:** PAY-B02
+
+  '
+url: '{{baseUrl}}/api/bookings/{{bookingId}}/pay'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: CUSTOMER
+order: 2000
+body:
+  type: json
+  raw: "{\n  \"result\": \"SUCCESS\"\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PM-002] Thanh toán đơn không thuộc về mình\npm.test(\"[TC-PM-002]\
+    \ Status code is 403\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([403]);\n\
+    });\npm.test(\"[TC-PM-002] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

@@ -1,0 +1,37 @@
+$kind: http-request
+name: '[TC-SZ-010] Lọc Space theo Zone'
+description: '**Mã TC:** TC-SZ-010
+
+  **Nhóm:** Tìm kiếm & Lọc Space
+
+  **API / Thành phần:** GET /api/spaces?zoneId
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đã seed zones/spaces/packages; không cần
+  đăng nhập.
+
+  **Dữ liệu vào:** ?zoneId=<_id Zone>
+
+  **Các bước thực hiện:**
+
+  1) GET /api/spaces?zoneId=...
+
+  **Kết quả mong đợi:** 200 chỉ gồm Space thuộc Zone đó (HTTP: 200)
+
+  **Nhánh code bao phủ:** SPC-B08
+
+  '
+url: '{{baseUrl}}/api/spaces?zoneId'
+method: GET
+headers:
+- key: Content-Type
+  value: application/json
+order: 10000
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-SZ-010] Lọc Space theo Zone\npm.test(\"[TC-SZ-010] Status code is\
+    \ 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-SZ-010] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

@@ -1,0 +1,39 @@
+$kind: http-request
+name: "TC-PRICING-070: [PRICING-070] 10.000đ thực trả = 1 KÉN Điểm + 1 KÉN Coin (tính trên Thành tiền, không phải Tạm tính) (Branch: ALL-B02)"
+description: |-
+  **Mã TC:** PRICING-070 (TC-PRICING-070)
+  **Nhóm:** Điểm & Coin từ số thực trả
+  **API / Thành phần:** POST /api/loyalty/earn (UI Dashboard Loyalty (Customer) + Compass)
+  **Loại:** Business Rule
+  **Điều kiện tiên quyết:** Server chạy (http://localhost:3002) và ứng dụng giao diện chạy; đã chạy npm run setup (có hạng thành viên); dữ liệu giá/Inclusion/Add-on/Voucher theo cột 'Dữ liệu vào' đã có trong MongoDB (tạo bằng Compass nếu chưa có).
+  **Dữ liệu vào:** Tài khoản: Customer hạng BASIC; ghi lại số Điểm và Coin hiện có&#10;Package trọn gói 200.000đ; Voucher cố định 10.000đ → Thành tiền 190.000đ
+  **Các bước thực hiện:**
+  1) Ghi lại số KÉN Điểm, KÉN Coin của Customer trước khi đặt.&#10;2) Đặt Package 200.000đ với Voucher cố định 10.000đ và hoàn tất thanh toán (mô phỏng).&#10;3) Đợi tới thời điểm hệ thống cộng điểm (thời điểm cộng: TBD – tra Business Rule Loyalty) rồi xem Dashboard Loyalty.&#10;4) Compass: so với users/ví điểm (tên collection: TBD).
+  **Kết quả mong đợi:** Điểm và Coin đều tăng 19 (190.000đ ÷ 10.000đ), KHÔNG tăng 20 (không tính trên Tạm tính 200.000đ). (HTTP: 200)
+  **Nhánh code bao phủ:** ALL-B02
+  **Ghi chú:** Không có Automated Test tương ứng – chỉ kiểm tra thủ công.
+url: "{{baseUrl}}/api/loyalty/earn"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "bookingId": "{{bookingId}}"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-PRICING-070] 10.000đ thực trả = 1 KÉN Điểm + 1 KÉN Coin (tính trên Thành tiền, không phải Tạm tính)
+      pm.test("[TC-PRICING-070] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+      const json = pm.response.json();
+            pm.test("[TC-PRICING-070] Cộng đúng 19 KÉN Điểm và 19 KÉN Coin trên Thành tiền 190.000đ (không tính trên Tạm tính 200.000đ)", function () {
+                pm.expect(json).to.have.property("earned");
+                pm.expect(json.earned.points).to.eql(19);
+                pm.expect(json.earned.coins).to.eql(19);
+            });
+    language: text/javascript
+order: 1000

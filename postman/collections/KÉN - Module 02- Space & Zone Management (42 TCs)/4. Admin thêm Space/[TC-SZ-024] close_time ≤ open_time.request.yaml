@@ -1,0 +1,46 @@
+$kind: http-request
+name: '[TC-SZ-024] close_time ≤ open_time'
+description: '**Mã TC:** TC-SZ-024
+
+  **Nhóm:** Admin thêm Space
+
+  **API / Thành phần:** POST /api/spaces
+
+  **Loại:** Negative
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed zones/spaces/packages.
+
+  **Dữ liệu vào:** {"zone_id": "<_id Zone>", "space_code": "SPC-T01", "name": "Phòng
+  test", "space_type": "ROOM", "booking_mode": "EXCLUSIVE", "capacity": 6, "min_guests":
+  1, "max_guests": 6, "open_time": "22:00", "close_time": "08:00", "image_url": "/img/t.png"}
+
+  **Các bước thực hiện:**
+
+  1) POST /api/spaces
+
+  **Kết quả mong đợi:** 422 VALIDATION_ERROR (HTTP: 422)
+
+  **Nhánh code bao phủ:** SPC-B17
+
+  '
+url: '{{baseUrl}}/api/spaces'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 24000
+body:
+  type: json
+  raw: "{\n  \"zone_id\": \"<_id Zone>\",\n  \"space_code\": \"SPC-T01\",\n  \"name\"\
+    : \"Phòng test\",\n  \"space_type\": \"ROOM\",\n  \"booking_mode\": \"EXCLUSIVE\"\
+    ,\n  \"capacity\": 6,\n  \"min_guests\": 1,\n  \"max_guests\": 6,\n  \"open_time\"\
+    : \"22:00\",\n  \"close_time\": \"08:00\",\n  \"image_url\": \"/img/t.png\"\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-SZ-024] close_time ≤ open_time\npm.test(\"[TC-SZ-024] Status code\
+    \ is 422\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([422]);\n\
+    });\npm.test(\"[TC-SZ-024] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

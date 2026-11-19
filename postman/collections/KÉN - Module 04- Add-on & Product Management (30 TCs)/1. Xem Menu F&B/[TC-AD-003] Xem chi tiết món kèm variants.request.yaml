@@ -1,0 +1,36 @@
+$kind: http-request
+name: '[TC-AD-003] Xem chi tiết món kèm variants'
+description: '**Mã TC:** TC-AD-003
+
+  **Nhóm:** Xem Menu F&B
+
+  **API / Thành phần:** GET /api/products/:id
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đã seed products/addons; không cần đăng nhập.
+
+  **Dữ liệu vào:** id = _id Product có variants
+
+  **Các bước thực hiện:**
+
+  1) GET /api/products/<id>
+
+  **Kết quả mong đợi:** 200 chi tiết món; variants [{name, price}] đúng (HTTP: 200)
+
+  **Nhánh code bao phủ:** ADD-B03
+
+  '
+url: '{{baseUrl}}/api/products/{{productId}}'
+method: GET
+headers:
+- key: Content-Type
+  value: application/json
+order: 3000
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-AD-003] Xem chi tiết món kèm variants\npm.test(\"[TC-AD-003] Status\
+    \ code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-AD-003] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

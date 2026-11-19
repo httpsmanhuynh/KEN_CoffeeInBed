@@ -1,0 +1,44 @@
+$kind: http-request
+name: '[TC-SZ-036] Xóa mềm: status → INACTIVE, document vẫn còn trong DB'
+description: '**Mã TC:** TC-SZ-036
+
+  **Nhóm:** Đổi trạng thái Space
+
+  **API / Thành phần:** DELETE /api/spaces/:id
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed zones/spaces/packages.
+
+  **Dữ liệu vào:** id = Space không có đơn
+
+  **Các bước thực hiện:**
+
+  1) DELETE /api/spaces/<id>
+
+  2) Kiểm tra Atlas
+
+  **Kết quả mong đợi:** 200/204; status=INACTIVE; bản ghi không bị xóa vật lý (HTTP:
+  200)
+
+  **Nhánh code bao phủ:** SPC-B25
+
+  '
+url: '{{baseUrl}}/api/spaces/{{spaceId}}'
+method: DELETE
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 36000
+body:
+  type: json
+  raw: '{"data": "id = Space không có đơn"}'
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-SZ-036] Xóa mềm: status → INACTIVE, document vẫn còn trong DB\npm.test(\"\
+    [TC-SZ-036] Status code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-SZ-036] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

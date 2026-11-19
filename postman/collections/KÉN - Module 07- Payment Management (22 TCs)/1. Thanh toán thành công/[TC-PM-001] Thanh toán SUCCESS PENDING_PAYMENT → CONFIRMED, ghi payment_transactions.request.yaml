@@ -1,0 +1,45 @@
+$kind: http-request
+name: '[TC-PM-001] Thanh toán SUCCESS: PENDING_PAYMENT → CONFIRMED, ghi payment_transactions'
+description: '**Mã TC:** TC-PM-001
+
+  **Nhóm:** Thanh toán thành công
+
+  **API / Thành phần:** POST /api/bookings/:id/pay
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; có đơn PENDING_PAYMENT
+  còn hạn.
+
+  **Dữ liệu vào:** {"result": "SUCCESS"}
+
+  **Các bước thực hiện:**
+
+  1) POST /api/bookings/<id>/pay
+
+  2) Kiểm tra bookings, payment_transactions
+
+  **Kết quả mong đợi:** 200 CONFIRMED; 1 bản ghi SUCCESS; có thông báo SMS xác nhận
+  kèm booking_code (HTTP: 200)
+
+  **Nhánh code bao phủ:** PAY-B01
+
+  '
+url: '{{baseUrl}}/api/bookings/{{bookingId}}/pay'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: CUSTOMER
+order: 1000
+body:
+  type: json
+  raw: "{\n  \"result\": \"SUCCESS\"\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PM-001] Thanh toán SUCCESS: PENDING_PAYMENT → CONFIRMED, ghi payment_transactions\n\
+    pm.test(\"[TC-PM-001] Status code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-PM-001] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

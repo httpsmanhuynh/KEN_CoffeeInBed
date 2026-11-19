@@ -1,0 +1,32 @@
+$kind: http-request
+name: "[TC-OT-02] Gửi OTP đổi số điện thoại (CHANGE_PHONE) về số điện thoại MỚI"
+description: |-
+  **Mã TC:** TC-OT-02
+  **Loại:** Positive
+  **Nhóm:** OTP Hồ sơ
+  **Tiền điều kiện:** User đã đăng nhập; số 0912345678 chưa thuộc tài khoản nào.
+  **Các bước:** 1) Gửi POST /api/profile/me/otp với purpose='CHANGE_PHONE' và newPhone='0912345678'
+  2) Kiểm tra otp_codes trên Atlas
+  **Kết quả mong đợi:** Trả 200 {message:'Đã gửi OTP về số điện thoại mới'}; bản ghi otp_codes có user_id của user hiện tại nhưng phone='0912345678' (số mới).
+  **Nhánh code:** PRF-B03; OTP-B01
+  **Ghi chú:** Tham chiếu OT-02 (BR-A06)
+url: "{{baseUrl}}/api/profile/me/otp"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "purpose": "CHANGE_PHONE",
+      "newPhone": "0912345678"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-OT-02] Gửi OTP đổi số điện thoại (CHANGE_PHONE) về số điện thoại MỚI
+      pm.test("[TC-OT-02] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 2000

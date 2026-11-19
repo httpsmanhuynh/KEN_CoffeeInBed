@@ -1,0 +1,36 @@
+$kind: http-request
+name: "[TC-RL2-01] Giới hạn đăng nhập theo tài khoản (10 lần / 15 phút)"
+description: |-
+  **Mã TC:** TC-RL2-01
+  **Loại:** Negative
+  **Nhóm:** Rate limit
+  **Tiền điều kiện:** Đã có user SĐT 0901234567 trên Atlas; server mới khởi động.
+  **Các bước:** 1) Gửi 11 lần POST /api/auth/login cùng identifier='0901234567', mật khẩu sai
+  2) Gửi tiếp 1 lần POST /api/auth/login với identifier='0909999999' (mật khẩu sai)
+  **Kết quả mong đợi:** 10 lần đầu trả 401 INVALID_CREDENTIALS; lần 11 trả 429 TOO_MANY_REQUESTS (bộ đếm loginLimiter theo identifier). Request với identifier khác vẫn trả 401 (không bị 429).
+  **Nhánh code:** RL2-B01
+  **Ghi chú:** Tham chiếu RL-02 (BR-A08)
+url: "{{baseUrl}}/api/auth/login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "identifier": "0901234567",
+      "password": "wrong_password"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-RL2-01] Giới hạn đăng nhập theo tài khoản (10 lần / 15 phút)
+      pm.test("[TC-RL2-01] Status code is 429", function () {
+          pm.expect(pm.response.code).to.be.oneOf([429]);
+      });
+      pm.test("[TC-RL2-01] Response contains expected code or keyword: INVALID_CREDENTIALS", function () {
+          var resText = pm.response.text();
+          pm.expect(resText).to.include("INVALID_CREDENTIALS");
+      });
+    language: text/javascript
+order: 5000

@@ -1,0 +1,42 @@
+$kind: http-request
+name: '[TC-PM-012] amount không khớp final_amount / không nguyên dương'
+description: '**Mã TC:** TC-PM-012
+
+  **Nhóm:** Idempotency
+
+  **API / Thành phần:** POST /api/payments
+
+  **Loại:** Negative
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; có đơn PENDING_PAYMENT
+  còn hạn.
+
+  **Dữ liệu vào:** amount = final_amount − 1 ; 0 ; -5 ; 10.5
+
+  **Các bước thực hiện:**
+
+  1) POST /api/payments 4 lần
+
+  **Kết quả mong đợi:** Cả 4 lần bị từ chối (422); không tạo giao dịch (HTTP: 422)
+
+  **Nhánh code bao phủ:** PAY-B12
+
+  '
+url: '{{baseUrl}}/api/payments'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: CUSTOMER
+order: 12000
+body:
+  type: json
+  raw: '{"data": "amount = final_amount − 1 ; 0 ; -5 ; 10.5"}'
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PM-012] amount không khớp final_amount / không nguyên dương\npm.test(\"\
+    [TC-PM-012] Status code is 422\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([422]);\n\
+    });\npm.test(\"[TC-PM-012] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

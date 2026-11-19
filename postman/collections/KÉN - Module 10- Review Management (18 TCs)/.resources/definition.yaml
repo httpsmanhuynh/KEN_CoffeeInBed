@@ -1,0 +1,3 @@
+$kind: collection
+name: "KÉN - Module 10: Review Management (18 TCs)"
+description: "Bộ kiểm thử 18 test cases của Phân hệ 10: Quản lý Đánh giá sau sử dụng (Tạo đánh giá, Kiểm tra điều kiện đơn chính chủ & CHECKED_OUT, Chặn đánh giá trùng, Xem đánh giá theo Space/Booking/User, Lời nhắc đánh giá review_reminder). Đồng bộ với Test_Module10_Review_Management.xlsx."

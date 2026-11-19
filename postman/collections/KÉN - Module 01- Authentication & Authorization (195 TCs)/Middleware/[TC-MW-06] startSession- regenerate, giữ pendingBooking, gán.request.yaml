@@ -1,0 +1,27 @@
+$kind: http-request
+name: "[TC-MW-06] startSession: regenerate, giữ pendingBooking, gán user"
+description: |-
+  **Mã TC:** TC-MW-06
+  **Loại:** Positive
+  **Nhóm:** Middleware
+  **Tiền điều kiện:** Unit test
+  **Các bước:** npm test (node --test test/*.test.js)
+  **Kết quả mong đợi:** Sau regenerate: session.user={id, role, pwdAt}; pendingBooking còn; pending2FA bị xóa
+  **Nhánh code:** MW-B05; SES-B03
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/test"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: session có pendingBooking + pending2FA
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-MW-06] startSession: regenerate, giữ pendingBooking, gán user
+      pm.test("[TC-MW-06] Status code is —", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 6000

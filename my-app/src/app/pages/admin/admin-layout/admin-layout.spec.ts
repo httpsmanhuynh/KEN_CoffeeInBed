@@ -1,0 +1,31 @@
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { RouterModule } from '@angular/router';
+import { AdminLayoutComponent } from './admin-layout.component';
+import { AuthService } from '../../../core/auth.service';
+import { ConfirmDialog } from '../../../shared/components/confirm-dialog/confirm-dialog';
+import { of } from 'rxjs';
+
+describe('AdminLayoutComponent', () => {
+  let component: AdminLayoutComponent;
+  let fixture: ComponentFixture<AdminLayoutComponent>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      declarations: [AdminLayoutComponent],
+      imports: [RouterModule.forRoot([]), ConfirmDialog],
+      providers: [
+        { provide: AuthService, useValue: { logout: () => of(void 0), user: { fullName: 'Admin' } } },
+      ],
+      schemas: [NO_ERRORS_SCHEMA],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(AdminLayoutComponent);
+    component = fixture.componentInstance;
+    await fixture.whenStable();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+});

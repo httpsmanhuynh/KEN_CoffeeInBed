@@ -1,0 +1,44 @@
+$kind: http-request
+name: '[TC-PK-020] Đổi giá gói không làm đổi price_snapshot của đơn đã tạo'
+description: '**Mã TC:** TC-PK-020
+
+  **Nhóm:** Admin cập nhật gói
+
+  **API / Thành phần:** PATCH /api/packages/:id
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed spaces/packages/package_prices/package_inclusions.
+  Có đơn PENDING_PAYMENT/CONFIRMED dùng gói.
+
+  **Dữ liệu vào:** Đổi price trong package_prices
+
+  **Các bước thực hiện:**
+
+  1) PATCH giá gói
+
+  2) GET /api/bookings/:id của đơn cũ
+
+  **Kết quả mong đợi:** price_snapshot của đơn cũ giữ nguyên giá cũ (HTTP: 200)
+
+  **Nhánh code bao phủ:** PKG-B17
+
+  '
+url: '{{baseUrl}}/api/packages/{{packageId}}'
+method: PATCH
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 20000
+body:
+  type: json
+  raw: '{"data": "Đổi price trong package_prices"}'
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PK-020] Đổi giá gói không làm đổi price_snapshot của đơn đã tạo\n\
+    pm.test(\"[TC-PK-020] Status code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-PK-020] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

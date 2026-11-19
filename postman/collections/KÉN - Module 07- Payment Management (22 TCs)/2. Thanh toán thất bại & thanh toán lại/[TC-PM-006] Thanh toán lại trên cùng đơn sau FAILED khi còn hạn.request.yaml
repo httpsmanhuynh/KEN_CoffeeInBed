@@ -1,0 +1,45 @@
+$kind: http-request
+name: '[TC-PM-006] Thanh toán lại trên cùng đơn sau FAILED khi còn hạn'
+description: '**Mã TC:** TC-PM-006
+
+  **Nhóm:** Thanh toán thất bại & thanh toán lại
+
+  **API / Thành phần:** POST /api/bookings/:id/pay
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; có đơn PENDING_PAYMENT
+  còn hạn.
+
+  **Dữ liệu vào:** FAILED rồi SUCCESS
+
+  **Các bước thực hiện:**
+
+  1) POST pay FAILED
+
+  2) POST pay SUCCESS cùng đơn
+
+  **Kết quả mong đợi:** Đơn → CONFIRMED; có 2 bản ghi (FAILED, SUCCESS); không tạo
+  đơn mới (HTTP: 200)
+
+  **Nhánh code bao phủ:** PAY-B06
+
+  '
+url: '{{baseUrl}}/api/bookings/{{bookingId}}/pay'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: CUSTOMER
+order: 6000
+body:
+  type: json
+  raw: '{"data": "FAILED rồi SUCCESS"}'
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PM-006] Thanh toán lại trên cùng đơn sau FAILED khi còn hạn\npm.test(\"\
+    [TC-PM-006] Status code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-PM-006] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

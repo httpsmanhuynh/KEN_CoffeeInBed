@@ -1,0 +1,35 @@
+$kind: http-request
+description: |-
+  **Mã TC:** TC-FGT-01
+  **Loại:** Positive
+  **Nhóm:** Quên mật khẩu
+  **Tiền điều kiện:** Đã đăng ký + xác minh OTP thành công cho SĐT 0909123456 (mật khẩu password123).
+  **Các bước:** 1) POST /api/auth/forgot-password (Body: phone)
+  2) Quan sát phản hồi và terminal
+  3) Kiểm tra otp_codes
+  **Kết quả mong đợi:** 200 {message:'Nếu số điện thoại đã đăng ký, OTP đã được gửi'}; otp_codes có OTP purpose=FORGOT_PASSWORD với user_id; terminal in OTP
+  **Nhánh code:** FGT-B01; OTP-B01
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/forgot-password"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "phone": "0909123456"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-FGT-01] SĐT đã đăng ký (ACTIVE)
+      pm.test("[TC-FGT-01] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+      pm.test("[TC-FGT-01] Response contains expected code or keyword: FORGOT_PASSWORD", function () {
+          var resText = pm.response.text();
+          pm.expect(resText).to.include("FORGOT_PASSWORD");
+      });
+    language: text/javascript
+order: 1000

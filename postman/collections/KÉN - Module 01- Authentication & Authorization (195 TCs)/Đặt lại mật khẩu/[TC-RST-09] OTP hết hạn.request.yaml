@@ -1,0 +1,38 @@
+$kind: http-request
+description: |-
+  **Mã TC:** TC-RST-09
+  **Loại:** Negative
+  **Nhóm:** Đặt lại mật khẩu
+  **Tiền điều kiện:** Đã đăng ký + xác minh OTP thành công cho SĐT 0909123456 (mật khẩu password123). Đã gọi forgot-password và có OTP. Cho OTP quá hạn.
+  **Các bước:** 1) POST /api/auth/reset-password (Body: phone, code, newPassword, confirmPassword)
+  2) Quan sát phản hồi
+  3) Đăng nhập thử bằng mật khẩu mới/cũ
+  **Kết quả mong đợi:** 422 OTP_EXPIRED
+  **Nhánh code:** RST-B03; OTP-B08
+  **Ghi chú:** Có thể gặp OTP_INVALID nếu TTL index đã xóa bản ghi.
+url: "{{baseUrl}}/api/auth/reset-password"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "phone": "0909123456",
+      "code": "<OTP>",
+      "newPassword": "matkhaumoi123",
+      "confirmPassword": "matkhaumoi123"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-RST-09] OTP hết hạn
+      pm.test("[TC-RST-09] Status code is 422", function () {
+          pm.expect(pm.response.code).to.be.oneOf([422]);
+      });
+      pm.test("[TC-RST-09] Response contains expected code or keyword: OTP_EXPIRED", function () {
+          var resText = pm.response.text();
+          pm.expect(resText).to.include("OTP_EXPIRED");
+      });
+    language: text/javascript
+order: 9000

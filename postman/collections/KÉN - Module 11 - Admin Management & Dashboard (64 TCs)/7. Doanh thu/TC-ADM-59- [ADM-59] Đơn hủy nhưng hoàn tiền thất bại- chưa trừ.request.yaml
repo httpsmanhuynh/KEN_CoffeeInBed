@@ -1,0 +1,25 @@
+$kind: http-request
+name: "TC-ADM-59: [ADM-59] Đơn hủy nhưng hoàn tiền thất bại: chưa trừ doanh thu cho đến khi Admin đối soát (Branch: ADM-B59)"
+description: |-
+  **Mã TC:** ADM-59 (TC-ADM-59)
+  **Nhóm:** Doanh thu
+  **API / Thành phần:** GET /api/admin/dashboard
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; có đơn CONFIRMED đã thanh toán, khi hủy cổng hoàn tiền lỗi (refund_status = FAILED).
+  **Dữ liệu vào:** Đơn CONFIRMED 600.000 (PAYMENT SUCCESS 600.000); hủy → REFUND FAILED; sau đó Admin đối soát
+  **Các bước thực hiện:**
+  1) GET dashboard, ghi revenue.total&#10;2) POST /api/bookings/<id>/cancel (hoàn tiền thất bại)&#10;3) GET dashboard&#10;4) POST /api/bookings/<id>/refund-reconcile (Admin)&#10;5) GET dashboard
+  **Kết quả mong đợi:** Bước 3: revenue.total không đổi so với bước 1 (REFUND FAILED không trừ) dù bookings.byStatus.CANCELLED tăng 1. Bước 5: revenue.total giảm đúng số đã hoàn thủ công (REFUND method MANUAL, SUCCESS); refund_status = MANUALLY_RESOLVED (HTTP: 200)
+  **Nhánh code bao phủ:** ADM-B59
+  **Ghi chú:** Test mới theo Report (UC-31): hoàn tiền đang xử lý hoặc thất bại chưa trừ cho đến khi Admin đối soát. Nếu không tạo được lỗi hoàn tiền qua API thì seed trên Atlas (đơn CANCELLED, refund_status = FAILED, REFUND FAILED). Cần xác nhận refund-reconcile ghi REFUND SUCCESS (bookingService không nằm trong gói đã nộp).
+url: "{{baseUrl}}/api/admin/dashboard"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-59] Đơn hủy nhưng hoàn tiền thất bại: chưa trừ doanh thu cho đến khi Admin đối soát
+      pm.test("[TC-ADM-59] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 8000

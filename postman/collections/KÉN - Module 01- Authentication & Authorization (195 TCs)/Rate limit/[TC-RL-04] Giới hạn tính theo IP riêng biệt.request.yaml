@@ -1,0 +1,27 @@
+$kind: http-request
+description: |-
+  **Mã TC:** TC-RL-04
+  **Loại:** Positive
+  **Nhóm:** Rate limit
+  **Tiền điều kiện:** Unit test (req.ip khác nhau)
+  **Các bước:** 1) Gọi middleware với req.ip='A' quá max
+  2) Gọi với req.ip='B'
+  **Kết quả mong đợi:** IP A bị 429; IP B vẫn qua
+  **Nhánh code:** RL-B01; RL-B02
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/test"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: IP A vượt ngưỡng, IP B chưa
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-RL-04] Giới hạn tính theo IP riêng biệt
+      pm.test("[TC-RL-04] Status code is —", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 4000

@@ -1,0 +1,28 @@
+$kind: http-request
+name: "TC-ADM-34: [ADM-34] id sai định dạng ObjectId (Branch: ADM-B34)"
+description: |-
+  **Mã TC:** ADM-34 (TC-ADM-34)
+  **Nhóm:** Xem hồ sơ & lịch sử Booking
+  **API / Thành phần:** GET /api/admin/users/:id
+  **Loại:** Negative
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed users/bookings.
+  **Dữ liệu vào:** abc123 ; 123 ; zzzzzzzzzzzzzzzzzzzzzzzz (24 ký tự không phải hex)
+  **Các bước thực hiện:**
+  1) GET /api/admin/users/<id>&#10;2) GET /api/admin/users/<id>/bookings&#10;3) POST /api/admin/users/<id>/lock
+  **Kết quả mong đợi:** 400 INVALID_ID ở cả 3 endpoint; không lỗi 500; DB không đổi (HTTP: 400)
+  **Nhánh code bao phủ:** ADM-B34
+  **Ghi chú:** Tách từ ADM-06 (case cũ kỳ vọng 404).
+url: "{{baseUrl}}/api/admin/users/abc123"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-34] id sai định dạng ObjectId
+      pm.test("[TC-ADM-34] Status code is 400", function () {
+          pm.expect(pm.response.code).to.be.oneOf([400]);
+      });
+      pm.test("[TC-ADM-34] Trả về 400 INVALID_ID", function () {
+          pm.expect(pm.response.json().error).to.eql("INVALID_ID");
+      });
+    language: text/javascript
+order: 8000

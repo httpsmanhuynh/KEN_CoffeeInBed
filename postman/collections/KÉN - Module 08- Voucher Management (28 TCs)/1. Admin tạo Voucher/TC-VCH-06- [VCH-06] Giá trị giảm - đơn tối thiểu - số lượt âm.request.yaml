@@ -1,0 +1,41 @@
+$kind: http-request
+name: "TC-VCH-06: [VCH-06] Giá trị giảm / đơn tối thiểu / số lượt âm hoặc không nguyên (Branch: VCH-B05)"
+description: |-
+  **Mã TC:** VCH-06 (TC-VCH-06)
+  **Nhóm:** Admin tạo Voucher
+  **API / Thành phần:** POST /api/vouchers
+  **Loại:** Negative
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed vouchers.
+  **Dữ liệu vào:** discount_value=-1 ; min_order_value=10.5 ; usage_limit=0
+  **Các bước thực hiện:**
+  1) POST /api/vouchers 3 lần
+  **Kết quả mong đợi:** Cả 3 lần 422 (HTTP: 422)
+  **Nhánh code bao phủ:** VCH-B05
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/vouchers"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "code": "VCH_VCH06",
+      "discount_type": "FIXED_AMOUNT",
+      "discount_value": -10000,
+      "min_order_value": 100000,
+      "usage_limit": 50,
+      "redeem_limit": 0,
+      "coins_cost": 0,
+      "valid_from": "2026-05-01T00:00:00.000Z",
+      "valid_to": "2026-12-31T23:59:59.000Z"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-VCH-06] Giá trị giảm / đơn tối thiểu / số lượt âm hoặc không nguyên
+      pm.test("[TC-VCH-06] Status code is 422", function () {
+          pm.expect(pm.response.code).to.be.oneOf([422]);
+      });
+    language: text/javascript
+order: 6000

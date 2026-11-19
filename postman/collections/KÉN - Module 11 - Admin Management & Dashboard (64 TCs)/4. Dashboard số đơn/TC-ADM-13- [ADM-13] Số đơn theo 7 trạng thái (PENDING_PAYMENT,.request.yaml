@@ -1,0 +1,32 @@
+$kind: http-request
+name: "TC-ADM-13: [ADM-13] Số đơn theo 7 trạng thái (PENDING_PAYMENT, CONFIRMED, CHECKED_IN, CHECKED_OUT, CANCELLED, EXPIRED, NO_SHOW) (Branch: ADM-B13)"
+description: |-
+  **Mã TC:** ADM-13 (TC-ADM-13)
+  **Nhóm:** Dashboard số đơn
+  **API / Thành phần:** GET /api/admin/dashboard
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed users/bookings.
+  **Dữ liệu vào:** from/to (YYYY-MM-DD) bao phủ ngày start_at của dữ liệu seed
+  **Các bước thực hiện:**
+  1) GET /api/admin/dashboard?from=<YYYY-MM-DD>&to=<YYYY-MM-DD>&#10;2) Đối chiếu đếm trực tiếp trên Atlas theo bookings.start_at
+  **Kết quả mong đợi:** 200 bookings.byStatus đủ 7 khóa, bookings.total = số đơn có start_at trong kỳ (trạng thái 0 đơn vẫn hiển thị 0) (HTTP: 200)
+  **Nhánh code bao phủ:** ADM-B13
+  **Ghi chú:** Review: không có /dashboard/summary; mọi chỉ số nằm trong 1 response GET /api/admin/dashboard. Pipeline aggregate chưa có test tự động nên case này bắt buộc chạy trên Mongo thật.
+url: "{{baseUrl}}/api/admin/dashboard?from=2026-11-01&to=2026-11-30"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-13] Số đơn theo 7 trạng thái (PENDING_PAYMENT, CONFIRMED, CHECKED_IN, CHECKED_OUT, CANCELLED, EXPIRED, NO_SHOW)
+      pm.test("[TC-ADM-13] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+      pm.test("[TC-ADM-13] bookings.byStatus có đủ 7 trạng thái và tổng khớp bookings.total", function () {
+          const json = pm.response.json();
+          const keys = ["PENDING_PAYMENT", "CONFIRMED", "CHECKED_IN", "CHECKED_OUT", "NO_SHOW", "CANCELLED", "EXPIRED"];
+          pm.expect(json.bookings.byStatus).to.have.all.keys(keys);
+          const sum = keys.reduce(function (a, k) { return a + json.bookings.byStatus[k]; }, 0);
+          pm.expect(json.bookings.total).to.eql(sum);
+      });
+    language: text/javascript
+order: 1000

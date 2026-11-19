@@ -1,0 +1,25 @@
+$kind: http-request
+name: "TC-BKG-19- [BKG-19] Hủy CONFIRMED trước Cut-off 2 giờ (Branch- BKG-B19)"
+description: |-
+  **Mã TC:** BKG-19 (TC-BKG-19)
+  **Nhóm:** Hủy đơn CONFIRMED
+  **API / Thành phần:** POST /api/bookings/:id/cancel
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; đơn CONFIRMED, startAt > now+2h.
+  **Dữ liệu vào:** bookingId CONFIRMED
+  **Các bước thực hiện:**
+  1) POST cancel
+  **Kết quả mong đợi:** 200 CANCELLED; hoàn tiền refund_status (HTTP: 200)
+  **Nhánh code bao phủ:** BKG-B19
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/bookings/{{confirmedBookingId}}/cancel"
+method: POST
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-BKG-19] Hủy CONFIRMED trước Cut-off 2 giờ
+      pm.test("[TC-BKG-19] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 19000

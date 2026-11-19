@@ -1,0 +1,25 @@
+$kind: http-request
+name: "TC-LOY-01: [LOY-01] Xem bảng 4 hạng: BASIC 0%, SILVER 5%, GOLD 10%, DIAMOND 15% (Branch: LOY-B01)"
+description: |-
+  **Mã TC:** LOY-01 (TC-LOY-01)
+  **Nhóm:** Bảng hạng
+  **API / Thành phần:** GET /api/loyalty/tiers
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; không cần đăng nhập.
+  **Dữ liệu vào:** —
+  **Các bước thực hiện:**
+  1) GET /api/loyalty/tiers
+  **Kết quả mong đợi:** 200 đúng 4 hạng, minPoints 0/1.000/5.000/10.000 và % giảm giá (HTTP: 200)
+  **Nhánh code bao phủ:** LOY-B01
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/loyalty/tiers"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-LOY-01] Xem bảng 4 hạng: BASIC 0%, SILVER 5%, GOLD 10%, DIAMOND 15%
+      pm.test("[TC-LOY-01] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 1000

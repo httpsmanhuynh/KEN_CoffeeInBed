@@ -1,0 +1,41 @@
+$kind: http-request
+name: '[TC-AD-012] category không thuộc DRINK/PASTRY/SNACK'
+description: '**Mã TC:** TC-AD-012
+
+  **Nhóm:** Admin quản lý Product
+
+  **API / Thành phần:** POST /api/products
+
+  **Loại:** Negative
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed products/addons.
+
+  **Dữ liệu vào:** {"name": "X", "category": "FOOD", "price": 1000}
+
+  **Các bước thực hiện:**
+
+  1) POST /api/products
+
+  **Kết quả mong đợi:** 422 VALIDATION_ERROR (HTTP: 422)
+
+  **Nhánh code bao phủ:** ADD-B11
+
+  '
+url: '{{baseUrl}}/api/products'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 12000
+body:
+  type: json
+  raw: "{\n  \"name\": \"X\",\n  \"category\": \"FOOD\",\n  \"price\": 1000\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-AD-012] category không thuộc DRINK/PASTRY/SNACK\npm.test(\"[TC-AD-012]\
+    \ Status code is 422\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([422]);\n\
+    });\npm.test(\"[TC-AD-012] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

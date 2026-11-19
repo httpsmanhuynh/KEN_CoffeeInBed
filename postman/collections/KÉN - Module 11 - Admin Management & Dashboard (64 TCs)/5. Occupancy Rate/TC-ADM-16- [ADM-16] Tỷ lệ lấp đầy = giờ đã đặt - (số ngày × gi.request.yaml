@@ -1,0 +1,29 @@
+$kind: http-request
+name: "TC-ADM-16: [ADM-16] Tỷ lệ lấp đầy = giờ đã đặt / (số ngày × giờ mở cửa) của Space (Branch: ADM-B16)"
+description: |-
+  **Mã TC:** ADM-16 (TC-ADM-16)
+  **Nhóm:** Occupancy Rate
+  **API / Thành phần:** GET /api/admin/dashboard
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed users/bookings.
+  **Dữ liệu vào:** 1 Space EXCLUSIVE ACTIVE mở 08–22h (14h), là Space duy nhất của Zone; 1 đơn CHECKED_OUT 7h trong ngày; from=to=<ngày đó>&zoneId=<Zone>
+  **Các bước thực hiện:**
+  1) GET /api/admin/dashboard?zoneId=...&from=D&to=D&#10;2) Tính tay 7 ÷ 14
+  **Kết quả mong đợi:** 200 occupancy.rate = 50 (occupiedHours = 7, availableHours = 14) (HTTP: 200)
+  **Nhánh code bao phủ:** ADM-B16
+  **Ghi chú:** Review: phải đặt from=to và lọc Zone; nếu để mặc định 30 ngày thì mẫu số = 30 × 14h × số Space ACTIVE nên không ra 50%.
+url: "{{baseUrl}}/api/admin/dashboard?zoneId={{zoneId}}&from=2026-11-01&to=2026-11-01"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-16] Tỷ lệ lấp đầy = giờ đã đặt / (số ngày × giờ mở cửa) của Space
+      pm.test("[TC-ADM-16] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+      pm.test("[TC-ADM-16] occupancy có rate, occupiedHours, availableHours hợp lệ", function () {
+          const occ = pm.response.json().occupancy;
+          pm.expect(occ).to.have.all.keys("rate", "occupiedHours", "availableHours");
+      });
+    language: text/javascript
+order: 1000

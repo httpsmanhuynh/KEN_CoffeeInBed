@@ -1,0 +1,25 @@
+$kind: http-request
+name: "TC-ADM-54: [ADM-54] Doanh thu theo kỳ: ranh giới ngày giờ VN theo thời điểm giao dịch; kỳ không có giao dịch (Branch: ADM-B54)"
+description: |-
+  **Mã TC:** ADM-54 (TC-ADM-54)
+  **Nhóm:** Doanh thu
+  **API / Thành phần:** GET /api/admin/dashboard?from&to
+  **Loại:** Boundary
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; payment_transactions có PAYMENT SUCCESS lúc 2026-10-31T17:00:00Z và 2026-11-01T17:00:00Z (đơn có start_at ở tháng khác).
+  **Dữ liệu vào:** ?from=2026-11-01&to=2026-11-01 ; ?from=2020-01-01&to=2020-01-07
+  **Các bước thực hiện:**
+  1) GET lần lượt từng bộ tham số
+  **Kết quả mong đợi:** Lần 1: tính giao dịch 17:00Z 31/10 (00:00 VN 01/11), không tính 17:00Z 01/11 (00:00 VN 02/11), không phụ thuộc start_at của đơn. Lần 2: revenue.total = 0, collected.count = 0, refunded.count = 0 (HTTP: 200)
+  **Nhánh code bao phủ:** ADM-B54
+  **Ghi chú:** Cập nhật theo Report: mốc lọc doanh thu là thời điểm giao dịch (trước đây là giao dịch F&B).
+url: "{{baseUrl}}/api/admin/dashboard?from=2026-11-01&to=2026-11-01"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-54] Doanh thu theo kỳ: ranh giới ngày giờ VN theo thời điểm giao dịch; kỳ không có giao dịch
+      pm.test("[TC-ADM-54] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 7000

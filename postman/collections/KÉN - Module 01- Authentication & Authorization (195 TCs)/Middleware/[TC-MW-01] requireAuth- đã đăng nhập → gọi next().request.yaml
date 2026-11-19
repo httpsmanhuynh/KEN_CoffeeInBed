@@ -1,0 +1,27 @@
+$kind: http-request
+name: "[TC-MW-01] requireAuth: đã đăng nhập → gọi next()"
+description: |-
+  **Mã TC:** TC-MW-01
+  **Loại:** Positive
+  **Nhóm:** Middleware
+  **Tiền điều kiện:** Unit test
+  **Các bước:** npm test (node --test test/*.test.js)
+  **Kết quả mong đợi:** next() được gọi; không trả 401
+  **Nhánh code:** MW-B08
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/test"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: session.user = {id, role}
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-MW-01] requireAuth: đã đăng nhập → gọi next()
+      pm.test("[TC-MW-01] Status code is —", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 1000

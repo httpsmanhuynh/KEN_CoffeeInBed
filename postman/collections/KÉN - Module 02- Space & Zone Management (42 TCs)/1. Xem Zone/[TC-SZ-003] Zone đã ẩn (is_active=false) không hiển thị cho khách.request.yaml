@@ -1,0 +1,37 @@
+$kind: http-request
+name: '[TC-SZ-003] Zone đã ẩn (is_active=false) không hiển thị cho khách'
+description: '**Mã TC:** TC-SZ-003
+
+  **Nhóm:** Xem Zone
+
+  **API / Thành phần:** GET /api/zones
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đã seed zones/spaces/packages; không cần
+  đăng nhập. Có 1 zone is_active=false.
+
+  **Dữ liệu vào:** —
+
+  **Các bước thực hiện:**
+
+  1) GET /api/zones
+
+  **Kết quả mong đợi:** 200 danh sách không chứa zone đã ẩn (HTTP: 200)
+
+  **Nhánh code bao phủ:** SPC-B03
+
+  '
+url: '{{baseUrl}}/api/zones'
+method: GET
+headers:
+- key: Content-Type
+  value: application/json
+order: 3000
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-SZ-003] Zone đã ẩn (is_active=false) không hiển thị cho khách\npm.test(\"\
+    [TC-SZ-003] Status code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-SZ-003] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

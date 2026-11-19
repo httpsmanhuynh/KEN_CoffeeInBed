@@ -1,0 +1,43 @@
+$kind: http-request
+name: '[TC-SZ-034] Mở lại MAINTENANCE → ACTIVE'
+description: '**Mã TC:** TC-SZ-034
+
+  **Nhóm:** Đổi trạng thái Space
+
+  **API / Thành phần:** PATCH /api/spaces/:id
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed zones/spaces/packages.
+
+  **Dữ liệu vào:** {"status": "ACTIVE"}
+
+  **Các bước thực hiện:**
+
+  1) PATCH status
+
+  2) GET search
+
+  **Kết quả mong đợi:** 200; Space khả dụng trở lại (HTTP: 200)
+
+  **Nhánh code bao phủ:** SPC-B23
+
+  '
+url: '{{baseUrl}}/api/spaces/{{spaceId}}'
+method: PATCH
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 34000
+body:
+  type: json
+  raw: "{\n  \"status\": \"ACTIVE\"\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-SZ-034] Mở lại MAINTENANCE → ACTIVE\npm.test(\"[TC-SZ-034] Status\
+    \ code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-SZ-034] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

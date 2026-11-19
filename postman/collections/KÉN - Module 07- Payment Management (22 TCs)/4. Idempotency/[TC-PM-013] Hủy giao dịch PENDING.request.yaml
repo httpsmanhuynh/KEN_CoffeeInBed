@@ -1,0 +1,42 @@
+$kind: http-request
+name: '[TC-PM-013] Hủy giao dịch PENDING'
+description: '**Mã TC:** TC-PM-013
+
+  **Nhóm:** Idempotency
+
+  **API / Thành phần:** POST /api/payments/:id/cancel
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; có đơn PENDING_PAYMENT
+  còn hạn.
+
+  **Dữ liệu vào:** id giao dịch PENDING
+
+  **Các bước thực hiện:**
+
+  1) POST /api/payments/<id>/cancel
+
+  **Kết quả mong đợi:** 200; giao dịch chuyển CANCELLED (HTTP: 200)
+
+  **Nhánh code bao phủ:** PAY-B13
+
+  '
+url: '{{baseUrl}}/api/payments/{{bookingId}}/cancel'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: CUSTOMER
+order: 13000
+body:
+  type: json
+  raw: '{"data": "id giao dịch PENDING"}'
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PM-013] Hủy giao dịch PENDING\npm.test(\"[TC-PM-013] Status code is\
+    \ 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-PM-013] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

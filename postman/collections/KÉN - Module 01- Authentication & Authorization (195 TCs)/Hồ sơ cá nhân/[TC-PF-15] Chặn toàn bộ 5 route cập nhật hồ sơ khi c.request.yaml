@@ -1,0 +1,31 @@
+$kind: http-request
+name: "[TC-PF-15] Chặn toàn bộ 5 route cập nhật hồ sơ khi chưa đăng nhập"
+description: |-
+  **Mã TC:** TC-PF-15
+  **Loại:** Negative
+  **Nhóm:** Hồ sơ cá nhân
+  **Tiền điều kiện:** Cookie sạch (chưa đăng nhập).
+  **Các bước:** 1) Lần lượt gọi PATCH /api/profile/me, POST /api/profile/me/password, /me/2fa, /me/phone, /me/otp không kèm cookie
+  **Kết quả mong đợi:** Tất cả 5 route đều trả 401 {code:'UNAUTHENTICATED', message:'Vui lòng đăng nhập'}.
+  **Nhánh code:** MW2-B01
+  **Ghi chú:** Tham chiếu PF-15 (BR-A01)
+url: "{{baseUrl}}/me"
+method: PATCH
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: "{}"
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-PF-15] Chặn toàn bộ 5 route cập nhật hồ sơ khi chưa đăng nhập
+      pm.test("[TC-PF-15] Status code is 401", function () {
+          pm.expect(pm.response.code).to.be.oneOf([401]);
+      });
+      pm.test("[TC-PF-15] Response contains expected code or keyword: UNAUTHENTICATED", function () {
+          var resText = pm.response.text();
+          pm.expect(resText).to.include("UNAUTHENTICATED");
+      });
+    language: text/javascript
+order: 15000

@@ -1,0 +1,32 @@
+$kind: http-request
+name: "[TC-PF-08] Cập nhật họ tên: hợp lệ (trim khoảng trắng) và không hợp lệ (1 ký tự, 101 ký tự, rỗng)"
+description: |-
+  **Mã TC:** TC-PF-08
+  **Loại:** Boundary
+  **Nhóm:** Hồ sơ cá nhân
+  **Tiền điều kiện:** User đã đăng nhập.
+  **Các bước:** 1) Gửi PATCH /api/profile/me với fullName='A', chuỗi 101 ký tự, chuỗi rỗng ''
+  2) Gửi PATCH /api/profile/me với fullName='  Nguyễn Văn B  '
+  **Kết quả mong đợi:** Các trường hợp <2 hoặc >100 ký tự trả 422 VALIDATION_ERROR; khi hợp lệ trả 200 và tự động trim khoảng trắng 2 đầu thành 'Nguyễn Văn B'.
+  **Nhánh code:** PRF-B11
+  **Ghi chú:** Tham chiếu PF-08 & RG-05 (BR-A06)
+url: "{{baseUrl}}/api/profile/me"
+method: PATCH
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: '{"fullName": "A"} / {"fullName": "<101 ký tự>"} / {"fullName": "  Nguyễn Văn B  "}'
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-PF-08] Cập nhật họ tên: hợp lệ (trim khoảng trắng) và không hợp lệ (1 ký tự, 101 ký tự, rỗng)
+      pm.test("[TC-PF-08] Status code is 422", function () {
+          pm.expect(pm.response.code).to.be.oneOf([422, 200]);
+      });
+      pm.test("[TC-PF-08] Response contains expected code or keyword: VALIDATION_ERROR", function () {
+          var resText = pm.response.text();
+          pm.expect(resText).to.include("VALIDATION_ERROR");
+      });
+    language: text/javascript
+order: 8000

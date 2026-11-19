@@ -1,0 +1,30 @@
+$kind: http-request
+name: "TC-REC-17: [REC-17] Recommend theo nhóm Customer (ml_cluster_id) trong luồng Booking menu Inclusion & Add-ons (Branch: REC-B17)"
+description: |-
+  **Mã TC:** REC-17 (TC-REC-17)
+  **Nhóm:** Customer Recommend
+  **API / Thành phần:** GET /api/recommendations/booking (và GET /api/bookings/recommendations)
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; Customer đã đăng nhập có ml_cluster_id; truyền packageId={{packageId}}.
+  **Dữ liệu vào:** ?packageId={{packageId}}&startAt=2026-11-10T02:00:00Z&limit=4
+  **Các bước thực hiện:**
+  1) GET /api/bookings/recommendations?packageId={{packageId}}&startAt=2026-11-10T02:00:00Z&limit=4&#10;2) Kiểm tra inclusions[], inclusionsByType, addons[], recommendedInclusions[], recommendedAddons[]
+  **Kết quả mong đợi:** 200 trả menu Inclusion & Add-ons xếp hạng theo cụm ML của Customer (gắn isRecommended, recommendRank, recommendReason, subsidyLimit, surchargeAmount) (HTTP: 200)
+  **Nhánh code bao phủ:** REC-B17
+url: "{{baseUrl}}/api/bookings/recommendations?packageId={{packageId}}&startAt=2026-11-10T02:00:00Z&limit=4"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("[TC-REC-17] Status code is 200", function () {
+          pm.expect(pm.response.code).to.eql(200);
+      });
+      pm.test("[TC-REC-17] Trả đủ menu inclusions, addons theo cụm Customer và daypart MORNING", function () {
+          const json = pm.response.json();
+          pm.expect(json.context.daypart).to.eql("MORNING");
+          pm.expect(json).to.include.all.keys("strategy", "fallbackUsed", "customerGroup", "inclusions", "inclusionsByType", "addons", "recommendedInclusions", "recommendedAddons");
+          pm.expect(json.inclusions).to.be.an("array");
+          pm.expect(json.addons).to.be.an("array");
+      });
+    language: text/javascript
+order: 5000

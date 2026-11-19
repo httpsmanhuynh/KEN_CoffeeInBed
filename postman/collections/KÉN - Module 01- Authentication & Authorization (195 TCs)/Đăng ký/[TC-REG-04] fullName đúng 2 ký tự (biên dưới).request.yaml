@@ -1,0 +1,34 @@
+$kind: http-request
+description: |-
+  **Mã TC:** TC-REG-04
+  **Loại:** Boundary
+  **Nhóm:** Đăng ký
+  **Tiền điều kiện:** Server chạy; đã chạy npm run setup (có membership_tiers, otp_codes, users trên Atlas).
+  **Các bước:** 1) POST /api/auth/register (Body: raw JSON)
+  2) Quan sát phản hồi
+  3) Kiểm tra otp_codes/users trên Atlas
+  **Kết quả mong đợi:** 201 Đã gửi OTP xác minh
+  **Nhánh code:** REG-B01; REG-B09
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/register"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "fullName": "An",
+      "phone": "0909123456",
+      "dateOfBirth": "2004-01-15",
+      "password": "password123"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-REG-04] fullName đúng 2 ký tự (biên dưới)
+      pm.test("[TC-REG-04] Status code is 201", function () {
+          pm.expect(pm.response.code).to.be.oneOf([201]);
+      });
+    language: text/javascript
+order: 4000

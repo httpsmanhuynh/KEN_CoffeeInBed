@@ -1,0 +1,36 @@
+$kind: http-request
+name: "[TC-PF-04] Bật 2FA khi đã bật hoặc tắt 2FA khi đang tắt (TWO_FACTOR_UNCHANGED)"
+description: |-
+  **Mã TC:** TC-PF-04
+  **Loại:** Negative
+  **Nhóm:** Hồ sơ cá nhân
+  **Tiền điều kiện:** User đã đăng nhập (giả sử two_factor_enabled=false); có OTP TOGGLE_2FA.
+  **Các bước:** 1) Gửi POST /api/profile/me/2fa với enabled trùng trạng thái hiện tại của user
+  **Kết quả mong đợi:** Trả 422 {code:'TWO_FACTOR_UNCHANGED', message:'2FA đang tắt' / '2FA đã được bật'}; mã OTP chưa bị tiêu thụ.
+  **Nhánh code:** PRF-B08
+  **Ghi chú:** Tham chiếu PF-04 (BR-A06)
+url: "{{baseUrl}}/api/profile/me/2fa"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "enabled": false,
+      "currentPassword": "password123",
+      "code": "<OTP>"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-PF-04] Bật 2FA khi đã bật hoặc tắt 2FA khi đang tắt (TWO_FACTOR_UNCHANGED)
+      pm.test("[TC-PF-04] Status code is 422", function () {
+          pm.expect(pm.response.code).to.be.oneOf([422]);
+      });
+      pm.test("[TC-PF-04] Response contains expected code or keyword: TWO_FACTOR_UNCHANGED", function () {
+          var resText = pm.response.text();
+          pm.expect(resText).to.include("TWO_FACTOR_UNCHANGED");
+      });
+    language: text/javascript
+order: 4000

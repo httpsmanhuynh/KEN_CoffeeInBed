@@ -1,0 +1,31 @@
+$kind: http-request
+name: "TC-LOY-12: [LOY-12] Không hạ hạng giữa năm khi phát sinh đơn 0 điểm hoặc điểm thấp (Branch: LOY-B12)"
+description: |-
+  **Mã TC:** LOY-12 (TC-LOY-12)
+  **Nhóm:** Bảo toàn hạng trong năm
+  **API / Thành phần:** POST /api/bookings/:id/check-out
+  **Loại:** Boundary
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; khách đang ở hạng GOLD (tier_points=5000).
+  **Dữ liệu vào:** Đơn CHECKED_IN có final_amount = 9.000đ (0 điểm)
+  **Các bước thực hiện:**
+  1) Check-out đơn 9.000đ&#10;2) Kiểm tra tier và tier_points của khách
+  **Kết quả mong đợi:** 200; earned.points=0; khách vẫn giữ nguyên hạng GOLD (không bị hạ hạng giữa năm theo BR-H04) (HTTP: 200)
+  **Nhánh code bao phủ:** LOY-B12
+  **Ghi chú:** Bảo toàn hạng trong năm dương lịch (BR-H04)
+url: "{{baseUrl}}/api/bookings/{{bookingId}}/check-out"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {}
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-LOY-12] Không hạ hạng giữa năm khi phát sinh đơn 0 điểm hoặc điểm thấp
+      pm.test("[TC-LOY-12] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 1000

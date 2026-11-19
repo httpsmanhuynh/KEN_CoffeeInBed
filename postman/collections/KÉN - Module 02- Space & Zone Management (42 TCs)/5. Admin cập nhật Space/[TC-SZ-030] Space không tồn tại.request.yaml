@@ -1,0 +1,41 @@
+$kind: http-request
+name: '[TC-SZ-030] Space không tồn tại'
+description: '**Mã TC:** TC-SZ-030
+
+  **Nhóm:** Admin cập nhật Space
+
+  **API / Thành phần:** PATCH /api/spaces/:id
+
+  **Loại:** Negative
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed zones/spaces/packages.
+
+  **Dữ liệu vào:** {"name": "X"}
+
+  **Các bước thực hiện:**
+
+  1) PATCH /api/spaces/000000000000000000000000
+
+  **Kết quả mong đợi:** 404 (HTTP: 404)
+
+  **Nhánh code bao phủ:** SPC-B06
+
+  '
+url: '{{baseUrl}}/api/spaces/{{spaceId}}'
+method: PATCH
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 30000
+body:
+  type: json
+  raw: "{\n  \"name\": \"X\"\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-SZ-030] Space không tồn tại\npm.test(\"[TC-SZ-030] Status code is\
+    \ 404\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([404]);\n\
+    });\npm.test(\"[TC-SZ-030] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

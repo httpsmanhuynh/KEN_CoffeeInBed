@@ -1,0 +1,36 @@
+$kind: http-request
+name: '[TC-AD-008] Add-on không tồn tại'
+description: '**Mã TC:** TC-AD-008
+
+  **Nhóm:** Xem Add-on
+
+  **API / Thành phần:** GET /api/addons/:id
+
+  **Loại:** Negative
+
+  **Điều kiện tiên quyết:** Server chạy; đã seed products/addons; không cần đăng nhập.
+
+  **Dữ liệu vào:** id = 000000000000000000000000
+
+  **Các bước thực hiện:**
+
+  1) GET /api/addons/<id>
+
+  **Kết quả mong đợi:** 404 (HTTP: 404)
+
+  **Nhánh code bao phủ:** ADD-B08
+
+  '
+url: '{{baseUrl}}/api/addons/{{addonId}}'
+method: GET
+headers:
+- key: Content-Type
+  value: application/json
+order: 8000
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-AD-008] Add-on không tồn tại\npm.test(\"[TC-AD-008] Status code is\
+    \ 404\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([404]);\n\
+    });\npm.test(\"[TC-AD-008] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

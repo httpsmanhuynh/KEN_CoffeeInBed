@@ -1,0 +1,44 @@
+$kind: http-request
+name: '[TC-PM-014] Hủy đơn CONFIRMED trước Cut-off: mô phỏng hoàn tiền REFUNDED'
+description: '**Mã TC:** TC-PM-014
+
+  **Nhóm:** Hoàn tiền
+
+  **API / Thành phần:** POST /api/bookings/:id/cancel
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; đơn CONFIRMED > 120 phút.
+
+  **Dữ liệu vào:** id đơn
+
+  **Các bước thực hiện:**
+
+  1) POST cancel
+
+  2) Kiểm tra payment_transactions
+
+  **Kết quả mong đợi:** refund_status=REFUNDED; 1 giao dịch REFUND số tiền = final_amount
+  (HTTP: 200)
+
+  **Nhánh code bao phủ:** PAY-B14
+
+  '
+url: '{{baseUrl}}/api/bookings/{{bookingId}}/cancel'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: CUSTOMER
+order: 14000
+body:
+  type: json
+  raw: '{"data": "id đơn"}'
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PM-014] Hủy đơn CONFIRMED trước Cut-off: mô phỏng hoàn tiền REFUNDED\n\
+    pm.test(\"[TC-PM-014] Status code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-PM-014] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

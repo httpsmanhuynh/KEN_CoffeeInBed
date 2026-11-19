@@ -1,0 +1,389 @@
+'use strict';
+// Khớp schema Atlas (database/schemas): users.status = ACTIVE|LOCKED, users.tier_id -> membership_tiers,
+// users.coin_balance; otp_codes dùng user_id / is_used / attempt_count / max_attempts.
+// Luồng đăng ký: /register chỉ lưu thông tin vào otp_codes.pending_data; user chỉ được tạo ở /verify-otp.
+const express = require('express');
+const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
+const { ObjectId } = require('mongodb');
+const { requireAuth, startSession, destroySession } = require('../middleware/auth');
+const { rateLimit } = require('../middleware/rateLimit');
+const { issueOtp, verifyOtp } = require('../services/otp');
+const {
+  PHONE_RE,
+  EMAIL_RE,
+  wrap,
+  fail,
+  str,
+  isDup,
+  validNewPassword,
+  otpError,
+  publicUser,
+  tierOf,
+} = require('../utils/http');
+
+const router = express.Router();
+// Gắn từng route (không router.use): router này mount ở cả /api và /api/auth nên router.use sẽ đếm đôi.
+const ipLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 30 });
+// Theo tài khoản/SĐT (không chỉ IP): chống dò mật khẩu phân tán và spam SMS OTP vào số người khác (BR-A08).
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  key: (req) => `login:${str(req.body && req.body.identifier).toLowerCase()}`,
+});
+const otpKey = (phone) => `otp:${phone}`;
+const phoneOtpLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 5,
+  key: (req) => otpKey(str(req.body && req.body.phone)),
+});
+
+const DUMMY_HASH = bcrypt.hashSync('dummy-password', 10); // giữ thời gian phản hồi đều khi user không tồn tại
+
+function createResetToken(phone) {
+  const exp = Date.now() + 10 * 60 * 1000;
+  const payload = `${phone}|${exp}`;
+  const sig = crypto
+    .createHmac('sha256', process.env.SESSION_SECRET || 'dev-only-secret')
+    .update(payload)
+    .digest('hex');
+  return `${Buffer.from(payload, 'utf8').toString('base64url')}.${sig}`;
+}
+
+function verifyResetToken(token, phone) {
+  if (!token || typeof token !== 'string' || !token.includes('.')) return 'INVALID';
+  const [encoded, sig] = token.split('.');
+  let payload = '';
+  try {
+    payload = Buffer.from(encoded, 'base64url').toString('utf8');
+  } catch (_) {
+    return 'INVALID';
+  }
+  const parts = payload.split('|');
+  if (parts.length !== 2 || parts[0] !== phone) return 'INVALID';
+  const exp = Number(parts[1]);
+  if (!Number.isFinite(exp) || exp <= Date.now()) return 'EXPIRED';
+  const expected = crypto
+    .createHmac('sha256', process.env.SESSION_SECRET || 'dev-only-secret')
+    .update(payload)
+    .digest('hex');
+  const a = Buffer.from(sig, 'hex');
+  const b = Buffer.from(expected, 'hex');
+  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return 'INVALID';
+  return 'OK';
+}
+
+// BR-A03: đăng ký -> lưu tạm vào otp_codes.pending_data -> OTP REGISTER (chưa tạo user)
+router.post(
+  '/register',
+  ipLimiter,
+  phoneOtpLimiter,
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    const fullName = str(req.body.fullName),
+      phone = str(req.body.phone),
+      email = str(req.body.email).toLowerCase();
+    const dobRaw = str(req.body.dateOfBirth);
+    const dob = dobRaw ? new Date(dobRaw) : null;
+    const password = typeof req.body.password === 'string' ? req.body.password : '';
+    const hasValidContact = (phone ? PHONE_RE.test(phone) : Boolean(email));
+    if (
+      fullName.length < 2 ||
+      fullName.length > 100 ||
+      !hasValidContact ||
+      (dob && (Number.isNaN(dob.getTime()) || dob > new Date())) ||
+      !validNewPassword(password) ||
+      (email && (!EMAIL_RE.test(email) || email.length > 100))
+    )
+      return fail(res, 422, 'VALIDATION_ERROR', 'Thông tin đăng ký không hợp lệ');
+
+    const users = db.collection('users');
+    if (phone && (await users.findOne({ phone })))
+      return fail(res, 409, 'PHONE_EXISTS', 'Số điện thoại đã được đăng ký');
+    if (email && (await users.findOne({ email })))
+      return fail(res, 409, 'EMAIL_EXISTS', 'Email đã được sử dụng');
+
+    const otpIdentifier = phone || email;
+    const pendingData = {
+      full_name: fullName,
+      password_hash: await bcrypt.hash(password, 10),
+    };
+    if (dob) pendingData.date_of_birth = dob;
+    if (phone) pendingData.phone = phone;
+    if (email) pendingData.email = email;
+    await issueOtp(db, { userId: null, purpose: 'REGISTER', phone: otpIdentifier, email, pendingData });
+    res.status(201).json({ message: 'Đã gửi OTP xác minh' });
+  }),
+);
+
+// Gửi lại OTP đăng ký dựa trên pending_data đã lưu ở bước /register
+router.post(
+  '/resend-otp',
+  ipLimiter,
+  phoneOtpLimiter,
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    const phone = str(req.body.phone);
+    if (!PHONE_RE.test(phone) && !EMAIL_RE.test(phone.toLowerCase()))
+      return fail(res, 422, 'VALIDATION_ERROR', 'Thông tin liên hệ không hợp lệ');
+    const lookupKey = PHONE_RE.test(phone) ? phone : phone.toLowerCase();
+    if (PHONE_RE.test(phone) && (await db.collection('users').findOne({ phone })))
+      return fail(res, 409, 'PHONE_EXISTS', 'Số điện thoại đã được đăng ký');
+    if (!PHONE_RE.test(phone) && (await db.collection('users').findOne({ email: lookupKey })))
+      return fail(res, 409, 'EMAIL_EXISTS', 'Email đã được sử dụng');
+
+    const latest = await db
+      .collection('otp_codes')
+      .findOne({ phone: lookupKey, purpose: 'REGISTER', is_used: false }, { sort: { created_at: -1 } });
+    if (!latest || !latest.pending_data)
+      return fail(res, 404, 'REGISTER_SESSION_NOT_FOUND', 'Không tìm thấy phiên đăng ký đang chờ xác minh');
+
+    await issueOtp(db, {
+      userId: null,
+      purpose: 'REGISTER',
+      phone: lookupKey,
+      email: latest.pending_data.email || null,
+      pendingData: latest.pending_data,
+    });
+    res.json({ message: 'Đã gửi lại OTP xác minh' });
+  }),
+);
+
+// Xác minh OTP đăng ký -> tạo user ACTIVE với hạng BASIC
+router.post(
+  '/verify-otp',
+  ipLimiter,
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    const rawPhone = str(req.body.phone);
+    const phone = PHONE_RE.test(rawPhone) ? rawPhone : rawPhone.toLowerCase();
+    const { status, otp } = await verifyOtp(db, {
+      phone,
+      purpose: 'REGISTER',
+      code: str(req.body.code),
+    });
+    if (status !== 'OK') return otpError(res, status);
+
+    const basic = await db.collection('membership_tiers').findOne({ code: 'BASIC' });
+    if (!basic)
+      throw new Error(
+        'Thiếu hạng BASIC trong membership_tiers (chạy npm run setup ở thư mục database)',
+      );
+    const p = otp.pending_data,
+      now = new Date();
+    const doc = {
+      full_name: p.full_name,
+      password_hash: p.password_hash,
+      date_of_birth: p.date_of_birth ? new Date(p.date_of_birth) : null,
+      role: 'CUSTOMER',
+      status: 'ACTIVE',
+      two_factor_enabled: false,
+      tier_id: basic._id,
+      tier_points: 0,
+      coin_balance: 0,
+      created_at: now,
+      updated_at: now,
+    };
+    if (p.phone || PHONE_RE.test(phone)) doc.phone = p.phone || phone;
+    if (p.email) doc.email = p.email;
+    try {
+      await db.collection('users').insertOne(doc);
+    } catch (e) {
+      if (isDup(e))
+        return e.keyPattern && e.keyPattern.email
+          ? fail(res, 409, 'EMAIL_EXISTS', 'Email đã được sử dụng')
+          : fail(res, 409, 'PHONE_EXISTS', 'Số điện thoại đã được đăng ký');
+      throw e;
+    }
+    res.json({ message: 'Kích hoạt tài khoản thành công' });
+  }),
+);
+
+// BR-A05, BR-A08: mật khẩu -> (2FA: OTP) -> startSession
+router.post(
+  '/login',
+  ipLimiter,
+  loginLimiter,
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    const identifier = str(req.body.identifier),
+      password = typeof req.body.password === 'string' ? req.body.password : '';
+    const user = identifier
+      ? await db
+          .collection('users')
+          .findOne({ $or: [{ phone: identifier }, { email: identifier.toLowerCase() }] })
+      : null;
+    const ok = await bcrypt.compare(password, user ? user.password_hash : DUMMY_HASH);
+    if (!user || !ok) return fail(res, 401, 'INVALID_CREDENTIALS', 'Sai thông tin đăng nhập');
+    if (user.status !== 'ACTIVE') return fail(res, 403, 'ACCOUNT_LOCKED', 'Tài khoản đã bị khóa');
+
+    if (user.two_factor_enabled) {
+      const contactPhone = user.phone || user.email;
+      // SĐT chỉ biết sau khi tra DB nên gọi hit() trực tiếp; dùng chung key với phoneOtpLimiter (BR-A08).
+      if (!phoneOtpLimiter.hit(otpKey(contactPhone)))
+        return fail(res, 429, 'TOO_MANY_REQUESTS', 'Thử lại sau ít phút');
+      req.session.pending2FA = { userId: String(user._id) }; // KHÔNG gán session.user ở bước này
+      await issueOtp(db, { userId: user._id, purpose: '2FA_LOGIN', phone: contactPhone, email: user.email });
+      return res.json({ requires2FA: true });
+    }
+    await startSession(req, user);
+    res.json({ user: publicUser(user, await tierOf(db, user)) });
+  }),
+);
+
+router.post(
+  '/login/2fa',
+  ipLimiter,
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    const pending = req.session.pending2FA;
+    if (!pending) return fail(res, 401, 'UNAUTHENTICATED', 'Chưa đăng nhập bước 1');
+    const user = await db.collection('users').findOne({ _id: new ObjectId(pending.userId) });
+    if (!user || user.status !== 'ACTIVE')
+      return fail(res, 403, 'ACCOUNT_LOCKED', 'Tài khoản đã bị khóa');
+    const contactPhone = user.phone || user.email;
+    const { status } = await verifyOtp(db, {
+      phone: contactPhone,
+      purpose: '2FA_LOGIN',
+      code: str(req.body.code),
+    });
+    if (status === 'TOO_MANY') {
+      await destroySession(req, res);
+      return otpError(res, status);
+    } // hủy session khi quá số lần thử
+    if (status !== 'OK') return otpError(res, status);
+    await startSession(req, user);
+    res.json({ user: publicUser(user, await tierOf(db, user)) });
+  }),
+);
+
+router.post(
+  '/login/2fa/resend',
+  ipLimiter,
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    const pending = req.session.pending2FA;
+    if (!pending) return fail(res, 401, 'UNAUTHENTICATED', 'Chưa đăng nhập bước 1');
+    const user = await db.collection('users').findOne({ _id: new ObjectId(pending.userId) });
+    if (!user || user.status !== 'ACTIVE')
+      return fail(res, 403, 'ACCOUNT_LOCKED', 'Tài khoản đã bị khóa');
+    const contactPhone = user.phone || user.email;
+    if (!phoneOtpLimiter.hit(otpKey(contactPhone)))
+      return fail(res, 429, 'TOO_MANY_REQUESTS', 'Thử lại sau ít phút');
+    await issueOtp(db, {
+      userId: user._id,
+      purpose: '2FA_LOGIN',
+      phone: contactPhone,
+      email: user.email,
+    });
+    res.json({ ok: true, resend: true });
+  }),
+);
+
+// BR-A07: OTP luôn gửi về SĐT đã đăng ký; luôn trả 200 để không lộ SĐT có tồn tại hay không
+router.post(
+  '/forgot-password',
+  ipLimiter,
+  phoneOtpLimiter,
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    const user = await db
+      .collection('users')
+      .findOne({ phone: str(req.body.phone), status: 'ACTIVE' });
+    if (user)
+      await issueOtp(db, { userId: user._id, purpose: 'FORGOT_PASSWORD', phone: user.phone, email: user.email });
+    res.json({ message: 'Nếu số điện thoại đã đăng ký, OTP đã được gửi' });
+  }),
+);
+
+router.post(
+  '/forgot-password/verify-otp',
+  ipLimiter,
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    const user = await db
+      .collection('users')
+      .findOne({ phone: str(req.body.phone), status: 'ACTIVE' });
+    if (!user) return fail(res, 422, 'OTP_INVALID', 'Mã OTP không đúng');
+    const { status } = await verifyOtp(db, {
+      phone: user.phone,
+      purpose: 'FORGOT_PASSWORD',
+      code: str(req.body.code),
+    });
+    if (status !== 'OK') return otpError(res, status);
+    res.json({ ok: true, resetToken: createResetToken(user.phone) });
+  }),
+);
+
+router.post(
+  '/reset-password',
+  ipLimiter,
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    const { newPassword } = req.body;
+    const resetToken = str(req.body.resetToken);
+    const confirmPassword =
+      req.body.confirmPassword !== undefined
+        ? req.body.confirmPassword
+        : resetToken
+          ? newPassword
+          : undefined;
+    if (!validNewPassword(newPassword) || newPassword !== confirmPassword)
+      return fail(res, 422, 'VALIDATION_ERROR', 'Mật khẩu mới không hợp lệ hoặc không khớp');
+    const user = await db
+      .collection('users')
+      .findOne({ phone: str(req.body.phone), status: 'ACTIVE' });
+    if (!user) return fail(res, 422, 'OTP_INVALID', 'Mã OTP không đúng');
+    if (resetToken) {
+      const tokenStatus = verifyResetToken(resetToken, user.phone);
+      if (tokenStatus === 'EXPIRED') {
+        return fail(res, 401, 'RESET_TOKEN_EXPIRED', 'Phiên đặt lại mật khẩu đã hết hạn');
+      }
+      if (tokenStatus !== 'OK') {
+        return fail(res, 401, 'RESET_TOKEN_INVALID', 'Phiên đặt lại mật khẩu không hợp lệ');
+      }
+    } else {
+      const { status } = await verifyOtp(db, {
+        phone: user.phone,
+        purpose: 'FORGOT_PASSWORD',
+        code: str(req.body.code),
+      });
+      if (status !== 'OK') return otpError(res, status);
+    }
+    await db.collection('users').updateOne(
+      { _id: user._id },
+      {
+        $set: {
+          password_hash: await bcrypt.hash(newPassword, 10),
+          password_changed_at: new Date(),
+          updated_at: new Date(),
+        },
+      },
+    );
+    res.json({ message: 'Đã đặt lại mật khẩu' });
+  }),
+);
+
+// Đăng xuất dùng POST (không đổi dữ liệu bằng GET - chống CSRF)
+router.post(
+  '/logout',
+  ipLimiter,
+  wrap(async (req, res) => {
+    await destroySession(req, res);
+    res.status(204).end();
+  }),
+);
+
+// Kiểm tra lại khóa tài khoản từ DB (BR-A05) - session cũ không dùng được nếu Admin đã khóa
+router.get(
+  ['/me', '/profile'],
+  ipLimiter,
+  requireAuth,
+  wrap(async (req, res) => {
+    const db = req.app.locals.db;
+    const user = req.user; // requireAuth đã kiểm tra DB (BR-A05)
+    res.json(publicUser(user, await tierOf(db, user)));
+  }),
+);
+
+module.exports = router;

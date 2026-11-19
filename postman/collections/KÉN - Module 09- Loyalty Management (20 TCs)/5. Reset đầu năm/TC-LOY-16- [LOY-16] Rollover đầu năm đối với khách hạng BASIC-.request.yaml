@@ -1,0 +1,33 @@
+$kind: http-request
+name: "TC-LOY-16: [LOY-16] Rollover đầu năm đối với khách hạng BASIC: giữ nguyên hạng và điểm, chỉ reset Coins về 0 (Branch: LOY-B16)"
+description: |-
+  **Mã TC:** LOY-16 (TC-LOY-16)
+  **Nhóm:** Reset đầu năm
+  **API / Thành phần:** POST /api/loyalty/year-rollover
+  **Loại:** Boundary
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; khách hạng BASIC có tier_points=700, coin_balance=50.
+  **Dữ liệu vào:** {"year": 2027}
+  **Các bước thực hiện:**
+  1) POST /api/loyalty/year-rollover&#10;2) Kiểm tra users và loyalty_transactions
+  **Kết quả mong đợi:** 200; khách BASIC giữ nguyên tier=BASIC và tier_points=700; coin_balance=0; có bản ghi YEAR_RESET (HTTP: 200)
+  **Nhánh code bao phủ:** LOY-B16
+  **Ghi chú:** BASIC là hạng thấp nhất nên không hạ bậc
+url: "{{baseUrl}}/api/loyalty/year-rollover"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "year": 2027
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-LOY-16] Rollover đầu năm đối với khách hạng BASIC: giữ nguyên hạng và điểm, chỉ reset Coins về 0
+      pm.test("[TC-LOY-16] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 3000

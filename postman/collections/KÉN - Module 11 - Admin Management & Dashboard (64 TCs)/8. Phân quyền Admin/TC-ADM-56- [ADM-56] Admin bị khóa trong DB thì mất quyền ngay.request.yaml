@@ -1,0 +1,25 @@
+$kind: http-request
+name: "TC-ADM-56: [ADM-56] Admin bị khóa trong DB thì mất quyền ngay (BR-A05) (Branch: ADM-B56)"
+description: |-
+  **Mã TC:** ADM-56 (TC-ADM-56)
+  **Nhóm:** Phân quyền Admin
+  **API / Thành phần:** GET /api/admin/dashboard
+  **Loại:** Security
+  **Điều kiện tiên quyết:** Server chạy; Admin phụ đang đăng nhập (không phải Admin duy nhất).
+  **Dữ liệu vào:** Đặt users.status của Admin thành LOCKED trên Atlas
+  **Các bước thực hiện:**
+  1) Admin gọi GET /api/admin/dashboard (200)&#10;2) Đặt status = LOCKED trên Atlas&#10;3) Gọi lại bằng session cũ
+  **Kết quả mong đợi:** 401 ở request kế tiếp (session bị thu hồi) (HTTP: 401)
+  **Nhánh code bao phủ:** ADM-B56
+  **Ghi chú:** Tách từ ADM-25: khóa → 401, hạ quyền → 403. Admin không khóa được qua API (ADM-36) nên phải sửa DB.
+url: "{{baseUrl}}/api/admin/dashboard"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-56] Admin bị khóa trong DB thì mất quyền ngay (BR-A05)
+      pm.test("[TC-ADM-56] Status code is 401", function () {
+          pm.expect(pm.response.code).to.be.oneOf([401]);
+      });
+    language: text/javascript
+order: 4000

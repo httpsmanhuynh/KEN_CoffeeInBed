@@ -1,0 +1,40 @@
+$kind: http-request
+name: '[TC-SZ-009] Khám phá chỗ trống (UC-04): trả isAvailable, remainingCapacity,
+  minPackagePrice, compatiblePackages'
+description: '**Mã TC:** TC-SZ-009
+
+  **Nhóm:** Tìm kiếm & Lọc Space
+
+  **API / Thành phần:** GET /api/spaces?startAt&guestCount
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đã seed zones/spaces/packages; không cần
+  đăng nhập.
+
+  **Dữ liệu vào:** ?startAt=<ISO ngày mai 10:00>&guestCount=2&hours=2
+
+  **Các bước thực hiện:**
+
+  1) GET /api/spaces với 3 tham số
+
+  **Kết quả mong đợi:** 200 mỗi Space có isAvailable, remainingCapacity, minPackagePrice,
+  compatiblePackages (HTTP: 200)
+
+  **Nhánh code bao phủ:** SPC-B07
+
+  '
+url: '{{baseUrl}}/api/spaces?startAt&guestCount'
+method: GET
+headers:
+- key: Content-Type
+  value: application/json
+order: 9000
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-SZ-009] Khám phá chỗ trống (UC-04): trả isAvailable, remainingCapacity,\
+    \ minPackagePrice, compatiblePackages\npm.test(\"[TC-SZ-009] Status code is 200\"\
+    , function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n});\npm.test(\"\
+    [TC-SZ-009] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

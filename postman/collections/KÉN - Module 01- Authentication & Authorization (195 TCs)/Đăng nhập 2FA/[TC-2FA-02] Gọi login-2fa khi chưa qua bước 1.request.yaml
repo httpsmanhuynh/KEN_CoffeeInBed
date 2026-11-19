@@ -1,0 +1,36 @@
+$kind: http-request
+name: "[TC-2FA-02] Gọi login/2fa khi chưa qua bước 1"
+description: |-
+  **Mã TC:** TC-2FA-02
+  **Loại:** Negative
+  **Nhóm:** Đăng nhập 2FA
+  **Tiền điều kiện:** Server chạy; đã chạy npm run setup (có membership_tiers, otp_codes, users trên Atlas). Cookie sạch (chưa login).
+  **Các bước:** 1) POST /api/auth/login/2fa (Body: code) cùng cookie của bước 1
+  2) Quan sát phản hồi
+  3) GET /api/profile
+  **Kết quả mong đợi:** 401 {code:'UNAUTHENTICATED', message:'Chưa đăng nhập bước 1'}
+  **Nhánh code:** TFA-B01
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/login/2fa"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "code": "123456"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-2FA-02] Gọi login/2fa khi chưa qua bước 1
+      pm.test("[TC-2FA-02] Status code is 401", function () {
+          pm.expect(pm.response.code).to.be.oneOf([401]);
+      });
+      pm.test("[TC-2FA-02] Response contains expected code or keyword: UNAUTHENTICATED", function () {
+          var resText = pm.response.text();
+          pm.expect(resText).to.include("UNAUTHENTICATED");
+      });
+    language: text/javascript
+order: 2000

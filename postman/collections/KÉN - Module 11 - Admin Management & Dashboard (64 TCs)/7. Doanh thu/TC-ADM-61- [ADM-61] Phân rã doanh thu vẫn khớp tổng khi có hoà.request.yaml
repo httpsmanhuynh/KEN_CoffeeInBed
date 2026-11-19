@@ -1,0 +1,34 @@
+$kind: http-request
+name: "TC-ADM-61: [ADM-61] Phân rã doanh thu vẫn khớp tổng khi có hoàn tiền một phần và khi lọc Zone (Branch: ADM-B61)"
+description: |-
+  **Mã TC:** ADM-61 (TC-ADM-61)
+  **Nhóm:** Doanh thu
+  **API / Thành phần:** GET /api/admin/dashboard
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đơn đã thanh toán 600.000 (Package 500.000, Inclusion 59.000, Add-on 100.000, giảm 59.000) ở Zone A đã hoàn 100.000; có đơn khác ở Zone B.
+  **Dữ liệu vào:** ?from&to chứa giao dịch ; ?zoneId=<Zone A> ; ?zoneId=<Zone B>
+  **Các bước thực hiện:**
+  1) GET dashboard không lọc Zone&#10;2) GET ?zoneId=<Zone A> và ?zoneId=<Zone B>&#10;3) Với mỗi response (và từng zones[].revenue) tính package + inclusionSurcharge + addon − discount
+  **Kết quả mong đợi:** 200 mọi nơi: package + inclusionSurcharge + addon − discount = revenue.total; các thành phần là số nguyên VND; Zone A có revenue.total = 500.000; không lọc thì Σ zones[].revenue.total = revenue.total (HTTP: 200)
+  **Nhánh code bao phủ:** ADM-B61
+  **Ghi chú:** Test mới theo Report (tổng phân rã khớp doanh thu). Hoàn một phần chia theo tỷ lệ số hoàn / final_amount, làm tròn dồn vào Package (quy ước của nhóm, Report không nêu). Code: allocateAmount.
+url: "{{baseUrl}}/api/admin/dashboard"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-61] Phân rã doanh thu vẫn khớp tổng khi có hoàn tiền một phần và khi lọc Zone
+      pm.test("[TC-ADM-61] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+      pm.test("[TC-ADM-61] Phân rã doanh thu khớp tổng trên cả hệ thống và từng Zone", function () {
+          const json = pm.response.json();
+          const b = json.revenue.breakdown;
+          pm.expect(b.package + b.inclusionSurcharge + b.addon - b.discount).to.eql(json.revenue.total);
+          json.zones.forEach(function (z) {
+              const zb = z.revenue.breakdown;
+              pm.expect(zb.package + zb.inclusionSurcharge + zb.addon - zb.discount).to.eql(z.revenue.total);
+          });
+      });
+    language: text/javascript
+order: 10000

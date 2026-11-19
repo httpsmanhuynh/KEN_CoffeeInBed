@@ -1,0 +1,139 @@
+﻿<div class="story-page">
+  <ng-container *ngIf="!selectedStory; else detailView">
+    <section class="story-hero">
+      <div class="story-container">
+        <span class="story-eyebrow">CHUYỆN Ở KÉN</span>
+
+        <h1>Chuyện ở KÉN</h1>
+
+        <p class="story-tagline">Lười một chút, chill một góc</p>
+
+        <p class="story-intro">Câu chuyện, cẩm nang và những nhịp sống giữa ba không gian.</p>
+      </div>
+    </section>
+
+    <main class="story-content">
+      <div class="story-container">
+        <div class="story-row-group" *ngFor="let row of rows; let rowIndex = index">
+          <div class="story-grid">
+            <article class="story-card" *ngFor="let card of row">
+              <div class="story-image-wrap">
+                <img class="story-image" [src]="card.image" [alt]="card.title" loading="lazy" />
+
+                <span class="story-category" [class.warm]="card.tone === 'warm'">
+                  {{ card.category }}
+                </span>
+              </div>
+
+              <div class="story-card-body">
+                <div class="story-card-heading">
+                  <h2>{{ card.title }}</h2>
+
+                  <button
+                    type="button"
+                    class="story-save"
+                    [attr.aria-label]="
+                      isSaved(card.id) ? 'Bỏ lưu ' + card.title : 'Lưu ' + card.title
+                    "
+                    [attr.aria-pressed]="isSaved(card.id)"
+                    (click)="toggleSaved(card.id)"
+                  >
+                    <img
+                      [src]="
+                        isSaved(card.id)
+                          ? '/images/ken-figma/stories-bookmark-filled.svg'
+                          : '/images/ken-figma/stories-bookmark.svg'
+                      "
+                      alt=""
+                    />
+                  </button>
+                </div>
+
+                <p>{{ card.description }}</p>
+
+                <a [routerLink]="card.route" class="story-read-more"> Đọc thêm → </a>
+              </div>
+            </article>
+          </div>
+
+          <img
+            *ngIf="rowIndex < 2"
+            class="story-divider"
+            src="/images/ken-figma/stories-divider.svg"
+            alt=""
+          />
+        </div>
+      </div>
+    </main>
+  </ng-container>
+
+  <ng-template #detailView>
+    <main class="story-detail" *ngIf="selectedStory as story">
+      <div class="story-container story-detail-container">
+        <nav class="story-crumb" aria-label="Breadcrumb">
+          <a routerLink="/blog">Blog</a>
+          <span aria-hidden="true">/</span>
+          <span>{{ story.title }}</span>
+        </nav>
+
+        <a routerLink="/blog" class="story-back">← Quay lại Chuyện ở KÉN</a>
+
+        <article class="story-article">
+          <header class="story-article-head">
+            <div class="story-article-meta">
+              <span
+                class="story-category story-category-inline"
+                [class.warm]="story.tone === 'warm'"
+              >
+                {{ story.category }}
+              </span>
+              <span class="story-meta-text">{{ story.publishedAt }} · {{ story.readTime }}</span>
+            </div>
+            <h1>{{ story.title }}</h1>
+            <p class="story-article-lead">{{ story.description }}</p>
+          </header>
+
+          <div class="story-article-media">
+            <img [src]="story.image" [alt]="story.title" />
+          </div>
+
+          <div class="story-article-body">
+            <p *ngFor="let p of story.content">{{ p }}</p>
+          </div>
+
+          <div class="story-article-actions">
+            <a
+              *ngIf="story.ctaRoute && story.ctaLabel"
+              [routerLink]="story.ctaRoute"
+              class="story-cta-btn"
+            >
+              {{ story.ctaLabel }} →
+            </a>
+            <a routerLink="/blog" class="story-secondary-btn">Xem tất cả bài viết</a>
+          </div>
+        </article>
+
+        <section class="story-related" aria-label="Bài viết khác tại KÉN">
+          <h2>Bài viết khác tại KÉN</h2>
+          <div class="story-grid">
+            <article class="story-card" *ngFor="let card of relatedStories">
+              <div class="story-image-wrap">
+                <img class="story-image" [src]="card.image" [alt]="card.title" loading="lazy" />
+                <span class="story-category" [class.warm]="card.tone === 'warm'">{{
+                  card.category
+                }}</span>
+              </div>
+              <div class="story-card-body">
+                <div class="story-card-heading">
+                  <h2>{{ card.title }}</h2>
+                </div>
+                <p>{{ card.description }}</p>
+                <a [routerLink]="card.route" class="story-read-more">Đọc thêm →</a>
+              </div>
+            </article>
+          </div>
+        </section>
+      </div>
+    </main>
+  </ng-template>
+</div>

@@ -1,0 +1,35 @@
+$kind: http-request
+name: "TC-REV-06: [REV-06] Đánh giá đơn chưa CHECKED_OUT (CONFIRMED, CHECKED_IN, CANCELLED, NO_SHOW...) (Branch: REV-B06)"
+description: |-
+  **Mã TC:** REV-06 (TC-REV-06)
+  **Nhóm:** Điều kiện đánh giá
+  **API / Thành phần:** POST /api/reviews
+  **Loại:** Negative
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; có đơn CHECKED_OUT của Customer.
+  **Dữ liệu vào:** id đơn ở các trạng thái khác
+  **Các bước thực hiện:**
+  1) POST /api/reviews từng đơn
+  **Kết quả mong đợi:** Bị từ chối (409/422); không tạo đánh giá (HTTP: 409)
+  **Nhánh code bao phủ:** REV-B06
+  **Ghi chú:** Xác nhận mã lỗi thực tế
+url: "{{baseUrl}}/api/reviews"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "bookingId": "{{bookingId}}",
+      "rating": 5,
+      "comment": "Không gian rất ổn"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-REV-06] Đánh giá đơn chưa CHECKED_OUT (CONFIRMED, CHECKED_IN, CANCELLED, NO_SHOW...)
+      pm.test("[TC-REV-06] Status code is 409", function () {
+          pm.expect(pm.response.code).to.be.oneOf([409, 422]);
+      });
+    language: text/javascript
+order: 1000

@@ -1,0 +1,27 @@
+$kind: http-request
+name: "TC-REC-18: [REC-18] Tham số truy vấn gợi ý không hợp lệ (spaceId/packageId sai → 400, guestCount <= 0 → 422) (Branch: REC-B18)"
+description: |-
+  **Mã TC:** REC-18 (TC-REC-18)
+  **Nhóm:** Customer Recommend
+  **API / Thành phần:** GET /api/recommendations & GET /api/recommendations/booking
+  **Loại:** Negative
+  **Điều kiện tiên quyết:** Server chạy.
+  **Dữ liệu vào:** ?spaceId={{spaceId}}&guestCount=0
+  **Các bước thực hiện:**
+  1) GET /api/recommendations?spaceId={{spaceId}}&guestCount=0
+  **Kết quả mong đợi:** 422 VALIDATION_ERROR khi guestCount <= 0 (hoặc 400 INVALID_ID khi spaceId/packageId sai định dạng ObjectId) (HTTP: 422)
+  **Nhánh code bao phủ:** REC-B18
+url: "{{baseUrl}}/api/recommendations?spaceId={{spaceId}}&guestCount=0"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("[TC-REC-18] Status code is 422", function () {
+          pm.expect(pm.response.code).to.eql(422);
+      });
+      pm.test("[TC-REC-18] Trả về mã lỗi VALIDATION_ERROR", function () {
+          const json = pm.response.json();
+          pm.expect(json.code || json.error).to.eql("VALIDATION_ERROR");
+      });
+    language: text/javascript
+order: 6000

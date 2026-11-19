@@ -1,0 +1,40 @@
+$kind: http-request
+name: '[TC-AD-030] Customer / Guest sửa hoặc xóa Product'
+description: '**Mã TC:** TC-AD-030
+
+  **Nhóm:** Phân quyền Catalog
+
+  **API / Thành phần:** PATCH/DELETE /api/products/:id
+
+  **Loại:** Security
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; đã seed products/addons/spaces/packages.
+
+  **Dữ liệu vào:** {"price": 1}
+
+  **Các bước thực hiện:**
+
+  1) PATCH và DELETE bằng Customer
+
+  2) Lặp lại không cookie
+
+  **Kết quả mong đợi:** Customer 403; Guest 401; dữ liệu không đổi (HTTP: 403)
+
+  **Nhánh code bao phủ:** ADD-B25
+
+  '
+url: '{{baseUrl}}/api/products/{{productId}}'
+method: PATCH/DELETE
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: CUSTOMER
+order: 30000
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-AD-030] Customer / Guest sửa hoặc xóa Product\npm.test(\"[TC-AD-030]\
+    \ Status code is 403\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([403]);\n\
+    });\npm.test(\"[TC-AD-030] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

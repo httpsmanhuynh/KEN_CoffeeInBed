@@ -1,0 +1,41 @@
+$kind: http-request
+name: '[TC-PK-033] Giá âm / không nguyên / là chuỗi'
+description: '**Mã TC:** TC-PK-033
+
+  **Nhóm:** Bảng giá package_prices
+
+  **API / Thành phần:** POST /api/pricing
+
+  **Loại:** Negative
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed spaces/packages/package_prices/package_inclusions.
+
+  **Dữ liệu vào:** {"price": -1} ; {"price": 99.5} ; {"price": "abc"}
+
+  **Các bước thực hiện:**
+
+  1) POST /api/pricing 3 lần
+
+  **Kết quả mong đợi:** Cả 3 lần 422 VALIDATION_ERROR (HTTP: 422)
+
+  **Nhánh code bao phủ:** PKG-B30
+
+  '
+url: '{{baseUrl}}/api/pricing'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 33000
+body:
+  type: json
+  raw: '{"price": -1} ; {"price": 99.5} ; {"price": "abc"}'
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PK-033] Giá âm / không nguyên / là chuỗi\npm.test(\"[TC-PK-033] Status\
+    \ code is 422\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([422]);\n\
+    });\npm.test(\"[TC-PK-033] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

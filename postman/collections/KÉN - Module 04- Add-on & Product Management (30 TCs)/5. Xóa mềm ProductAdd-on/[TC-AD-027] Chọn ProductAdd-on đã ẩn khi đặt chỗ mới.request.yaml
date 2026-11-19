@@ -1,0 +1,41 @@
+$kind: http-request
+name: '[TC-AD-027] Chọn Product/Add-on đã ẩn khi đặt chỗ mới'
+description: '**Mã TC:** TC-AD-027
+
+  **Nhóm:** Xóa mềm Product/Add-on
+
+  **API / Thành phần:** POST /api/bookings/quote
+
+  **Loại:** Negative
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; đã seed products/addons/spaces/packages.
+
+  **Dữ liệu vào:** Add-on đã ẩn
+
+  **Các bước thực hiện:**
+
+  1) POST /api/bookings/quote kèm add-on đã ẩn
+
+  **Kết quả mong đợi:** Bị từ chối; không tính vào giá (HTTP: 422)
+
+  **Nhánh code bao phủ:** ADD-B23
+
+  '
+url: '{{baseUrl}}/api/bookings/quote'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: CUSTOMER
+order: 27000
+body:
+  type: json
+  raw: '{"data": "Add-on đã ẩn"}'
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-AD-027] Chọn Product/Add-on đã ẩn khi đặt chỗ mới\npm.test(\"[TC-AD-027]\
+    \ Status code is 422\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([422]);\n\
+    });\npm.test(\"[TC-AD-027] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

@@ -1,0 +1,35 @@
+$kind: http-request
+name: "[TC-PF-12] Đổi sang địa chỉ email đã được tài khoản khác sử dụng"
+description: |-
+  **Mã TC:** TC-PF-12
+  **Loại:** Negative
+  **Nhóm:** Hồ sơ cá nhân
+  **Tiền điều kiện:** User A đang đăng nhập; email 'used@uel.edu.vn' đã thuộc về User B.
+  **Các bước:** 1) User A gửi PATCH /api/profile/me với email='used@uel.edu.vn' và currentPassword đúng
+  **Kết quả mong đợi:** Trả 409 {code:'EMAIL_EXISTS', message:'Email đã được sử dụng'} (bắt lỗi E11000 từ index uq_users_email).
+  **Nhánh code:** PRF-B12; DB-B02
+  **Ghi chú:** Tham chiếu PF-12 (BR-A02)
+url: "{{baseUrl}}/api/profile/me"
+method: PATCH
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "used@uel.edu.vn",
+      "currentPassword": "password123"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-PF-12] Đổi sang địa chỉ email đã được tài khoản khác sử dụng
+      pm.test("[TC-PF-12] Status code is 409", function () {
+          pm.expect(pm.response.code).to.be.oneOf([409]);
+      });
+      pm.test("[TC-PF-12] Response contains expected code or keyword: EMAIL_EXISTS", function () {
+          var resText = pm.response.text();
+          pm.expect(resText).to.include("EMAIL_EXISTS");
+      });
+    language: text/javascript
+order: 12000

@@ -1,0 +1,35 @@
+$kind: http-request
+name: "[TC-ST-02] Đăng nhập khi tài khoản có status khác ACTIVE (ví dụ INACTIVE)"
+description: |-
+  **Mã TC:** TC-ST-02
+  **Loại:** Negative
+  **Nhóm:** Trạng thái tài khoản
+  **Tiền điều kiện:** Trên Atlas, sửa tay trường status của user thành 'INACTIVE' (tạm tắt validator hoặc dùng giá trị khác ACTIVE).
+  **Các bước:** 1) Gửi POST /api/auth/login với đúng identifier và mật khẩu
+  **Kết quả mong đợi:** Trả 403 ACCOUNT_LOCKED (code kiểm tra chặt user.status !== 'ACTIVE' thay vì chỉ kiểm tra === 'LOCKED').
+  **Nhánh code:** STS-B01
+  **Ghi chú:** Tham chiếu ST-02 (BR-A05)
+url: "{{baseUrl}}/api/auth/login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "identifier": "0909123456",
+      "password": "password123"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ST-02] Đăng nhập khi tài khoản có status khác ACTIVE (ví dụ INACTIVE)
+      pm.test("[TC-ST-02] Status code is 403", function () {
+          pm.expect(pm.response.code).to.be.oneOf([403]);
+      });
+      pm.test("[TC-ST-02] Response contains expected code or keyword: ACCOUNT_LOCKED", function () {
+          var resText = pm.response.text();
+          pm.expect(resText).to.include("ACCOUNT_LOCKED");
+      });
+    language: text/javascript
+order: 1000

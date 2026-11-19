@@ -1,0 +1,43 @@
+$kind: http-request
+name: "TC-PRICING-009: [PRICING-009] Package theo giờ dưới số giờ tối thiểu của gói bị từ chối (HOURS_BELOW_MIN) (Branch: PKG-B08)"
+description: |-
+  **Mã TC:** PRICING-009 (TC-PRICING-009)
+  **Nhóm:** Giá Package
+  **API / Thành phần:** POST /api/bookings (Backend – API tạo Booking (endpoint TBD) – Postman)
+  **Loại:** Boundary
+  **Điều kiện tiên quyết:** Server chạy (http://localhost:3002); Postman bật Cookie jar và đã đăng nhập Customer; dữ liệu theo cột 'Dữ liệu vào' đã có trong MongoDB. Endpoint tạo Booking: TBD (chưa có trong tài liệu được cấp) – điền endpoint thực tế vào bước 2 trước khi chạy. Gói HOURLY có số giờ tối thiểu > 1 (giá trị cụ thể: TBD – lấy từ dữ liệu gói trong Compass).
+  **Dữ liệu vào:** Tài khoản: Customer&#10;Package theo giờ có min_hours = N (N ≥ 2, lấy từ DB)&#10;Số giờ gửi lên: N − 1
+  **Các bước thực hiện:**
+  1) Trong Compass, xác định gói HOURLY có số giờ tối thiểu N ≥ 2.&#10;2) Postman: gọi API tạo Booking cho gói đó với số giờ = N − 1.&#10;3) Ghi lại HTTP status và body.&#10;4) Kiểm tra bookings không có bản ghi mới.
+  **Kết quả mong đợi:** Backend từ chối vì dưới giờ tối thiểu. Backend từ chối yêu cầu: không tạo Booking (collection bookings không có bản ghi mới), không trừ lượt Voucher; người dùng nhận thông báo lỗi (nội dung thông báo: TBD – chưa có trong tài liệu). (HTTP: 400/422)
+  **Nhánh code bao phủ:** PKG-B08
+  **Ghi chú:** Auto liên quan (chỉ để truy vết, KHÔNG phải kết quả Manual): AUTO-PRICING-006: HOURLY dưới minHours bị từ chối
+url: "{{baseUrl}}/api/bookings"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "spaceId": "{{spaceId}}",
+      "packageId": "{{pkgHourlyMin2hId}}",
+      "startAt": "2026-12-20T02:00:00.000Z",
+      "hours": 1,
+      "guestCount": 1
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-PRICING-009] Package theo giờ dưới số giờ tối thiểu của gói bị từ chối (HOURS_BELOW_MIN)
+      pm.test("[TC-PRICING-009] Status code is 400 or 422", function () {
+          pm.expect(pm.response.code).to.be.oneOf([400,422]);
+      });
+      pm.test("[TC-PRICING-009] Phản hồi từ chối hợp lệ kèm mã lỗi nghiệp vụ", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.have.property("code");
+          pm.expect(["INVALID_DURATION","HOURS_BELOW_MIN"]).to.include(json.code);
+          pm.expect(json).to.have.property("message");
+      });
+    language: text/javascript
+order: 9000

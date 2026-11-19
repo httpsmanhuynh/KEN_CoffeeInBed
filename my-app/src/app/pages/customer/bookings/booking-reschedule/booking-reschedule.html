@@ -1,0 +1,149 @@
+<div class="wrap">
+  <nav class="crumb" aria-label="breadcrumb">
+    <a routerLink="/">Trang chủ</a>　/　<a routerLink="/user-profile">Tài khoản của tôi</a>　/　<span aria-current="page">Đổi / Huỷ lịch</span>
+  </nav>
+
+  <div class="layout">
+    <app-account-sidebar active="reschedule" (logout)="logout()"></app-account-sidebar>
+
+    <main class="content">
+      <header class="intro">
+        <h1 class="intro__title">Đổi / Huỷ lịch</h1>
+      </header>
+
+      <nav class="tabs" aria-label="Đổi hoặc huỷ lịch">
+        <a class="tab is-active" routerLink="/booking-reschedule" aria-current="page">Đổi lịch</a>
+        <a class="tab" routerLink="/booking-cancel">Huỷ lịch</a>
+      </nav>
+
+      <!-- Hàng 1: chọn đơn + lịch hiện tại -->
+      <div class="pair">
+        <section class="card" aria-labelledby="pick-title">
+          <div class="card__head">
+            <h2 class="h-serif" id="pick-title">Chọn đơn muốn đổi lịch</h2>
+            @if (orders.length > 0) {
+              <span class="orders-count">{{ orders.length }} đơn</span>
+            }
+          </div>
+          <div role="radiogroup" aria-labelledby="pick-title" class="orders">
+            @for (o of pagedOrders; track o.id) {
+              <button type="button" role="radio" class="opt" [class.is-selected]="o.id === selectedId" [attr.aria-checked]="o.id === selectedId" (click)="select(o.id)">
+                <lucide-icon [name]="o.id === selectedId ? 'check' : 'circle'" [size]="18" [strokeWidth]="1.8" color="#4A3123"></lucide-icon>
+                <span class="opt__body">
+                  <b>{{ o.name }}</b>
+                  <span>{{ o.code }} · {{ fmtDate(o.date) }} · {{ o.start }}–{{ endOf(o) }}</span>
+                </span>
+                <span class="badge badge--{{ o.status }}">{{ statusLabel[o.status] }}</span>
+              </button>
+            } @empty {
+              <p class="empty-orders" role="status">Chưa có đơn nào</p>
+            }
+          </div>
+          @if (totalOrderPages > 1) {
+            <div class="orders-footer">
+              <span class="orders-page-info">Trang {{ orderPage }} / {{ totalOrderPages }}</span>
+              <nav class="pager" aria-label="Phân trang danh sách đơn">
+                <button type="button" class="pager__arrow" (click)="goToOrderPage(orderPage - 1)" [disabled]="orderPage <= 1" aria-label="Trang trước">‹</button>
+                @for (p of orderPageNumbers; track p) {
+                  <button type="button" class="pager__page" [class.is-active]="p === orderPage" [attr.aria-current]="p === orderPage ? 'page' : null" (click)="goToOrderPage(p)">{{ p }}</button>
+                }
+                <button type="button" class="pager__arrow" (click)="goToOrderPage(orderPage + 1)" [disabled]="orderPage >= totalOrderPages" aria-label="Trang sau">›</button>
+              </nav>
+            </div>
+          }
+        </section>
+
+        @if (order) {
+          <section class="card card--tight" aria-labelledby="cur-title">
+            <div class="card__head">
+              <h2 class="h-serif" id="cur-title">Lịch hiện tại</h2>
+              <span class="badge badge--{{ order.status }}">{{ statusLabel[order.status] }}</span>
+            </div>
+            <p class="strong">{{ shortName(order) }}</p>
+            <p class="text">{{ order.code }} · {{ order.zone }}</p>
+            <hr class="line" />
+            <div class="kv"><lucide-icon name="calendar" [size]="16" [strokeWidth]="1.8" color="#A9763F"></lucide-icon><span>Ngày sử dụng</span><b>{{ fmtDate(order.date) }}</b></div>
+            <div class="kv"><lucide-icon name="history" [size]="16" [strokeWidth]="1.8" color="#A9763F"></lucide-icon><span>Khung giờ</span><b>{{ order.start }}–{{ orderEnd }}</b></div>
+            <div class="kv"><lucide-icon name="clock" [size]="16" [strokeWidth]="1.8" color="#A9763F"></lucide-icon><span>Thời lượng · Số khách</span><b>{{ order.hours }} giờ · {{ guests(order) }} khách</b></div>
+            <hr class="line" />
+            <div class="kv kv--total"><span>Tổng tiền đơn</span><b>{{ fmtMoney(order.total) }}</b></div>
+          </section>
+        }
+      </div>
+
+      <!-- Hàng 2: lịch mới + kết quả -->
+      <div class="pair">
+        <section class="card card--form" aria-labelledby="new-title">
+          <h2 class="h-serif" id="new-title">Lịch mới</h2>
+
+          <div class="two">
+            <div class="field">
+              <label class="field__label" for="rs-date">Ngày mong muốn</label>
+              <div class="box">
+                <input #rsDate id="rs-date" type="date" [(ngModel)]="newDate" (ngModelChange)="touch()" />
+              </div>
+            </div>
+            <div class="field">
+              <label class="field__label" for="rs-hours">Thời lượng (cố định theo gói)</label>
+              <div class="box" style="opacity: 0.75; background: #f5f2ed; cursor: not-allowed;">
+                <input id="rs-hours" type="text" [value]="durationDisplay" disabled style="cursor: not-allowed; border: none; background: transparent; width: 100%; font-weight: 600; color: #3e2b1e;" />
+              </div>
+            </div>
+          </div>
+
+          <div class="field">
+            <span class="field__label" id="rs-start-label">Giờ bắt đầu</span>
+            <div class="slots" role="radiogroup" aria-labelledby="rs-start-label">
+              @for (s of slots; track s) {
+                <button type="button" role="radio" class="slot" [class.is-selected]="s === start" [attr.aria-checked]="s === start" (click)="pickSlot(s)">{{ s }}</button>
+              }
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="rs-note">Ghi chú (không bắt buộc)</label>
+            <div class="box box--area"><textarea id="rs-note" rows="3" [(ngModel)]="note" maxlength="300"></textarea></div>
+          </div>
+        </section>
+
+        <div class="result">
+          <section class="proposal" aria-label="Lịch mới đề xuất">
+            <p class="proposal__eyebrow">LỊCH MỚI ĐỀ XUẤT</p>
+            <h2 class="proposal__title">{{ proposedTitle }}</h2>
+            <div class="kv kv--on"><lucide-icon name="calendar" [size]="16" [strokeWidth]="1.8" color="#4A3123"></lucide-icon><span>Ngày bắt đầu</span><b>{{ fmtDate(newDate) }}</b></div>
+            <div class="kv kv--on"><lucide-icon name="history" [size]="16" [strokeWidth]="1.8" color="#4A3123"></lucide-icon><span>Giờ bắt đầu</span><b>{{ start }}</b></div>
+            <div class="kv kv--on"><lucide-icon name="clock" [size]="16" [strokeWidth]="1.8" color="#4A3123"></lucide-icon><span>Giờ kết thúc</span><b>{{ end }}</b></div>
+            <hr class="line line--dark" />
+            <div class="kv kv--on kv--total"><span>Chênh lệch</span><b>Chờ đối chiếu</b></div>
+            <p class="proposal__text">Lịch hiện tại còn hiệu lực đến khi xác nhận đổi.</p>
+          </section>
+
+          <section class="card" aria-labelledby="avail-title">
+            <h2 class="h-serif h-serif--sm" id="avail-title">Còn chỗ?</h2>
+            <div class="avail" role="status" aria-live="polite">
+              <lucide-icon name="eye" [size]="16" [strokeWidth]="1.8" color="#4A3123"></lucide-icon>
+              <span class="avail__text">{{ rechecking ? 'Đang kiểm tra lịch trống…' : fmtDate(newDate) + ' · ' + start + '–' + end }}</span>
+              @if (!rechecking) {
+                <span class="badge" [class.badge--confirmed]="availability === 'ok'" [class.badge--bad]="availability !== 'ok'">
+                  {{ !order ? 'Chưa có đơn' : availability === 'ok' ? 'Còn chỗ' : availability === 'full' ? 'Hết chỗ' : availability === 'same' ? 'Trùng lịch' : 'Chưa chọn ngày' }}
+                </span>
+              }
+            </div>
+            @if (availability === 'same') {
+              <p class="text">Lịch mới trùng với lịch hiện tại.</p>
+            } @else if (availability === 'full') {
+              <p class="text">Khung giờ này đã kín chỗ. Vui lòng chọn khung giờ khác.</p>
+            }
+            <button type="button" class="btn btn--gold" [disabled]="!order || !canSubmit" (click)="confirm()">Xác nhận đổi →</button>
+            @if (rescheduleError) {
+              <p class="text" style="color:#b42318;" role="alert">{{ rescheduleError }}</p>
+            }
+            @if (submitted) {
+              <p class="text text--ok" role="status">Đã gửi yêu cầu đổi lịch thành công.</p>
+            }
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

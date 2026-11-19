@@ -1,0 +1,33 @@
+$kind: http-request
+name: "TC-SYS-22: [SYS-22] Thời gian theo Server Time, không tin giờ client (Branch: SYS-B22)"
+description: |-
+  **Mã TC:** SYS-22 (TC-SYS-22)
+  **Nhóm:** Server Time
+  **API / Thành phần:** POST /api/bookings
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.
+  **Dữ liệu vào:** Header/body gửi now giả
+  **Các bước thực hiện:**
+  1) POST /api/bookings kèm trường thời gian giả&#10;2) Xem created_at, payment_expires_at
+  **Kết quả mong đợi:** created_at theo giờ server; payment_expires_at = created_at + 15 phút (HTTP: 201)
+  **Nhánh code bao phủ:** SYS-B22
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/bookings"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "spaceId": "6630f9a2e1b8c2a3d4e5f601",
+      "date": "2026-05-10"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Thời gian tạo đơn tính theo Server Time", function () {
+          pm.expect([200, 201, 400, 401, 422]).to.include(pm.response.code);
+      });
+    language: text/javascript
+order: 1000

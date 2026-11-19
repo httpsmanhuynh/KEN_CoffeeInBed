@@ -1,0 +1,120 @@
+<header class="trending-hero-band">
+  <div class="crumbrow wrap">
+    <nav class="crumb" aria-label="breadcrumb">
+      <a routerLink="/menu">Menu</a><span aria-hidden="true">/</span
+      ><b aria-current="page">Top Trending</b>
+    </nav>
+  </div>
+
+  <!-- Lời mời buổi chiều -->
+  <section class="hero wrap" aria-labelledby="tt-title">
+    <div class="hero__text">
+      <span class="hero__eyebrow">BẢNG XẾP HẠNG THỊNH HÀNH</span>
+      <h1 class="hero__title" id="tt-title">Top Trending</h1>
+      <p class="hero__desc">
+        Những hương vị được yêu thích nhất tại KÉN, xếp hạng theo điểm thịnh hành thực tế.
+      </p>
+    </div>
+    <figure class="hero__photo">
+      <img
+        src="/images/addons/matcha-latte.png"
+        alt="Matcha latte và hojicha latte trên bàn gỗ"
+      />
+    </figure>
+  </section>
+</header>
+
+<!-- Top 1 - 2 - 3 Nổi bật -->
+@if (topThree.length) {
+  <section class="podium-section wrap" aria-label="Top 3 nổi bật">
+    <div class="head">
+      <div class="head__title">
+        <h2>Top 3 được yêu thích nhất</h2>
+      </div>
+    </div>
+
+    <div class="podium">
+      @for (d of topThree; track d.id) {
+        <article
+          class="podium-card"
+          [class.podium-card--first]="d.rank === 1"
+          [class.podium-card--second]="d.rank === 2"
+          [class.podium-card--third]="d.rank === 3"
+        >
+          <div class="podium-card__media">
+            <img class="podium-card__img" [src]="d.image" [alt]="d.name" loading="lazy" />
+            <span
+              class="rank-medal"
+              [class.rank-medal--1]="d.rank === 1"
+              [class.rank-medal--2]="d.rank === 2"
+              [class.rank-medal--3]="d.rank === 3"
+            >
+              #{{ d.rank }} ·
+              {{ d.rank === 1 ? 'Hạng Nhất' : d.rank === 2 ? 'Hạng Nhì' : 'Hạng Ba' }}
+            </span>
+          </div>
+          <div class="podium-card__body">
+            <div class="podium-card__meta">
+              <p class="card__tag card__tag--green">{{ d.category }}</p>
+              @if (d.score !== undefined) {
+                <span class="score-pill">Điểm: {{ formatScore(d.score) }}</span>
+              }
+            </div>
+            <h3 class="card__name">{{ d.name }}</h3>
+            <p class="card__desc">{{ d.desc }}</p>
+            <div class="card__price">
+              <b>{{ fmt(d.price) }}</b
+              ><span>/ phần</span>
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+  </section>
+}
+
+<!-- Bảng xếp hạng 4 - 11 (2 hàng x 4 cột) -->
+@if (gridEight.length) {
+  <section class="band">
+    <div class="band__inner wrap">
+      <div class="head">
+        <div class="head__title">
+          <!-- <span class="eyebrow">BẢNG XẾP HẠNG TIẾP THEO</span> -->
+          <h2>BẢNG XẾP HẠNG TIẾP THEO</h2>
+        </div>
+      </div>
+      <div class="grid grid--four">
+        @for (d of gridEight; track d.id) {
+          <article class="card card--ranked">
+            <div class="card__thumb">
+              <img class="card__img" [src]="d.image" [alt]="d.name" loading="lazy" />
+              <span class="rank-badge">#{{ d.rank }}</span>
+            </div>
+            <div class="card__body">
+              <div class="podium-card__meta">
+                <p class="card__tag">{{ d.category }}</p>
+                @if (d.score !== undefined) {
+                  <span class="score-pill score-pill--soft">{{ formatScore(d.score) }}</span>
+                }
+              </div>
+              <h3 class="card__name">{{ d.name }}</h3>
+              <p class="card__desc">{{ d.desc }}</p>
+              <div class="card__price">
+                <b>{{ fmt(d.price) }}</b
+                ><span>/ phần</span>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+
+      <!-- Nút Xem Menu đầy đủ ngay dưới sản phẩm thứ 11 -->
+      <div class="trending-action">
+        <a class="btn-outline" routerLink="/menu">
+          <span>Xem Menu đầy đủ</span>
+          <lucide-icon name="arrow-right" [size]="18" [strokeWidth]="1.8" aria-hidden="true"></lucide-icon>
+        </a>
+      </div>
+    </div>
+  </section>
+}

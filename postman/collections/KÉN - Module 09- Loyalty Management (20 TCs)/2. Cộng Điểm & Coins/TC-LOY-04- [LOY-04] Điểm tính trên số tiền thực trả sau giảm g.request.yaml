@@ -1,0 +1,31 @@
+$kind: http-request
+name: "TC-LOY-04: [LOY-04] Điểm tính trên số tiền thực trả sau giảm giá (không tính phần Voucher/Hạng) (Branch: LOY-B04)"
+description: |-
+  **Mã TC:** LOY-04 (TC-LOY-04)
+  **Nhóm:** Cộng Điểm & Coins
+  **API / Thành phần:** POST /api/bookings/:id/check-out
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed membership_tiers.
+  **Dữ liệu vào:** Đơn subtotal 300.000đ, final 250.000đ
+  **Các bước thực hiện:**
+  1) Check-out
+  **Kết quả mong đợi:** +25 Điểm (theo final_amount) (HTTP: 200)
+  **Nhánh code bao phủ:** LOY-B04
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/bookings/{{bookingId}}/check-out"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {}
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-LOY-04] Điểm tính trên số tiền thực trả sau giảm giá (không tính phần Voucher/Hạng)
+      pm.test("[TC-LOY-04] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 3000

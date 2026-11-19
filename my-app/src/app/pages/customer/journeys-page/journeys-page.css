@@ -1,0 +1,389 @@
+﻿:host { display: block; }
+
+.journeys-page {
+  color: #4a3123;
+  background: #f7efe2;
+  font-family: Inter, Arial, sans-serif;
+}
+
+.journeys-page * { box-sizing: border-box; }
+
+.journeys-container {
+  width: min(1280px, calc(100% - 40px));
+  margin: 0 auto;
+}
+
+.journeys-hero {
+  background: #e6d3b5;
+}
+
+.journeys-hero-inner {
+  min-height: 420px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 470px;
+  align-items: center;
+  gap: 36px;
+  padding: 40px 0;
+}
+
+.journeys-eyebrow {
+  color: #a9763f;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+}
+
+.journeys-hero h1 {
+  font: 600 clamp(35px, 3.5vw, 48px)/1.25 Lora, Georgia, serif;
+  margin: 20px 0 18px;
+}
+
+.journeys-hero-copy > p {
+  font-size: 16px;
+  line-height: 1.7;
+  margin: 0 0 20px;
+}
+
+.journeys-script {
+  display: block;
+  font: 28px/1.5 'Lavishly Yours', cursive;
+  color: #a9763f;
+}
+
+.journeys-hero-image {
+  display: block;
+  width: 470px;
+  height: 340px;
+  object-fit: cover;
+  border-radius: 20px;
+}
+
+.journeys-introduction {
+  margin: 52px 0 32px;
+}
+
+.journeys-introduction p {
+  margin: 0 0 18px;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.journeys-heading {
+  text-align: center;
+  margin: 28px 0 32px;
+}
+
+.journeys-heading h2 {
+  font: 600 32px/1.4 Lora, Georgia, serif;
+  margin: 0 0 10px;
+}
+
+.journeys-heading p {
+  font-size: 15px;
+  color: #7a6553;
+  margin: 0;
+}
+
+.journeys-list {
+  display: grid;
+  gap: 32px;
+}
+
+.journeys-card {
+  background: #fffcf7;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid #e6d3b5;
+  box-shadow: 0 4px 12px #4a31231a;
+}
+
+.journeys-card-header {
+  height: 68px;
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  background: #a9763f;
+  color: #fffcf7;
+}
+
+.journeys-card.focus .journeys-card-header {
+  background: #4a3123;
+}
+
+.journeys-card.rest .journeys-card-header {
+  background: #3a2a1e;
+}
+
+.journeys-card-identity {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.journeys-header-icon {
+  display: grid;
+  place-items: center;
+  background: #fffcf726;
+  border-radius: 10px;
+  width: 36px;
+  height: 36px;
+}
+
+.journeys-header-icon img {
+  width: 20px;
+  height: 20px;
+}
+
+.journeys-card-identity span {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+}
+
+.journeys-card-identity h3 {
+  margin: 1px 0 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.journeys-header-badge {
+  font-size: 12px;
+  color: #f7efe2;
+  text-align: right;
+}
+
+.journeys-card-body {
+  display: grid;
+  grid-template-columns: 520px minmax(0, 1fr);
+  align-items: start;
+  gap: 28px;
+  padding: 28px;
+}
+
+.journeys-card.focus .journeys-card-body {
+  grid-template-columns: minmax(0, 1fr) 520px;
+}
+
+.journeys-card.focus .journeys-card-image {
+  order: 2;
+}
+
+.journeys-card-image {
+  width: 100%;
+  height: 380px;
+  overflow: hidden;
+  border-radius: 16px;
+}
+
+.journeys-card-image img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.journeys-card.rest .journeys-card-image img {
+  object-position: center;
+}
+
+.journeys-card-content {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.journeys-card-content h4 {
+  font: 600 23px/1.4 Lora, Georgia, serif;
+  margin: 0;
+}
+
+.journeys-lead {
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.journeys-story {
+  font-size: 13px;
+  line-height: 1.65;
+  margin: 0;
+}
+
+.journeys-details {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: 100%;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.journeys-details > div {
+  background: #e6d3b5;
+  border-radius: 9px;
+  padding: 10px 12px;
+  min-width: 0;
+}
+
+.journeys-details strong {
+  display: block;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.journeys-details span {
+  display: block;
+  margin-top: 5px;
+  color: #7a6553;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.journeys-primary-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 18px;
+  border-radius: 999px;
+  background: #e3a52f;
+  color: #4a3123;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.journeys-primary-button img {
+  width: 18px;
+  height: 18px;
+}
+
+.journeys-outro {
+  background: #e6d3b5;
+  padding: 48px;
+  margin: 32px 0 64px;
+  border-radius: 20px;
+}
+
+.journeys-outro-label {
+  display: inline-block;
+  background: #e3a52f;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.journeys-outro h2 {
+  font: 600 30px/1.4 Lora, Georgia, serif;
+  margin: 20px 0 18px;
+}
+
+.journeys-outro p {
+  font-size: 14px;
+  line-height: 1.7;
+  margin: 0 0 20px;
+}
+
+.journeys-outro-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.journeys-secondary-button {
+  display: inline-block;
+  padding: 11px 18px;
+  background: #fffcf7;
+  color: #4a3123;
+  border: 1px solid #d7bea1;
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.journeys-page a:focus-visible {
+  outline: 2px solid #a9763f;
+  outline-offset: 4px;
+}
+
+@media (max-width: 1100px) {
+  .journeys-hero-inner {
+    grid-template-columns: minmax(0, 1fr) 40%;
+  }
+
+  .journeys-hero-image {
+    width: 100%;
+  }
+
+  .journeys-card-body,
+  .journeys-card.focus .journeys-card-body {
+    grid-template-columns: 1fr;
+  }
+
+  .journeys-card.focus .journeys-card-image {
+    order: 0;
+  }
+
+  .journeys-card-image {
+    height: 340px;
+  }
+}
+
+@media (max-width: 700px) {
+  .journeys-hero-inner {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 36px 0;
+  }
+
+  .journeys-hero-image {
+    height: auto;
+    aspect-ratio: 4 / 3;
+  }
+
+  .journeys-card-header {
+    height: auto;
+    min-height: 68px;
+    align-items: flex-start;
+  }
+
+  .journeys-header-badge {
+    max-width: 45%;
+  }
+
+  .journeys-card-body {
+    padding: 16px;
+    gap: 20px;
+  }
+
+  .journeys-card-image {
+    height: 260px;
+  }
+
+  .journeys-card-content h4 {
+    font-size: 21px;
+  }
+
+  .journeys-details {
+    gap: 6px;
+  }
+
+  .journeys-details > div {
+    padding: 8px;
+  }
+
+  .journeys-outro {
+    padding: 24px;
+  }
+
+  .journeys-outro h2 {
+    font-size: 24px;
+  }
+}

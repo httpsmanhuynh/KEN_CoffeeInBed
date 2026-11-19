@@ -1,0 +1,25 @@
+$kind: http-request
+name: "[TC-SS-06] User mới tạo chưa từng đổi mật khẩu (không có field password_changed_at)"
+description: |-
+  **Mã TC:** TC-SS-06
+  **Loại:** Positive
+  **Nhóm:** Thu hồi session
+  **Tiền điều kiện:** Tài khoản vừa đăng ký mới (trong DB chưa có trường password_changed_at).
+  **Các bước:** 1) Đăng nhập tài khoản mới
+  2) Gọi GET /api/me và PATCH /api/profile/me
+  **Kết quả mong đợi:** Trả 200 OK bình thường, không bị thu hồi nhầm.
+  **Nhánh code:** SES-B05
+  **Ghi chú:** Tham chiếu SS-06 (BR-A05)
+url: "{{baseUrl}}/api/me"
+method: GET
+headers:
+  Content-Type: application/json
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-SS-06] User mới tạo chưa từng đổi mật khẩu (không có field password_changed_at)
+      pm.test("[TC-SS-06] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 5000

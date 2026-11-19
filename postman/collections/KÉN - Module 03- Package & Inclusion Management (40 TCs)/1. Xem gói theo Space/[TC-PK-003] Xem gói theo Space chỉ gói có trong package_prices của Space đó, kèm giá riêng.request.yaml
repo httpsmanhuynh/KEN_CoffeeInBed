@@ -1,0 +1,40 @@
+$kind: http-request
+name: '[TC-PK-003] Xem gói theo Space: chỉ gói có trong package_prices của Space đó,
+  kèm giá riêng'
+description: '**Mã TC:** TC-PK-003
+
+  **Nhóm:** Xem gói theo Space
+
+  **API / Thành phần:** GET /api/spaces/:id
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đã seed packages/package_prices/package_inclusions;
+  không cần đăng nhập.
+
+  **Dữ liệu vào:** id = _id Space
+
+  **Các bước thực hiện:**
+
+  1) GET /api/spaces/<id>
+
+  **Kết quả mong đợi:** 200 packages[] đều có giá trong package_prices của Space;
+  giá đúng từng Space (HTTP: 200)
+
+  **Nhánh code bao phủ:** PKG-B03
+
+  '
+url: '{{baseUrl}}/api/spaces/{{spaceId}}'
+method: GET
+headers:
+- key: Content-Type
+  value: application/json
+order: 3000
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PK-003] Xem gói theo Space: chỉ gói có trong package_prices của Space\
+    \ đó, kèm giá riêng\npm.test(\"[TC-PK-003] Status code is 200\", function () {\n\
+    \    pm.expect(pm.response.code).to.be.oneOf([200]);\n});\npm.test(\"[TC-PK-003]\
+    \ Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

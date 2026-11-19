@@ -1,0 +1,25 @@
+$kind: http-request
+name: "TC-ADM-25: [ADM-25] Admin bị hạ quyền (đổi role) thì mất quyền ngay (requireRole đọc lại DB) (Branch: ADM-B25)"
+description: |-
+  **Mã TC:** ADM-25 (TC-ADM-25)
+  **Nhóm:** Phân quyền Admin
+  **API / Thành phần:** GET /api/admin/dashboard/summary
+  **Loại:** Security
+  **Điều kiện tiên quyết:** Server chạy; Admin đang đăng nhập.
+  **Dữ liệu vào:** Đổi role của Admin sang CUSTOMER trong DB
+  **Các bước thực hiện:**
+  1) Đổi role trong Atlas&#10;2) Gọi lại API Admin bằng session cũ
+  **Kết quả mong đợi:** 403 ở request kế tiếp (HTTP: 403)
+  **Nhánh code bao phủ:** ADM-B25
+  **Ghi chú:** Review: Admin bị khóa tách sang ADM-56 (kết quả 401, không phải 403).
+url: "{{baseUrl}}/api/admin/dashboard"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-25] Admin bị hạ quyền (đổi role) thì mất quyền ngay (requireRole đọc lại DB)
+      pm.test("[TC-ADM-25] Status code is 403", function () {
+          pm.expect(pm.response.code).to.be.oneOf([403]);
+      });
+    language: text/javascript
+order: 2000

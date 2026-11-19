@@ -1,0 +1,37 @@
+$kind: http-request
+name: "[TC-OT-04] Yêu cầu OTP CHANGE_PHONE nhưng newPhone trùng với số điện thoại hiện tại"
+description: |-
+  **Mã TC:** TC-OT-04
+  **Loại:** Negative
+  **Nhóm:** OTP Hồ sơ
+  **Tiền điều kiện:** User đã đăng nhập (SĐT hiện tại 0909123456 hoặc {{testPhone}}).
+  **Các bước:** 1) Gửi POST /api/profile/me/otp với purpose='CHANGE_PHONE', newPhone trùng SĐT hiện tại
+  **Kết quả mong đợi:** Trả 422 {code:'PHONE_UNCHANGED', message:'Số điện thoại mới trùng số hiện tại'}; không sinh OTP.
+  **Nhánh code:** PRF-B03
+  **Ghi chú:** Tham chiếu OT-04 (BR-A06)
+url: "{{baseUrl}}/api/profile/me/otp"
+method: POST
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "purpose": "CHANGE_PHONE",
+      "newPhone": "{{testPhone}}"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-OT-04] Yêu cầu OTP CHANGE_PHONE nhưng newPhone trùng với số điện thoại hiện tại
+      pm.test("[TC-OT-04] Status code is 422 (PHONE_UNCHANGED) hoặc 409 (PHONE_EXISTS)", function () {
+          pm.expect([422, 409]).to.include(pm.response.code);
+      });
+      pm.test("[TC-OT-04] Response trả mã lỗi không tạo OTP", function () {
+          var resText = pm.response.text();
+          var ok = resText.includes("PHONE_UNCHANGED") || resText.includes("PHONE_EXISTS");
+          pm.expect(ok).to.be.true;
+      });
+    language: text/javascript
+order: 4000

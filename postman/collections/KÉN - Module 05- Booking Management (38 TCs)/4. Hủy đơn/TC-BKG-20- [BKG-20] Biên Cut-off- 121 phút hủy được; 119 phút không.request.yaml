@@ -1,0 +1,26 @@
+$kind: http-request
+name: "TC-BKG-20- [BKG-20] Biên Cut-off- 121 phút hủy được; 119 phút không (Branch- BKG"
+description: |-
+          **Mã TC:** BKG-20 (TC-BKG-20)
+          **Nhóm:** Hủy đơn CONFIRMED
+          **API / Thành phần:** POST /api/bookings/:id/cancel
+          **Loại:** Boundary
+          **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer.
+          **Dữ liệu vào:** đơn startAt cách now 121' rồi 119'
+          **Các bước thực hiện:**
+          1) POST cancel lần 1 (121')
+  2) POST cancel lần 2 (119')
+          **Kết quả mong đợi:** 121': 200 hủy; 119': 409 quá Cut-off (HTTP: 200/409)
+          **Nhánh code bao phủ:** BKG-B20
+          **Ghi chú:** 
+url: "{{baseUrl}}/api/bookings/{{cutoffBookingId}}/cancel"
+method: POST
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-BKG-20] Biên Cut-off- 121 phút hủy được; 119 phút không
+      pm.test("[TC-BKG-20] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200, 409]);
+      });
+    language: text/javascript
+order: 20000

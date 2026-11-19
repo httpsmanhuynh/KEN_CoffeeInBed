@@ -1,0 +1,25 @@
+$kind: http-request
+name: "TC-BKG-18- [BKG-18] Hủy đơn của người khác (Branch- BKG-B18)"
+description: |-
+  **Mã TC:** BKG-18 (TC-BKG-18)
+  **Nhóm:** Hủy đơn chờ
+  **API / Thành phần:** POST /api/bookings/:id/cancel
+  **Loại:** Negative
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; bookingId thuộc user khác.
+  **Dữ liệu vào:** bookingId người khác
+  **Các bước thực hiện:**
+  1) POST cancel
+  **Kết quả mong đợi:** 403 Forbidden (HTTP: 403)
+  **Nhánh code bao phủ:** BKG-B18
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/bookings/{{otherBookingId}}/cancel"
+method: POST
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-BKG-18] Hủy đơn của người khác
+      pm.test("[TC-BKG-18] Status code is 403", function () {
+          pm.expect(pm.response.code).to.be.oneOf([403]);
+      });
+    language: text/javascript
+order: 18000

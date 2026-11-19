@@ -1,0 +1,27 @@
+$kind: http-request
+name: "[TC-MW-05] requireRole: đúng vai trò → next()"
+description: |-
+  **Mã TC:** TC-MW-05
+  **Loại:** Positive
+  **Nhóm:** Middleware
+  **Tiền điều kiện:** Unit test
+  **Các bước:** npm test (node --test test/*.test.js)
+  **Kết quả mong đợi:** next() được gọi
+  **Nhánh code:** MW-B04
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/test"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: session.user.role='ADMIN', yêu cầu 'ADMIN'
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-MW-05] requireRole: đúng vai trò → next()
+      pm.test("[TC-MW-05] Status code is —", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 5000

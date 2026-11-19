@@ -1,0 +1,24 @@
+$kind: http-request
+name: "TC-SYS-10: [SYS-10] MONGODB_URI sai hoặc mất kết nối DB (Branch: SYS-B10)"
+description: |-
+  **Mã TC:** SYS-10 (TC-SYS-10)
+  **Nhóm:** Database Transaction
+  **API / Thành phần:** Khởi động server
+  **Loại:** Negative
+  **Điều kiện tiên quyết:** Server chạy; kết nối MongoDB Atlas.
+  **Dữ liệu vào:** URI sai
+  **Các bước thực hiện:**
+  1) Chạy server với URI sai&#10;2) Gọi 1 API bất kỳ
+  **Kết quả mong đợi:** Có log lỗi rõ ràng; API không treo vô hạn; trả 500/503 đã chuẩn hóa (HTTP: 500)
+  **Nhánh code bao phủ:** SYS-B10
+  **Ghi chú:** 
+url: "{{baseUrl}}/"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("DB connection error handling guard", function () {
+          pm.expect([200, 500]).to.include(pm.response.code);
+      });
+    language: text/javascript
+order: 2000

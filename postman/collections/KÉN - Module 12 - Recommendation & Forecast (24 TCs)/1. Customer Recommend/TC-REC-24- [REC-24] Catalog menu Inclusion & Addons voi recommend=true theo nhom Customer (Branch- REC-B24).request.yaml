@@ -1,0 +1,30 @@
+$kind: http-request
+name: "TC-REC-24: [REC-24] Catalog menu Booking (?recommend=true) trên GET /api/products & /api/addons (Branch: REC-B24)"
+description: |-
+  **Mã TC:** REC-24 (TC-REC-24)
+  **Nhóm:** Customer Recommend
+  **API / Thành phần:** GET /api/products?recommend=true (và GET /api/addons?recommend=true)
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; Customer đăng nhập (hoặc Guest fallback).
+  **Dữ liệu vào:** ?recommend=true&packageId={{packageId}}
+  **Các bước thực hiện:**
+  1) GET /api/products?recommend=true&packageId={{packageId}}&#10;2) Kiểm tra danh sách mảng sản phẩm Inclusion đã sắp xếp theo cụm khách hàng và gắn cờ recommend
+  **Kết quả mong đợi:** 200 trả mảng sản phẩm giữ tương thích Catalog cũ, bổ sung isRecommended, recommendRank, recommendReason, subsidyLimit, surchargeAmount (HTTP: 200)
+  **Nhánh code bao phủ:** REC-B24
+url: "{{baseUrl}}/api/products?recommend=true&packageId={{packageId}}"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("[TC-REC-24] Status code is 200", function () {
+          pm.expect(pm.response.code).to.eql(200);
+      });
+      pm.test("[TC-REC-24] Trả về mảng menu sản phẩm gắn metadata recommend", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.be.an("array");
+          if (json.length > 0) {
+              pm.expect(json[0]).to.include.all.keys("_id", "name", "price", "isRecommended", "recommendRank", "recommendReason");
+          }
+      });
+    language: text/javascript
+order: 7000

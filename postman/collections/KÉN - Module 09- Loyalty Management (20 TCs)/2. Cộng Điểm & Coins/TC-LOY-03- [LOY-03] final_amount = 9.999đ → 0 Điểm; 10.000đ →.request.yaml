@@ -1,0 +1,31 @@
+$kind: http-request
+name: "TC-LOY-03: [LOY-03] final_amount = 9.999đ → 0 Điểm; 10.000đ → 1 Điểm (Branch: LOY-B03)"
+description: |-
+  **Mã TC:** LOY-03 (TC-LOY-03)
+  **Nhóm:** Cộng Điểm & Coins
+  **API / Thành phần:** POST /api/bookings/:id/check-out
+  **Loại:** Boundary
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed membership_tiers.
+  **Dữ liệu vào:** 2 đơn 9.999đ và 10.000đ
+  **Các bước thực hiện:**
+  1) Check-out đơn 9.999đ&#10;2) Check-out đơn 10.000đ
+  **Kết quả mong đợi:** Lần 1 +0; lần 2 +1 Điểm +1 Coin (HTTP: 200)
+  **Nhánh code bao phủ:** LOY-B03
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/bookings/{{bookingId}}/check-out"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {}
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-LOY-03] final_amount = 9.999đ → 0 Điểm; 10.000đ → 1 Điểm
+      pm.test("[TC-LOY-03] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 2000

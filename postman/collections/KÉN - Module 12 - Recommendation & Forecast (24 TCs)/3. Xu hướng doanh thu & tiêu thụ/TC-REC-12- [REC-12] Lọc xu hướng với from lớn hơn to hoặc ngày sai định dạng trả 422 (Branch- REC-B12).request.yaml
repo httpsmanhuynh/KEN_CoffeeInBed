@@ -1,0 +1,28 @@
+$kind: http-request
+name: "TC-REC-12: [REC-12] from > to hoặc ngày sai định dạng → 422 VALIDATION_ERROR (Branch: REC-B12)"
+description: |-
+  **Mã TC:** REC-12 (TC-REC-12)
+  **Nhóm:** Xu hướng doanh thu/tiêu thụ
+  **API / Thành phần:** GET /api/admin/forecast/trends
+  **Loại:** Negative
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin.
+  **Dữ liệu vào:** ?from=2026-12-31&to=2026-01-01
+  **Các bước thực hiện:**
+  1) GET /api/admin/forecast/trends?from=2026-12-31&to=2026-01-01
+  **Kết quả mong đợi:** 422 VALIDATION_ERROR (HTTP: 422)
+  **Nhánh code bao phủ:** REC-B12
+url: "{{baseUrl}}/api/admin/forecast/trends?from=2026-12-31&to=2026-01-01"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-REC-12] from > to hoặc ngày sai định dạng -> 422 VALIDATION_ERROR
+      pm.test("[TC-REC-12] Status code is 422", function () {
+          pm.expect(pm.response.code).to.eql(422);
+      });
+      pm.test("[TC-REC-12] Mã lỗi VALIDATION_ERROR", function () {
+          const json = pm.response.json();
+          pm.expect(json.code || json.error).to.eql("VALIDATION_ERROR");
+      });
+    language: text/javascript
+order: 3000

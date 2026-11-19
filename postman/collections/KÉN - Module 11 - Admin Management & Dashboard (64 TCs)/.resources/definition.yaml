@@ -1,0 +1,3 @@
+$kind: collection
+name: "KÉN - Module 11: Admin Management & Dashboard (64 TCs)"
+description: "Bộ kiểm thử 64 test cases của Phân hệ 11: Quản trị Khách hàng & Bảng điều khiển Thống kê (Danh sách & tìm kiếm khách hàng kèm hạng/KÉN Điểm/KÉN Coins, Hồ sơ & lịch sử Booking, Khóa/Mở khóa tài khoản ACTIVE ↔ LOCKED & thu hồi session BR-A05, Dashboard 4 nhóm chỉ số: Số đơn theo 7 trạng thái, Occupancy Rate EXCLUSIVE/SHARED, Top Add-on, Doanh thu thực thu theo thời điểm giao dịch kèm phân rã Package/Inclusion/Add-on/Giảm giá, Phân quyền Admin & Rate Limit). Đồng bộ với sheet Test_Module11_Admin_Dashboard."

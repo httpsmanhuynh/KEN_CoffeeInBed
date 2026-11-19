@@ -1,0 +1,32 @@
+$kind: http-request
+description: |-
+  **Mã TC:** TC-PF-01
+  **Loại:** Positive
+  **Nhóm:** Hồ sơ cá nhân
+  **Tiền điều kiện:** User đang tắt 2FA (two_factor_enabled=false); đã gọi /me/otp với purpose='TOGGLE_2FA'.
+  **Các bước:** 1) Gửi POST /api/profile/me/2fa với enabled=true, currentPassword đúng và OTP đúng
+  2) Đăng xuất rồi đăng nhập lại
+  **Kết quả mong đợi:** Trả 200 {twoFactorEnabled: true}; users.two_factor_enabled=true trên Atlas; lần đăng nhập tiếp theo trả {requires2FA: true}.
+  **Nhánh code:** PRF-B08; OTP-B10
+  **Ghi chú:** Tham chiếu PF-01 (BR-A06)
+url: "{{baseUrl}}/api/profile/me/2fa"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "enabled": true,
+      "currentPassword": "password123",
+      "code": "<OTP>"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-PF-01] Bật xác thực 2 bước (2FA) thành công
+      pm.test("[TC-PF-01] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+    language: text/javascript
+order: 1000

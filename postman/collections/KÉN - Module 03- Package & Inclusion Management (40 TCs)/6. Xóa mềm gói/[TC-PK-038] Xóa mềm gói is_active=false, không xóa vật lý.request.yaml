@@ -1,0 +1,43 @@
+$kind: http-request
+name: '[TC-PK-038] Xóa mềm gói: is_active=false, không xóa vật lý'
+description: '**Mã TC:** TC-PK-038
+
+  **Nhóm:** Xóa mềm gói
+
+  **API / Thành phần:** DELETE /api/packages/:id
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed spaces/packages/package_prices/package_inclusions.
+
+  **Dữ liệu vào:** id Package
+
+  **Các bước thực hiện:**
+
+  1) DELETE /api/packages/<id>
+
+  2) Kiểm tra Atlas
+
+  **Kết quả mong đợi:** 200/204; is_active=false (HTTP: 200)
+
+  **Nhánh code bao phủ:** PKG-B34
+
+  '
+url: '{{baseUrl}}/api/packages/{{packageId}}'
+method: DELETE
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: ADMIN
+order: 38000
+body:
+  type: json
+  raw: '{"data": "id Package"}'
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PK-038] Xóa mềm gói: is_active=false, không xóa vật lý\npm.test(\"\
+    [TC-PK-038] Status code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-PK-038] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

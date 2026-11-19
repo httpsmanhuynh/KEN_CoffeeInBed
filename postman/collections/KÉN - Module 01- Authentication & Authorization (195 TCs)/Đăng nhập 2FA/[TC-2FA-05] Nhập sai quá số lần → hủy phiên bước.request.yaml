@@ -1,0 +1,35 @@
+$kind: http-request
+name: "[TC-2FA-05] Nhập sai quá số lần → hủy phiên bước 1"
+description: |-
+  **Mã TC:** TC-2FA-05
+  **Loại:** Negative
+  **Nhóm:** Đăng nhập 2FA
+  **Tiền điều kiện:** Đã đăng ký + xác minh OTP thành công cho SĐT 0909123456 (mật khẩu password123). two_factor_enabled=true; đã gọi login (bước 1) và có OTP 2FA_LOGIN.
+  **Các bước:** 1) Gọi login/2fa sai 5 lần
+  2) Gọi lại login/2fa với OTP đúng
+  **Kết quả mong đợi:** Lần 5: 429 OTP_TOO_MANY_ATTEMPTS và session bị hủy; lần gọi tiếp theo: 401 'Chưa đăng nhập bước 1'
+  **Nhánh code:** TFA-B03; OTP-B12; OUT-B01
+  **Ghi chú:** 
+url: "{{baseUrl}}/api/auth/login/2fa"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "code": "000000"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-2FA-05] Nhập sai quá số lần → hủy phiên bước 1
+      pm.test("[TC-2FA-05] Status code is 429", function () {
+          pm.expect(pm.response.code).to.be.oneOf([429]);
+      });
+      pm.test("[TC-2FA-05] Response contains expected code or keyword: OTP_TOO_MANY_ATTEMPTS", function () {
+          var resText = pm.response.text();
+          pm.expect(resText).to.include("OTP_TOO_MANY_ATTEMPTS");
+      });
+    language: text/javascript
+order: 5000

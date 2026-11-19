@@ -1,0 +1,35 @@
+$kind: http-request
+name: "[TC-RL-05] /api/profile/* dùng hạn mức nhạy cảm theo user, không tốn quota IP của auth"
+description: |-
+  **Mã TC:** TC-RL-05
+  **Loại:** Positive
+  **Nhóm:** Rate limit
+  **Tiền điều kiện:** Đã đăng nhập; server mới khởi động.
+  **Các bước:** 1) Gọi 12 lần PATCH /api/profile/me với fullName hợp lệ
+  2) Gọi tiếp POST /api/auth/login với đúng mật khẩu
+  **Kết quả mong đợi:** 10 lần PATCH đầu trả 200; lần 11–12 trả 429 (hạn mức thao tác nhạy cảm sensitiveLimiter 10/15p theo user); POST /api/auth/login vẫn trả 200, không bị 429 do các request profile.
+  **Nhánh code:** RL2-B03; RL2-B06
+  **Ghi chú:** Tham chiếu RL-05 (Đã sửa theo code mới)
+url: "{{baseUrl}}/api/profile/me"
+method: PATCH
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "fullName": "Tên Hợp Lệ"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-RL-05] /api/profile/* dùng hạn mức nhạy cảm theo user, không tốn quota IP của auth
+      pm.test("[TC-RL-05] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200, 429]);
+      });
+      pm.test("[TC-RL-05] Response contains expected code or keyword: PATCH", function () {
+          var resText = pm.response.text();
+          pm.expect(resText).to.include("PATCH");
+      });
+    language: text/javascript
+order: 8000

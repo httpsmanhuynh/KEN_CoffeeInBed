@@ -1,0 +1,41 @@
+$kind: http-request
+name: '[TC-PM-003] Thanh toán đơn đã CONFIRMED / CANCELLED / EXPIRED'
+description: '**Mã TC:** TC-PM-003
+
+  **Nhóm:** Thanh toán thành công
+
+  **API / Thành phần:** POST /api/bookings/:id/pay
+
+  **Loại:** Negative
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; đơn ở trạng thái đã đóng.
+
+  **Dữ liệu vào:** {"result": "SUCCESS"}
+
+  **Các bước thực hiện:**
+
+  1) POST pay từng đơn
+
+  **Kết quả mong đợi:** 409 từ chối; không ghi thêm giao dịch (HTTP: 409)
+
+  **Nhánh code bao phủ:** PAY-B03
+
+  '
+url: '{{baseUrl}}/api/bookings/{{bookingId}}/pay'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: CUSTOMER
+order: 3000
+body:
+  type: json
+  raw: "{\n  \"result\": \"SUCCESS\"\n}"
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PM-003] Thanh toán đơn đã CONFIRMED / CANCELLED / EXPIRED\npm.test(\"\
+    [TC-PM-003] Status code is 409\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([409]);\n\
+    });\npm.test(\"[TC-PM-003] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

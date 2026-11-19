@@ -1,0 +1,45 @@
+$kind: http-request
+name: '[TC-PM-010] Gửi lại cùng idempotencyKey + cùng bookingId'
+description: '**Mã TC:** TC-PM-010
+
+  **Nhóm:** Idempotency
+
+  **API / Thành phần:** POST /api/payments
+
+  **Loại:** Positive
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; có đơn PENDING_PAYMENT
+  còn hạn.
+
+  **Dữ liệu vào:** KEY-001 lần 2
+
+  **Các bước thực hiện:**
+
+  1) POST /api/payments lần 2 cùng key
+
+  2) Đếm payment_transactions
+
+  **Kết quả mong đợi:** 200 {idempotent:true, transaction}; không ghi bản ghi mới
+  (HTTP: 200)
+
+  **Nhánh code bao phủ:** PAY-B10
+
+  '
+url: '{{baseUrl}}/api/payments'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: CUSTOMER
+order: 10000
+body:
+  type: json
+  raw: '{"data": "KEY-001 lần 2"}'
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-PM-010] Gửi lại cùng idempotencyKey + cùng bookingId\npm.test(\"[TC-PM-010]\
+    \ Status code is 200\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200]);\n\
+    });\npm.test(\"[TC-PM-010] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

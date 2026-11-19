@@ -1,0 +1,43 @@
+$kind: http-request
+name: '[TC-SZ-037] Đặt chỗ vào Space MAINTENANCE/INACTIVE bị chặn'
+description: '**Mã TC:** TC-SZ-037
+
+  **Nhóm:** Đổi trạng thái Space
+
+  **API / Thành phần:** POST /api/bookings
+
+  **Loại:** Negative
+
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Customer; đã seed zones/spaces/packages.
+  Space đang MAINTENANCE.
+
+  **Dữ liệu vào:** payload checkout hợp lệ cho Space đó
+
+  **Các bước thực hiện:**
+
+  1) POST /api/bookings
+
+  **Kết quả mong đợi:** Bị từ chối (không khóa được lock_version vì status≠ACTIVE);
+  không tạo đơn (HTTP: 409)
+
+  **Nhánh code bao phủ:** SPC-B26
+
+  '
+url: '{{baseUrl}}/api/bookings'
+method: POST
+headers:
+- key: Content-Type
+  value: application/json
+- key: x-test-role
+  value: CUSTOMER
+order: 37000
+body:
+  type: json
+  raw: '{"data": "payload checkout hợp lệ cho Space đó"}'
+scripts:
+- type: afterResponse
+  language: text/javascript
+  code: "// [TC-SZ-037] Đặt chỗ vào Space MAINTENANCE/INACTIVE bị chặn\npm.test(\"\
+    [TC-SZ-037] Status code is 409\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([409]);\n\
+    });\npm.test(\"[TC-SZ-037] Response valid format\", function () {\n    pm.expect(pm.response.text()).to.be.a('string');\n\
+    });"

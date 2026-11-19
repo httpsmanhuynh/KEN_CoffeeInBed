@@ -1,0 +1,31 @@
+$kind: http-request
+name: "TC-ADM-53: [ADM-53] Dashboard chỉ có 4 nhóm chỉ số, không có F&B trực tiếp (bán tại quầy bằng POS nằm ngoài phạm vi hệ thống) (Branch: ADM-B53)"
+description: |-
+  **Mã TC:** ADM-53 (TC-ADM-53)
+  **Nhóm:** Doanh thu
+  **API / Thành phần:** GET /api/admin/dashboard
+  **Loại:** Positive
+  **Điều kiện tiên quyết:** Server chạy; đăng nhập Admin; đã seed zones/spaces/bookings/booking_addons/payment_transactions.
+  **Dữ liệu vào:** Không lọc ; ?zoneId=<Zone>
+  **Các bước thực hiện:**
+  1) GET dashboard&#10;2) GET dashboard?zoneId=<Zone>&#10;3) Kiểm tra các khóa của response
+  **Kết quả mong đợi:** 200 mỗi response gồm đúng 4 nhóm chỉ số: bookings (7 trạng thái), occupancy, revenue { basis, total, breakdown, collected, refunded }, topAddons (kèm range, filters, zones[]); không có revenue.fnbDirect, revenue.grandTotal (HTTP: 200)
+  **Nhánh code bao phủ:** ADM-B53
+  **Ghi chú:** Thay case F&B trực tiếp: Report nêu F&B nằm ngoài phạm vi hệ thống, Dashboard chỉ có 4 nhóm chỉ số. Code đã bỏ fnbDirect, grandTotal và không còn đọc sales_transactions.
+url: "{{baseUrl}}/api/admin/dashboard"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-ADM-53] Dashboard chỉ có 4 nhóm chỉ số, không có F&B trực tiếp (bán tại quầy bằng POS nằm ngoài phạm vi hệ thống)
+      pm.test("[TC-ADM-53] Status code is 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200]);
+      });
+      pm.test("[TC-ADM-53] Dashboard có đúng 4 nhóm chỉ số và không có fnbDirect / grandTotal", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.include.all.keys("bookings", "occupancy", "revenue", "topAddons");
+          pm.expect(json.revenue).to.not.have.property("fnbDirect");
+          pm.expect(json.revenue).to.not.have.property("grandTotal");
+      });
+    language: text/javascript
+order: 6000

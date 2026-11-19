@@ -1,0 +1,42 @@
+$kind: http-request
+name: "TC-PRICING-011: [PRICING-011] Dữ liệu gói có pricingUnit ngoài PER_SPACE/PER_PERSON bị từ chối (Branch: PKG-B02)"
+description: |-
+  **Mã TC:** PRICING-011 (TC-PRICING-011)
+  **Nhóm:** Giá Package
+  **API / Thành phần:** POST /api/bookings (MongoDB Compass + UI Checkout (Customer))
+  **Loại:** Exception
+  **Điều kiện tiên quyết:** Server chạy; có quyền ghi MongoDB Compass; ghi lại giá trị gốc của document sẽ sửa để khôi phục sau test; ứng dụng giao diện chạy với tài khoản Customer.
+  **Dữ liệu vào:** Package trong DB: pricing_unit = "PER_DAY" (giá trị sai cố ý)&#10;Tài khoản: Customer hạng BASIC
+  **Các bước thực hiện:**
+  1) Compass: sửa pricing_unit của 1 gói thử thành "PER_DAY".&#10;2) UI: đăng nhập Customer, chọn gói đó, tới Checkout.&#10;3) Quan sát; kiểm tra bookings.&#10;4) Khôi phục giá trị gốc.
+  **Kết quả mong đợi:** Không tính được giá, không tạo Booking, server vẫn hoạt động. Backend từ chối yêu cầu: không tạo Booking (collection bookings không có bản ghi mới), không trừ lượt Voucher; người dùng nhận thông báo lỗi (nội dung thông báo: TBD – chưa có trong tài liệu). (HTTP: 400/422/500)
+  **Nhánh code bao phủ:** PKG-B02
+  **Ghi chú:** CẦN XEM XÉT – ánh xạ không 1-1 (AUTO-PRICING-008 dùng chung cho 3 Manual TC). Automated TC ứng viên (chưa xác nhận, chỉ để truy vết, KHÔNG phải kết quả Manual): AUTO-PRICING-008: đầu vào không hợp lệ: giá âm, số thực, loại sai
+url: "{{baseUrl}}/api/bookings"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "spaceId": "{{spaceId}}",
+      "packageId": "{{pkgInvalidUnitId}}",
+      "startAt": "2026-12-20T02:00:00.000Z",
+      "guestCount": 1
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // [TC-PRICING-011] Dữ liệu gói có pricingUnit ngoài PER_SPACE/PER_PERSON bị từ chối
+      pm.test("[TC-PRICING-011] Status code is 400 or 422 or 500", function () {
+          pm.expect(pm.response.code).to.be.oneOf([400,422,500]);
+      });
+      pm.test("[TC-PRICING-011] Phản hồi từ chối hợp lệ kèm mã lỗi nghiệp vụ", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.have.property("code");
+          pm.expect(["INVALID_PRICING_UNIT","INTERNAL_ERROR"]).to.include(json.code);
+          pm.expect(json).to.have.property("message");
+      });
+    language: text/javascript
+order: 11000
