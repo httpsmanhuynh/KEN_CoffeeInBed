@@ -2,6 +2,9 @@
 
 Nền tảng đặt không gian làm việc, học tập và thưởng thức cà phê **KÉN — Coffee In Bed**, hỗ trợ quy trình đặt chỗ 5 bước theo thời gian thực, thanh toán idempotent, chương trình khách hàng thân thiết (KÉN Điểm & KÉN Coins), hệ thống quản trị vận hành và pipeline Học máy (Machine Learning) phục vụ gợi ý món và dự báo nguyên vật liệu.
 
+- **Live Demo (Vercel):** https://ken-coffee-in-bed-five.vercel.app/
+- **Backend API (Render):** https://ken-coffeeinbed.onrender.com
+
 ---
 
 ## 1. Giới thiệu dự án
