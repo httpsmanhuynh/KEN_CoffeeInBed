@@ -80,6 +80,7 @@ import { OtpInput } from './shared/components/otp-input/otp-input';
 import { ConfirmDialog } from './shared/components/confirm-dialog/confirm-dialog';
 import { AccountSidebar } from './shared/components/account-sidebar/account-sidebar';
 import { SuggestionPopup } from './shared/components/suggestion-popup/suggestion-popup';
+import { KenIntroComponent } from './shared/components/ken-intro/ken-intro';
 import { AccessDenied } from './shared/components/errors/access-denied/access-denied';
 import { NotFound } from './shared/components/errors/not-found/not-found';
 
@@ -103,9 +104,6 @@ import { TopTrending } from './pages/customer/menu/top-trending/top-trending';
 import { MenuPage } from './pages/customer/menu/menu-page/menu-page';
 
 // Home, Booking Flow, Spaces & Info Pages (ttrinh)
-import { KenHomeContent } from './pages/customer/home-page/home-content/home-content';
-import { HomeGuestPage } from './pages/customer/home-page/home-guest/home-guest';
-import { HomeMemberPage } from './pages/customer/home-page/home-member/home-member';
 import { KenBookingShell } from './pages/customer/ken-booking/booking-shell/booking-shell';
 import { KenCafeCatalogPage } from './pages/customer/ken-booking/cafe-catalog/cafe-catalog';
 import { KenOtherSpacePage } from './pages/customer/ken-booking/other-space-booking/other-space-booking';
@@ -166,9 +164,6 @@ import { Forecast } from './pages/admin/forecast/forecast';
     BookingCancel,
     TopTrending,
     MenuPage,
-    KenHomeContent,
-    HomeGuestPage,
-    HomeMemberPage,
     KenBookingShell,
     KenCafeCatalogPage,
     KenOtherSpacePage,
@@ -209,6 +204,7 @@ import { Forecast } from './pages/admin/forecast/forecast';
     ReactiveFormsModule,
     FormsModule,
     ConfirmDialog,
+    KenIntroComponent,
     LucideAngularModule.pick({
       Coffee,
       ArrowRight,

@@ -25,6 +25,7 @@ function mapPopupImage(item: any): string {
   if (code === 'BAKE_CROISSANT' || name.includes('croissant')) return '/images/addons/bake-croissant.png';
   if (code.startsWith('CAKE_') || name.includes('tiramisu') || name.includes('cheese')) return '/images/addons/cake-tiramisu.png';
   if (code.startsWith('JUICE_') || name.includes('cam') || name.includes('chanh')) return '/images/addons/juice-cam.png';
+  if (code === 'CF_SUA' || name.includes('cà phê sữa') || name.includes('cafe sữa')) return '/images/addons/cf-sua.png';
   if (code === 'CF_AMERICANO' || name.includes('americano')) return '/images/addons/cf-americano.png';
   if (code.startsWith('MOUSSE_') || name.includes('mousse')) return '/images/addons/mousse-matcha.png';
   return '/images/addons/cf-den.png';

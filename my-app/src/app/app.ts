@@ -2,6 +2,7 @@ import { Component, HostListener, OnDestroy, OnInit, inject, signal } from '@ang
 import { Router } from '@angular/router';
 import { AuthService } from './core/auth.service';
 import { SmoothScrollService } from './core/smooth-scroll.service';
+import { SuggestionPopupService } from './shared/services/suggestion-popup.service';
 
 @Component({
   selector: 'app-root',
@@ -13,8 +14,11 @@ export class App implements OnInit, OnDestroy {
   protected readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly smoothScroll = inject(SmoothScrollService);
+  private readonly suggestionPopup = inject(SuggestionPopupService);
+  private popupTimer: ReturnType<typeof setTimeout> | null = null;
 
   protected readonly title = signal('my-app');
+  protected readonly showIntro = signal(typeof window !== 'undefined' && !('vitest' in globalThis));
   protected readonly fontScaleLevel = signal<0 | 1 | 2>(0);
   private readonly fontScales = ['100%', '105%', '110%'] as const;
 
@@ -37,9 +41,26 @@ export class App implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (this.popupTimer) {
+      clearTimeout(this.popupTimer);
+      this.popupTimer = null;
+    }
     this.smoothScroll.destroy();
     if (typeof document !== 'undefined') {
       document.documentElement.style.fontSize = '';
+    }
+  }
+
+  onIntroDone(): void {
+    this.showIntro.set(false);
+    if (this.isAdminRoute) {
+      return;
+    }
+    const url = this.router.url.split('?')[0].split('#')[0];
+    if (url === '/' || url === '' || url === '/home-logged-in') {
+      this.popupTimer = setTimeout(() => {
+        this.suggestionPopup.showOncePerSession();
+      }, 450);
     }
   }
 

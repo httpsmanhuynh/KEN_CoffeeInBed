@@ -21,8 +21,7 @@ import { AccessDenied } from './shared/components/errors/access-denied/access-de
 import { NotFound } from './shared/components/errors/not-found/not-found';
 
 // Home, Booking Flow, Spaces & Info Pages (ttrinh)
-import { HomeGuestPage } from './pages/customer/home-page/home-guest/home-guest';
-import { HomeMemberPage } from './pages/customer/home-page/home-member/home-member';
+import { HomePage } from './pages/customer/home-page/home-page';
 import { KenBookingShell } from './pages/customer/ken-booking/booking-shell/booking-shell';
 import { KenCafeCatalogPage } from './pages/customer/ken-booking/cafe-catalog/cafe-catalog';
 import { KenOtherSpacePage } from './pages/customer/ken-booking/other-space-booking/other-space-booking';
@@ -56,8 +55,8 @@ const routes: Routes = [
     canActivateChild: [customerGuard],
     children: [
       // Home
-      { path: '', component: HomeGuestPage, pathMatch: 'full' },
-      { path: 'home-logged-in', component: HomeMemberPage },
+      { path: '', component: HomePage, pathMatch: 'full' },
+      { path: 'home-logged-in', component: HomePage },
 
       // Auth (pthao)
       { path: 'register', component: RegisterPage },

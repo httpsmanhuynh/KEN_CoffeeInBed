@@ -1,0 +1,363 @@
+<div class="hp-page" #homeRoot>
+  <!-- 1. CINEMATIC CURTAIN-REVEAL HERO -->
+  <section class="hp-hero">
+    <div class="hp-hero-frame">
+      <div class="hp-hero-media">
+        @for (slide of heroSlides; track slide.image; let idx = $index) {
+          <img
+            [src]="slide.image"
+            [alt]="slide.caption"
+            class="hp-hero-img"
+            [class.is-active]="activeHero() === idx"
+          />
+        }
+        <div class="hp-hero-scrim" aria-hidden="true"></div>
+        <div class="hp-hero-grain" aria-hidden="true"></div>
+      </div>
+
+      <div class="hp-hero-content">
+        <div class="hp-hero-eyebrow">
+          <span class="hp-eyebrow-line"></span>
+          <span>KÉN — COFFEE IN BED · SÀI GÒN</span>
+          <span class="hp-live-chip">07:00 – 23:00</span>
+        </div>
+
+        <h1 class="hp-hero-title">
+          <span class="hp-split-line">
+            <span class="hp-split-line-inner">Lười một chút,</span>
+          </span>
+          <span class="hp-split-line">
+            <span class="hp-split-line-inner">
+              <em class="hp-script-accent">chill</em> một góc riêng.
+            </span>
+          </span>
+        </h1>
+
+        <p class="hp-hero-sub">
+          Không gian cà phê, làm việc yên tĩnh và kén nghỉ riêng tư trong cùng một điểm đến — đặt
+          chỗ theo giờ, giữ chỗ tự động 15 phút và tận hưởng nhịp sống chậm theo cách của bạn.
+        </p>
+
+        <div class="hp-hero-actions">
+          <a routerLink="/spaces" class="hp-btn hp-btn-gold" data-magnetic>
+            <span>Đặt không gian ngay</span>
+            <span class="hp-btn-arrow" aria-hidden="true">→</span>
+          </a>
+          <button
+            type="button"
+            class="hp-btn hp-btn-glass"
+            data-magnetic
+            (click)="scrollToSection('hp-spaces-showcase')"
+          >
+            <span>Khám phá 5 không gian</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="hp-hero-bottom">
+        <div class="hp-hero-switcher" role="tablist" aria-label="Chọn khung cảnh KÉN">
+          @for (slide of heroSlides; track slide.tag; let idx = $index) {
+            <button
+              type="button"
+              class="hp-hero-tab"
+              [class.is-active]="activeHero() === idx"
+              (click)="selectHero(idx)"
+            >
+              <span class="hp-hero-tab-tag">{{ slide.tag }}</span>
+              <span class="hp-hero-tab-bar"><i [class.is-running]="activeHero() === idx"></i></span>
+            </button>
+          }
+        </div>
+
+        <div class="hp-scroll-cue" aria-hidden="true">
+          <span>Cuộn để khám phá</span>
+          <div class="hp-scroll-line"><i></i></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. KINETIC BRAND MANIFESTO (SCRUBBED WORD REVEAL + ANIMATED COUNTERS) -->
+  <section class="hp-manifesto">
+    <div class="hp-container">
+      <div class="hp-section-kicker" data-reveal>TRIẾT LÝ KHÔNG GIAN</div>
+      <p class="hp-manifesto-text">
+        @for (word of manifestoWords; track $index) {
+          <span class="hp-manifesto-word">{{ word }}</span>
+        }
+      </p>
+
+      <div class="hp-stats-grid">
+        @for (stat of stats(); track $index) {
+          <div class="hp-stat-card" data-spotlight>
+            <div
+              class="hp-stat-value"
+              [attr.data-target]="stat.value"
+              [attr.data-suffix]="stat.suffix"
+              [attr.data-decimals]="stat.decimals ?? 0"
+            >
+              {{ stat.value }}{{ stat.suffix }}
+            </div>
+            <div class="hp-stat-label">{{ stat.label }}</div>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. THREE STATES OF KEN (DIRECT TO /spaces?zone=connect|focus|rest) -->
+  <section class="hp-journeys">
+    <div class="hp-container">
+      <div class="hp-section-head hp-section-head-dark" data-reveal>
+        <div>
+          <div class="hp-section-kicker hp-kicker-gold">BA TRẠNG THÁI Ở KÉN</div>
+          <h2 class="hp-heading-lg">Một điểm đến, trọn vẹn mọi nhịp điệu trong ngày.</h2>
+        </div>
+        <p class="hp-head-desc">
+          Dù bạn cần gặp gỡ bạn bè, chạy deadline không bị làm phiền hay chợp mắt 60 phút giữa trưa,
+          KÉN luôn có một góc vừa vặn.
+        </p>
+      </div>
+
+      <div class="hp-journeys-grid">
+        @for (item of journeys; track item.index) {
+          <a
+            [routerLink]="['/spaces']"
+            [queryParams]="{ zone: item.zone }"
+            class="hp-journey-card"
+            data-spotlight
+          >
+            <div class="hp-journey-photo">
+              <img [src]="item.image" [alt]="item.label" loading="lazy" />
+              <span class="hp-journey-index">{{ item.index }}</span>
+              <img
+                [src]="item.mascot"
+                [alt]="item.title"
+                class="hp-journey-mascot"
+                loading="lazy"
+              />
+            </div>
+            <div class="hp-journey-body">
+              <span class="hp-journey-label">{{ item.label }}</span>
+              <h3>{{ item.title }}</h3>
+              <p>{{ item.description }}</p>
+              <span class="hp-journey-link">Khám phá khu vực <span>→</span></span>
+            </div>
+          </a>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. PINNED HORIZONTAL SCROLL SHOWCASE: 5 SPACES -->
+  <section class="hp-spaces-pin" id="hp-spaces-showcase">
+    <div class="hp-spaces-header">
+      <div>
+        <div class="hp-section-kicker">THANG ĐO RIÊNG TƯ · 05 KHÔNG GIAN</div>
+        <h2 class="hp-heading-lg">Từ cởi mở đến riêng tư tuyệt đối.</h2>
+      </div>
+      <div class="hp-spaces-meter">
+        <span class="hp-spaces-count">0{{ activeSpaceIndex() + 1 }} / 0{{ spaces.length }}</span>
+        <div class="hp-spaces-progress">
+          <div class="hp-spaces-progress-fill"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hp-spaces-viewport">
+      <div class="hp-spaces-track">
+        @for (space of spaces; track space.index) {
+          <article class="hp-space-card" data-spotlight>
+            <div class="hp-space-media">
+              <img [src]="space.image" [alt]="space.name" loading="lazy" />
+              <div class="hp-space-badges">
+                <span class="hp-space-num">{{ space.index }}</span>
+                <span class="hp-space-privacy">{{ space.privacy }}</span>
+              </div>
+            </div>
+
+            <div class="hp-space-info">
+              <div class="hp-space-top">
+                <h3>{{ space.name }}</h3>
+                <span class="hp-space-price">{{ space.priceTag }}</span>
+              </div>
+              <p>{{ space.description }}</p>
+
+              <ul class="hp-space-perks">
+                @for (perk of space.perks; track perk) {
+                  <li>{{ perk }}</li>
+                }
+              </ul>
+
+              <div class="hp-space-actions">
+                @if (space.bookingRoute) {
+                  <a [routerLink]="space.bookingRoute" class="hp-btn hp-btn-dark" data-magnetic>
+                    <span>Đặt chỗ ngay</span>
+                    <span>→</span>
+                  </a>
+                } @else {
+                  <a [routerLink]="space.detailRoute" class="hp-btn hp-btn-dark" data-magnetic>
+                    <span>Ghé trực tiếp</span>
+                    <span>→</span>
+                  </a>
+                }
+                <a [routerLink]="space.detailRoute" class="hp-link-subtle">Xem chi tiết</a>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. DUAL-DIRECTION MOMENTS MARQUEE -->
+  <section class="hp-moments">
+    <div class="hp-container">
+      <div class="hp-section-head" data-reveal>
+        <div>
+          <div class="hp-section-kicker">KHOẢNH KHẮC Ở KÉN</div>
+          <h2 class="hp-heading-lg">Ánh đèn vàng ấm, mùi cà phê mới & sự tĩnh lặng.</h2>
+        </div>
+        <a routerLink="/our-story" class="hp-btn hp-btn-outline hp-btn-wide" data-magnetic>
+          <span>Câu chuyện của KÉN</span>
+          <span>↗</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="hp-marquee-stack">
+      <div class="hp-marquee-row hp-marquee-left">
+        <div class="hp-marquee-group">
+          @for (img of marqueeTop; track img) {
+            <figure class="hp-moment-frame">
+              <img [src]="img" alt="Khoảnh khắc tại KÉN" loading="lazy" />
+            </figure>
+          }
+        </div>
+        <div class="hp-marquee-group" aria-hidden="true">
+          @for (img of marqueeTop; track img) {
+            <figure class="hp-moment-frame">
+              <img [src]="img" alt="" loading="lazy" />
+            </figure>
+          }
+        </div>
+      </div>
+
+      <div class="hp-marquee-row hp-marquee-right">
+        <div class="hp-marquee-group">
+          @for (img of marqueeBottom; track img) {
+            <figure class="hp-moment-frame">
+              <img [src]="img" alt="Không gian tại KÉN" loading="lazy" />
+            </figure>
+          }
+        </div>
+        <div class="hp-marquee-group" aria-hidden="true">
+          @for (img of marqueeBottom; track img) {
+            <figure class="hp-moment-frame">
+              <img [src]="img" alt="" loading="lazy" />
+            </figure>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. STICKY SPLIT BOOKING STORYTELLING -->
+  <section class="hp-steps">
+    <div class="hp-container hp-steps-layout">
+      <div class="hp-steps-sticky">
+        <div class="hp-section-kicker">QUY TRÌNH ĐẶT CHỖ 4 BƯỚC</div>
+        <h2 class="hp-heading-lg">Giữ góc riêng chỉ trong 60 giây.</h2>
+        <p class="hp-steps-lead">
+          Mọi bước đều rõ ràng: xem lịch trống thực tế, báo giá tự động, giữ chỗ 15 phút và tích KÉN
+          Điểm tự động sau mỗi lượt.
+        </p>
+
+        <div class="hp-steps-visual">
+          <img
+            src="/images/ken-home/steps-coffee.png"
+            alt="Thưởng thức cà phê tại KÉN"
+            class="hp-steps-img"
+            [class.is-visible]="activeStepIndex() < 2"
+          />
+          <img
+            src="/images/ken-home/steps-rest.png"
+            alt="Nghỉ ngơi tại KÉN"
+            class="hp-steps-img"
+            [class.is-visible]="activeStepIndex() >= 2"
+          />
+          <div class="hp-steps-badge">
+            <span>Bước 0{{ activeStepIndex() + 1 }} / 04</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hp-steps-list">
+        @for (step of bookingSteps; track step.num; let idx = $index) {
+          <div class="hp-step-card" [class.is-active]="activeStepIndex() === idx" data-spotlight>
+            <div class="hp-step-num">{{ step.num }}</div>
+            <div class="hp-step-body">
+              <h3>{{ step.title }}</h3>
+              <p>{{ step.description }}</p>
+              <span class="hp-step-highlight">{{ step.highlight }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. SIGNATURE MENU STRIP & FINAL CINEMATIC CTA -->
+  <section class="hp-finale">
+    <div class="hp-container">
+      <div class="hp-addons-wrap" data-reveal>
+        <div class="hp-addons-head">
+          <div>
+            <div class="hp-section-kicker">THỰC ĐƠN & TIỆN ÍCH MUA THÊM</div>
+            <h2 class="hp-heading-md">Đủ đầy cho cả làm việc lẫn nghỉ ngơi.</h2>
+          </div>
+          <a routerLink="/menu" class="hp-link-gold">Xem toàn bộ thực đơn →</a>
+        </div>
+
+        <div class="hp-addons-grid">
+          @for (item of signatureMenu; track item.name) {
+            <a routerLink="/menu" class="hp-addon-pill" data-spotlight>
+              <div class="hp-addon-left">
+                <img [src]="item.image" [alt]="item.name" class="hp-addon-thumb" loading="lazy" />
+                <div>
+                  <span class="hp-addon-tag">{{ item.tag }}</span>
+                  <h4>{{ item.name }}</h4>
+                </div>
+              </div>
+              <strong>{{ item.price }}</strong>
+            </a>
+          }
+        </div>
+      </div>
+
+      <div class="hp-cta-banner" data-spotlight data-reveal>
+        <div class="hp-cta-orb hp-cta-orb-1" aria-hidden="true"></div>
+        <div class="hp-cta-orb hp-cta-orb-2" aria-hidden="true"></div>
+
+        <div class="hp-cta-inner">
+          <span class="hp-cta-script">Kén — Coffee In Bed</span>
+          <h2>Sẵn sàng chọn một góc cho riêng bạn hôm nay?</h2>
+          <p>
+            Đặt chỗ trước để giữ không gian yên tĩnh, nhận ưu đãi hạng thành viên lên đến 15% và
+            tích KÉN Coins đổi quà.
+          </p>
+
+          <div class="hp-cta-actions">
+            <a routerLink="/spaces" class="hp-btn hp-btn-gold" data-magnetic>
+              <span>Chọn không gian & đặt ngay</span>
+              <span>→</span>
+            </a>
+            <a routerLink="/top-trending" class="hp-btn hp-btn-glass" data-magnetic>
+              <span>Xem món đang thịnh hành</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

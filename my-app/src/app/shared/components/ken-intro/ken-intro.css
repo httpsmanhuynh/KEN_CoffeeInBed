@@ -1,0 +1,165 @@
+.ki-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.ki-shell {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 52%;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(227, 165, 47, 0.14), transparent 62%),
+    linear-gradient(160deg, #24160e 0%, #170e09 55%, #23150d 100%);
+  will-change: transform, border-radius;
+  overflow: hidden;
+}
+
+.ki-shell-left {
+  left: 0;
+  border-right: 1px solid rgba(242, 203, 121, 0.24);
+  box-shadow: inset -28px 0 60px rgba(227, 165, 47, 0.08);
+}
+
+.ki-shell-right {
+  right: 0;
+  border-left: 1px solid rgba(242, 203, 121, 0.24);
+  box-shadow: inset 28px 0 60px rgba(227, 165, 47, 0.08);
+}
+
+.ki-silk {
+  position: absolute;
+  inset: 0;
+  opacity: 0.16;
+  background-image:
+    repeating-linear-gradient(
+      32deg,
+      rgba(242, 203, 121, 0.28) 0px,
+      rgba(242, 203, 121, 0.28) 1px,
+      transparent 1px,
+      transparent 22px
+    ),
+    repeating-linear-gradient(
+      -32deg,
+      rgba(247, 239, 226, 0.18) 0px,
+      rgba(247, 239, 226, 0.18) 1px,
+      transparent 1px,
+      transparent 26px
+    );
+}
+
+.ki-seam {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%) scaleY(0);
+  transform-origin: center;
+  opacity: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(242, 203, 121, 0.85) 35%,
+    #fff6de 50%,
+    rgba(242, 203, 121, 0.85) 65%,
+    transparent 100%
+  );
+  box-shadow: 0 0 28px rgba(227, 165, 47, 0.85);
+  z-index: 2;
+}
+
+.ki-center {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  text-align: center;
+  padding: 24px;
+}
+
+.ki-nest {
+  position: relative;
+  width: 176px;
+  height: 176px;
+  display: grid;
+  place-items: center;
+}
+
+.ki-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 14px rgba(227, 165, 47, 0.45));
+  animation: kiNestSpin 16s linear infinite;
+}
+
+.ki-wordmark {
+  position: relative;
+  z-index: 1;
+  font-family: var(--ken-heading, 'Lora', Georgia, serif);
+  font-size: clamp(2.4rem, 4.8vw, 3.35rem);
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  padding-left: 0.22em;
+  color: #fff6de;
+  text-shadow:
+    0 0 28px rgba(227, 165, 47, 0.48),
+    0 6px 24px rgba(0, 0, 0, 0.45);
+}
+
+.ki-caption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.ki-caption p {
+  margin: 0;
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(247, 239, 226, 0.72);
+}
+
+.ki-progress {
+  width: 156px;
+  height: 2px;
+  margin-top: 10px;
+  border-radius: 999px;
+  background: rgba(247, 239, 226, 0.16);
+  overflow: hidden;
+}
+
+.ki-progress-fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #a9763f, #f2cb79, #fff6de);
+  transform-origin: left center;
+  transform: scaleX(0);
+}
+
+@keyframes kiNestSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ki-svg {
+    animation: none;
+  }
+}
