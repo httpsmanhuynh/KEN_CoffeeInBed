@@ -269,7 +269,7 @@ export class TopTrending implements OnInit {
       name: 'Cà phê Đen / Sữa',
       desc: 'Hương cà phê quen thuộc cho những phút ngồi lại.',
       price: 40000,
-      image: IMG + 'cf-den.png',
+      image: IMG + 'cf-sua.png',
       category: 'Cà phê',
       tag: 'Cà phê',
     },
@@ -410,6 +410,28 @@ export class TopTrending implements OnInit {
 
   get gridEight(): Dish[] {
     return this.allRanked.slice(3, 11);
+  }
+
+  get filteredGridEight(): Dish[] {
+    if (this.category === 'all') {
+      return this.gridEight;
+    }
+    return this.gridEight.filter((d) => d.category === this.category);
+  }
+
+  scorePercent(score?: number): number {
+    if (score === undefined || score === null || Number.isNaN(score)) return 75;
+    const maxScore = Math.max(...this.allRanked.map((d) => Number(d.score ?? 0)), 1);
+    const ratio = maxScore > 0 ? Number(score) / maxScore : 0.75;
+    return Math.round(Math.min(100, Math.max(28, ratio * 100)));
+  }
+
+  onCardMove(event: MouseEvent): void {
+    const el = event.currentTarget as HTMLElement | null;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    el.style.setProperty('--spot-x', `${event.clientX - rect.left}px`);
+    el.style.setProperty('--spot-y', `${event.clientY - rect.top}px`);
   }
 
   get afternoonShown(): Dish[] {

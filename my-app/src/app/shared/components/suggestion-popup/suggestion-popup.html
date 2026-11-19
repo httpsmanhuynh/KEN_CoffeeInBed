@@ -1,32 +1,67 @@
 @if (popup.isOpen() && current.length) {
   <div class="overlay" (click)="onBackdrop($event)">
-    <div #dialog class="dialog" role="dialog" aria-modal="true" aria-labelledby="sg-title" tabindex="-1">
+    <div
+      #dialog
+      class="dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="sg-title"
+      tabindex="-1"
+    >
       @for (s of current; track s.id) {
         <div class="content">
           <div class="media">
             <img class="media__photo" [src]="s.image" [alt]="s.name" />
-            <span class="when"><lucide-icon name="sun" [size]="16" [strokeWidth]="1.8" color="#E3A52F"></lucide-icon>BUỔI CHIỀU · 14:00–17:00</span>
-            <p class="quote">Lười một chút, chill một góc</p>
+            <div class="media__scrim" aria-hidden="true"></div>
+
+            <div class="media__top">
+              <span class="when">
+                <lucide-icon name="sun" [size]="15" [strokeWidth]="1.9" color="#F2CB79"></lucide-icon>
+                <span>BUỔI CHIỀU · 14:00–17:00</span>
+              </span>
+              <span class="ai-pill">
+                <lucide-icon name="sparkles" [size]="13" [strokeWidth]="1.9" color="#F2CB79"></lucide-icon>
+                <span>KÉN gợi ý</span>
+              </span>
+            </div>
+
+            <div class="media__bottom">
+              <span class="quote">Lười một chút, chill một góc</span>
+              <span class="media__sub">Tuyển chọn theo khung giờ từ thực đơn KÉN</span>
+            </div>
           </div>
 
           <div class="copy">
             <div class="copy__top">
-              <p class="eyebrow">MỘT CHÚT GỢI Ý TỪ KÉN</p>
+              <p class="eyebrow">
+                <span class="eyebrow__line" aria-hidden="true"></span>
+                <span>MỘT CHÚT GỢI Ý TỪ KÉN</span>
+              </p>
               <button type="button" class="close" (click)="close()" aria-label="Đóng gợi ý">
-                <span>Đóng</span><lucide-icon name="x" [size]="20" [strokeWidth]="1.8" color="#4A3123"></lucide-icon>
+                <lucide-icon name="x" [size]="18" [strokeWidth]="1.9" color="#4A3123"></lucide-icon>
               </button>
             </div>
-            <h2 class="headline" id="sg-title">Chiều rồi, nghỉ một chút nhé.</h2>
-            <div class="dish">
-              <p class="dish__name">{{ s.name }}</p>
-              <p class="dish__price">{{ s.price }}</p>
-              <p class="dish__desc">{{ s.desc }}</p>
+
+            <div class="copy__main">
+              <h2 class="headline" id="sg-title">Chiều rồi, nghỉ một chút nhé.</h2>
+
+              <div class="dish">
+                <div class="dish__header">
+                  <p class="dish__name">{{ s.name }}</p>
+                  <span class="dish__price">{{ s.price }}</span>
+                </div>
+                <p class="dish__desc">{{ s.desc }}</p>
+              </div>
             </div>
+
             <div class="actions">
               <button type="button" class="cta" (click)="explore()">
-                <span>Khám phá Top Trending</span><lucide-icon name="arrow-right" [size]="20" [strokeWidth]="1.8" color="#A9763F"></lucide-icon>
+                <span>Khám phá Top Trending</span>
+                <lucide-icon name="arrow-right" [size]="18" [strokeWidth]="2" color="#21130B"></lucide-icon>
               </button>
-              <button type="button" class="later" (click)="later()">Để sau, mình xem Menu</button>
+              <button type="button" class="later" (click)="later()">
+                Để sau, mình xem toàn bộ Menu
+              </button>
             </div>
           </div>
         </div>
@@ -36,12 +71,23 @@
         <p class="counter" aria-live="off">{{ counter }}</p>
         <div class="bars" aria-hidden="true">
           @for (b of slides; track b.id; let i = $index) {
-            <span class="bar" [class.is-active]="i === index"><i [style.width.%]="fill(i)"></i></span>
+            <span class="bar" [class.is-active]="i === index">
+              <i [style.width.%]="fill(i)"></i>
+            </span>
           }
         </div>
         <div class="nav">
-          <button type="button" class="nav__btn" (click)="prev()" aria-label="Món trước"><lucide-icon name="chevron-left" [size]="16" [strokeWidth]="1.8" color="#4A3123"></lucide-icon></button>
-          <button type="button" class="nav__btn nav__btn--dark" (click)="next()" aria-label="Món tiếp theo"><lucide-icon name="chevron-right" [size]="16" [strokeWidth]="1.8" color="#FAF5EE"></lucide-icon></button>
+          <button type="button" class="nav__btn" (click)="prev()" aria-label="Món trước">
+            <lucide-icon name="chevron-left" [size]="16" [strokeWidth]="1.9" color="#4A3123"></lucide-icon>
+          </button>
+          <button
+            type="button"
+            class="nav__btn nav__btn--dark"
+            (click)="next()"
+            aria-label="Món tiếp theo"
+          >
+            <lucide-icon name="chevron-right" [size]="16" [strokeWidth]="1.9" color="#F7EFE2"></lucide-icon>
+          </button>
         </div>
       </div>
     </div>

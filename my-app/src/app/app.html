@@ -1,3 +1,4 @@
+<app-ken-intro *ngIf="!isAdminRoute && showIntro()" (done)="onIntroDone()"></app-ken-intro>
 <div class="ken-scroll-progress" aria-hidden="true"></div>
 <app-header
   *ngIf="!isAdminRoute"
