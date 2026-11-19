@@ -32,6 +32,7 @@ export interface CustomerItem {
   coins: number;
   coinsFormatted: string;
   status: 'ACTIVE' | 'LOCKED';
+  isDeleted: boolean;
   statusLabel: string;
   statusBadgeClass: string;
   joinDate: string;
@@ -181,6 +182,11 @@ export class CustomersComponent implements OnInit, OnDestroy {
     const id = String(u._id || u.id || `c-${idx + 1}`);
     const role = String(u.role || 'CUSTOMER').toUpperCase();
     const status: 'ACTIVE' | 'LOCKED' = String(u.status || 'ACTIVE').toUpperCase() === 'LOCKED' ? 'LOCKED' : 'ACTIVE';
+    const isDeleted = Boolean(
+      u.deleted_at || (typeof u.phone === 'string' && /^(X[0-9a-f]{14}|deleted_)/i.test(u.phone))
+    );
+    const displayPhone = u.original_phone || (isDeleted ? '—' : u.phone || '—');
+    const displayEmail = u.original_email || u.email || '—';
 
     const points = Math.max(0, Number(u.loyalty?.points ?? u.points ?? 0));
     const coins = Math.max(0, Number(u.loyalty?.coins ?? u.coins ?? 0));
@@ -193,8 +199,8 @@ export class CustomersComponent implements OnInit, OnDestroy {
       id,
       code: u.code || (role === 'ADMIN' ? 'ADMIN' : `KH-${id.slice(-4).toUpperCase()}`),
       name: u.full_name || u.name || 'Khách hàng',
-      phone: u.phone || '—',
-      email: u.email || '—',
+      phone: displayPhone,
+      email: displayEmail,
       role,
       tier: tierInfo.name,
       tierKey: tierInfo.key,
@@ -204,8 +210,9 @@ export class CustomersComponent implements OnInit, OnDestroy {
       coins,
       coinsFormatted: coins.toLocaleString('vi-VN'),
       status,
-      statusLabel: status === 'LOCKED' ? 'Tạm khoá' : 'Hoạt động',
-      statusBadgeClass: status === 'LOCKED' ? 'badge-status-locked' : 'badge-status-active',
+      isDeleted,
+      statusLabel: isDeleted ? 'Đã xoá' : status === 'LOCKED' ? 'Tạm khoá' : 'Hoạt động',
+      statusBadgeClass: isDeleted ? 'badge-status-deleted' : status === 'LOCKED' ? 'badge-status-locked' : 'badge-status-active',
       joinDate: u.created_at ? new Date(u.created_at).toLocaleDateString('vi-VN') : '—',
       totalOrders,
       totalSpend,
@@ -401,6 +408,10 @@ export class CustomersComponent implements OnInit, OnDestroy {
   requestToggleLock(c: CustomerItem): void {
     if (c.role === 'ADMIN') {
       this.showToast('error', 'Không thể khoá hoặc mở khoá tài khoản Quản trị viên (ADMIN).');
+      return;
+    }
+    if (c.isDeleted) {
+      this.showToast('error', 'Không thể mở khoá tài khoản khách hàng đã tự xoá.');
       return;
     }
     this.pendingLockTarget = c;

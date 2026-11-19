@@ -46,8 +46,8 @@ p, h1 { margin: 0; }
 /* Dòng tóm tắt + sắp xếp */
 .summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .summary p { color: #7A6553; font-size: 12px; line-height: 1.6; }
-.sort { display: inline-flex; align-items: center; gap: 6px; padding: 0; border: 0; background: transparent; color: #4A3123; font: inherit; font-size: 14px; line-height: 22.4px; white-space: nowrap; cursor: pointer; }
-.sort:hover { color: #A9763F; }
+.sort { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid rgba(216,199,178,.8); border-radius: 999px; background: #FFFCF7; color: #4A3123; font: inherit; font-size: 13px; font-weight: 600; line-height: 20px; white-space: nowrap; cursor: pointer; transition: all .18s ease; }
+.sort:hover { border-color: #A9763F; background: #F8EFE2; color: #4A3123; }
 .sort img { width: 16px; height: 16px; display: block; }
 
 /* Bảng: co giãn đều theo chiều rộng container, tối thiểu 962px */

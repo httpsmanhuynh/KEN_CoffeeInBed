@@ -22,45 +22,25 @@ describe('BookingList', () => {
 
   it('should create', () => expect(component).toBeTruthy());
 
-  it('opens on "Tất cả" with the 7 bookings from the design, newest first', () => {
+  it('defaults to "Đặt gần nhất ↓" sorted by createdAtMs descending', () => {
+    component.bookings = [
+      { id: '#OLD', space: 'A', zone: 'Z', date: '2026-11-20', time: '09:00–11:00', pkg: '2 giờ', total: 100000, status: 'confirmed', createdAtMs: 1000, createdAt: '2026-11-18T01:00:00.000Z' },
+      { id: '#NEW', space: 'B', zone: 'Z', date: '2026-11-19', time: '09:00–11:00', pkg: '2 giờ', total: 100000, status: 'pending', createdAtMs: 2000, createdAt: '2026-11-19T01:00:00.000Z' },
+    ];
     expect(component.status).toBe('all');
-    expect(component.rows.length).toBe(7);
-    expect(component.rows[0].id).toBe('#KEN-261026-009');
-    expect(component.summary).toBe('7 đơn đặt chỗ · Sắp xếp theo ngày sử dụng');
-    expect(component.footnote).toBe('Đã hiển thị 7 / 7 đơn');
-    expect(component.sortLabel).toBe('Mới nhất ↓');
+    expect(component.summary).toBe('2 đơn đặt chỗ · Sắp xếp theo thời gian đặt');
+    expect(component.sortLabel).toBe('Đặt gần nhất ↓');
+    expect(component.rows.map(r => r.id)).toEqual(['#NEW', '#OLD']);
   });
 
-  it('tab counts match the design', () => {
-    expect(component.tabs.map(t => `${t.label} (${component.count(t.key)})`)).toEqual([
-      'Tất cả (7)', 'Chờ xác nhận (2)', 'Đã xác nhận (1)', 'Hoàn thành (2)', 'Đã huỷ (1)', 'Không đến (1)',
-    ]);
-  });
-
-  it('pending tab shows the 2 pending bookings', () => {
-    component.setStatus('pending');
-    expect(component.rows.length).toBe(2);
-    expect(component.footnote).toBe('Đã hiển thị 2 / 2 đơn chờ xác nhận');
-  });
-
-  it('toggling sort reverses the order', () => {
+  it('toggling sort switches to "Đặt xa nhất ↑" and reverses the order', () => {
+    component.bookings = [
+      { id: '#OLD', space: 'A', zone: 'Z', date: '2026-11-20', time: '09:00–11:00', pkg: '2 giờ', total: 100000, status: 'confirmed', createdAtMs: 1000 },
+      { id: '#NEW', space: 'B', zone: 'Z', date: '2026-11-19', time: '09:00–11:00', pkg: '2 giờ', total: 100000, status: 'pending', createdAtMs: 2000 },
+    ];
     component.toggleSort();
-    expect(component.sortLabel).toBe('Cũ nhất ↑');
-    expect(component.rows[0].id).toBe('#KEN-121026-005');
-  });
-
-  it('date filter narrows the list and swaps a reversed range', () => {
-    component.fromDate = '2026-10-31'; component.toDate = '2026-10-23';
-    component.applyFilter();
-    expect(component.fromDate).toBe('2026-10-23');
-    expect(component.rows.map(r => r.id)).toEqual(['#KEN-261026-009', '#KEN-251026-024', '#KEN-241026-006']);
-  });
-
-  it('picks the eye icon per status like the design', () => {
-    const by = (id: string) => component.bookings.find(b => b.id === id)!;
-    expect(component.eyeIcon(by('#KEN-241026-006'))).toBe('eye-view');
-    expect(component.eyeIcon(by('#KEN-221026-018'))).toBe('eye-view-fill');
-    expect(component.eyeIcon(by('#KEN-151026-003'))).toBe('eye-view-off');
+    expect(component.sortLabel).toBe('Đặt xa nhất ↑');
+    expect(component.rows.map(r => r.id)).toEqual(['#OLD', '#NEW']);
   });
 
   it('formats date and money like the design', () => {

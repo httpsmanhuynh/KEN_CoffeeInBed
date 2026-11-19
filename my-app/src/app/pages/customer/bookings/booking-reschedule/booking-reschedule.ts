@@ -28,6 +28,8 @@ export class BookingReschedule implements OnInit, OnDestroy {
   private readonly router = inject(Router, { optional: true });
   private readonly cdr = inject(ChangeDetectorRef, { optional: true });
   orders: Order[] = [];
+  orderPage = 1;
+  readonly orderPageSize = 3;
   readonly statusLabel: Record<OrderStatus, string> = { confirmed: 'Đã xác nhận', pending: 'Chờ xác nhận' };
   get slots(): string[] {
     const out: string[] = [];
@@ -93,6 +95,7 @@ export class BookingReschedule implements OnInit, OnDestroy {
                 total: b.final_amount,
               };
             });
+            this.orderPage = 1;
             this.selectedId = this.orders[0].id;
             const d = new Date(this.orders[0].date + 'T00:00:00');
             d.setDate(d.getDate() + 1);
@@ -107,6 +110,22 @@ export class BookingReschedule implements OnInit, OnDestroy {
       },
       error: () => {},
     });
+  }
+
+  get totalOrderPages(): number {
+    return Math.max(1, Math.ceil(this.orders.length / this.orderPageSize));
+  }
+  get pagedOrders(): Order[] {
+    const safePage = Math.min(Math.max(1, this.orderPage), this.totalOrderPages);
+    const startIdx = (safePage - 1) * this.orderPageSize;
+    return this.orders.slice(startIdx, startIdx + this.orderPageSize);
+  }
+  get orderPageNumbers(): number[] {
+    return Array.from({ length: this.totalOrderPages }, (_, i) => i + 1);
+  }
+  goToOrderPage(p: number): void {
+    if (p < 1 || p > this.totalOrderPages) return;
+    this.orderPage = p;
   }
 
   get order(): Order | undefined { return this.orders.find(o => o.id === this.selectedId) ?? this.orders[0]; }

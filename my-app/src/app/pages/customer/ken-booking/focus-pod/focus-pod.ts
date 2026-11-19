@@ -23,6 +23,7 @@ export class KenFocusPodPage implements OnInit {
     private changeDetector: ChangeDetectorRef,
   ) {}
   ngOnInit(): void {
+    this.state.syncCatalogFromApi(true);
     this.state.loadClusterRecommendations(true, () => this.changeDetector.markForCheck());
     const patch: Partial<KenBookingDraft> = {};
     if (!this.state.isFocusSpace) {
@@ -41,6 +42,8 @@ export class KenFocusPodPage implements OnInit {
     this.changeDetector.markForCheck();
   }
   get tierDiscountLabel(): string { return this.state.tierDiscountLabel || 'Ưu đãi thành viên'; }
+  get hourlyRatePrice(): number { return this.state.space.rates.find(r => r.hours === 1)?.price ?? 45000; }
+  get halfDayRatePrice(): number { return this.state.space.rates.find(r => r.hours === 4)?.price ?? 140000; }
   get minDate(): string { return kenNextDay(); }
   get filteredExtras() { return this.extraCategory === 'all' ? this.state.extras : this.state.extras.filter(x => x.category === this.extraCategory); }
   get hourlyDurationOptions(): number[] {

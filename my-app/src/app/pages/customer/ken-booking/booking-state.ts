@@ -307,6 +307,8 @@ function resolveProductImage(raw: any): string {
   if (name.includes('sandwich')) return '/images/addons/snack-sandwich.png';
   if (name.includes('trái cây')) return '/images/addons/snack-fruit.png';
   if (name.includes('màn hình')) return '/images/addons/eq-monitor.png';
+  if (name.includes('máy chiếu')) return '/images/addons/eq-projector.png';
+  if (name.includes('bảng từ')) return '/images/addons/eq-whiteboard.png';
   if (name.includes('bàn phím') || name.includes('chuột')) return '/images/addons/eq-keyboard-mouse.png';
   if (name.includes('cáp') || name.includes('sạc')) return '/images/addons/eq-cable-powerbank.png';
   if (name.includes('bút') || name.includes('bảng')) return '/images/addons/eq-pen-board.png';
@@ -688,13 +690,22 @@ export class KenBookingState {
             .map((p) => {
               const code = String(p.item_code || '').toUpperCase();
               const canonicalId = CANONICAL_PRODUCT_SLUGS[code] || code || String(p._id);
-              const variantsText = Array.isArray(p.variants) && p.variants.length
-                ? p.variants
+              const rawVariants = Array.isArray(p.variants) ? p.variants : [];
+              const variantsText = rawVariants.length
+                ? rawVariants
                     .map((v: any) => (v && typeof v === 'object' ? (v.name ?? v.label ?? v.title ?? '') : String(v ?? '')))
                     .map((v: string) => String(v).trim())
                     .filter(Boolean)
                     .join(' / ')
                 : '';
+              let desc = String(p.description || variantsText || 'Món phục vụ tại KÉN');
+              if (!p.description && (code === 'MATCHA_LATTE' || code === 'HOJICHA_LATTE') && rawVariants.length > 0) {
+                const mVar = rawVariants.find((v: any) => String(v?.name || '').includes('M (') || String(v?.name || '').includes('Size M'));
+                const lVar = rawVariants.find((v: any) => String(v?.name || '').includes('L (') || String(v?.name || '').includes('Size L'));
+                const mK = Math.round(Number(mVar?.price ?? p.price ?? 55000) / 1000);
+                const lK = Math.round(Number(lVar?.price ?? Number(p.price ?? 55000) + 5000) / 1000);
+                desc = `Nóng / Lạnh, Size M (${mK}k) / L (${lK}k)`;
+              }
               return {
                 id: canonicalId,
                 apiProductId: String(p._id),
@@ -704,8 +715,8 @@ export class KenBookingState {
                 price: Number(p.price ?? 0),
                 image: resolveProductImage(p),
                 category: mapProductCategory(p),
-                description: String(p.description || variantsText || 'Món phục vụ tại KÉN'),
-                variants: Array.isArray(p.variants) ? p.variants : [],
+                description: desc,
+                variants: rawVariants,
               };
             });
           if (mappedProducts.length > 0) {
@@ -1397,7 +1408,8 @@ export class KenBookingState {
     }
     if (this.isSizeSelectable(prod)) {
       const parsed = this.parseVariant(vName);
-      return parsed.size === 'L' ? 60000 : 55000;
+      const base = Number(prod.price || 55000);
+      return parsed.size === 'L' ? base + 5000 : base;
     }
     return Number(prod.price || 0);
   }
@@ -1410,7 +1422,8 @@ export class KenBookingState {
     }
     if (this.isSizeSelectable(extra)) {
       const parsed = this.parseVariant(vName);
-      return parsed.size === 'L' ? 60000 : 55000;
+      const base = Number(extra.price || 55000);
+      return parsed.size === 'L' ? base + 5000 : base;
     }
     return Number(extra.price || 0);
   }
@@ -1496,10 +1509,25 @@ export class KenBookingState {
     const id = this.draft().spaceId;
     return (id === 'meeting-small' || id === 'meeting-large') ? ['Máy chiếu', 'Bảng từ'] : [];
   }
-  get fixedInclusionsList(): Array<{ label: string; quantity: number }> {
-    const list: Array<{ label: string; quantity: number }> = this.fixedEquipment.map(label => ({ label, quantity: 1 }));
+  fixedInclusionImage(label: string): string | null {
+    const key = String(label || '').trim().toLocaleLowerCase('vi-VN');
+    if (key.includes('nước suối') || key.includes('nước tinh khiết')) return '/images/addons/water-bottle.png';
+    if (key.includes('máy chiếu')) return '/images/addons/eq-projector.png';
+    if (key.includes('bảng từ')) return '/images/addons/eq-whiteboard.png';
+    return null;
+  }
+  get fixedInclusionsList(): Array<{ label: string; quantity: number; image: string | null }> {
+    const list: Array<{ label: string; quantity: number; image: string | null }> = this.fixedEquipment.map(label => ({
+      label,
+      quantity: 1,
+      image: this.fixedInclusionImage(label),
+    }));
     if (this.freeWaterCount > 0) {
-      list.push({ label: 'Nước suối', quantity: this.freeWaterCount });
+      list.push({
+        label: 'Nước suối',
+        quantity: this.freeWaterCount,
+        image: this.fixedInclusionImage('Nước suối'),
+      });
     }
     return list;
   }

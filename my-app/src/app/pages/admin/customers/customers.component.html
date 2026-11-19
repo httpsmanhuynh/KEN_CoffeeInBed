@@ -157,11 +157,11 @@
             <button
               type="button"
               class="btn-row-lock"
-              [class.is-unlock]="c.status === 'LOCKED'"
-              [disabled]="c.role === 'ADMIN' || actionLoading"
+              [class.is-unlock]="c.status === 'LOCKED' && !c.isDeleted"
+              [disabled]="c.role === 'ADMIN' || c.isDeleted || actionLoading"
               (click)="requestToggleLock(c); $event.stopPropagation()"
             >
-              {{ c.role === 'ADMIN' ? 'ADMIN' : (c.status === 'ACTIVE' ? 'Khoá TK' : 'Mở khoá') }}
+              {{ c.role === 'ADMIN' ? 'ADMIN' : c.isDeleted ? 'Đã xoá' : (c.status === 'ACTIVE' ? 'Khoá TK' : 'Mở khoá') }}
             </button>
           </ng-template>
         </div>
@@ -244,18 +244,25 @@
         <div class="panel-divider"></div>
 
         <div class="lock-action-row" *ngIf="sel.role !== 'ADMIN'">
-          <button
-            type="button"
-            class="btn-lock"
-            [class.btn-unlock]="sel.status === 'LOCKED'"
-            [disabled]="actionLoading"
-            (click)="requestToggleLock(sel)"
-          >
-            {{ sel.status === 'ACTIVE' ? 'Tạm khoá tài khoản' : 'Mở khoá tài khoản' }}
-          </button>
-          <p class="lock-note">
-            Tài khoản tạm khoá không thể đăng nhập hoặc đặt chỗ mới; lịch sử đơn cũ vẫn được lưu trữ.
-          </p>
+          <ng-container *ngIf="!sel.isDeleted; else deletedCustNote">
+            <button
+              type="button"
+              class="btn-lock"
+              [class.btn-unlock]="sel.status === 'LOCKED'"
+              [disabled]="actionLoading"
+              (click)="requestToggleLock(sel)"
+            >
+              {{ sel.status === 'ACTIVE' ? 'Tạm khoá tài khoản' : 'Mở khoá tài khoản' }}
+            </button>
+            <p class="lock-note">
+              Tài khoản tạm khoá không thể đăng nhập hoặc đặt chỗ mới; lịch sử đơn cũ vẫn được lưu trữ.
+            </p>
+          </ng-container>
+          <ng-template #deletedCustNote>
+            <p class="lock-note">
+              Tài khoản đã được khách hàng tự xoá (SĐT/email đã được giải phóng để đăng ký mới; lịch sử đơn cũ vẫn được lưu trữ).
+            </p>
+          </ng-template>
         </div>
 
         <div *ngIf="pendingLockTarget?.id === sel.id" class="inline-lock-confirm">

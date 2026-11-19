@@ -137,11 +137,11 @@
             <div class="kf-drink-entry-list" style="margin-top: 8px">
               <article class="kf-drink-entry-item" *ngFor="let fixed of state.fixedInclusionsList">
                 <img
-                  *ngIf="fixed.label === 'Nước suối'"
-                  src="/images/addons/water-bottle.png"
-                  alt="Nước suối"
+                  *ngIf="fixed.image"
+                  [src]="fixed.image"
+                  [alt]="fixed.label"
                 />
-                <span class="kf-fixed-badge" *ngIf="fixed.label !== 'Nước suối'">✓</span>
+                <span class="kf-fixed-badge" *ngIf="!fixed.image">✓</span>
                 <span
                   ><strong>{{ fixed.label }}</strong
                   ><small>Số lượng: {{ fixed.quantity }} · Miễn phí theo gói</small></span

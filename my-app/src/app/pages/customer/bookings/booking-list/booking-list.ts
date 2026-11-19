@@ -15,6 +15,9 @@ interface Booking {
   date: string;            // ISO yyyy-mm-dd
   time: string;            // "13:00–15:00 · 2 giờ · 01 khách"
   pkg: string; total: number; status: BookingStatus;
+  startAtMs?: number;
+  createdAtMs?: number;
+  createdAt?: string;
 }
 
 const STATUS_LABEL: Record<BookingStatus, string> = {
@@ -100,8 +103,23 @@ export class BookingList implements OnInit {
     });
   }
 
+  private extractCreatedAtMs(b: ApiBooking, fallbackMs: number): number {
+    if (b.created_at) {
+      const parsed = new Date(b.created_at).getTime();
+      if (Number.isFinite(parsed)) return parsed;
+    }
+    const rawId = String(b._id || '');
+    if (/^[0-9a-fA-F]{24}$/.test(rawId)) {
+      const ts = parseInt(rawId.slice(0, 8), 16) * 1000;
+      if (Number.isFinite(ts)) return ts;
+    }
+    return fallbackMs;
+  }
+
   private mapBooking(b: ApiBooking, spaceMap: Map<string, any>): Booking {
-    const startVn = new Date(new Date(b.start_at).getTime() + 7 * 3600000);
+    const startAtMs = new Date(b.start_at).getTime();
+    const safeStartAtMs = Number.isFinite(startAtMs) ? startAtMs : 0;
+    const startVn = new Date(startAtMs + 7 * 3600000);
     const endVn = new Date(new Date(b.end_at).getTime() + 7 * 3600000);
     const hrs = Math.max(1, Math.round((endVn.getTime() - startVn.getTime()) / 3600000));
     const date = startVn.toISOString().slice(0, 10);
@@ -117,6 +135,7 @@ export class BookingList implements OnInit {
       EXPIRED: 'failed',
       NO_SHOW: 'noshow',
     };
+    const createdAtMs = this.extractCreatedAtMs(b, safeStartAtMs);
     return {
       rawId: b._id,
       rawStatus: b.status,
@@ -129,6 +148,9 @@ export class BookingList implements OnInit {
       pkg: `${hrs} giờ`,
       total: b.final_amount,
       status: statusMap[b.status] ?? 'pending',
+      startAtMs: safeStartAtMs,
+      createdAtMs,
+      createdAt: b.created_at || (createdAtMs > 0 ? new Date(createdAtMs).toISOString() : undefined),
     };
   }
 
@@ -179,6 +201,23 @@ export class BookingList implements OnInit {
     return key === 'all' ? this.bookings.length : this.bookings.filter(b => b.status === key).length;
   }
 
+  private compareBookingsAsc(a: Booking, b: Booking): number {
+    const aCreated = Number.isFinite(a.createdAtMs) ? (a.createdAtMs as number) : 0;
+    const bCreated = Number.isFinite(b.createdAtMs) ? (b.createdAtMs as number) : 0;
+    if (aCreated !== bCreated) return aCreated - bCreated;
+
+    const byDate = a.date.localeCompare(b.date);
+    if (byDate !== 0) return byDate;
+
+    if (Number.isFinite(a.startAtMs) && Number.isFinite(b.startAtMs) && a.startAtMs !== b.startAtMs) {
+      return (a.startAtMs as number) - (b.startAtMs as number);
+    }
+    const byTime = a.time.localeCompare(b.time);
+    if (byTime !== 0) return byTime;
+
+    return String(a.rawId || a.id).localeCompare(String(b.rawId || b.id));
+  }
+
   /** Toàn bộ đơn khớp bộ lọc, đã sắp xếp (chưa phân trang). */
   get filtered(): Booking[] {
     const q = this.searchCode.trim().toLowerCase().replace(/^#/, '');
@@ -186,7 +225,7 @@ export class BookingList implements OnInit {
       (this.status === 'all' || b.status === this.status) &&
       (!q || b.id.toLowerCase().includes(q)) &&
       b.date >= this.applied.from && b.date <= this.applied.to);
-    return list.sort((a, b) => (this.newestFirst ? b.date.localeCompare(a.date) : a.date.localeCompare(b.date)));
+    return list.sort((a, b) => (this.newestFirst ? this.compareBookingsAsc(b, a) : this.compareBookingsAsc(a, b)));
   }
 
   viewDetail(b: Booking): void {
@@ -220,6 +259,16 @@ export class BookingList implements OnInit {
     return d.toLocaleString('vi-VN');
   }
 
+  fmtShortDateTime(iso?: string): string {
+    if (!iso) return '—';
+    const ms = new Date(iso).getTime();
+    if (!Number.isFinite(ms)) return iso;
+    const vn = new Date(ms + 7 * 3600000);
+    const [y, m, d] = vn.toISOString().slice(0, 10).split('-');
+    const t = vn.toISOString().slice(11, 16);
+    return `${d}/${m}/${y} ${t}`;
+  }
+
   get pages(): number { return Math.max(1, Math.ceil(this.filtered.length / PAGE_SIZE)); }
   get rows(): Booking[] {
     const start = (Math.min(this.page, this.pages) - 1) * PAGE_SIZE;
@@ -227,16 +276,16 @@ export class BookingList implements OnInit {
   }
   get pageNumbers(): number[] { return Array.from({ length: this.pages }, (_, i) => i + 1); }
 
-  get summary(): string { return `${this.filtered.length} đơn đặt chỗ · Sắp xếp theo ngày sử dụng`; }
-  get sortLabel(): string { return this.newestFirst ? 'Mới nhất ↓' : 'Cũ nhất ↑'; }
+  get summary(): string { return `${this.filtered.length} đơn đặt chỗ · Sắp xếp theo thời gian đặt`; }
+  get sortLabel(): string { return this.newestFirst ? 'Đặt gần nhất ↓' : 'Đặt xa nhất ↑'; }
   get footnote(): string {
     const suffix = this.status === 'all' ? '' : ` ${STATUS_LABEL[this.status as BookingStatus].toLowerCase()}`;
     return `Đã hiển thị ${this.rows.length} / ${this.filtered.length} đơn${suffix}`;
   }
 
-  setStatus(key: StatusFilter): void { this.status = key; this.page = 1; }
-  toggleSort(): void { this.newestFirst = !this.newestFirst; this.page = 1; }
-  goTo(p: number): void { this.page = Math.min(Math.max(1, p), this.pages); }
+  setStatus(key: StatusFilter): void { this.status = key; this.page = 1; this.cdr?.markForCheck(); }
+  toggleSort(): void { this.newestFirst = !this.newestFirst; this.page = 1; this.cdr?.markForCheck(); }
+  goTo(p: number): void { this.page = Math.min(Math.max(1, p), this.pages); this.cdr?.markForCheck(); }
   applyFilter(): void {
     // Nếu người dùng chọn ngược khoảng, hoán đổi để tránh danh sách trống khó hiểu.
     if (this.fromDate && this.toDate && this.fromDate > this.toDate) {
@@ -244,6 +293,7 @@ export class BookingList implements OnInit {
     }
     this.applied = { from: this.fromDate || '0000-00-00', to: this.toDate || '9999-12-31' };
     this.page = 1;
+    this.cdr?.markForCheck();
   }
 
   fmtDate(iso: string): string { const [y, m, d] = iso.split('-'); return `${d}/${m}/${y}`; }

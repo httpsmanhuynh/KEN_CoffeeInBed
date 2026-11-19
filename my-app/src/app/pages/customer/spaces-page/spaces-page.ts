@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { SmoothScrollService } from '../../../core/smooth-scroll.service';
+import { KenBookingState, kenMoney } from '../ken-booking/booking-state';
 
 export type KenZoneFilter = 'all' | 'connect' | 'focus' | 'rest';
 
@@ -40,12 +41,20 @@ export class SpacesPage implements OnInit {
       return null;
     }
   })();
+  private readonly bookingState = (() => {
+    try {
+      return inject(KenBookingState, { optional: true });
+    } catch {
+      return null;
+    }
+  })();
 
   bookingNotice = false;
   menuNotice = false;
   activeZone: KenZoneFilter = 'all';
 
   ngOnInit(): void {
+    this.bookingState?.syncCatalogFromApi(true);
     this.route?.queryParamMap.subscribe((params) => {
       const z = params.get('zone');
       if (z === 'connect' || z === 'focus' || z === 'rest') {
@@ -184,9 +193,29 @@ export class SpacesPage implements OnInit {
     },
   ];
 
+  private dynamicPriceLabel(spaceCard: SpaceCard): string {
+    const mapSpec: Record<string, { bookingId: string; hours: number; suffix: string }> = {
+      cowork: { bookingId: 'work', hours: 1, suffix: '/ người / giờ' },
+      focus: { bookingId: 'focus', hours: 1, suffix: '/ ô / giờ' },
+      meeting: { bookingId: 'meeting-small', hours: 3, suffix: '/ phòng / gói 3 giờ' },
+      boardroom: { bookingId: 'meeting-large', hours: 3, suffix: '/ phòng / gói 3 giờ' },
+      single: { bookingId: 'single', hours: 1, suffix: '/ KÉN / gói 1 giờ' },
+      double: { bookingId: 'double', hours: 1, suffix: '/ KÉN / gói 1 giờ' },
+      private: { bookingId: 'private', hours: 1, suffix: '/ phòng / gói 1 giờ' },
+    };
+    const spec = mapSpec[spaceCard.id];
+    if (!spec || !this.bookingState) return spaceCard.price;
+    const sp = this.bookingState.getSpace(spec.bookingId);
+    const rate = sp?.rates.find((r) => r.hours === spec.hours) || sp?.rates[0];
+    return rate ? `${kenMoney(rate.price)} ${spec.suffix}` : spaceCard.price;
+  }
+
   get filteredSpaces(): SpaceCard[] {
-    if (this.activeZone === 'all') return this.spaces;
-    return this.spaces.filter((space) => space.zone === this.activeZone);
+    const list =
+      this.activeZone === 'all'
+        ? this.spaces
+        : this.spaces.filter((space) => space.zone === this.activeZone);
+    return list.map((space) => ({ ...space, price: this.dynamicPriceLabel(space) }));
   }
 
   setZoneFilter(zone: KenZoneFilter): void {

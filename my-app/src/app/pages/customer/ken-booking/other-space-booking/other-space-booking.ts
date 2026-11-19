@@ -64,6 +64,7 @@ export class KenOtherSpacePage implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.state.syncCatalogFromApi(true);
     this.state.loadClusterRecommendations(true, () => this.changeDetector.markForCheck());
     this.route.paramMap.subscribe((params) => {
       const id = params.get('id') || '';

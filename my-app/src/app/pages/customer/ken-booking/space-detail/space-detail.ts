@@ -21,7 +21,10 @@ interface KenSpacePresentation {
   styleUrl: './space-detail.css'
 })
 export class KenBookingSpaceDetailPage implements OnInit {
-  space?: KenBookingSpace;
+  spaceId = '';
+  get space(): KenBookingSpace | undefined {
+    return this.state.getSpace(this.spaceId);
+  }
   readonly money = kenMoney;
   private readonly presentation: Record<string, KenSpacePresentation> = {
     work: {
@@ -120,8 +123,9 @@ export class KenBookingSpaceDetailPage implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.state.syncCatalogFromApi(true);
     this.route.paramMap.subscribe(params => {
-      this.space = this.state.getSpace(params.get('id') || '');
+      this.spaceId = params.get('id') || '';
     });
     this.route.queryParamMap?.subscribe(params => {
       this.backPath = '/spaces';

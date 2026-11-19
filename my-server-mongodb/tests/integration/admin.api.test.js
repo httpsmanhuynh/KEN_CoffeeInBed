@@ -793,3 +793,28 @@ test('TC-ADM-03, TC-ADM-31, TC-ADM-32, TC-ADM-33\t[ADM-03, ADM-31..33] Hồ sơ 
     (e) => e.code === 'INVALID_STATUS' && e.status === 422
   );
 });
+
+test('Admin không thể unlock tài khoản đã bị khách hàng tự xóa (409 USER_DELETED)', async () => {
+  const deletedId = new ObjectId();
+  const db = fakeDb([
+    ...seed(),
+    {
+      _id: deletedId,
+      role: 'CUSTOMER',
+      status: 'LOCKED',
+      full_name: 'Khách Đã Xóa',
+      phone: `X${String(deletedId).slice(0, 8)}${String(deletedId).slice(-6)}`,
+      original_phone: '0901122334',
+      original_email: 'deleted@ken.vn',
+      deleted_at: new Date('2026-11-18T10:00:00Z'),
+      tier_points: 0,
+      coin_balance: 0,
+    },
+  ]);
+
+  await assert.rejects(
+    svc.setUserStatus(db, { actor: { _id: ids.admin }, targetId: String(deletedId), action: 'unlock' }),
+    (e) => e.code === 'USER_DELETED' && e.status === 409
+  );
+  assert.equal(db._users.find((u) => u._id.equals(deletedId)).status, 'LOCKED');
+});

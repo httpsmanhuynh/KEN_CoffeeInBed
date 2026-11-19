@@ -83,7 +83,11 @@ async function listUsers(db, query = {}) {
   if (query.tier) and.push(tierFilter(query.tier));
   if (query.q && String(query.q).trim()) {
     const rx = new RegExp(escapeRegex(String(query.q).trim()), 'i');
-    and.push({ $or: ['phone', 'email', 'full_name', 'name'].map((f) => ({ [f]: rx })) });
+    and.push({
+      $or: ['phone', 'email', 'original_phone', 'original_email', 'full_name', 'name'].map((f) => ({
+        [f]: rx,
+      })),
+    });
   }
   if (and.length) filter.$and = and;
 
@@ -198,7 +202,11 @@ async function setUserStatus(db, { actor, targetId, action }) {
   const target = await users.findOne({ _id });
   const { from, to } = decideStatusChange({ actorId: actor && actor._id, target, action });
 
-  const cond = { _id, status: from };
+  const cond = {
+    _id,
+    status: from,
+    $or: [{ deleted_at: null }, { deleted_at: { $exists: false } }],
+  };
   if (action === 'lock') cond.role = { $ne: 'ADMIN' };
   const res = await users.updateOne(cond, { $set: { status: to } });
   if (!res.matchedCount) {

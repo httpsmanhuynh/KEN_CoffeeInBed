@@ -1355,6 +1355,7 @@ module.exports = {
   createBooking,
   payBooking,
   cancelBooking,
+  releaseVoucherIfNeeded,
   rescheduleBooking,
   checkInBooking,
   checkOutBooking,

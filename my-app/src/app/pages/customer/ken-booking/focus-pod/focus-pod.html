@@ -2,7 +2,7 @@
   <section class="kf-focus-hero"><img src="/images/ken-flow/listing-focus.png" alt="Ô tập trung cá nhân Focus Pod"><div class="kf-focus-hero-shade"></div><div class="kf-container kf-focus-hero-body"><div class="kf-focus-top-tags">
   <span>KÉN TẬP TRUNG</span>
   <span>Dùng riêng</span>
-</div><div class="kf-crumb kf-crumb-light"><a routerLink="/spaces">Không gian</a> / KÉN Tập Trung / <strong>Ô tập trung cá nhân</strong></div><span class="kf-overline">KHÔNG GIAN RIÊNG · FOCUS POD</span><h1>Ô tập trung cá nhân</h1><p class="kf-script">Một góc riêng, cho những điều cần trọn vẹn.</p><div class="kf-hero-tags"><span>Wi-Fi</span><span>Ổ cắm</span><span>08:00–22:00</span><span>01 khách / ô</span></div><div class="kf-focus-hero-price"><small>Từ</small><strong>45.000đ</strong><span>/ giờ / ô riêng</span></div></div></section>
+</div><div class="kf-crumb kf-crumb-light"><a routerLink="/spaces">Không gian</a> / KÉN Tập Trung / <strong>Ô tập trung cá nhân</strong></div><span class="kf-overline">KHÔNG GIAN RIÊNG · FOCUS POD</span><h1>Ô tập trung cá nhân</h1><p class="kf-script">Một góc riêng, cho những điều cần trọn vẹn.</p><div class="kf-hero-tags"><span>Wi-Fi</span><span>Ổ cắm</span><span>08:00–22:00</span><span>01 khách / ô</span></div><div class="kf-focus-hero-price"><small>Từ</small><strong>{{ money(hourlyRatePrice) }}</strong><span>/ giờ / ô riêng</span></div></div></section>
   <div class="kf-focus-photo-strip">
   <div class="kf-focus-photo-tile">
     <img src="/images/ken-flow/focus-photo-2.png" alt="Một khoảng nghỉ giữa giờ">
@@ -21,7 +21,7 @@
     <p class="kf-entitlement">Xem lịch chưa giữ chỗ. Đổi ngày hoặc giờ sẽ kiểm tra lại khi đặt.</p>
 
     <div class="kf-booking-step-title"><span>BƯỚC 02</span><h2>Chọn không gian &amp; gói dịch vụ</h2></div>
-    <div class="kf-package-grid"><button type="button" [class.selected]="state.draft().hours !== 4" (click)="chooseHours(1)"><div><strong>Tập trung theo giờ</strong><b>45.000đ/h</b></div><small>Tự chọn thời lượng · Tối thiểu 1 giờ · 01 chai nước suối từ 2h</small></button><button type="button" [class.selected]="state.draft().hours === 4" (click)="chooseHours(4)"><div><strong>Tập trung nửa ngày (4 giờ)</strong><b>140.000đ</b></div><small>Cố định 4 giờ · 01 đồ uống Menu Tiêu chuẩn (≤50.000đ) · {{ state.draft().hours === 4 ? 'Đang chọn ✓' : 'Chọn gói' }}</small></button></div>
+    <div class="kf-package-grid"><button type="button" [class.selected]="state.draft().hours !== 4" (click)="chooseHours(1)"><div><strong>Tập trung theo giờ</strong><b>{{ money(hourlyRatePrice) }}/h</b></div><small>Tự chọn thời lượng · Tối thiểu 1 giờ · 01 chai nước suối từ 2h</small></button><button type="button" [class.selected]="state.draft().hours === 4" (click)="chooseHours(4)"><div><strong>Tập trung nửa ngày (4 giờ)</strong><b>{{ money(halfDayRatePrice) }}</b></div><small>Cố định 4 giờ · 01 đồ uống Menu Tiêu chuẩn (≤50.000đ) · {{ state.draft().hours === 4 ? 'Đang chọn ✓' : 'Chọn gói' }}</small></button></div>
     <div class="kf-date-controls" *ngIf="state.draft().hours !== 4" style="margin-top: 12px;">
       <label>Số giờ sử dụng (đơn vị 1 giờ)
         <select [ngModel]="state.draft().hours" (ngModelChange)="chooseHours(+$event)">

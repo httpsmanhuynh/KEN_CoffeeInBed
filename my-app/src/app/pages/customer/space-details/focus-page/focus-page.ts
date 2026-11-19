@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { KenBookingState } from '../../ken-booking/booking-state';
+import { KenBookingState, kenMoney } from '../../ken-booking/booking-state';
 
 @Component({
   selector: 'app-focus-page',
@@ -16,7 +16,7 @@ export class FocusPage implements OnInit {
   backPath = '/spaces';
 
   ngOnInit(): void {
-    this.bookingState?.syncCatalogFromApi();
+    this.bookingState?.syncCatalogFromApi(true);
     this.route?.queryParamMap?.subscribe(params => {
       this.backPath = '/spaces';
     });
@@ -24,6 +24,18 @@ export class FocusPage implements OnInit {
 
   get spaceData() {
     return this.bookingState?.getSpace('focus');
+  }
+
+  private ratePrice(hours: number, fallback: number): number {
+    return this.spaceData?.rates.find(r => r.hours === hours)?.price ?? fallback;
+  }
+
+  get hourlyPriceText(): string {
+    return kenMoney(this.ratePrice(1, 45000));
+  }
+
+  get halfDayPriceText(): string {
+    return kenMoney(this.ratePrice(4, 140000));
   }
 
   showInfo(): void {

@@ -78,6 +78,13 @@ function decideStatusChange({ actorId, target, action }) {
   const t = TRANSITIONS[action];
   if (!t) throw new AdminError(400, 'INVALID_ACTION', 'Hành động không hợp lệ (lock | unlock).');
   if (!target) throw new AdminError(404, 'USER_NOT_FOUND', 'Không tìm thấy người dùng.');
+  if (target.deleted_at) {
+    throw new AdminError(
+      409,
+      'USER_DELETED',
+      'Tài khoản đã được khách hàng tự xóa vĩnh viễn, không thể thay đổi trạng thái.',
+    );
+  }
 
   if (action === 'lock') {
     if (String(target._id) === String(actorId)) {

@@ -19,9 +19,14 @@
       <!-- Hàng 1: chọn đơn + lịch hiện tại -->
       <div class="pair">
         <section class="card" aria-labelledby="pick-title">
-          <h2 class="h-serif" id="pick-title">Chọn đơn muốn đổi lịch</h2>
+          <div class="card__head">
+            <h2 class="h-serif" id="pick-title">Chọn đơn muốn đổi lịch</h2>
+            @if (orders.length > 0) {
+              <span class="orders-count">{{ orders.length }} đơn</span>
+            }
+          </div>
           <div role="radiogroup" aria-labelledby="pick-title" class="orders">
-            @for (o of orders; track o.id) {
+            @for (o of pagedOrders; track o.id) {
               <button type="button" role="radio" class="opt" [class.is-selected]="o.id === selectedId" [attr.aria-checked]="o.id === selectedId" (click)="select(o.id)">
                 <lucide-icon [name]="o.id === selectedId ? 'check' : 'circle'" [size]="18" [strokeWidth]="1.8" color="#4A3123"></lucide-icon>
                 <span class="opt__body">
@@ -34,6 +39,18 @@
               <p class="empty-orders" role="status">Chưa có đơn nào</p>
             }
           </div>
+          @if (totalOrderPages > 1) {
+            <div class="orders-footer">
+              <span class="orders-page-info">Trang {{ orderPage }} / {{ totalOrderPages }}</span>
+              <nav class="pager" aria-label="Phân trang danh sách đơn">
+                <button type="button" class="pager__arrow" (click)="goToOrderPage(orderPage - 1)" [disabled]="orderPage <= 1" aria-label="Trang trước">‹</button>
+                @for (p of orderPageNumbers; track p) {
+                  <button type="button" class="pager__page" [class.is-active]="p === orderPage" [attr.aria-current]="p === orderPage ? 'page' : null" (click)="goToOrderPage(p)">{{ p }}</button>
+                }
+                <button type="button" class="pager__arrow" (click)="goToOrderPage(orderPage + 1)" [disabled]="orderPage >= totalOrderPages" aria-label="Trang sau">›</button>
+              </nav>
+            </div>
+          }
         </section>
 
         @if (order) {

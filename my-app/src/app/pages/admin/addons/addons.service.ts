@@ -2,10 +2,16 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, forkJoin, Observable, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
+import { KenBookingState } from '../../customer/ken-booking/booking-state';
 
 export type ProductCategory = 'Đồ uống' | 'Bánh / Ăn nhẹ' | 'Tiện ích';
 export type AddonAvailability = 'Khả dụng' | 'Hết hàng' | 'Không khả dụng';
 export type ProductStatus = 'ACTIVE' | 'PAUSED';
+
+export interface ProductVariant {
+  name: string;
+  price: number;
+}
 
 export interface ProductAddon {
   id: string;
@@ -16,6 +22,7 @@ export interface ProductAddon {
   name: string;
   category: ProductCategory;
   price: number;
+  variants: ProductVariant[];
   unit: string;
   catalogVisible: boolean;
   addonAvailable: AddonAvailability;
@@ -34,6 +41,7 @@ const INITIAL_ADDONS: ProductAddon[] = [];
 @Injectable({ providedIn: 'root' })
 export class AddonsService {
   private readonly http = inject(HttpClient, { optional: true });
+  private readonly bookingState = inject(KenBookingState, { optional: true });
   private readonly addonsSubject = new BehaviorSubject<ProductAddon[]>(this.loadInitial());
   readonly addons$ = this.addonsSubject.asObservable();
 
@@ -110,6 +118,18 @@ export class AddonsService {
     }
 
     const img = this.resolveProductImage(raw, cat);
+    const rawVariants = Array.isArray(raw.variants) && raw.variants.length > 0
+      ? raw.variants
+      : Array.isArray(linkedAddon?.variants)
+        ? linkedAddon.variants
+        : [];
+    const basePrice = Number(raw.price ?? raw.unit_price ?? raw.base_price ?? 0);
+    const variants: ProductVariant[] = rawVariants
+      .filter((v: any) => v && typeof v.name === 'string' && v.name.trim())
+      .map((v: any) => ({
+        name: String(v.name).trim().slice(0, 50),
+        price: Math.max(0, Math.round(Number(v.price ?? basePrice))),
+      }));
 
     return {
       id,
@@ -124,7 +144,8 @@ export class AddonsService {
           : undefined,
       name: raw.name || raw.product_name || raw.addon_name || 'Sản phẩm KÉN',
       category: cat,
-      price: Number(raw.price ?? raw.unit_price ?? raw.base_price ?? 0),
+      price: basePrice,
+      variants,
       unit: raw.unit || (cat === 'Đồ uống' ? 'Ly' : cat === 'Tiện ích' ? 'Lượt' : 'Phần'),
       catalogVisible:
         raw.catalog_visible !== undefined ? Boolean(raw.catalog_visible) : source === 'PRODUCT',
@@ -179,21 +200,30 @@ export class AddonsService {
     data: Omit<ProductAddon, 'id' | 'source'>,
     existing?: ProductAddon,
   ): Observable<ProductAddon> {
+    const cleanVariants: ProductVariant[] = (data.variants || [])
+      .map((v) => ({
+        name: String(v.name || '').trim().slice(0, 50),
+        price: Math.max(0, Math.round(Number(v.price ?? data.price ?? 0))),
+      }))
+      .filter((v) => v.name.length > 0);
+    const cleanData: Omit<ProductAddon, 'id' | 'source'> = { ...data, variants: cleanVariants };
+
     if (!this.http || (existing && !/^[a-f0-9]{24}$/i.test(existing.id))) {
-      return of(this.save({ ...data, source: existing?.source || 'PRODUCT' }, existing?.id));
+      return of(this.save({ ...cleanData, source: existing?.source || 'PRODUCT' }, existing?.id));
     }
 
-    const isActive = data.status === 'ACTIVE';
+    const isActive = cleanData.status === 'ACTIVE';
     const apiPayload: Record<string, any> = {
-      code: data.code || undefined,
-      name: data.name,
-      category: this.toApiCategory(data.category),
-      type: this.toApiCategory(data.category),
-      price: Number(data.price),
-      unit: data.unit,
-      image_url: data.image,
-      catalog_visible: data.catalogVisible,
-      in_stock: data.addonAvailable !== 'Hết hàng',
+      code: cleanData.code || undefined,
+      name: cleanData.name,
+      category: this.toApiCategory(cleanData.category),
+      type: this.toApiCategory(cleanData.category),
+      price: Number(cleanData.price),
+      variants: cleanVariants,
+      unit: cleanData.unit,
+      image_url: cleanData.image,
+      catalog_visible: cleanData.catalogVisible,
+      in_stock: cleanData.addonAvailable !== 'Hết hàng',
       is_active: isActive,
       status: isActive ? 'ACTIVE' : 'INACTIVE',
     };
@@ -206,23 +236,25 @@ export class AddonsService {
           const doc = res?.item || res?.product || res?.addon || res;
           return doc?._id
             ? this.mapRawItem(doc, existing.source)
-            : this.save({ ...data, source: existing.source }, existing.id);
+            : this.save({ ...cleanData, source: existing.source }, existing.id);
         }),
         tap(() => {
           this.loadFromApi().subscribe();
+          this.bookingState?.syncCatalogFromApi(true);
         }),
       );
     }
 
-    const createEndpoint = data.category === 'Tiện ích' ? '/api/addons' : '/api/products';
-    const src: 'PRODUCT' | 'ADDON' = data.category === 'Tiện ích' ? 'ADDON' : 'PRODUCT';
+    const createEndpoint = cleanData.category === 'Tiện ích' ? '/api/addons' : '/api/products';
+    const src: 'PRODUCT' | 'ADDON' = cleanData.category === 'Tiện ích' ? 'ADDON' : 'PRODUCT';
     return this.http.post<any>(createEndpoint, apiPayload).pipe(
       map((res) => {
         const doc = res?.item || res?.product || res?.addon || res;
-        return doc?._id ? this.mapRawItem(doc, src) : this.save({ ...data, source: src });
+        return doc?._id ? this.mapRawItem(doc, src) : this.save({ ...cleanData, source: src });
       }),
       tap(() => {
         this.loadFromApi().subscribe();
+        this.bookingState?.syncCatalogFromApi(true);
       }),
     );
   }
@@ -242,6 +274,7 @@ export class AddonsService {
     return req$.pipe(
       tap(() => {
         this.loadFromApi().subscribe();
+        this.bookingState?.syncCatalogFromApi(true);
       }),
     );
   }
@@ -304,6 +337,8 @@ export class AddonsService {
     if (name.includes('sandwich')) return '/images/addons/snack-sandwich.png';
     if (name.includes('trái cây')) return '/images/addons/snack-fruit.png';
     if (name.includes('màn hình')) return '/images/addons/eq-monitor.png';
+    if (name.includes('máy chiếu')) return '/images/addons/eq-projector.png';
+    if (name.includes('bảng từ')) return '/images/addons/eq-whiteboard.png';
     if (name.includes('bàn phím') || name.includes('chuột')) return '/images/addons/eq-keyboard-mouse.png';
     if (name.includes('cáp') || name.includes('sạc')) return '/images/addons/eq-cable-powerbank.png';
     if (name.includes('bút') || name.includes('bảng')) return '/images/addons/eq-pen-board.png';

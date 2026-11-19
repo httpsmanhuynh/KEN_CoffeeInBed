@@ -180,7 +180,7 @@
         <div class="danger__row">
           <div class="grow danger__body">
             <h2 class="danger__title">Xoá tài khoản</h2>
-            <p class="text">Xoá tài khoản sẽ xoá vĩnh viễn tài khoản khỏi hệ thống, làm mất quyền truy cập lịch sử, Coins và quyền lợi thành viên.</p>
+            <p class="text">Xoá vĩnh viễn tài khoản khỏi KÉN. Toàn bộ điểm thưởng, Coins và quyền lợi thành viên sẽ bị mất; các lịch đặt sắp tới sẽ tự động huỷ và hoàn tiền theo quy định.</p>
           </div>
           @if (!confirmingDelete) {
             <button type="button" class="btn-outline" (click)="onRequestDeleteAccount()">Xoá tài khoản</button>
@@ -198,7 +198,7 @@
         } @else if (confirmingDelete) {
           <p class="danger__hint">Bạn chắc chắn muốn xoá tài khoản? Hành động này không thể hoàn tác.</p>
         } @else {
-          <p class="danger__hint">Tài khoản sẽ được xoá ngay lập tức mà không cần chờ duyệt.</p>
+          <p class="danger__hint">Tài khoản sẽ được đóng ngay sau khi bạn xác nhận.</p>
         }
       </section>
     </main>

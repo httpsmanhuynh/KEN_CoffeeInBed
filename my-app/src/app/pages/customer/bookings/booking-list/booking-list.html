@@ -88,7 +88,12 @@
         @for (b of rows; track b.id; let i = $index) {
           <div class="entry" [class.entry--alt]="i % 2 === 1" (click)="viewDetail(b)" style="cursor: pointer;">
             <div class="tr" role="row">
-              <div class="td td--id" role="cell">{{ b.id }}</div>
+              <div class="td td--id td--stack" role="cell">
+                <span>{{ b.id }}</span>
+                @if (b.createdAt) {
+                  <small>Đặt: {{ fmtShortDateTime(b.createdAt) }}</small>
+                }
+              </div>
               <div class="td td--stack" role="cell"><strong>{{ b.space }}</strong><small>{{ b.zone }}</small></div>
               <div class="td td--stack td--date" role="cell"><span>{{ fmtDate(b.date) }}</span><small>{{ b.time }}</small></div>
               <div class="td td--pkg" role="cell">{{ b.pkg }}</div>
@@ -152,6 +157,7 @@
             <div><span>Không gian</span><strong>{{ detailBooking.spaceName || 'Không gian KÉN' }}</strong></div>
             <div><span>Gói dịch vụ</span><strong>{{ detailBooking.package_name || 'Theo đặt chỗ' }}</strong></div>
             <div><span>Trạng thái</span><strong [style.color]="detailStatusColor">{{ detailStatusLabel }}</strong></div>
+            <div><span>Thời gian đặt</span><strong>{{ fmtDateTime(detailBooking.created_at) }}</strong></div>
             <div><span>Bắt đầu</span><strong>{{ fmtDateTime(detailBooking.start_at) }}</strong></div>
             <div><span>Kết thúc</span><strong>{{ fmtDateTime(detailBooking.end_at) }}</strong></div>
             <div><span>Số khách</span><strong>{{ detailBooking.guest_count }} khách</strong></div>

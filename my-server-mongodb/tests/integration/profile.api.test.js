@@ -44,7 +44,10 @@ function createProfileTestDb() {
       }
       if (v && typeof v === 'object' && !(v instanceof ObjectId) && !(v instanceof Date)) {
         if ('$lt' in v) return (doc[k] || 0) < v.$lt;
+        if ('$gt' in v) return doc[k] > v.$gt;
+        if ('$in' in v) return Array.isArray(v.$in) && v.$in.includes(doc[k]);
         if ('$ne' in v) return String(doc[k]) !== String(v.$ne);
+        if ('$exists' in v) return v.$exists ? doc[k] !== undefined : doc[k] === undefined;
         if ('$type' in v) return doc[k] !== undefined && doc[k] !== null;
       }
       if (v instanceof ObjectId || doc[k] instanceof ObjectId) {
@@ -88,6 +91,13 @@ function createProfileTestDb() {
             matched = matched.slice().reverse();
           }
           return matched[0] ? { ...matched[0] } : null;
+        },
+        find(filter = {}) {
+          return {
+            async toArray() {
+              return rows.filter((r) => matches(r, filter)).map((r) => ({ ...r }));
+            },
+          };
         },
         async insertOne(doc) {
           const inserted = { _id: new ObjectId(), ...doc };
@@ -665,23 +675,150 @@ test('TC-PF-05..15\tAUTO-PF-02: Đổi SĐT (/me/phone), cập nhật họ tên 
   }
 });
 
-test('DELETE /api/profile/me: Khóa mềm tài khoản trong DB để bảo lưu lịch sử và hủy session', async () => {
+test('DELETE /api/profile/me: Hủy đơn sắp tới (tự động hoàn tiền + giải phóng voucher), giữ đơn quá khứ, chép contact sang booking và giải phóng SĐT/email để đăng ký lại', async () => {
   const db = createProfileTestDb();
   const srv = await startTestServer(db);
   try {
-    const user = db.seedUser({ phone: '0908887776', email: 'del@example.com' });
+    const user = db.seedUser({ full_name: 'Trần Văn Xóa', phone: '0908887776', email: 'del@example.com' });
     const cookie = await srv.loginAs(user);
+
+    const pastBookingId = new ObjectId();
+    const upcomingConfirmedId = new ObjectId();
+    const upcomingPendingId = new ObjectId();
+    const voucherId = new ObjectId();
+    const userVoucherId = new ObjectId();
+    const now = Date.now();
+
+    db._raw.vouchers = [{ _id: voucherId, code: 'SAVE20', usage_count: 1 }];
+    db._raw.user_vouchers = [
+      {
+        _id: userVoucherId,
+        user_id: user._id,
+        voucher_id: voucherId,
+        coins_spent: 50,
+        used_booking_id: upcomingConfirmedId,
+        used_at: new Date(now - 3600 * 1000),
+      },
+    ];
+    db._raw.payment_transactions = [];
+    db._raw.bookings = [
+      {
+        _id: pastBookingId,
+        user_id: user._id,
+        status: 'CHECKED_OUT',
+        start_at: new Date(now - 24 * 3600 * 1000),
+        final_amount: 120000,
+      },
+      {
+        _id: upcomingConfirmedId,
+        user_id: user._id,
+        status: 'CONFIRMED',
+        start_at: new Date(now + 24 * 3600 * 1000),
+        final_amount: 150000,
+        voucher_id: voucherId,
+        voucher_usage_released: false,
+      },
+      {
+        _id: upcomingPendingId,
+        user_id: user._id,
+        status: 'PENDING_PAYMENT',
+        start_at: new Date(now + 48 * 3600 * 1000),
+        final_amount: 90000,
+        contact_phone: '0999000111',
+      },
+    ];
 
     const res = await srv.request('DELETE', '/api/profile/me', { cookie });
     assert.equal(res.status, 200);
     assert.equal(res.body.deleted, true);
+    assert.equal(res.body.cancelledUpcomingCount, 2);
+    assert.equal(res.body.refundedCount, 1);
+
     const storedUser = db._raw.users.find((u) => String(u._id) === String(user._id));
     assert.equal(storedUser.status, 'LOCKED');
+    assert.match(String(storedUser.phone), /^X[0-9a-f]{14}$/i);
+    assert.ok(String(storedUser.phone).length <= 15);
+    assert.equal(storedUser.original_phone, '0908887776');
+    assert.equal(storedUser.original_email, 'del@example.com');
     assert.ok(storedUser.deleted_at instanceof Date);
+    assert.equal(storedUser.email, undefined);
+
+    // Đơn quá khứ giữ nguyên + có đủ contact snapshot
+    const pastB = db._raw.bookings.find((b) => String(b._id) === String(pastBookingId));
+    assert.equal(pastB.status, 'CHECKED_OUT');
+    assert.equal(pastB.contact_name, 'Trần Văn Xóa');
+    assert.equal(pastB.contact_phone, '0908887776');
+    assert.equal(pastB.contact_email, 'del@example.com');
+
+    // Đơn tương lai đã thanh toán (CONFIRMED) -> CANCELLED + REFUNDED + giao dịch REFUND + giải phóng voucher
+    const upConf = db._raw.bookings.find((b) => String(b._id) === String(upcomingConfirmedId));
+    assert.equal(upConf.status, 'CANCELLED');
+    assert.ok(upConf.cancelled_at instanceof Date);
+    assert.equal(upConf.refund_status, 'REFUNDED');
+    assert.equal(upConf.refund_amount, 150000);
+    assert.equal(upConf.voucher_usage_released, true);
+    assert.equal(upConf.contact_phone, '0908887776');
+    assert.equal(db._raw.vouchers[0].usage_count, 0);
+    assert.equal(db._raw.user_vouchers[0].used_booking_id, null);
+
+    // Giao dịch hoàn tiền tự động trong payment_transactions
+    assert.equal(db._raw.payment_transactions.length, 1);
+    const refTx = db._raw.payment_transactions[0];
+    assert.equal(String(refTx.booking_id), String(upcomingConfirmedId));
+    assert.equal(refTx.txn_type, 'REFUND');
+    assert.equal(refTx.status, 'SUCCESS');
+    assert.equal(refTx.method, 'SIMULATION');
+    assert.equal(refTx.amount, 150000);
+
+    // Đơn tương lai PENDING_PAYMENT -> CANCELLED + không hoàn tiền + giữ contact_phone có sẵn
+    const upPend = db._raw.bookings.find((b) => String(b._id) === String(upcomingPendingId));
+    assert.equal(upPend.status, 'CANCELLED');
+    assert.equal(upPend.refund_status, 'NONE');
+    assert.equal(upPend.refund_amount, 0);
+    assert.equal(upPend.contact_phone, '0999000111'); // không ghi đè contact_phone đã có
 
     // Session cũ không còn hiệu lực
     const meAfter = await srv.request('GET', '/api/profile', { cookie });
     assert.equal(meAfter.status, 401);
+
+    // Có thể đăng ký lại bằng đúng SĐT và email cũ
+    const reReg = await srv.request('POST', '/api/auth/register', {
+      body: {
+        fullName: 'Người Dùng Mới',
+        phone: '0908887776',
+        email: 'del@example.com',
+        password: DEFAULT_PW,
+      },
+    });
+    assert.equal(reReg.status, 201);
+  } finally {
+    await srv.close();
+  }
+});
+
+test('DELETE /api/profile/me: Chặn xóa tài khoản khi đang có booking CHECKED_IN (409 ACTIVE_CHECKED_IN_BOOKING)', async () => {
+  const db = createProfileTestDb();
+  const srv = await startTestServer(db);
+  try {
+    const user = db.seedUser({ full_name: 'Khách Đang Ngồi', phone: '0907776665', email: 'in@example.com' });
+    const cookie = await srv.loginAs(user);
+
+    db._raw.bookings = [
+      {
+        _id: new ObjectId(),
+        user_id: user._id,
+        status: 'CHECKED_IN',
+        start_at: new Date(Date.now() - 3600 * 1000),
+      },
+    ];
+
+    const res = await srv.request('DELETE', '/api/profile/me', { cookie });
+    assert.equal(res.status, 409);
+    assert.equal(res.body.code, 'ACTIVE_CHECKED_IN_BOOKING');
+
+    const storedUser = db._raw.users.find((u) => String(u._id) === String(user._id));
+    assert.equal(storedUser.status, 'ACTIVE');
+    assert.equal(storedUser.phone, '0907776665');
   } finally {
     await srv.close();
   }

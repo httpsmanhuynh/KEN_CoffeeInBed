@@ -22,7 +22,7 @@ export class KenCafeCatalogPage implements OnInit {
   })();
 
   ngOnInit(): void {
-    this.state?.syncCatalogFromApi();
+    this.state?.syncCatalogFromApi(true);
   }
 
   get products(): KenProduct[] {

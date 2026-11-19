@@ -4,10 +4,13 @@
 // - Đổi SĐT: mật khẩu hiện tại + OTP gửi về SỐ MỚI.
 // - Đổi email: chỉ cần mật khẩu hiện tại.
 const express = require('express');
+const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
+const { ObjectId } = require('mongodb');
 const { requireAuth, startSession, destroySession } = require('../middleware/auth');
 const { rateLimit } = require('../middleware/rateLimit');
 const { issueOtp, verifyOtp } = require('../services/otp');
+const { releaseVoucherIfNeeded } = require('../services/bookingService');
 const {
   PHONE_RE,
   EMAIL_RE,
@@ -229,7 +232,21 @@ router.patch(
   }),
 );
 
-// Xóa tài khoản: khóa tài khoản và đánh dấu để bảo lưu lịch sử đơn đặt chỗ
+function buildDeletedPhone(userId) {
+  const hex = String(userId || '').replace(/[^0-9a-f]/gi, '');
+  if (hex.length >= 24) return `X${hex.slice(0, 8)}${hex.slice(-6)}`; // 15 ký tự <= maxLength 15 trên Atlas
+  return `X${crypto.randomBytes(7).toString('hex')}`;
+}
+
+function isDeletedPhone(val) {
+  return /^(X[0-9a-f]{14}|deleted_)/i.test(String(val || ''));
+}
+
+// Xóa tài khoản:
+// 1. Chặn xóa khi khách hàng đang có đơn CHECKED_IN tại không gian.
+// 2. Chép thông tin liên hệ sang các đơn đặt chỗ còn thiếu để Admin vẫn xem được SĐT/email gốc.
+// 3. Hủy các đơn sắp tới (PENDING_PAYMENT/CONFIRMED có start_at > now), tự động hoàn tiền cho đơn đã thanh toán & giải phóng voucher; giữ nguyên lịch sử đơn quá khứ.
+// 4. Khóa tài khoản, lưu original_phone/original_email/deleted_at và giải phóng phone/email để người dùng có thể đăng ký lại.
 router.delete(
   '/me',
   ...guard,
@@ -237,18 +254,139 @@ router.delete(
   wrap(async (req, res) => {
     const db = req.app.locals.db;
     const user = req.user;
+    const now = new Date();
+    const bookingsCol = db.collection('bookings');
+
+    const activeCheckedIn = await bookingsCol.findOne({
+      user_id: user._id,
+      status: 'CHECKED_IN',
+    });
+    if (activeCheckedIn) {
+      return fail(
+        res,
+        409,
+        'ACTIVE_CHECKED_IN_BOOKING',
+        'Bạn đang có phiên sử dụng không gian (đã check-in), vui lòng hoàn tất check-out trước khi xóa tài khoản',
+      );
+    }
+
+    const origName = user.full_name ? String(user.full_name).slice(0, 100) : null;
+    const origPhone =
+      user.phone && !isDeletedPhone(user.phone)
+        ? String(user.phone).slice(0, 20)
+        : user.original_phone || null;
+    const origEmail = user.email ? String(user.email).slice(0, 100) : user.original_email || null;
+
+    if (origName) {
+      await bookingsCol.updateMany(
+        {
+          user_id: user._id,
+          $or: [{ contact_name: null }, { contact_name: '' }, { contact_name: { $exists: false } }],
+        },
+        { $set: { contact_name: origName } },
+      );
+    }
+    if (origPhone) {
+      await bookingsCol.updateMany(
+        {
+          user_id: user._id,
+          $or: [{ contact_phone: null }, { contact_phone: '' }, { contact_phone: { $exists: false } }],
+        },
+        { $set: { contact_phone: origPhone } },
+      );
+    }
+    if (origEmail) {
+      await bookingsCol.updateMany(
+        {
+          user_id: user._id,
+          $or: [{ contact_email: null }, { contact_email: '' }, { contact_email: { $exists: false } }],
+        },
+        { $set: { contact_email: origEmail } },
+      );
+    }
+
+    const upcomingBookings = await bookingsCol
+      .find({
+        user_id: user._id,
+        status: { $in: ['PENDING_PAYMENT', 'CONFIRMED'] },
+        start_at: { $gt: now },
+      })
+      .toArray();
+
+    let refundedCount = 0;
+    const autoRefundNote = 'Tự động hoàn tiền khi khách hàng xóa tài khoản';
+    for (const b of upcomingBookings) {
+      const released = await releaseVoucherIfNeeded(db, b, now, null);
+      const needsRefund = b.status === 'CONFIRMED' && Number(b.final_amount) > 0;
+      if (needsRefund) {
+        const refundAmount = Math.round(Number(b.final_amount));
+        await db.collection('payment_transactions').insertOne({
+          _id: new ObjectId(),
+          booking_id: b._id,
+          txn_type: 'REFUND',
+          status: 'SUCCESS',
+          method: 'SIMULATION',
+          amount: refundAmount,
+          gateway_ref: `DEL-${crypto.randomBytes(5).toString('hex').toUpperCase()}`,
+          note: autoRefundNote,
+          created_at: now,
+          completed_at: now,
+        });
+        await bookingsCol.updateOne(
+          { _id: b._id },
+          {
+            $set: {
+              status: 'CANCELLED',
+              cancelled_at: now,
+              refund_status: 'REFUNDED',
+              refund_amount: refundAmount,
+              refund_note: autoRefundNote,
+              ...(released ? { voucher_usage_released: true } : {}),
+              updated_at: now,
+            },
+          },
+        );
+        refundedCount += 1;
+      } else {
+        await bookingsCol.updateOne(
+          { _id: b._id },
+          {
+            $set: {
+              status: 'CANCELLED',
+              cancelled_at: now,
+              refund_status: 'NONE',
+              refund_amount: 0,
+              ...(released ? { voucher_usage_released: true } : {}),
+              updated_at: now,
+            },
+          },
+        );
+      }
+    }
+
     await db.collection('users').updateOne(
       { _id: user._id },
       {
         $set: {
           status: 'LOCKED',
-          deleted_at: new Date(),
-          updated_at: new Date(),
+          phone: buildDeletedPhone(user._id),
+          deleted_at: now,
+          original_phone: origPhone,
+          original_email: origEmail,
+          updated_at: now,
+        },
+        $unset: {
+          email: '',
         },
       },
     );
     await destroySession(req, res);
-    res.json({ deleted: true, message: 'Đã xóa tài khoản' });
+    res.json({
+      deleted: true,
+      cancelledUpcomingCount: upcomingBookings.length,
+      refundedCount,
+      message: 'Đã xóa tài khoản',
+    });
   }),
 );
 

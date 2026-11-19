@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, catchError, forkJoin, map, of, tap } from 'rxjs';
+import { KenBookingState } from '../../customer/ken-booking/booking-state';
 
 export type PackageStatus = 'ACTIVE' | 'INACTIVE';
 export type PackageType = 'FIXED' | 'HOURLY';
@@ -26,6 +27,7 @@ export interface ServicePackage {
 @Injectable({ providedIn: 'root' })
 export class ServicePackagesService {
   private readonly http = inject(HttpClient, { optional: true });
+  private readonly bookingState = inject(KenBookingState, { optional: true });
   private readonly packagesSubject = new BehaviorSubject<ServicePackage[]>(this.loadPackages());
   readonly packages$ = this.packagesSubject.asObservable();
 
@@ -66,8 +68,11 @@ export class ServicePackagesService {
         const priceByPkgSpace = new Map<string, number>();
         for (const pr of rawPricing) {
           const pid = String(pr.package_id || '');
-          if (pid && pr.price != null && !priceByPkgSpace.has(pid)) {
-            priceByPkgSpace.set(pid, Number(pr.price));
+          const pVal = Number(pr.price);
+          if (pid && pr.price != null && Number.isFinite(pVal)) {
+            if (!priceByPkgSpace.has(pid) || pVal < priceByPkgSpace.get(pid)!) {
+              priceByPkgSpace.set(pid, pVal);
+            }
           }
         }
 
@@ -261,6 +266,7 @@ export class ServicePackagesService {
       }),
       tap(() => {
         this.loadFromApi().subscribe();
+        this.bookingState?.syncCatalogFromApi(true);
       })
     );
   }
@@ -278,6 +284,7 @@ export class ServicePackagesService {
     return req$.pipe(
       tap(() => {
         this.loadFromApi().subscribe();
+        this.bookingState?.syncCatalogFromApi(true);
       })
     );
   }

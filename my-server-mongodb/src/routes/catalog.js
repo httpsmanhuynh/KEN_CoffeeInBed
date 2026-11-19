@@ -544,6 +544,7 @@ router.patch(
   '/packages/:id',
   ...ADMIN,
   wrap(async (req, res) => {
+    const db = req.app.locals.db;
     const { id } = req.params;
     if (!validId(id)) return badId(res);
     const set = pick(req.body, [
@@ -597,9 +598,60 @@ router.patch(
       set.duration_hours = rawDur === null ? null : Number(rawDur);
       delete set.durationHours;
     }
-    if (!Object.keys(set).length) return fail(res, 422, 'VALIDATION_ERROR', 'Không có gì để cập nhật');
-    const r = await req.app.locals.db.collection('packages').updateOne({ _id: oid(id) }, { $set: set });
-    if (!r.matchedCount) return notFound(res, 'Package');
+
+    const rawPrice = req.body.price !== undefined ? req.body.price : req.body.unitPrice;
+    const hasPriceUpdate = rawPrice !== undefined;
+    let newPrice;
+    if (hasPriceUpdate) {
+      if (rawPrice === '' || rawPrice === null || typeof rawPrice === 'boolean') {
+        return fail(res, 422, 'VALIDATION_ERROR', 'price phải là số nguyên VNĐ >= 0');
+      }
+      newPrice = Math.round(Number(rawPrice));
+      try {
+        assertMoney(newPrice, 'price');
+      } catch (e) {
+        return fail(res, 422, 'VALIDATION_ERROR', e.message);
+      }
+    }
+
+    if (!Object.keys(set).length && !hasPriceUpdate) {
+      return fail(res, 422, 'VALIDATION_ERROR', 'Không có gì để cập nhật');
+    }
+
+    const pkgDoc = await db.collection('packages').findOne({ _id: oid(id) });
+    if (!pkgDoc) return notFound(res, 'Package');
+
+    if (Object.keys(set).length) {
+      await db.collection('packages').updateOne({ _id: oid(id) }, { $set: set });
+    }
+
+    if (hasPriceUpdate) {
+      const priceCol = db.collection('package_prices');
+      const priceDocs = await priceCol.find({ package_id: oid(id) }).toArray();
+      const reqSpaceId = str(req.body.space_id || req.body.spaceId);
+      const matchedBySpace = validId(reqSpaceId)
+        ? priceDocs.filter((d) => String(d.space_id) === reqSpaceId)
+        : [];
+      if (matchedBySpace.length > 0) {
+        await Promise.all(
+          matchedBySpace.map((d) => priceCol.updateOne({ _id: d._id }, { $set: { price: newPrice } })),
+        );
+      } else if (priceDocs.length === 1) {
+        await priceCol.updateOne({ _id: priceDocs[0]._id }, { $set: { price: newPrice } });
+      } else if (priceDocs.length > 1) {
+        const minOld = Math.min(...priceDocs.map((d) => Number(d.price || 0)));
+        const delta = newPrice - minOld;
+        await Promise.all(
+          priceDocs.map((d) =>
+            priceCol.updateOne(
+              { _id: d._id },
+              { $set: { price: Math.max(0, Math.round(Number(d.price || 0) + delta)) } },
+            ),
+          ),
+        );
+      }
+    }
+
     res.json({ updated: true });
   }),
 );
@@ -759,6 +811,20 @@ router.post(
 // ═══════════════════════════════════════════════════
 // 4. PRODUCTS & ADD-ONS (UC-22, products.validator.json, addons.validator.json)
 // ═══════════════════════════════════════════════════
+function normalizeVariants(raw) {
+  if (!Array.isArray(raw)) return [];
+  const out = [];
+  for (const item of raw) {
+    const name = str(item?.name).slice(0, 50);
+    if (!name) continue;
+    const price = Number(item?.price);
+    if (!Number.isFinite(price) || price < 0) {
+      throw Object.assign(new Error('Giá biến thể phải là số nguyên VNĐ >= 0'), { status: 422 });
+    }
+    out.push({ name, price: Math.round(price) });
+  }
+  return out;
+}
 // GET /api/products — Menu đồ uống & bánh (13 món F&B KÉN Kết Nối & chọn món Inclusion)
 router.get(
   '/products',
@@ -812,6 +878,13 @@ router.post(
       return fail(res, 422, 'VALIDATION_ERROR', e.message);
     }
 
+    let variants = [];
+    try {
+      variants = normalizeVariants(req.body.variants);
+    } catch (e) {
+      return fail(res, 422, 'VALIDATION_ERROR', e.message);
+    }
+
     const itemCode =
       str(req.body.itemCode || req.body.item_code).toUpperCase() ||
       `PRD_${Date.now().toString(36).toUpperCase()}`;
@@ -821,7 +894,7 @@ router.post(
       name: name.slice(0, 100),
       category,
       sub_category: req.body.subCategory ? str(req.body.subCategory) : null,
-      variants: Array.isArray(req.body.variants) ? req.body.variants : [],
+      variants,
       price,
       image_url: str(req.body.imageUrl || req.body.image_url) || '/images/addons/cf-den.png',
       description: req.body.description ? str(req.body.description) : null,
@@ -837,8 +910,12 @@ router.patch(
   '/products/:id',
   ...ADMIN,
   wrap(async (req, res) => {
+    const db = req.app.locals.db;
     const { id } = req.params;
     if (!validId(id)) return badId(res);
+    const existingProd = await db.collection('products').findOne({ _id: oid(id) });
+    if (!existingProd) return notFound(res, 'Product');
+
     const set = pick(req.body, [
       'name',
       'price',
@@ -863,6 +940,16 @@ router.patch(
         return fail(res, 422, 'VALIDATION_ERROR', e.message);
       }
     }
+    if ('category' in set) {
+      const cat = str(set.category).toUpperCase();
+      if (cat === 'PASTRY' && existingProd.category === 'SNACK') {
+        set.category = 'SNACK';
+      } else if (['DRINK', 'PASTRY', 'SNACK'].includes(cat)) {
+        set.category = cat;
+      } else {
+        delete set.category;
+      }
+    }
     if ('isActive' in set) {
       set.is_active = Boolean(set.isActive);
       delete set.isActive;
@@ -873,9 +960,44 @@ router.patch(
     } else if ('image_url' in set) {
       set.image_url = str(set.image_url);
     }
+
+    const priceDelta = 'price' in set ? set.price - Number(existingProd.price ?? set.price) : 0;
+    if ('price' in set && set.variants === undefined && Array.isArray(existingProd.variants) && existingProd.variants.length > 0) {
+      set.variants = existingProd.variants.map((v) => ({
+        name: String(v.name).slice(0, 50),
+        price: Math.max(0, Math.round(Number(v.price ?? existingProd.price ?? 0) + priceDelta)),
+      }));
+    } else if (Array.isArray(set.variants)) {
+      try {
+        set.variants = normalizeVariants(set.variants);
+      } catch (e) {
+        return fail(res, 422, 'VALIDATION_ERROR', e.message);
+      }
+    }
+
     if (!Object.keys(set).length) return fail(res, 422, 'VALIDATION_ERROR', 'Không có gì để cập nhật');
-    const r = await req.app.locals.db.collection('products').updateOne({ _id: oid(id) }, { $set: set });
-    if (!r.matchedCount) return notFound(res, 'Product');
+    await db.collection('products').updateOne({ _id: oid(id) }, { $set: set });
+
+    const linkedAddon = await db.collection('addons').findOne({ product_id: oid(id) });
+    if (linkedAddon) {
+      const addonSet = {};
+      if ('name' in set) addonSet.name = set.name;
+      if ('price' in set) addonSet.price = set.price;
+      if ('image_url' in set) addonSet.image_url = set.image_url;
+      if ('is_active' in set) addonSet.is_active = set.is_active;
+      if (Array.isArray(req.body.variants) && Array.isArray(set.variants)) {
+        addonSet.variants = set.variants;
+      } else if ('price' in set && Array.isArray(linkedAddon.variants) && linkedAddon.variants.length > 0) {
+        addonSet.variants = linkedAddon.variants.map((v) => ({
+          name: String(v.name).slice(0, 50),
+          price: Math.max(0, Math.round(Number(v.price ?? linkedAddon.price ?? 0) + priceDelta)),
+        }));
+      }
+      if (Object.keys(addonSet).length) {
+        await db.collection('addons').updateOne({ _id: linkedAddon._id }, { $set: addonSet });
+      }
+    }
+
     res.json({ updated: true });
   }),
 );
@@ -945,11 +1067,18 @@ router.post(
       return fail(res, 422, 'VALIDATION_ERROR', e.message);
     }
 
+    let variants = [];
+    try {
+      variants = normalizeVariants(req.body.variants);
+    } catch (e) {
+      return fail(res, 422, 'VALIDATION_ERROR', e.message);
+    }
+
     const doc = {
       _id: new ObjectId(),
       product_id: validId(req.body.productId) ? oid(req.body.productId) : null,
       name: name.slice(0, 100),
-      variants: Array.isArray(req.body.variants) ? req.body.variants : [],
+      variants,
       price,
       unit,
       operation_note: req.body.description || req.body.operation_note ? str(req.body.description || req.body.operation_note) : null,
@@ -966,8 +1095,12 @@ router.patch(
   '/addons/:id',
   ...ADMIN,
   wrap(async (req, res) => {
+    const db = req.app.locals.db;
     const { id } = req.params;
     if (!validId(id)) return badId(res);
+    const existingAddon = await db.collection('addons').findOne({ _id: oid(id) });
+    if (!existingAddon) return notFound(res, 'Addon');
+
     const set = pick(req.body, [
       'name',
       'price',
@@ -981,6 +1114,14 @@ router.patch(
       'imageUrl',
     ]);
     if ('name' in set) set.name = str(set.name).slice(0, 100);
+    if ('unit' in set) {
+      const uVal = str(set.unit).toUpperCase();
+      if (['PER_ITEM', 'PER_BOOKING'].includes(uVal)) {
+        set.unit = uVal;
+      } else {
+        delete set.unit;
+      }
+    }
     if ('unitPrice' in set) {
       set.price = set.unitPrice;
       delete set.unitPrice;
@@ -1002,9 +1143,46 @@ router.patch(
     } else if ('image_url' in set) {
       set.image_url = str(set.image_url);
     }
+
+    const priceDelta = 'price' in set ? set.price - Number(existingAddon.price ?? set.price) : 0;
+    if ('price' in set && set.variants === undefined && Array.isArray(existingAddon.variants) && existingAddon.variants.length > 0) {
+      set.variants = existingAddon.variants.map((v) => ({
+        name: String(v.name).slice(0, 50),
+        price: Math.max(0, Math.round(Number(v.price ?? existingAddon.price ?? 0) + priceDelta)),
+      }));
+    } else if (Array.isArray(set.variants)) {
+      try {
+        set.variants = normalizeVariants(set.variants);
+      } catch (e) {
+        return fail(res, 422, 'VALIDATION_ERROR', e.message);
+      }
+    }
+
     if (!Object.keys(set).length) return fail(res, 422, 'VALIDATION_ERROR', 'Không có gì để cập nhật');
-    const r = await req.app.locals.db.collection('addons').updateOne({ _id: oid(id) }, { $set: set });
-    if (!r.matchedCount) return notFound(res, 'Addon');
+    await db.collection('addons').updateOne({ _id: oid(id) }, { $set: set });
+
+    if (existingAddon.product_id) {
+      const linkedProd = await db.collection('products').findOne({ _id: existingAddon.product_id });
+      if (linkedProd) {
+        const prodSet = {};
+        if ('name' in set) prodSet.name = set.name;
+        if ('price' in set) prodSet.price = set.price;
+        if ('image_url' in set) prodSet.image_url = set.image_url;
+        if ('is_active' in set) prodSet.is_active = set.is_active;
+        if (Array.isArray(req.body.variants) && Array.isArray(set.variants)) {
+          prodSet.variants = set.variants;
+        } else if ('price' in set && Array.isArray(linkedProd.variants) && linkedProd.variants.length > 0) {
+          prodSet.variants = linkedProd.variants.map((v) => ({
+            name: String(v.name).slice(0, 50),
+            price: Math.max(0, Math.round(Number(v.price ?? linkedProd.price ?? 0) + priceDelta)),
+          }));
+        }
+        if (Object.keys(prodSet).length) {
+          await db.collection('products').updateOne({ _id: linkedProd._id }, { $set: prodSet });
+        }
+      }
+    }
+
     res.json({ updated: true });
   }),
 );

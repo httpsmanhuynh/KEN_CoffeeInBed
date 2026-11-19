@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { KenBookingState } from '../../ken-booking/booking-state';
+import { KenBookingState, kenMoney } from '../../ken-booking/booking-state';
 
 @Component({
   selector: 'app-meeting-page',
@@ -16,7 +16,7 @@ export class MeetingPage implements OnInit {
   backPath = '/spaces';
 
   ngOnInit(): void {
-    this.bookingState?.syncCatalogFromApi();
+    this.bookingState?.syncCatalogFromApi(true);
     this.route?.queryParamMap?.subscribe(params => {
       this.backPath = '/spaces';
     });
@@ -24,6 +24,11 @@ export class MeetingPage implements OnInit {
 
   get spaceData() {
     return this.bookingState?.getSpace('meeting-small');
+  }
+
+  get meetingPriceText(): string {
+    const price = this.spaceData?.rates.find(r => r.hours === 3)?.price ?? this.spaceData?.rates[0]?.price ?? 250000;
+    return kenMoney(price);
   }
 
   showInfo(): void {

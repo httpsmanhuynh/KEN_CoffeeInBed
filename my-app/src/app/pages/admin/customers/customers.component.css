@@ -365,6 +365,11 @@
   color: #ba5c48;
 }
 
+.badge-status-deleted {
+  background-color: #ece6df;
+  color: #6e5c4f;
+}
+
 .action-link {
   font-weight: 600;
   color: #4a3123;

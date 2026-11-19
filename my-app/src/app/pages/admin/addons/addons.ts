@@ -1,7 +1,14 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { AddonAvailability, AddonsService, ProductAddon, ProductCategory, ProductStatus } from './addons.service';
+import {
+  AddonAvailability,
+  AddonsService,
+  ProductAddon,
+  ProductCategory,
+  ProductStatus,
+  ProductVariant,
+} from './addons.service';
 
 interface AddonFormData {
   id?: string;
@@ -9,6 +16,7 @@ interface AddonFormData {
   name: string;
   category: ProductCategory;
   price: number;
+  variants: ProductVariant[];
   unit: string;
   catalogVisible: boolean;
   addonAvailable: AddonAvailability;
@@ -218,6 +226,7 @@ export class Addons implements OnInit, OnDestroy {
       name: product.name,
       category: product.category,
       price: product.price,
+      variants: (product.variants || []).map((v) => ({ name: v.name, price: v.price })),
       unit: product.unit,
       catalogVisible: product.catalogVisible,
       addonAvailable: product.addonAvailable,
@@ -230,6 +239,46 @@ export class Addons implements OnInit, OnDestroy {
         document.getElementById('addon-editor-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 40);
     }
+  }
+
+  addVariant(): void {
+    const basePrice = Math.max(0, Math.round(Number(this.formData.price) || 0));
+    this.formData.variants.push({ name: '', price: basePrice });
+  }
+
+  removeVariant(index: number): void {
+    this.formData.variants.splice(index, 1);
+    if (this.formData.variants.length > 0) {
+      this.formData.price = Math.min(...this.formData.variants.map((v) => Math.max(0, Math.round(Number(v.price) || 0))));
+    }
+  }
+
+  onVariantNameChange(index: number, value: string): void {
+    if (this.formData.variants[index]) {
+      this.formData.variants[index].name = value;
+    }
+  }
+
+  onVariantPriceChange(index: number, value: string): void {
+    if (!this.formData.variants[index]) return;
+    this.formData.variants[index].price = Math.max(0, Math.round(Number(value) || 0));
+    if (this.formData.variants.length > 0) {
+      this.formData.price = Math.min(...this.formData.variants.map((v) => Math.max(0, Math.round(Number(v.price) || 0))));
+    }
+  }
+
+  trackByIndex(index: number): number {
+    return index;
+  }
+
+  formatPriceRange(p: ProductAddon): string {
+    const list = p.variants || [];
+    if (list.length === 0) return this.formatPrice(p.price);
+    const prices = list.map((v) => Number(v.price ?? p.price));
+    const min = Math.min(...prices);
+    const max = Math.max(...prices);
+    if (min !== max) return `${this.formatPrice(min)} – ${this.formatPrice(max)}`;
+    return this.formatPrice(min);
   }
 
   openCreateForm(): void {
@@ -253,6 +302,7 @@ export class Addons implements OnInit, OnDestroy {
   }
 
   saveProduct(): void {
+    this.formError = '';
     if (!this.formData.name.trim()) {
       this.formError = 'Vui lòng nhập tên sản phẩm / tiện ích.';
       return;
@@ -261,6 +311,33 @@ export class Addons implements OnInit, OnDestroy {
       this.formError = 'Giá bán phải là số không âm.';
       return;
     }
+
+    const cleanedVariants: ProductVariant[] = [];
+    const seenVariantNames = new Set<string>();
+    for (const v of this.formData.variants || []) {
+      const vName = String(v.name || '').trim().slice(0, 50);
+      if (!vName) {
+        this.formError = 'Tên biến thể không được để trống (hoặc bấm ✕ để xoá dòng trống).';
+        return;
+      }
+      const key = vName.toLocaleLowerCase('vi-VN');
+      if (seenVariantNames.has(key)) {
+        this.formError = `Tên biến thể "${vName}" bị trùng.`;
+        return;
+      }
+      seenVariantNames.add(key);
+      const vPrice = Number(v.price);
+      if (!Number.isFinite(vPrice) || vPrice < 0) {
+        this.formError = `Giá của biến thể "${vName}" phải là số không âm.`;
+        return;
+      }
+      cleanedVariants.push({ name: vName, price: Math.round(vPrice) });
+    }
+
+    const basePrice =
+      cleanedVariants.length > 0
+        ? Math.min(...cleanedVariants.map((v) => v.price))
+        : Math.round(Number(this.formData.price));
 
     let defaultImg = this.formData.image.trim();
     if (!defaultImg) {
@@ -276,7 +353,8 @@ export class Addons implements OnInit, OnDestroy {
           code: this.formData.code.trim().toUpperCase(),
           name: this.formData.name.trim(),
           category: this.formData.category,
-          price: Math.round(Number(this.formData.price)),
+          price: basePrice,
+          variants: cleanedVariants,
           unit: this.formData.unit || 'Ly',
           catalogVisible: this.formData.catalogVisible,
           addonAvailable: this.formData.addonAvailable,
@@ -376,6 +454,7 @@ export class Addons implements OnInit, OnDestroy {
       name: '',
       category: 'Đồ uống',
       price: 45000,
+      variants: [],
       unit: 'Ly',
       catalogVisible: true,
       addonAvailable: 'Khả dụng',

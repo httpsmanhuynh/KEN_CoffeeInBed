@@ -253,7 +253,7 @@ router.get(
       const rx = new RegExp(escaped, 'i');
       const matchingUsers = await db
         .collection('users')
-        .find({ $or: [{ full_name: rx }, { phone: rx }, { email: rx }] })
+        .find({ $or: [{ full_name: rx }, { phone: rx }, { email: rx }, { original_phone: rx }, { original_email: rx }] })
         .project({ _id: 1 })
         .limit(50)
         .toArray();
@@ -314,8 +314,8 @@ router.get(
       }
       const u = b.user_id ? userById.get(String(b.user_id)) : null;
       b.customer_name = b.contact_name || u?.full_name || u?.name || null;
-      b.customer_phone = b.contact_phone || u?.phone || null;
-      b.customer_email = b.contact_email || u?.email || null;
+      b.customer_phone = b.contact_phone || u?.original_phone || u?.phone || null;
+      b.customer_email = b.contact_email || u?.original_email || u?.email || null;
     }
     res.json(enriched);
   }),
@@ -381,14 +381,16 @@ router.get(
         .toArray(),
       db.collection('reviews').findOne({ booking_id: bOid }),
       userQuery
-        ? db.collection('users').findOne(userQuery, { projection: { full_name: 1, name: 1, email: 1, phone: 1 } })
+        ? db.collection('users').findOne(userQuery, {
+            projection: { full_name: 1, name: 1, email: 1, phone: 1, original_email: 1, original_phone: 1 },
+          })
         : Promise.resolve(null),
     ]);
 
     const enrichedResult = enrichBookingWithReview({ ...booking, inclusions, addons, transactions }, review);
     enrichedResult.contact_name = booking.contact_name || bookUser?.full_name || bookUser?.name || null;
-    enrichedResult.contact_phone = booking.contact_phone || bookUser?.phone || null;
-    enrichedResult.contact_email = booking.contact_email || bookUser?.email || null;
+    enrichedResult.contact_phone = booking.contact_phone || bookUser?.original_phone || bookUser?.phone || null;
+    enrichedResult.contact_email = booking.contact_email || bookUser?.original_email || bookUser?.email || null;
     res.json(enrichedResult);
   }),
 );

@@ -136,7 +136,10 @@
               </td>
 
               <td class="col-price">
-                <span class="price-text">{{ formatPrice(p.price) }}</span>
+                <div class="price-cell">
+                  <span class="price-text">{{ formatPriceRange(p) }}</span>
+                  <span *ngIf="p.variants.length > 0" class="variant-count-sub">{{ p.variants.length }} biến thể</span>
+                </div>
               </td>
 
               <td class="col-catalog">
@@ -312,6 +315,47 @@
             </div>
           </div>
 
+          <div class="variants-editor-box">
+            <div class="variants-editor-head">
+              <label class="form-label">Biến thể &amp; giá riêng ({{ formData.variants.length }})</label>
+              <button type="button" class="btn-add-variant" (click)="addVariant()">+ Thêm biến thể</button>
+            </div>
+
+            <div *ngIf="formData.variants.length > 0; else noVariantsHint" class="variants-list">
+              <div *ngFor="let v of formData.variants; let i = index; trackBy: trackByIndex" class="variant-row">
+                <input
+                  type="text"
+                  maxlength="50"
+                  [value]="v.name"
+                  (input)="onVariantNameChange(i, $any($event.target).value)"
+                  placeholder="VD: Nóng / Lạnh, Size L"
+                  class="form-input-box variant-name-input"
+                />
+                <input
+                  type="number"
+                  min="0"
+                  step="1000"
+                  [value]="v.price"
+                  (input)="onVariantPriceChange(i, $any($event.target).value)"
+                  placeholder="Giá VND"
+                  class="form-input-box variant-price-input"
+                />
+                <button
+                  type="button"
+                  class="btn-remove-variant"
+                  title="Xoá biến thể"
+                  (click)="removeVariant(i)"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            <ng-template #noVariantsHint>
+              <p class="variants-empty-hint">Chưa có biến thể — áp dụng chung Giá niêm yết ở trên.</p>
+            </ng-template>
+          </div>
+
           <div class="form-row-pair">
             <div class="form-group flex-1">
               <label class="form-label">Nhóm sản phẩm</label>
@@ -409,6 +453,14 @@
               <span class="breakdown-k font-bold">Phụ thu khách trả</span>
               <span class="breakdown-v font-bold">{{ formatPrice(drinkSurcharge(formData.price)) }}</span>
             </div>
+            <ng-container *ngIf="formData.variants.length > 0">
+              <div class="link-divider"></div>
+              <span class="breakdown-k" style="font-size: 12px;">Theo từng biến thể:</span>
+              <div class="link-breakdown-row" *ngFor="let v of formData.variants; trackBy: trackByIndex">
+                <span class="breakdown-k">{{ v.name || 'Chưa đặt tên' }}</span>
+                <span class="breakdown-v">{{ formatPrice(v.price) }} · phụ thu {{ formatPrice(drinkSurcharge(v.price)) }}</span>
+              </div>
+            </ng-container>
             <div class="link-divider"></div>
             <button type="button" class="btn-goto-packages btn-link-native" (click)="goToPackages()">
               Xem cấu hình gói dịch vụ liên kết ↗
@@ -426,6 +478,14 @@
                 <span class="breakdown-k">Hỗ trợ đồ uống 50k</span>
                 <span class="breakdown-v">Không áp dụng (Tính 100% giá bán kèm)</span>
               </div>
+              <ng-container *ngIf="formData.variants.length > 0">
+                <div class="link-divider"></div>
+                <span class="breakdown-k" style="font-size: 12px;">Theo từng biến thể:</span>
+                <div class="link-breakdown-row" *ngFor="let v of formData.variants; trackBy: trackByIndex">
+                  <span class="breakdown-k">{{ v.name || 'Chưa đặt tên' }}</span>
+                  <span class="breakdown-v font-bold">{{ formatPrice(v.price) }}</span>
+                </div>
+              </ng-container>
               <div class="link-divider"></div>
               <button type="button" class="btn-goto-packages btn-link-native" (click)="goToPackages()">
                 Quản lý Gói dịch vụ ↗

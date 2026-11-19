@@ -15,6 +15,7 @@ export class KenDrinkPickerPage {
     private router: Router,
     private route: ActivatedRoute,
   ) {
+    this.state.syncCatalogFromApi(true);
     this.state.loadClusterRecommendations(true);
   }
   get recommendedDrinks() { return this.state.clusterRecInclusionDrinks; }
