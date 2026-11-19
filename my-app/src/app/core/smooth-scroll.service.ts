@@ -238,6 +238,43 @@ export class SmoothScrollService {
     });
   }
 
+  revealFiltered(selector: string): void {
+    if (this.isUnsupportedEnv) {
+      return;
+    }
+    this.ngZone.runOutsideAngular(() => {
+      requestAnimationFrame(() => {
+        const els = Array.from(document.querySelectorAll(selector)).filter(
+          (el): el is HTMLElement => el instanceof HTMLElement,
+        );
+        if (els.length > 0) {
+          els.forEach((el) => el.setAttribute('data-ken-animated', 'true'));
+          gsap.killTweensOf(els);
+          if (this.prefersReducedMotion) {
+            gsap.set(els, { clearProps: 'transform,opacity' });
+          } else {
+            gsap.fromTo(
+              els,
+              { y: 14, opacity: 0 },
+              {
+                y: 0,
+                opacity: 1,
+                duration: 0.4,
+                stagger: 0.05,
+                ease: 'power2.out',
+                overwrite: true,
+                clearProps: 'transform,opacity',
+              },
+            );
+          }
+        }
+        this.attachCardSpotlight();
+        this.lenis?.resize();
+        ScrollTrigger.refresh();
+      });
+    });
+  }
+
   private updateScrollUi(scroll: number, progress: number): void {
     const docEl = document.documentElement;
     const clampedProgress = Number.isFinite(progress) ? Math.min(1, Math.max(0, progress)) : 0;
