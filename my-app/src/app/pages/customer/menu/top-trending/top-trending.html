@@ -17,9 +17,7 @@
           <span>BẢNG XẾP HẠNG THỊNH HÀNH · KÉN AI</span>
         </div>
 
-        <h1 class="tt-hero__title" id="tt-title">
-          Top <em class="tt-script">Trending</em>
-        </h1>
+        <h1 class="tt-hero__title" id="tt-title">Top <em class="tt-script">Trending</em></h1>
 
         <p class="tt-hero__desc">
           Những hương vị được khách hàng tại KÉN gọi nhiều nhất, tự động tổng hợp và xếp hạng theo
@@ -32,7 +30,12 @@
             <span>Top {{ allRanked.length > 11 ? 11 : allRanked.length }} món nổi bật</span>
           </span>
           <span class="tt-pill">
-            <lucide-icon name="sparkles" [size]="14" [strokeWidth]="2" color="#F2CB79"></lucide-icon>
+            <lucide-icon
+              name="sparkles"
+              [size]="14"
+              [strokeWidth]="2"
+              color="#F2CB79"
+            ></lucide-icon>
             <span>Gợi ý theo dữ liệu thực</span>
           </span>
         </div>
@@ -40,11 +43,7 @@
 
       @if (topThree.length) {
         <figure class="tt-hero__spotlight">
-          <img
-            [src]="topThree[0].image"
-            [alt]="topThree[0].name"
-            class="tt-hero__photo"
-          />
+          <img [src]="topThree[0].image" [alt]="topThree[0].name" class="tt-hero__photo" />
           <div class="tt-hero__photo-scrim" aria-hidden="true"></div>
           <figcaption class="tt-hero__caption">
             <span class="tt-crown-badge">
@@ -70,9 +69,6 @@
         <span class="tt-kicker">VINH DANH HƯƠNG VỊ</span>
         <h2>Top 3 được yêu thích nhất</h2>
       </div>
-      <p class="tt-section-sub">
-        Ba lựa chọn dẫn đầu bảng xếp hạng theo lượt gọi và độ yêu thích tại KÉN.
-      </p>
     </div>
 
     <div class="tt-podium">
@@ -203,7 +199,12 @@
         <div class="tt-cta-card__actions">
           <a class="tt-btn tt-btn--gold" routerLink="/menu">
             <span>Xem Menu đầy đủ</span>
-            <lucide-icon name="arrow-right" [size]="18" [strokeWidth]="2" aria-hidden="true"></lucide-icon>
+            <lucide-icon
+              name="arrow-right"
+              [size]="18"
+              [strokeWidth]="2"
+              aria-hidden="true"
+            ></lucide-icon>
           </a>
           <a class="tt-btn tt-btn--glass" routerLink="/spaces">
             <span>Đặt không gian</span>
